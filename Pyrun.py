@@ -32,6 +32,7 @@ class Runner:
         self.target = subprocess.Popen(['pkexec', f'./c_progs/{file}', str(os.getpid())],stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.ROOT_DIR,)
         command = "pkexec cat c_progs/pidfile.txt"
         try:
+            time.sleep(.2)
             result = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             pid_content = result.stdout.strip()
             print(f"PID from file: {pid_content}")  

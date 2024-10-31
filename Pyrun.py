@@ -52,11 +52,13 @@ class Runner:
         
         while self.start == 0: continue
         start_time = time.time()
-        profiler_cmd = f'powerjoular -l -p {self.target.pid} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
+        profiler_cmd = f'powerjoular -l -p {os.getpid()} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
+        profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
         print("parent",str(os.getpid()))
         print("child",self.target.pid)
 
         self.profiler = subprocess.Popen(shlex.split(profiler_cmd))
+        subprocess.Popen(shlex.split(profiler_cmd2))
         print(f"Started measurement for PID {self.target.pid}")
 
         print("Waiting for process to finish...")
@@ -70,12 +72,13 @@ class Runner:
 
         self.target.kill()
         self.target.wait()
-        self.readCSV()
+        self.readCSV(os.getpid())
+        self.readCSV(self.target.pid)
         print(f"Process took {(end_time-start_time):.3f}s")
 
-    def readCSV(self):
+    def readCSV(self,pid):
         try:
-            df = pd.read_csv(self.ROOT_DIR / f"powerjoular.csv-{self.target.pid}.csv")
+            df = pd.read_csv(self.ROOT_DIR / f"powerjoular.csv-{pid}.csv")
             run_data = {
                 'avg_cpu': round(df['CPU Utilization'].sum(), 3),
                 'total_energy': round(df['CPU Power'].sum(), 3),

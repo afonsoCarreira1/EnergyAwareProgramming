@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import glob
@@ -61,22 +62,30 @@ def plot_graph(data,average_power,color='blue',block = False):
     plt.grid(True)
     plt.show(block=block)
 
-# read all files
-all_powers_java = read_java_python_files("java_files")
-all_powers_python = read_java_python_files("python_files")
 
-#get average
-average_power_java = calculate_average(all_powers_java)
-average_power_python = calculate_average(all_powers_python)
+def main():
+    java_files = "fib_100ms_delay/java_files_c_fib"
+    python_files = "fib_100ms_delay/python_files_c_fib"
+    # read all files
+    all_powers_java = read_java_python_files(java_files)
+    all_powers_python = read_java_python_files(python_files)
 
-#get standard deviation
-standard_deviation_java = calculate_standard_deviation(all_powers_java,average_power_java)
-standard_deviation_python = calculate_standard_deviation(all_powers_python,average_power_python)
-print(f"standard deviation java: {standard_deviation_java}")
-print(f"standard deviation python: {standard_deviation_python}")
+    #get average
+    average_power_java = calculate_average(all_powers_java)
+    average_power_python = calculate_average(all_powers_python)
 
-#plots
-plot_graph(all_powers_java,average_power_java)
-plot_graph(all_powers_python,average_power_python,color='orange')
-plot_hist(all_powers_java)
-plot_hist(all_powers_python,block=True,color='orange')
+    #get standard deviation
+    standard_deviation_java = calculate_standard_deviation(all_powers_java,average_power_java)
+    standard_deviation_python = calculate_standard_deviation(all_powers_python,average_power_python)
+    print(f"standard deviation java: {standard_deviation_java}")
+    print(f"standard deviation python: {standard_deviation_python}")
+
+    #plots
+    plot_graph(all_powers_java,average_power_java)
+    plot_graph(all_powers_python,average_power_python,color='orange')
+    plot_hist(all_powers_java)
+    plot_hist(all_powers_python,block=True,color='orange')
+
+
+if __name__ == "__main__":
+    main()

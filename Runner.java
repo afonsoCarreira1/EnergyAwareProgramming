@@ -64,7 +64,7 @@ public class Runner {
                     System.out.println("Read child PID at "+LocalDateTime.now());
                     childPid = WritePid.readPidFromFile();
                 }
-                //System.out.println("parent " + ProcessHandle.current().pid());
+                System.out.println("parent " + ProcessHandle.current().pid());
                 //System.out.println("child " + childPid);
                 startTime = System.currentTimeMillis();
                 System.out.println("Created powerjoular process at "+LocalDateTime.now());

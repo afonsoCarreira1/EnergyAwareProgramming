@@ -1,12 +1,7 @@
 package java_progs;
 
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 
 public class Fib extends Thread {
@@ -29,6 +24,9 @@ public class Fib extends Thread {
             
             String time = ts + "\n"+te;
             writeToFile(time, "java_progs/time.txt");
+            //This is not measured beacuse the orchestrator sends the kill signal after USR2 signal
+            long f2 = fibonacci(100);
+            System.out.println("main: " + f2);
         } catch (IOException e) {
             e.printStackTrace();
         }

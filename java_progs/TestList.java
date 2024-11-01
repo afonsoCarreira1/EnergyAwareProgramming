@@ -26,6 +26,7 @@ public class TestList {
         list.add(list.size() - 1, 100);
     }
 
+    @SuppressWarnings("unused")
     private static void insertInMiddle(ArrayList<Integer> list) {
         list.add(list.size() / 2, 100);
     }
@@ -36,7 +37,7 @@ public class TestList {
                 insertRandomNumbers(list);
                 Runtime.getRuntime().exec("kill -USR1 " + args[0]);
                 //Thread.sleep(100);
-                insertInBegin(list);
+                //insertInBegin(list);
                 //insertInEnd(list);
                 //insertInMiddle(list);
                 Runtime.getRuntime().exec("kill -USR2 " + args[0]);

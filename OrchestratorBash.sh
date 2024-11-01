@@ -36,7 +36,9 @@ trap_start() {
 #fun to capture stop signal
 trap_stop() {
     echo "Stopping powerjoular..."
-    sudo pkill -f "powerjoular"
+    #sudo pkill -f "powerjoular"
+    sudo kill $powerjoular_pid
+    sudo kill $child_pid
     end_time=$(($(date +%s%N) / 1000000)) #$(date +%s)
     time_difference=$(echo "scale=3; ($end_time - $start_time) / 1000" | bc)
     echo "Time was ${time_difference}s"

@@ -17,7 +17,7 @@ sudo rm powerjoular.*
     elif [ "$1" == "p" ]; then
         sudo python3 Pyrun.py $filename $runCProgram $numberOfRuns
     elif [ "$1" == "b" ]; then
-        sudo ./c_runner.sh $filename $runCProgram $numberOfRuns
+        sudo ./OrchestratorBash.sh $filename $runCProgram $numberOfRuns
     elif [ "$1" == "c" ]; then
         if [ "$3" == "f" ]; then
             runCProgram=0

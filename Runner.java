@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.ProcessBuilder;
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -83,6 +82,14 @@ public class Runner {
             public void handle(Signal sig) {
                 System.out.println("Received END signal, stopping powerjoular at "+LocalDateTime.now());
                 endTime = System.currentTimeMillis();
+                try {
+                    Process killPowerjoular = Runtime.getRuntime().exec("sudo kill "+powerjoularPid);
+                    killPowerjoular.waitFor();
+                    Process killTargetProgram = Runtime.getRuntime().exec("sudo kill "+childPid);
+                    killTargetProgram.waitFor();
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
                 String cpuUsage = readCsv("powerjoular.csv-"+childPid+".csv");
                 System.out.println("Program used "+ cpuUsage +"J");
                 Double duration = (endTime-startTime)/1000.0;

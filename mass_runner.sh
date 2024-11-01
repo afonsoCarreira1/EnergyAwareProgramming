@@ -4,25 +4,32 @@ folderName="${1:-"files_default"}"
 
 sudo mkdir $folderName
 
-sudo mkdir $folderName/python_files_java_fib
-sudo mkdir $folderName/java_files_java_fib
+sudo mkdir $folderName/bash_files
+sudo mkdir $folderName/c_files
 
-sudo mkdir $folderName/python_files_c_fib
-sudo mkdir $folderName/java_files_c_fib
+sudo mkdir $folderName/bash_files_c_fib
+sudo mkdir $folderName/c_files_c_fib
 
+sleep 1
 
-./run.sh j Fib f 100
+./run.sh b Fib f 100
 sudo rm powerjoular.csv
-sudo mv powerjoular.csv* $folderName/java_files
+sudo mv powerjoular.csv* $folderName/bash_files
 
-./run.sh p Fib f 100
-sudo rm powerjoular.csv
-sudo mv powerjoular.csv* $folderName/python_files
+sleep 5
 
-./run.sh j Fib t 100
+./run.sh c Fib f 100
 sudo rm powerjoular.csv
-sudo mv powerjoular.csv* $folderName/java_files_c_fib
+sudo mv powerjoular.csv* $folderName/c_files
 
-./run.sh p Fib t 100
+sleep 5
+
+./run.sh b Fib t 100
 sudo rm powerjoular.csv
-sudo mv powerjoular.csv* $folderName/python_files_c_fib
+sudo mv powerjoular.csv* $folderName/bash_files_c_fib
+
+sleep 5
+
+./run.sh c Fib t 100
+sudo rm powerjoular.csv
+sudo mv powerjoular.csv* $folderName/c_files_c_fib

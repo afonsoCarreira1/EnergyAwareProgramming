@@ -84,7 +84,7 @@ public class Runner {
                 System.out.println("Received END signal, stopping powerjoular at "+LocalDateTime.now());
                 endTime = System.currentTimeMillis();
                 String cpuUsage = readCsv("powerjoular.csv-"+childPid+".csv");
-                System.out.println("Java program used "+ cpuUsage +"J");
+                System.out.println("Program used "+ cpuUsage +"J");
                 Double duration = (endTime-startTime)/1000.0;
                 System.out.println("Time taken: " + duration + " seconds");
                 averageJoules += Double.parseDouble(cpuUsage);

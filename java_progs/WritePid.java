@@ -15,7 +15,7 @@ public class WritePid {
         
         try (FileWriter writer = new FileWriter(filename)) {
             writer.write(pid);
-            System.out.println("Successfully wrote " + pid + " to " + filename);
+            //System.out.println("Successfully wrote " + pid + " to " + filename);
         } catch (IOException e) {
             System.out.println("An error occurred while writing to the file: " + e.getMessage());
         }
@@ -26,7 +26,7 @@ public class WritePid {
         String pid = "";
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             pid = reader.readLine().trim();
-            System.out.println("Successfully read " + pid + " from " + filename);
+            //System.out.println("Successfully read " + pid + " from " + filename);
         } catch (IOException | NumberFormatException e) {
             System.out.println("An error occurred while reading the file: " + e.getMessage());
         }

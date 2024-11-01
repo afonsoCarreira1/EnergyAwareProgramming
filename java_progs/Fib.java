@@ -38,7 +38,7 @@ public class Fib extends Thread {
         
         try (FileWriter writer = new FileWriter(filename)) {
             writer.write(time);
-            System.out.println("Successfully wrote " + time + " to " + filename);
+            //System.out.println("Successfully wrote " + time + " to " + filename);
         } catch (IOException e) {
             System.out.println("An error occurred while writing to the file: " + e.getMessage());
         }

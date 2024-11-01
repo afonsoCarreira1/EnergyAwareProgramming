@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <linux/limits.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 static int FIB_SIZE = 45;
 

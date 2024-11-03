@@ -16,7 +16,6 @@
 #define BUFFER_SIZE 256
 pid_t childPid;
 pid_t powerjoularPid;
-pid_t powerjoularPid;
 time_t startTime;
 time_t endTime;
 double lastTime;
@@ -24,10 +23,7 @@ double totalTime;
 short runCProgram;
 float totalPower = 0.0;
 float lastPower = 0.0;
-int waitSignal = 1;
 
-long long getCurrentTimestampMs()
-{
 long long getCurrentTimestampMs()
 {
     struct timeval tv;
@@ -195,12 +191,7 @@ void handleStartSignal(int sig)
 {
     if (runCProgram == 0)
     {
-    if (runCProgram == 0)
-    {
         childPid = readPidInFile("java_progs/pid.txt");
-    }
-    else
-    {
     }
     else
     {
@@ -208,17 +199,12 @@ void handleStartSignal(int sig)
     }
     char command[BUFFER_SIZE];
     runPowejoular();
-    startTime = getCurrentTimestampMs(); // time(0);
-    runPowejoular();
-    startTime = getCurrentTimestampMs(); // time(0);
+    startTime = getCurrentTimestampMs();
 }
 
 void handleEndSignal(int sig)
 {
-    endTime = getCurrentTimestampMs(); // time(0);
-    killProcess(powerjoularPid);
-    killProcess(childPid);
-    endTime = getCurrentTimestampMs(); // time(0);
+    endTime = getCurrentTimestampMs();
     killProcess(powerjoularPid);
     killProcess(childPid);
     char file[BUFFER_SIZE];
@@ -242,45 +228,6 @@ void runner(char *filename, float totalPower, float totalTime, short runCProgram
         perror("Failed to set up SIGUSR2 handler");
         exit(1);
     }
-    /*pid_t tempPid;
-    tempPid = fork();
-    if (tempPid < 0)
-    {
-        perror("fork failed");
-        exit(EXIT_FAILURE);
-    }
-    if (tempPid == 0)
-    {
-        int null_fd = open("/dev/null", O_WRONLY);
-        if (null_fd < 0)
-        {
-            perror("Failed to open /dev/null");
-            exit(EXIT_FAILURE);
-        }
-
-        // Redirect stdout and stderr to /dev/null
-        dup2(null_fd, STDOUT_FILENO); // Redirect stdout
-        dup2(null_fd, STDERR_FILENO); // Redirect stderr
-
-        // Close the file descriptor for /dev/null as it's no longer needed
-        close(null_fd);
-        char parentPidStr[20];
-        char programPath[100];
-        snprintf(parentPidStr, sizeof(parentPidStr), "%d", parentPid);
-        if (runCProgram == 1) {
-            snprintf(programPath, sizeof(programPath), "./c_progs/%s", filename);
-            execlp("sudo", "sudo", programPath, parentPidStr, (char *)NULL);
-        }
-        else{
-            snprintf(programPath, sizeof(programPath), "java_progs/%s", filename);
-            execlp("sudo", "sudo", "java", programPath, parentPidStr, (char *)NULL);
-        }
-        // If execlp returns, it means there was an error
-        perror("execlp failed");
-        exit(EXIT_FAILURE);
-    }
-    else
-    {*/
     char parentPidStr[20];
     char programPath[100];
     char *command[5];
@@ -303,7 +250,6 @@ void runner(char *filename, float totalPower, float totalTime, short runCProgram
     pid_t commandProcessId = runProcess("sudo", command);
     int status;
     waitpid(commandProcessId, &status, 0);
-    //}
 }
 
 int main(int argc, char *argv[])
@@ -320,14 +266,11 @@ int main(int argc, char *argv[])
         runner(filename, totalPower, totalTime, runCProgram, parentPid);
         printf("Program used %fj\n", lastPower);
         printf("Time taken %fs\n", lastTime);
-        waitSignal = 1;
     }
     printf("--------------------------------\n");
     totalPower /= numberOfRuns;
     totalTime /= numberOfRuns;
     printf("In %d runs average power was %fj\n", numberOfRuns, totalPower);
-    printf("Average time was %fs\n", totalTime);
-    printf("In %d runs average power was %fj\n", numberOfRuns, totalPower);
-    printf("Average time was %fs\n", totalTime);
+    printf("Average time was %fs\n", totalTime);  
     return 0;
 }

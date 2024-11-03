@@ -4,14 +4,19 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <limits.h>
 #include <linux/limits.h>
 #include <errno.h>
 #include <sys/time.h>
+#include <wait.h>
+#include <fcntl.h>
+
+
 
 #define BUFFER_SIZE 256
 pid_t childPid;
+pid_t powerjoularPid;
+pid_t powerjoularPid;
 time_t startTime;
 time_t endTime;
 double lastTime;
@@ -20,11 +25,76 @@ short runCProgram;
 float totalPower = 0.0;
 float lastPower = 0.0;
 
-
-long long getCurrentTimestampMs() {
+long long getCurrentTimestampMs()
+{
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return (long long)(tv.tv_sec) * 1000 + (tv.tv_usec / 1000);
+}
+
+void killProcess(pid_t pid)
+{
+    // Send SIGINT to the specified process ID
+    if (kill(pid, SIGINT) == -1)
+    {
+        perror("Failed to send SIGINT");
+        exit(EXIT_FAILURE);
+    }
+}
+
+pid_t runProcess(const char *command, char *const args[]) {
+    pid_t processPid = fork();
+
+    if (processPid < 0) {
+        perror("fork failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if (processPid == 0) {
+        // Child process
+        int null_fd = open("/dev/null", O_WRONLY);
+        if (null_fd < 0)
+        {
+            perror("Failed to open /dev/null");
+            exit(EXIT_FAILURE);
+        }
+
+        // Redirect stdout and stderr to /dev/null
+        dup2(null_fd, STDOUT_FILENO); // Redirect stdout
+        dup2(null_fd, STDERR_FILENO); // Redirect stderr
+
+        // Close the file descriptor for /dev/null as it's no longer needed
+        close(null_fd);
+
+        // Run the specified command with arguments
+        execvp(command, args);
+
+        // If execvp returns, there was an error
+        perror("execvp failed");
+        exit(EXIT_FAILURE);
+    } else {
+        // Parent process can optionally wait for the child to complete
+        //int status;
+        //waitpid(processPid, &status, 0);
+        //printf("Process %d finished with status %d\n", processPid, status);
+        return processPid;
+    }
+}
+
+void runPowejoular()
+{
+    char childPidStr[20];
+    char *command[8];
+    snprintf(childPidStr, sizeof(childPidStr), "%d", childPid);
+        command[0] = "powerjoular";
+        command[1] = "-D";
+        command[2] = "0.1";
+        command[3] = "-p";
+        command[4] = childPidStr;
+        command[5] = "-f";
+        command[6] = "powerjoular.csv";
+        command[7] = NULL;
+    powerjoularPid = runProcess("powerjoular", command);
 }
 
 float sumCpuPower(const char *filename)
@@ -120,32 +190,30 @@ pid_t readPidInFile(const char *filename)
 
 void handleStartSignal(int sig)
 {
-    if (runCProgram == 0) {
+    if (runCProgram == 0)
+    {
         childPid = readPidInFile("java_progs/pid.txt");
-    }else {
+    }
+    else
+    {
         childPid = readPidInFile("c_progs/pidfile.txt");
     }
     char command[BUFFER_SIZE];
-    startTime = getCurrentTimestampMs();//time(0);
-    snprintf(command, sizeof(command), "powerjoular -l -p %d -D .1 -f powerjoular.csv > /dev/null 2>&1", childPid);
-    int status = system(command);
-    if (status == -1)
-    {
-        perror("system() failed");
-        exit(1);
-    }
+    runPowejoular();
+    startTime = getCurrentTimestampMs(); // time(0);
 }
 
 void handleEndSignal(int sig)
 {
-    endTime = getCurrentTimestampMs();//time(0);
+    endTime = getCurrentTimestampMs(); // time(0);
+    killProcess(powerjoularPid);
+    killProcess(childPid);
     char file[BUFFER_SIZE];
     snprintf(file, sizeof(file), "powerjoular.csv-%d.csv", childPid);
     lastPower = sumCpuPower(file);
-    lastTime = (endTime- startTime) / 1000.0;
+    lastTime = (endTime - startTime) / 1000.0;
     totalPower += lastPower;
     totalTime += lastTime;
-    // printf("Total power usage was: %f\n",cpuPower);
 }
 
 void runner(char *filename, float totalPower, float totalTime, short runCProgram, pid_t parentPid)
@@ -195,7 +263,7 @@ int main(int argc, char *argv[])
     printf("--------------------------------\n");
     totalPower /= numberOfRuns;
     totalTime /= numberOfRuns;
-    printf("In %d runs average power was %fj\n",numberOfRuns,totalPower);
-    printf("Average time was %fs\n",totalTime);
+    printf("In %d runs average power was %fj\n", numberOfRuns, totalPower);
+    printf("Average time was %fs\n", totalTime);
     return 0;
 }

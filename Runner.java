@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.ProcessBuilder;
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -27,7 +26,7 @@ public class Runner {
             if (runs == 1) {
                 System.out.println("Running 1 time.");
             } else {
-                System.out.println("Running "+args[0]+" times.");
+                System.out.println("Running "+runs+" times.");
             }
             for (int i = 0; i < runs; i++) {
                 System.out.println("---------------------------------------");
@@ -35,7 +34,8 @@ public class Runner {
                 run(fileName);
             }
             averageJoules /=  runs;
-            System.out.println("In "+ args[0] + " runs the average power was " + averageJoules + "J");
+            averageTime /= runs;
+            System.out.println("In "+ runs + " runs the average power was " + averageJoules + "J");
             System.out.println("Average time was " + averageTime/1000/1+"s");
         } else {
             System.out.println("Invalid args");
@@ -83,6 +83,14 @@ public class Runner {
             public void handle(Signal sig) {
                 System.out.println("Received END signal, stopping powerjoular at "+LocalDateTime.now());
                 endTime = System.currentTimeMillis();
+                try {
+                    Process killPowerjoular = Runtime.getRuntime().exec("sudo kill "+powerjoularPid);
+                    killPowerjoular.waitFor();
+                    Process killTargetProgram = Runtime.getRuntime().exec("sudo kill "+childPid);
+                    killTargetProgram.waitFor();
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
                 String cpuUsage = readCsv("powerjoular.csv-"+childPid+".csv");
                 System.out.println("Program used "+ cpuUsage +"J");
                 Double duration = (endTime-startTime)/1000.0;

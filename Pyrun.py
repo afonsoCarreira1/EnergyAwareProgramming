@@ -52,12 +52,12 @@ class Runner:
         
         while self.start == 0: continue
         start_time = time.time()
-        profiler_cmd = f'powerjoular -l -p {os.getpid()} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
+        #profiler_cmd = f'powerjoular -l -p {os.getpid()} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
         profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
         print("parent",str(os.getpid()))
         print("child",self.target.pid)
 
-        self.profiler = subprocess.Popen(shlex.split(profiler_cmd))
+        #self.profiler = subprocess.Popen(shlex.split(profiler_cmd))
         subprocess.Popen(shlex.split(profiler_cmd2))
         print(f"Started measurement for PID {self.target.pid}")
 

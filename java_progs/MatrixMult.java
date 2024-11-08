@@ -1,5 +1,6 @@
 package java_progs;
 
+import java.io.IOException;
 import java.util.Random;
 
 public class MatrixMult {
@@ -52,7 +53,7 @@ public class MatrixMult {
 
         // Print the result
         System.out.println("\nResultant Matrix:");
-        printMatrix(C, row1, col2);
+        //printMatrix(C, row1, col2);
     }
 
     // Function to create a matrix with either random or incremental values
@@ -69,9 +70,9 @@ public class MatrixMult {
         return matrix;
     }
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
-        int val = 500;
+        int val = 1_000;
         int row1 = val, col1 = val, row2 = val, col2 = val;
 
         /*int A[][] = { { 1, 1, 1 },
@@ -85,6 +86,9 @@ public class MatrixMult {
 
         long A[][] = createMatrix(row1, col1, true);
         long B[][] = createMatrix(row2, col2, true);
+        WritePid.writePidToFile(Long.toString(ProcessHandle.current().pid()));
+        Runtime.getRuntime().exec("kill -USR1 " + args[0]);
         multiplyMatrix(row1, col1, A, row2, col2, B);
+        Runtime.getRuntime().exec("kill -USR2 " + args[0]);
     }
 }

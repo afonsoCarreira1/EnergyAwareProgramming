@@ -6,7 +6,7 @@ runCProgram="${3:-"f"}"
 numberOfRuns="${4:-"1"}"
 
 sudo rm powerjoular.*
-    sudo gcc c_progs/Fib.c -o c_progs/Fib
+    sudo gcc c_progs/"$2".c -o c_progs/"$2"
     sudo gcc OrchestratorC.c -o OrchestratorC
     
     # Compile Java program (name provided as second argument, e.g., MyRunner.java)

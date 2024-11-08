@@ -1,0 +1,161 @@
+%%
+%% This is file `sample-sigchi.tex',
+%% generated with the docstrip utility.
+%% but modified by the faculty @ DI/FCUL
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `sigchi')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-sigchi.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%% The first command in your LaTeX source must be the \documentclass command.
+\documentclass[sigplan]{acmart}
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{array}
+\usepackage{multirow}
+
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+\title{Title of Your Work} 
+
+\author{Afonso Carreira - 62701}
+\affiliation{%
+ \institution{
+  Estudo Orientado \\ 
+  Mestrado em Engenharia Informática \\ 
+  Faculdade de Ciências, Universidade de Lisboa}
+ }
+\email{fc62701@fc.ul.pt}
+
+
+\begin{abstract}
+  your abstract (about 10 lines).
+\end{abstract}
+
+
+%%
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+\keywords{5 keywords}
+
+\pagestyle{plain} % removes running headers
+
+%%
+%% This command processes the author and affiliation and title
+%% information and builds the first part of the formatted document.
+\maketitle
+\section{Introduction}
+
+This thesis aims to make programmers aware of the energy consumed by their programs. The time it takes to execute an algorithm and the memory it takes to perform a given task have always been issues that developers have been concerned about, and recently there have been attempts to reduce the energy cost of programs. However, building energy-efficient code is not a simple task and can often be overlooked. Because of its difficulty, there is still a need for tools that can help with this task\cite{10.1145/2597073.2597110}. \\
+
+
+Saving energy in programs is crucial for the operation of certain devices, such as mobile phones or IoT devices, so certain techniques need to be applied in order to reduce the energy of a program. For mobile devices, techniques are already used to save the battery when necessary, but for systems that don't use batteries, such as servers, energy is rarely taken into account when developing a program. This lack of concern or awareness on the part of developers, although it appears to have a small impact, turns out to be quite significant, as it is expected that by 2025 computing and communication systems will use around 20\% of global energy\cite{fonseca2022typesystemsresourceawareprogramming}. \\
+
+There are several reasons why there is a need to save energy in software, be it for mobile systems or data centre applications.\\
+
+\begin{itemize}
+    \item The dependence of mobile devices on batteries. All mobile devices rely on their batteries, so the software they run needs to make the best use of resources to conserve battery power.
+    \item Reducing operating costs in data centres. It is crucial to reduce the operating cost of data centres by using energy-efficient programs. This reduction results in economic benefits for companies and contributes positively to environmental sustainability. \\
+\end{itemize} 
+
+When, when trying to improve the energy efficiency of their code, programmers rely on blogs, websites and YouTube videos, which in most cases do not give the right answers, and sometimes even the wrong ones. This is due to a lack of knowledge and guidelines.
+Also, current tools can measure the energy of programs and applications as they run, but this usually requires extra steps that many developers may not have the time or inclination to take, so there is a need for a tool that can help the developer without the need for extra effort\cite{10.1145/3154384}. \\
+
+Java is a good choice for building this tool because of its interoperability with different operating systems. It has a wide range of useful libraries (JRAPL, joularjx, Jalen) that help to measure energy accurately, and Java's typing and object-oriented features make the code easier to maintain and extend, so the tool can evolve with new energy metering standards and technologies. \\
+
+In order to create this tool, static analysis techniques will have to be used to understand which methods are going to be used and, through inferences from previously made data, indicate the estimated energy levels of the program's execution. The inference will be made using energy data collected from low-level library functions. More complex functions are built on the basis of function composition, which means that, based on the estimated consumption of low-level functions, we can generalize our estimates to more complex functions and ultimately to the program as a whole. \\
+
+Many devices rely on Java and the Java Virtual Machine (JVM), so it is important that the code they run is energy efficient. Several factors can affect the power consumption of Java applications, including the behavior of the garbage collector and the efficiency of the memory management system \cite{10.5555/1267847.1267870}. \\
+
+This work proposes the development of a solution capable of identifying the energy consumption of methods in programs and presenting this information quickly to the programmer, allowing him to make informed decisions in software design. \textbf{The goal is to create an extension for an IDE that integrates these functionalities. (para ja fica assim)} This way, developers will have immediate feedback on the energy impact of their applications and can adjust them to meet efficiency requirements. \\
+
+\textbf{Organization} A quick description of the following sections \\
+
+\section{Background} \label{sec:background}
+
+This section should contain any information needed to understand the problem you are tackling. For instance, relevant concepts and definitions in the problem area, and particularly those that will be used in the work.
+
+\section{Related Work} \label{sec:relatedwork}
+
+Energy efficiency is a critical focus across industries, as it directly impacts global sustainability, economic costs, and product quality.  The goal is to reduce greenhouse gases to create a sustainable future, reduce infrastructure costs, and improve product quality\cite{annurev:/content/journals/10.1146/annurev.resource.102308.124234}. \\
+
+In particular, large scale computation and communication consume a lot of global energy, and these values have been increasing in the last decades, so the topic of energy aware programming and energy efficient software has been targeted by many researchers in recent years with the objective of reducing energy costs in large IT infrastructure. This improvement can be considered a optimization problem and can be tackled in several ways for example an heuristic approach by adjusting the hardware performance dynamically, or completing tasks in their deadlines, using the least energy possible. However some of this implementations can only be short term solutions and in long term, the focus will be toward more complex models that can predict and optimize performance relative to hardware configurations\cite{10.1145/1666420.1666438}.
+In addition, new languages can be developed to address these goals, as demonstrated by ENT\cite{10.1145/3062341.3062356}. ENT is a Java extension that empowers programmers with more direct control over the energy consumption of their applications. ENT’s type system enables applications to adapt dynamically to power constraints by switching operational modes based on resource availability, such as battery level or CPU temperature, allowing for software-level energy optimization. However, the language introduces complexity, making it potentially challenging for developers to learn and adapt to existing codebases.
+\\
+
+To tackle the problem of energy consumption in IT, some solutions have been presented. Some researchers focused on using energy measurement tools, like JRAPL to measure common libraries in Java and understand how much energy they use and what are the best alternatives to improve the energy efficiency of the code\cite{10.1145/2896967.2896968}. Observing common libraries for the implementation of list, sets and maps, is possible to see which ones have the better energy efficiency and what changes could improve the code.
+Hasan et al.'s \cite{10.1145/2884781.2884869} research adds to this by creating detailed energy profiles for various Java collection classes, including lists, maps, and sets, across different implementations (Java Collections Framework, Apache Commons Collections, and Trove). Their work presents concrete quantification of energy consumption in these collections based on common operations such as insertion, iteration, and random access, and highlights the performance impact of collection types on energy efficiency for different input sizes.
+
+However, because these collections are often used with threads, it is important to understand how much energy efficiency can be improved without compromising thread safety. The energy consumption of Java's thread-safe collections was studied in \cite{7816451}, where researchers demonstrated that switching to more energy-efficient collection implementations can reduce energy usage while maintaining thread safety.
+
+Building on these efforts, \cite{10.1145/3238147.3240473}, Pereira et al. created a static analysis tool (Jstanley), as part of a Eclipse plugin, that can detect energy inefficient collections and recommend better alternatives. However this studies have some limitations, for example they only account for 3 collections, (Lists, Sets and Maps), they only account for 3 sizes of the collections (25,000, 250,000 and 1,000,000), it does not account for loops, thread safe and thread unsafe collections. \\
+In this work\cite{8816747}, a tool (CT+) has been proposed that is capable of performing static analysis of the code and recommending changes that reduce energy consumption. It improved from previous works by taking into account more collections implementations, more operations, thread safety and support for mobile applications. \\
+
+In addition, SEEP \cite{10.1145/2094091.2094106} uses symbolic execution for energy profiling, generating multiple binaries representing different code paths and input scenarios. By analyzing these binaries with hardware-based energy measurement devices, SEEP provides energy consumption data, offering a deeper understanding of code efficiency across various inputs and paths. This approach complements other tool, such as PEEK, which builds on SEEP to help developers optimize energy usage with minimal effort \cite{187026}. PEEK is an IDE-integrated framework that guides developers in writing energy-efficient code. It has a front end for IDE interfaces (e.g., Eclipse, Xcode), a middle end to manage data and versioning via Git, and a backend where energy analysis is performed—either through SEEP or hardware devices. Through these layers, PEEK identifies inefficiencies and suggests optimizations, supporting efficient coding practices.
+
+
+This solutions have some limitations, like the need to execute the code before showing the average energy cost to the developer and have limited collections.
+
+This work has the objective of creating a user friendly tool that quickly estimates energy consumption through static analysis and providing developers recommendations. This energy will then be displayed to the developer making him more aware of the energy consumption of the program and help make better decisions.\\
+
+
+
+
+%hasim collections
+%oliveira Recommending Java Colletions (related work tem analise estatica)
+%jsmeter
+%analise estatica e dinamica
+%Mario Linares-Vásquez (API de UI)
+%Ivano Malavolta (API - Webassembler)
+% 
+
+Where the existing related technologies are described and explored. What is the state of the art on the topic you are working? \\
+
+
+
+\section{«Section(s) about your Work»} \label{sec:work1}
+
+Here you should describe in as much detail as possible the problem and your plan to tackle it (use appropriate section titles for the described work). \\
+
+What are the methods you are planning to use, or already started to use, to tackle your problem. \\
+
+This should be based on related word, your understanding of the problem and eventually preliminary results.
+
+\section{Preliminary Results (optional)} \label{sec:preliminaryresults}
+
+Where you describe the work already carried out, what data has already been collected, what analysis and designs have already been done, what methods have been used, what programs and/or preliminary results already exist, etc.
+
+
+\section{Forthcoming Work and Conclusions} \label{sec:conclusions}
+
+It should include subsections that describe the work to be carried out during the rest of the year, and what its objectives are. 
+
+It should also include planning until the end of the work, in chronological order. 
+
+Include a final concluding subsection (may be a separate section) with a summary of contributions already made, a preliminary self-assessment of the work done so far, and difficulties encountered.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% The next two lines define the bibliography style to be used, and
+%% the bibliography file.
+\bibliographystyle{unsrt}
+\bibliography{ref}
+
+\end{document}

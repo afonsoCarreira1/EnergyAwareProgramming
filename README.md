@@ -18,6 +18,3 @@ Example:
 Plots the files from the 4orch_fib dir which are power values of the Fibonacci program writen in java
 
 <img src="https://i.ibb.co/RYPgrLQ/Screenshot-from-2024-11-08-14-09-14.png" alt="Screenshot-from-2024-11-08-14-09-14" border="0" width="60%">
-
-## Overleaf
-https://pt.overleaf.com/7139453923znvnkcqnzhcx#1685b2

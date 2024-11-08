@@ -63,11 +63,11 @@ def plot_hist(orch):
     plt.title(f'Average power of {orch["name"]} orchestrator {orch["average_power"]}j')
     plt.show(block=orch["name"]=="bash")
 
-def plot_graph(orch,prog_name):
+def plot_graph(orch,prog_name,c_or_java_prog):
     if orch["name"] == 'java':
         plt.figure(figsize=(10, 6))
-        plt.title(f'Power of 100 {prog_name} runs')
-    sns.lineplot(data=orch["all_powers"], color=orch["color"], linestyle='-', label=f"avg: {round(orch["average_power"])}j\nstd dev: {round(orch["standard_deviation"], 2)}")
+        plt.title(f'Power of 100 {prog_name} runs in {c_or_java_prog}')
+    sns.lineplot(data=orch["all_powers"], color=orch["color"], linestyle='-', label=f"({orch["name"]}) avg: {round(orch["average_power"])}j\nstd dev: {round(orch["standard_deviation"], 2)}")
     plt.xlabel('Run')
     plt.ylabel('CPU Power')
     plt.legend()
@@ -85,7 +85,7 @@ def main():
         orch["all_powers"] = read_java_python_files(orch) # get the data from the files
         orch["average_power"] = calculate_average(orch)
         orch["standard_deviation"] = calculate_standard_deviation(orch)
-        plot_graph(orch,prog_name)
+        plot_graph(orch,prog_name,c_or_java_prog)
         #plot_hist(orch)
 
 if __name__ == "__main__":

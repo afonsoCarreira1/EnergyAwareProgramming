@@ -114,7 +114,7 @@ In addition, new languages can be developed to address these goals, as demonstra
 
 
 -------------------
-This paper shows that system calls are directly related to energy consumption in Android applications. With this insight, it's possible to use static analysis to identify system calls within the code. This information can then be used to infer potential energy usage patterns, providing an early indication of where higher energy consumption may occur.
+This paper\cite{aggarwal2014power} shows that system calls are directly related to energy consumption in Android applications. With this insight, it's possible to use static analysis to identify system calls within the code. This information can then be used to infer potential energy usage patterns, providing an early indication of where higher energy consumption may occur.
 -------------------
 
 
@@ -149,6 +149,15 @@ Where the existing related technologies are described and explored. What is the 
 
 
 \section{«Section(s) about your Work»} \label{sec:work1}
+
+As described in the previous sections, the challenge is to make developers aware of the energy consumption of their programs. By using a simple and practical tool, they can quickly and accurately estimate their program's energy consumption. This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development.
+
+To provide this insight to developers it is necessary to build a tool that can provide all of that. The tool needs to be pratical, which means that integrating it in an IDE is a very good option. With this the developer only needs to download an extension for an IDE and will have the insights desired.
+
+The tool will be an extension using Language Server Protocol (LSP), so it can be integrated in all the IDEs that support this feature (VScode, Eclipse, Neovim, Intellij IDEA). This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an Abstract Syntax Tree (ABS), from there its capable of analyzing the code and using an inference function it will output the estimated cost. \textbf{It will also be possible to make a more precise estimation, by running the code and also provide recommendations. Is this a requirement or optional/if i have time}.
+
+The inference function will work like this \textbf{Understand how to do this}
+
 
 Here you should describe in as much detail as possible the problem and your plan to tackle it (use appropriate section titles for the described work). \\
 
@@ -193,6 +202,17 @@ After running the tests again it was possible to see that the Python orchestrato
 Where you describe the work already carried out, what data has already been collected, what analysis and designs have already been done, what methods have been used, what programs and/or preliminary results already exist, etc.
 
 \section{Forthcoming Work and Conclusions} \label{sec:conclusions}
+
+Possible work timeline
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width = 0.5 \textwidth]{figures/gantt_diagram.png}
+  \caption{Work}
+  \label{fig:gantt_diagram}
+\end{figure}
+
+
 It should include subsections that describe the work to be carried out during the rest of the year, and what its objectives are.
 
 It should also include planning until the end of the work, in chronological order.

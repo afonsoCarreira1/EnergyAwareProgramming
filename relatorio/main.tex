@@ -95,8 +95,24 @@ This work proposes the development of a solution capable of identifying the ener
 
 When programming, developers usually take into consideration the time the program takes to complete or the response time from client to server, or the memory usage. Most don't have the idea of how much energy their program uses or how much it can use in certain cases, and to get this idea is not as trivial as it seems. The energy usage is non deterministic and is not linear with the time the program takes to run.
 
-To perform this work a tool is needed in order to measure the energy of programs, methods or code snippets. The tool used was powerjoular \cite{noureddine-ie-2022}, a open source tool, capable of measuring energy, from the CPU and GPU, using the Intel RAPL power data through the Linux powercap interface it can read the energy from the CPU and for the GPU it uses NVIDIA SMI. It is build in ADA, that is considered one of most energy efficient programming languages and it can monitor applications by name or PID.
+\subsection{Energy} \label{sec:background_energy}
 
+There are some tools capable of displaying the energy consumption of programs.
+
+Intel RAPL (Running Average Power Limit) is a tool for monitoring power consumption. It utilizes Model-Specific Registers (MSRs), which are used for program execution tracing, performance monitoring, and toggling CPU features. These registers store the total energy usage of the CPU, allowing it to be read and analyzed.
+
+Perf is a command line tool already available in linux, and is mainly used for performance monitoring and profiling. Although its not specific for energy measurement, it can do it, with Intel RAPL but not as pratical as other tools, specially when its needed to meausre a single process energy consumption.
+
+Powertop is another tool capable of providing the power consumption, however it only works for laptops, as it requires to check the battery to see how much energy was used and calculate the power consumption.
+
+Joularjx is a tool based on powerjoular and capable to measure energy consumption on Java programs, displaying the methods consumption.
+
+To perform this work a tool is needed in order to measure the energy of programs, methods or code snippets. The tool used was powerjoular \cite{noureddine-ie-2022}, a open source tool, capable of measuring energy, from the CPU and GPU, using the Intel RAPL power data through the Linux powercap interface it can read the energy from the CPU and for the GPU it uses NVIDIA SMI to directly read the power consumption.
+To read the power consumption of specific processes, PowerJoular monitors the CPU cycles and utilization of each process. By knowing the total power consumption of the CPU through the RAPL interface, it can calculate the power usage of individual processes based on their CPU utilization.
+It is build in ADA, that is considered one of most energy efficient programming languages and it can monitor applications by name or PID.
+
+
+\subsection{Code static and dynamic analysis} \label{sec:background_static_dynamic_analysis}
 Also, the tool proposed in this work will mainly use static analysis to achieve its goal, so it is crucial to understand why it is preferred over dynamic analysis in this context.
 
 Static analysis, as the name implies, analyzes the code statically, meaning it examines the code without executing it. By examining the code, static analysis tools can understand how the program will behave at runtime\cite{ernst2003static}, this analysis often aims for soundness, meaning that if the tool catches an error, it means that the error really exists, there are no false negatives. However, these tools may sometimes raise false positives. This analysis allows to check the entire source code and every path, much like compilers check syntax and types. Still, they can only predict some behaviors, as some can only be found when the program is executed.

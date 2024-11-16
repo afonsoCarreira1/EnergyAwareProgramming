@@ -141,10 +141,12 @@ Hasan et al.'s \cite{10.1145/2884781.2884869} research adds to this by creating 
 
 However, because these collections are often used with threads, it is important to understand how much energy efficiency can be improved without compromising thread safety. The energy consumption of Java's thread-safe collections was studied in \cite{7816451}, where researchers demonstrated that switching to more energy-efficient collection implementations can reduce energy usage while maintaining thread safety.
 
-Building on these efforts, \cite{10.1145/3238147.3240473}, Pereira et al. created a static analysis tool (Jstanley), as part of a Eclipse plugin, that can detect energy inefficient collections and recommend better alternatives. However this studies have some limitations, for example they only account for 3 collections, (Lists, Sets and Maps), they only account for 3 sizes of the collections (25,000, 250,000 and 1,000,000), it does not account for loops, thread safe and thread unsafe collections. 
+Building on these efforts, \cite{10.1145/3238147.3240473}, Pereira et al. introduced a static analysis tool (Jstanley), as part of a Eclipse plugin, that can detect energy inefficient collections and recommend better alternatives. While jStanley demonstrated notable improvements in energy efficiency within its specific context, it has several limitations.
+For example they only account for 3 collections, (Lists, Sets and Maps), they only account for 3 sizes of the collections (25,000, 250,000 and 1,000,000), it does not account for loops, thread safe and thread unsafe collections. Compared to our approach, Jstanley is limited, as it does not provide the actual information about the energy spent, it just shows recommendations. While the tool shows great improvements in its tested environment, replacing collections may not be enough in many practical cases. A more extensive tool, capable of analyzing a wider range of collections and providing energy metrics, would enable developers to achieve even greater energy efficiency and awareness.
+
 In this work\cite{8816747}, a tool (CT+) has been proposed that is capable of performing static analysis of the code and recommending changes that reduce energy consumption. It improved from previous works by taking into account more collections implementations, more operations, thread safety and support for mobile applications. 
 
-In addition, SEEP \cite{10.1145/2094091.2094106} uses symbolic execution for energy profiling, generating multiple binaries representing different code paths and input scenarios. By analyzing these binaries with hardware-based energy measurement devices, SEEP provides energy consumption data, offering a deeper understanding of code efficiency across various inputs and paths. This approach complements other tool, such as PEEK, which builds on SEEP to help developers optimize energy usage with minimal effort \cite{187026}. PEEK is an IDE-integrated framework that guides developers in writing energy-efficient code. It has a front end for IDE interfaces (e.g., Eclipse, Xcode), a middle end to manage data and versioning via Git, and a backend where energy analysis is performed—either through SEEP or hardware devices. Through these layers, PEEK identifies inefficiencies and suggests optimizations, supporting efficient coding practices.
+In addition, SEEP \cite{10.1145/2094091.2094106} uses symbolic execution for energy profiling, generating multiple binaries representing different code paths and input scenarios. By analyzing these binaries with hardware-based energy measurement devices, SEEP provides energy consumption data, offering a deeper understanding of code efficiency across various inputs and paths. This approach complements other tool, such as PEEK, which builds on SEEP to help developers optimize energy usage with minimal effort \cite{187026}. PEEK is an IDE-integrated framework that guides developers in writing energy-efficient code. It has a front end for IDE interfaces (e.g., Eclipse, Xcode), a middle end to manage data and versioning via Git, and a backend where energy analysis is performed—either through SEEP or hardware devices. Through these layers, PEEK identifies inefficiencies and suggests optimizations, supporting efficient coding practices. However, it has some limitations when compared to the proposed approach in this work, it uses dynamic analysis instead of static analysis, which was already explained in, \ref{sec:background_static_dynamic_analysis}, why it was choosen over dynamic analysis.
 
 
 This solutions have some limitations, like the need to execute the code before showing the average energy cost to the developer and have limited collections.
@@ -202,7 +204,7 @@ Powertop was also tested, but it could only perform energy measurements on lapto
 
 Joularjx is a tool based on PowerJoular capable of measuring energy consumption of Java applications and it provides the energy used by the methods and overall program. Although it uses PowerJoular, when measuring the same program it gives different measurements.\textbf{why}
 
-As described in the the \ref{sec:background}, PowerJoular is the best option. As a command line program it can be easily adpated to measure any program or code snippet in most languages.
+As described in the the \ref{sec:background_energy}, PowerJoular is the best option. As a command line program it can be easily adpated to measure any program or code snippet in most languages.
 
 To explore PowerJoular’s capabilities in energy profiling, we designed two testing setups, each using a different orchestrator to manage the execution of a sample Fibonacci program written in Java and C. One orchestrator was written in Java, and the other in Python. Both this orchestrators worked in the following way: \\
 
@@ -218,6 +220,7 @@ To explore PowerJoular’s capabilities in energy profiling, we designed two tes
 With this process it was noticeble that the Java orchestrator was getting significantly more energy consumption than the Python one, which is not very logical, since they both target the same program. So, to try and check which one was having problems, two more orchestrators were implemented, one in C and another in bash.
 
 After running the tests again it was possible to see that the Python orchestrator was getting values way more different than the other three orchestrators as show in Figure \ref{fig:4_orchs_comparison}.
+The figure contains 100 runs of the Fibonacci recursive program written in Java and order by the less energy to highest energy. And it shows the energy reads for the four different orchestrators used. The labels contain the average energy values and its standard deviation.
 
 \begin{figure}%[h]
   \centering
@@ -225,8 +228,6 @@ After running the tests again it was possible to see that the Python orchestrato
   \caption{orchestrators comparison}
   \label{fig:4_orchs_comparison}
 \end{figure}
-
-Where you describe the work already carried out, what data has already been collected, what analysis and designs have already been done, what methods have been used, what programs and/or preliminary results already exist, etc.
 
 \section{Forthcoming Work and Conclusions} \label{sec:conclusions}
 

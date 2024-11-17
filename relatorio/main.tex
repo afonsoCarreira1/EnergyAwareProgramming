@@ -78,7 +78,7 @@ There are several reasons why there is a need to save energy in software, be it 
   \item Reducing operating costs in data centres. It is crucial to reduce the operating cost of data centres by using energy-efficient programs. This reduction results in economic benefits for companies and contributes positively to environmental sustainability. \\
 \end{itemize}
 
-When, when trying to improve the energy efficiency of their code, programmers rely on blogs, websites and YouTube videos, which in most cases do not give the right answers, and sometimes even the wrong ones. This is due to a lack of knowledge and guidelines.
+When, trying to improve the energy efficiency of their code, programmers rely on blogs, websites and YouTube videos, which in most cases do not give the right answers, and sometimes even the wrong ones. This is due to a lack of knowledge and guidelines.
 Also, current tools can measure the energy of programs and applications as they run, but this usually requires extra steps that many developers may not have the time or inclination to take, so there is a need for a tool that can help the developer without the need for extra effort\cite{10.1145/3154384}. 
 
 Java is a good choice for building this tool because of its interoperability with different operating systems. It has a wide range of useful libraries (JRAPL, joularjx, Jalen) that help to measure energy accurately, and Java's typing and object-oriented features make the code easier to maintain and extend, so the tool can evolve with new energy metering standards and technologies. 
@@ -115,7 +115,7 @@ It is build in ADA, that is considered one of most energy efficient programming 
 \subsection{Code static and dynamic analysis} \label{sec:background_static_dynamic_analysis}
 Also, the tool proposed in this work will mainly use static analysis to achieve its goal, so it is crucial to understand why it is preferred over dynamic analysis in this context.
 
-Static analysis, as the name implies, analyzes the code statically, meaning it examines the code without executing it. By examining the code, static analysis tools can understand how the program will behave at runtime\cite{ernst2003static}, this analysis often aims for soundness, meaning that if the tool catches an error, it means that the error really exists, there are no false negatives. However, this can come at the cost of producing false positives, where issues that are not actually problems are flaged, so its important to keeps a balance between them. This analysis allows to check the entire source code and every path, much like compilers check syntax and types. Still, they can only predict some behaviors, as some can only be found when the program is executed, for example, by using dynamic analysis..
+Static analysis, as the name implies, analyzes the code statically, meaning it examines the code without executing it. By examining the code, static analysis tools can understand how the program will behave at runtime\cite{ernst2003static}, this analysis often aims for soundness, meaning that if the tool catches an error, it means that the error really exists, there are no false negatives. However, this can come at the cost of producing false positives, where issues that are not actually problems are flaged, so its important to keeps a balance between them. This analysis allows to check the entire source code and every path, much like compilers check syntax and types. Still, they can only predict some behaviors, as some can only be found when the program is executed, for example, by using dynamic analysis.
 
 Dynamic analysis, on the other hand, executes the program and observes its exact behavior without having to estimate or predict. This type of analysis leaves no doubt about memory usage, output, the path taken, how much time it took\cite{ernst2003static}. A good example of dynamic analysis is unit testing, which tries to cover as many code paths as possible with different inputs, to understand as much as possible how the program works, and to find something that might be difficult to find with static analysis. However, dynamic analysis can be time consuming, especially for programs that take a long time to complete.
 
@@ -165,8 +165,6 @@ This work has the objective of creating a user friendly tool that quickly estima
 % 
 
 Where the existing related technologies are described and explored. What is the state of the art on the topic you are working? 
-
-
 
 \section{«Section(s) about your Work»} \label{sec:work1}
 

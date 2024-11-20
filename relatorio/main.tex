@@ -75,10 +75,11 @@ There are several reasons why there is a need to save energy in software, be it 
 
 \begin{itemize}
   \item The dependence of mobile devices on batteries. All mobile devices rely on their batteries, so the software they run needs to make the best use of resources to conserve battery power.
-  \item Reducing operating costs in data centres. It is crucial to reduce the operating cost of data centres by using energy-efficient programs. This reduction results in economic benefits for companies and contributes positively to environmental sustainability. \\
+  \item Reducing operating costs in data centers. It is crucial to reduce the operating cost of data centers by using energy-efficient programs. This reduction results in economic benefits for companies and contributes positively to environmental sustainability. 
+  \item Reducing energy consumption has a benefic impact in our environment, as it saves energy that can be used for other things. \\
 \end{itemize}
 
-When, trying to improve the energy efficiency of their code, programmers rely on blogs, websites and YouTube videos, which in most cases do not give the right answers, and sometimes even the wrong ones. This is due to a lack of knowledge and guidelines.
+When, trying to improve the energy efficiency of their code, programmers rely on blogs, websites and YouTube videos, which in most cases do not give completly right answers, and sometimes even the wrong ones. This is due to a lack of knowledge and guidelines.
 Also, current tools can measure the energy of programs and applications as they run, but this usually requires extra steps that many developers may not have the time or inclination to take, so there is a need for a tool that can help the developer without the need for extra effort\cite{10.1145/3154384}. 
 
 Java is a good choice for building this tool because of its interoperability with different operating systems. It has a wide range of useful libraries (JRAPL, joularjx, Jalen) that help to measure energy accurately, and Java's typing and object-oriented features make the code easier to maintain and extend, so the tool can evolve with new energy metering standards and technologies. 
@@ -87,9 +88,23 @@ In order to create this tool, static analysis techniques will have to be used to
 
 Many devices rely on Java and the Java Virtual Machine (JVM), so it is important that the code they run is energy efficient. Several factors can affect the power consumption of Java applications, including the behavior of the garbage collector and the efficiency of the memory management system \cite{10.5555/1267847.1267870}. 
 
-This work proposes the development of a solution capable of identifying the energy consumption of methods in programs and presenting this information quickly to the programmer, allowing him to make informed decisions in software design. \textbf{The goal is to create an extension for an IDE that integrates these functionalities. (para ja fica assim)} This way, developers will have immediate feedback on the energy impact of their applications and can adjust them to meet efficiency requirements. 
+This work proposes the development of a solution capable of identifying the energy consumption of methods in programs and presenting this information quickly to the programmer, allowing him to make informed decisions in software design. \textbf{The goal is to create an extension for an IDE that integrates these functionalities. (para ja fica assim)} This way, developers will have immediate feedback on the energy impact of their applications and can adjust them to meet efficiency requirements. Also the tool should be simple to use and developers should not need to know much about the energy to know how to use it. \\
 
-\textbf{Organization} A quick description of the following sections 
+\textbf{Organization} 
+
+\begin{itemize}
+
+\item Background (\ref{sec:background}) contains information of concepts that should be known to understand the complete report. It explains why it is difficult to predict and measure energy consumption of programs. It explains different energy tools, how they work, and what they do. It explains static and dynamic analysis and why it is important in this work.
+
+\item Related work (\ref{sec:relatedwork}) contains the initials solutions proposed to the theme of energy aware programming, how they changed during the years, and what the most recent tools do. And comparing with the proposed tool in this work.
+
+\item This section (\ref{sec:work1}) explains in detail the existing problem and what is the solution, and a detailed explaination on how the solution will be built.
+
+\item The preliminary results (\ref{sec:preliminaryresults}) contains the tests made until the moment, and what results were obtained.
+
+\item  Final conclusions (\ref{sec:conclusions}) of the work done until the moment, and explaination of what work will be continued to be done.\\
+\end{itemize}
+
 
 \section{Background} \label{sec:background}
 
@@ -106,6 +121,8 @@ Perf is a command line tool already available in linux, and is mainly used for p
 Powertop is another tool capable of providing the power consumption, however it only works for laptops, as it requires to check the battery to see how much energy was used and calculate the power consumption.
 
 Joularjx is a tool based on powerjoular and capable to measure energy consumption on Java programs, displaying the methods consumption.
+
+Experiment-Runner is a framework made to facilitate experiments
 
 To perform this work a tool is needed in order to measure the energy of programs, methods or code snippets. The tool used was powerjoular \cite{noureddine-ie-2022}, a open source tool, capable of measuring energy, from the CPU and GPU, using the Intel RAPL power data through the Linux powercap interface it can read the energy from the CPU and for the GPU it uses NVIDIA SMI to directly read the power consumption.
 To read the power consumption of specific processes, PowerJoular monitors the CPU cycles and utilization of each process. By knowing the total power consumption of the CPU through the RAPL interface, it can calculate the power usage of individual processes based on their CPU utilization.
@@ -171,7 +188,7 @@ Where the existing related technologies are described and explored. What is the 
 As described in the previous sections, the challenge is to make developers aware of the energy consumption of their programs. By using a simple and practical tool, they can quickly and accurately estimate their program's energy consumption. This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development.
 
 To provide this insight to developers it is necessary to build a tool that can provide all of that. The tool needs to be pratical, which means that integrating it in an IDE is a very good option. With this the developer only needs to download an extension for an IDE and will have the insights desired.
-The tool will be an extension using Language Server Protocol (LSP), so it can be integrated in all the IDEs that support this feature (VScode, Eclipse, Neovim, Intellij IDEA). This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an Abstract Syntax Tree (ABS), from there its capable of analyzing the code and using an inference function it will output the estimated cost. \textbf{It will also be possible to make a more precise estimation, by running the code and also provide recommendations. Is this a requirement or optional/if i have time}.
+The tool will be an extension using Language Server Protocol (LSP), so it can be integrated in all the IDEs that support this feature (VScode, Eclipse, Neovim, Intellij IDEA). This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an Abstract Syntax Tree (ABS), from there its capable of analyzing the code and using an inference function it will output the estimated cost. \textbf{It will also be possible to make a more precise estimation, by running the code and also provide recommendations. optional/if i have time}.
 
 -------------------------\\
 The inference function will work like this \textbf{Understand how to do this}

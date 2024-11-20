@@ -69,7 +69,7 @@ This thesis aims to make programmers aware of the energy consumed by their progr
 
 
 Saving energy in programs is crucial for the operation of certain devices, such as mobile phones or IoT devices, so certain techniques need to be applied in order to reduce the energy of a program. For mobile devices, techniques are already used to save the battery when necessary, but for systems that don't use batteries, such as servers, energy is rarely taken into account when developing a program.
-This lack of concern or awareness on the part of developers, although it appears to have a small impact, turns out to be quite significant, as in 2020 around 7\% of global electricity use is due to information and communications technology, with an anticipated rise in line with the growing demand for new technologies\cite{article}. 
+This lack of concern or awareness on the part of developers, although it appears to have a small impact, turns out to be quite significant, as in 2020 around 7\% of global electricity use is due to information and communications technology, with an anticipated rise in line with the growing demand for new technologies\cite{article}. This trend has become even more significant with the increased use of artificial intelligence \cite{patterson2021carbon}, especially large scale models such as ChatGPT, which require significant computing resources to train and run. These energy-intensive processes contribute significantly to global energy consumption and carbon emissions, raising environmental concerns as AI adoption continues to grow.
 
 There are several reasons why there is a need to save energy in software, be it for mobile systems or data centre applications. \\
 
@@ -198,9 +198,7 @@ Maybe do it by hand with data analysis and obtain a formula capable of infering 
 -------------------------\\
 
 
-Design -> textbox with energy estimation, for each function. 
-          warnings/highlights with recommendations
-          warnings when desired energy usage overflows 
+
 
 
 Here you should describe in as much detail as possible the problem and your plan to tackle it (use appropriate section titles for the described work). \\
@@ -236,6 +234,15 @@ To better understand the results and the problem encountered, its better to see,
   \item The target Java program when it finishes the computation it sends a stop signal back.
   \item The orchestrator on receiving the stop signal, first stops PowerJoular and then stops the target program, if needed. Then it displays the energy measurement information stored in the files created by PowerJoular. \\
 \end{itemize}
+
+This process is more clearly illustrated in Figure \ref{fig:orchestrators_process}
+
+\begin{figure}%[h]
+  \centering
+  \includegraphics[width = 0.4 \textwidth]{figures/orchestrators_process.png}
+  \caption{orchestrators process}
+  \label{fig:orchestrators_process}
+\end{figure}
 
 With this process it was noticeble that the Java orchestrator was getting significantly more energy consumption than the Python one, which is not very logical, since they both target the same program. So, to try and check which one was having problems, two more orchestrators were implemented, one in C and another in bash.
 

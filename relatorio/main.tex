@@ -122,7 +122,7 @@ Powertop is another tool capable of providing the power consumption, however it 
 
 Joularjx is a tool based on powerjoular and capable to measure energy consumption on Java programs, displaying the methods consumption.
 
-Experiment-Runner is a framework made to facilitate experiments
+Experiment-Runner is a framework built in python made to facilitate experiments, it is easily customizable and can be used with energy measurement tools to monitor the power consumption of another process.
 
 To perform this work a tool is needed in order to measure the energy of programs, methods or code snippets. The tool used was powerjoular \cite{noureddine-ie-2022}, a open source tool, capable of measuring energy, from the CPU and GPU, using the Intel RAPL power data through the Linux powercap interface it can read the energy from the CPU and for the GPU it uses NVIDIA SMI to directly read the power consumption.
 To read the power consumption of specific processes, PowerJoular monitors the CPU cycles and utilization of each process. By knowing the total power consumption of the CPU through the RAPL interface, it can calculate the power usage of individual processes based on their CPU utilization.
@@ -219,9 +219,14 @@ Powertop was also tested, but it could only perform energy measurements on lapto
 
 Joularjx is a tool based on PowerJoular capable of measuring energy consumption of Java applications and it provides the energy used by the methods and overall program. Although it uses PowerJoular, when measuring the same program it gives different measurements.\textbf{why}
 
-As described in the the \ref{sec:background_energy}, PowerJoular is the best option. As a command line program it can be easily adpated to measure any program or code snippet in most languages.
+As described in the the \ref{sec:background_energy}, PowerJoular is the best option. As a command line program it can be easily adpated to measure any program or code snippet in most languages. So it was combined with the framework experiment-runner, that facilitates the process.
 
-To explore PowerJoular’s capabilities in energy profiling, we designed two testing setups, each using a different orchestrator to manage the execution of a sample Fibonacci program written in Java and C. One orchestrator was written in Java, and the other in Python. Both this orchestrators worked in the following way: \\
+
+Initially, JoularJx and the experiment-runner using powerjoular were used to explore their capabilities and familiarize with the tools. A sample Fibonacci program written in Java and C was used as a test case. However, the energy measurements provided by the two tools differed, and the experiment runner occasionally encountered errors. Later, it was determined that these problems were due to incorrect use of the framework. However it was still decided the the best approach was to make a new orchestrator similar to the Experiment-Runner, but simpler and specifically focused on measuring process energy consumption using PowerJoular. A Java-based orchestrator was initially developed because the Fibonacci implementation was also in Java. However, when tested, the energy measurement results differed significantly from those of the experiment runner, even though the main difference was the programming language (Java vs. Python).
+
+To further analyze these inconsistencies, another orchestrator was developed in Python. This allowed for a closer examination of the differences in energy measurements and a deeper understanding of the behavior of the tools.
+
+To better understand the results and the problem encountered, its better to see, first, how the orchestrators behave:
 
 
 \begin{itemize}
@@ -236,6 +241,9 @@ With this process it was noticeble that the Java orchestrator was getting signif
 
 After running the tests again it was possible to see that the Python orchestrator was getting values way more different than the other three orchestrators as show in Figure \ref{fig:4_orchs_comparison}.
 The figure contains 100 runs of the Fibonacci recursive program written in Java and order by the less energy to highest energy. And it shows the energy reads for the four different orchestrators used. The labels contain the average energy values and its standard deviation.
+
+Further analysis of the orchestrators revealed a notable difference in behavior. When the Python orchestrator was running, both the parent and child processes consumed CPU resources. In contrast, the other orchestrators (Java, C, and Bash) showed CPU usage only in the child process. This disparity may explain why powerjoular reported lower energy consumption for the Python orchestrator. Since the CPU load was shared between the parent and child processes, powerjoular, which measures energy only for the child process (the target Fibonacci program), captured less total energy usage.
+Since the experiment runner included an example demonstrating how to use the framework with powerjoular, the authors were made aware of this potential conflict when launching powerjoular from Python.
 
 \begin{figure}%[h]
   \centering

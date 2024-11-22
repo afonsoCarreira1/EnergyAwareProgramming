@@ -97,7 +97,7 @@ This work proposes the development of a solution capable of identifying the ener
 
 \item Related work (\ref{sec:relatedwork}) contains the initials solutions proposed to the theme of energy aware programming, how they changed during the years, and what the most recent tools do. And comparing with the proposed tool in this work.
 
-\item This section (\ref{sec:work1}) explains in detail the existing problem and what is the solution, and a detailed explaination on how the solution will be built.
+\item This section (\ref{sec:work}) explains in detail the existing problem and what is the solution, and a detailed explaination on how the solution will be built.
 
 \item The preliminary results (\ref{sec:preliminaryresults}) contains the tests made until the moment, and what results were obtained.
 
@@ -191,14 +191,17 @@ This work has the objective of creating a user friendly tool that quickly estima
 
 Where the existing related technologies are described and explored. What is the state of the art on the topic you are working? 
 
-\section{«Section(s) about your Work»} \label{sec:work1}
+\section{«Section(s) about your Work»} \label{sec:work}
 
 As described in the previous sections, the challenge is to make developers aware of the energy consumption of their programs. By using a simple and practical tool, they can quickly and accurately estimate their program's energy consumption. This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development. It's important to note that this tool serves as a guide, providing energy consumption estimates to raise awareness rather than dictate action. Ultimately, it is up to developers to decide whether to prioritize performance, energy efficiency or any other factor. For example, if a program only needs to run within a certain timeframe and can afford a slight reduction in performance, developers may choose to trade some performance for improved energy efficiency, making more informed decisions thanks to the insights provided by the tool.
 
 To provide this insight to developers it is necessary to build a tool that can provide all of that. The tool needs to be pratical, which means that integrating it in an IDE is a very good option. With this the developer only needs to download an extension for an IDE and will have the insights desired.
 The tool will be an extension using Language Server Protocol (LSP), so it can be integrated in all the IDEs that support this feature (VScode, Eclipse, Neovim, Intellij IDEA). This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an Abstract Syntax Tree (ABS), from there its capable of analyzing the code and using an inference function it will output the estimated cost. \textbf{It will also be possible to make a more precise estimation, by running the code and also provide recommendations. optional/if i have time}.
 
-To give energy consumption estimates, first it is necessary to obtain energy profiles so the inference function can obtain the most accurate results possible, for that, a process was created in order to efficiently obtain the energy usage of code snippets.
+\subsection{Step 1: Energy Profiling} \label{sec:work_step1_energy_profiling}
+
+To give energy consumption estimates, first it is necessary to obtain energy profiles so the inference function can obtain the most accurate results possible. The goal in this step is to first obtain energy profiles of collections and APIs that are widely used, break them down to their smallest functions, and understand their energy behavior. From there, it is possible to build from these granular functions to more complex and interconnected functions, ultimately covering the entire API set in detail. So whenever an API call is detected in the code, pre-built energy profiles are already available for it.
+For that, a process was created in order to efficiently obtain the energy usage of code snippets.
 The process uses an orchestrator that is responsible for invoking the target program and the measurement tool (powerjoular) to accurately measure the energy consumption of the program or the specific computation being analyzed within it.
 
 Bellow it is explained how the energy profiles process was done.
@@ -222,22 +225,12 @@ This process is more clearly illustrated in Figure \ref{fig:orchestrators_proces
   \label{fig:orchestrators_process}
 \end{figure}
 
--------------------------\\
-The inference function will work like this \textbf{Understand how to do this}
-First it is important to understand which snippets of code influence the energy consumption, what are the most common ones (sys calls/ CPU usage/ recursion/ loops ).
-Maybe collect data from the powerjoular and use a ML model.
-Maybe do it by hand with data analysis and obtain a formula capable of infering the energy.
--------------------------\\
 
+\subsection{Step 2: Energy Inference Function} \label{sec:work_step2_energy_inference_function}
 
+The inference function will receive as input the energy profiles obtained previously and the code that the developer wants to analyze. On receiving the code, static analyzes will be used in order to inspect the code using a Java parser (Spoon), which will provide the abstract syntax tree (AST). Later this AST will be used to feed a machine learning model with the return types of the function, collections used, loops and so on, alongside with the energy profiles. After that the model will output the estimated energy values to be displayed to the developer.
+The estimation will be the total energy used by the program, the total energy used for each function and the snippets of the function that spend the most energy.
 
-
-
-Here you should describe in as much detail as possible the problem and your plan to tackle it (use appropriate section titles for the described work). \\
-
-What are the methods you are planning to use, or already started to use, to tackle your problem. \\
-
-This should be based on related word, your understanding of the problem and eventually preliminary results.
 
 \section{Preliminary Results (optional)} \label{sec:preliminaryresults}
 
@@ -256,7 +249,7 @@ Initially, JoularJx and the experiment-runner using powerjoular were used to exp
 
 To further analyze these inconsistencies, another orchestrator was developed in Python. This allowed for a closer examination of the differences in energy measurements and a deeper understanding of the behavior of the tools.
 
-Using the process explained on \ref{sec:work1} it was noticeble that the Java orchestrator was getting significantly more energy consumption than the Python one, which is not very logical, since they both target the same program. So, to try and check which one was having problems, two more orchestrators were implemented, one in C and another in bash.
+Using the process explained on \ref{sec:work} it was noticeble that the Java orchestrator was getting significantly more energy consumption than the Python one, which is not very logical, since they both target the same program. So, to try and check which one was having problems, two more orchestrators were implemented, one in C and another in bash.
 
 After running the tests again it was possible to see that the Python orchestrator was getting values way more different than the other three orchestrators as show in Figure \ref{fig:4_orchs_comparison}.
 The figure contains 100 runs of the Fibonacci recursive program written in Java and order by the less energy to highest energy. And it shows the energy reads for the four different orchestrators used. The labels contain the average energy values and its standard deviation.

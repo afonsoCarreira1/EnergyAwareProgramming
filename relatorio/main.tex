@@ -152,7 +152,8 @@ Developers typically prefer not to run the program just to get an average measur
 
 Energy efficiency is a critical focus across industries, as it directly impacts global sustainability, economic costs, and product quality.  The goal is to reduce greenhouse gases to create a sustainable future, reduce infrastructure costs, and improve product quality\cite{annurev:/content/journals/10.1146/annurev.resource.102308.124234}. 
 
-In particular, large scale computation and communication consume a lot of global energy, and these values have been increasing in the last decades, so the topic of energy aware programming and energy efficient software has been targeted by many researchers in recent years with the objective of reducing energy costs in large IT infrastructure. This improvement can be considered a optimization problem and can be tackled in several ways for example an heuristic approach by adjusting the hardware performance dynamically, or completing tasks in their deadlines, using the least energy possible. However some of this implementations can only be short term solutions and in long term, the focus will be toward more complex models that can predict and optimize performance relative to hardware configurations\cite{10.1145/1666420.1666438}.
+In particular, large scale computation and communication consume a lot of global energy, and these values have been increasing in the last decades, so the topic of energy aware programming and energy efficient software has been targeted by many researchers in recent years with the objective of reducing energy costs in large IT infrastructure\cite{8880037}.
+This improvement can be considered a optimization problem and can be tackled in several ways for example an heuristic approach by adjusting the hardware performance dynamically, or completing tasks in their deadlines, using the least energy possible. However some of this implementations can only be short term solutions and in long term, the focus will be toward more complex models that can predict and optimize performance relative to hardware configurations\cite{10.1145/1666420.1666438}. 
 
 An approach to increasing developers awareness of the energy consumption of their code involves creating extensions to already used programming languages, such as Java. For example, ECO \cite{7194624}, a programming model as an minimal extension of Java. By rewriting some parts of the code to this extension syntax it is possible to defining resource limits on the battery or temperature implementing adaptive behaviors through modes, and leveraging runtime monitoring.
 
@@ -197,6 +198,30 @@ As described in the previous sections, the challenge is to make developers aware
 To provide this insight to developers it is necessary to build a tool that can provide all of that. The tool needs to be pratical, which means that integrating it in an IDE is a very good option. With this the developer only needs to download an extension for an IDE and will have the insights desired.
 The tool will be an extension using Language Server Protocol (LSP), so it can be integrated in all the IDEs that support this feature (VScode, Eclipse, Neovim, Intellij IDEA). This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an Abstract Syntax Tree (ABS), from there its capable of analyzing the code and using an inference function it will output the estimated cost. \textbf{It will also be possible to make a more precise estimation, by running the code and also provide recommendations. optional/if i have time}.
 
+To give energy consumption estimates, first it is necessary to obtain energy profiles so the inference function can obtain the most accurate results possible, for that, a process was created in order to efficiently obtain the energy usage of code snippets.
+The process uses an orchestrator that is responsible for invoking the target program and the measurement tool (powerjoular) to accurately measure the energy consumption of the program or the specific computation being analyzed within it.
+
+Bellow it is explained how the energy profiles process was done.
+
+\begin{itemize}
+  \item On the start of the orchestrator it launches a command to start the target Java Program and waits a signal.
+  \item The Java program start and setup the necessary things to run (starting threads, reading/writing files, etc.) and then it sends a start signal to the orchestrator to start monitoring the computation wanted, and waits for some miliseconds. 
+  \item The orchestrator receives the start signal and reads the PID of the target program from a file and starts PowerJoular using that PID. Then it waits for the stop signal.
+  \item The target Java program when it finishes the computation it sends a stop signal back.
+  \item The orchestrator on receiving the stop signal, first stops PowerJoular and then stops the target program, if needed. Then it displays the energy measurement information stored in the files created by PowerJoular. \\
+\end{itemize}
+
+This allows for more precise energy measurements, avoiding reading the JVM startup, and focusing only on the computation between the signals.
+
+This process is more clearly illustrated in Figure \ref{fig:orchestrators_process}
+
+\begin{figure}%[h]
+  \centering
+  \includegraphics[width = 0.4 \textwidth]{figures/orchestrators_process.png}
+  \caption{orchestrators process}
+  \label{fig:orchestrators_process}
+\end{figure}
+
 -------------------------\\
 The inference function will work like this \textbf{Understand how to do this}
 First it is important to understand which snippets of code influence the energy consumption, what are the most common ones (sys calls/ CPU usage/ recursion/ loops ).
@@ -231,27 +256,7 @@ Initially, JoularJx and the experiment-runner using powerjoular were used to exp
 
 To further analyze these inconsistencies, another orchestrator was developed in Python. This allowed for a closer examination of the differences in energy measurements and a deeper understanding of the behavior of the tools.
 
-To better understand the results and the problem encountered, its better to see, first, how the orchestrators behave:
-
-
-\begin{itemize}
-  \item On the start of the orchestrator it launches a command to start the target Java Program and waits a signal.
-  \item The Java program start and setup the necessary things to run (starting threads, reading/writing files, etc.) and then it sends a start signal to the orchestrator to start monitoring the computation wanted, and waits for some miliseconds. 
-  \item The orchestrator receives the start signal and reads the PID of the target program from a file and starts PowerJoular using that PID. Then it waits for the stop signal.
-  \item The target Java program when it finishes the computation it sends a stop signal back.
-  \item The orchestrator on receiving the stop signal, first stops PowerJoular and then stops the target program, if needed. Then it displays the energy measurement information stored in the files created by PowerJoular. \\
-\end{itemize}
-
-This process is more clearly illustrated in Figure \ref{fig:orchestrators_process}
-
-\begin{figure}%[h]
-  \centering
-  \includegraphics[width = 0.4 \textwidth]{figures/orchestrators_process.png}
-  \caption{orchestrators process}
-  \label{fig:orchestrators_process}
-\end{figure}
-
-With this process it was noticeble that the Java orchestrator was getting significantly more energy consumption than the Python one, which is not very logical, since they both target the same program. So, to try and check which one was having problems, two more orchestrators were implemented, one in C and another in bash.
+Using the process explained on \ref{sec:work1} it was noticeble that the Java orchestrator was getting significantly more energy consumption than the Python one, which is not very logical, since they both target the same program. So, to try and check which one was having problems, two more orchestrators were implemented, one in C and another in bash.
 
 After running the tests again it was possible to see that the Python orchestrator was getting values way more different than the other three orchestrators as show in Figure \ref{fig:4_orchs_comparison}.
 The figure contains 100 runs of the Fibonacci recursive program written in Java and order by the less energy to highest energy. And it shows the energy reads for the four different orchestrators used. The labels contain the average energy values and its standard deviation.

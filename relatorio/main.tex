@@ -228,8 +228,17 @@ This process is more clearly illustrated in Figure \ref{fig:orchestrators_proces
 
 \subsection{Step 2: Energy Inference Function} \label{sec:work_step2_energy_inference_function}
 
+\begin{figure}%[h]
+  \centering
+  \includegraphics[width = 0.4 \textwidth]{figures/energy_inf_fun.png}
+  \caption{energy inference function}
+  \label{fig:energy_inference_function}
+\end{figure}
+
 The inference function will receive as input the energy profiles obtained previously and the code that the developer wants to analyze. On receiving the code, static analyzes will be used in order to inspect the code using a Java parser (Spoon), which will provide the abstract syntax tree (AST). Later this AST will be used to feed a machine learning model with the return types of the function, collections used, loops and so on, alongside with the energy profiles. After that the model will output the estimated energy values to be displayed to the developer.
 The estimation will be the total energy used by the program, the total energy used for each function and the snippets of the function that spend the most energy.
+
+The Figure \ref{fig:energy_inference_function} helps to visualize the function.
 
 
 \section{Preliminary Results (optional)} \label{sec:preliminaryresults}

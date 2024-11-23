@@ -66,12 +66,12 @@ def plot_hist(orch):
 def plot_graph(orch,prog_name,c_or_java_prog):
     if orch["name"] == 'java':
         plt.figure(figsize=(10, 6))
-        plt.title(f'Power of 100 {prog_name} runs in {c_or_java_prog}')
+        plt.title(f'Power of 100 {prog_name} runs in {c_or_java_prog}',fontsize=16)
     sns.lineplot(data=orch["all_powers"], color=orch["color"], linestyle='-', label=f"({orch["name"]}) avg: {round(orch["average_power"])}j\nstd dev: {round(orch["standard_deviation"], 2)}")
-    plt.xlabel('Run')
-    plt.ylabel('CPU Power')
-    plt.legend()
-    plt.grid(True)
+    plt.xlabel('Run',fontsize=16)
+    plt.ylabel('CPU Power',fontsize=16)
+    plt.legend(fontsize=16)
+    plt.grid(False)
     plt.show(block=orch["name"]=="bash")
 
 def main():

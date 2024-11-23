@@ -35,7 +35,7 @@
 %% end of the preamble, start of the body of the document source.
 \begin{document}
 
-\title{Title of Your Work}
+\title{Energy Aware Programming}
 
 \author{Afonso Carreira - 62701}
 \affiliation{%
@@ -147,6 +147,7 @@ Dynamic analysis, on the other hand, executes the program and observes its exact
 For fast power estimation, static analysis is preferable. It analyzes code faster and is better suited for large projects with multiple dependencies, where dynamic analysis can be very difficult to achieve due to complex setup and long execution times. Although static analysis may not be as accurate as dynamic analysis, it is still a viable solution. In addition, static analysis is more portable because its setup is much simpler than the more complex setup required for dynamic analysis.
 Developers typically prefer not to run the program just to get an average measure of energy consumption for a code snippet or program, as it is time consuming and impractical. Therefore, using static analysis to infer energy consumption makes sense in this context.
 
+The use of static analysis implies the use of a parsing technique. This technique involves analyzing the syntactic structure of the provided code, respecting the rules of the language in which it is written. First, it is necessary to perform a lexical analysis to obtain the keywords, identifiers and tokens that the language contains. Then the parser uses these tokens together with the grammar rules of the programming language and outputs a tree. The output is an Abstract Syntax Tree, which contains the logical structure of the code and allows further analysis. In the context of this work, this technique allows to analyze Java code and obtain its structure to find out which statements have been used.
 
 \section{Related Work} \label{sec:relatedwork}
 
@@ -196,7 +197,7 @@ Where the existing related technologies are described and explored. What is the 
 As described in the previous sections, the challenge is to make developers aware of the energy consumption of their programs. By using a simple and practical tool, they can quickly and accurately estimate their program's energy consumption. This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development. It's important to note that this tool serves as a guide, providing energy consumption estimates to raise awareness rather than dictate action. Ultimately, it is up to developers to decide whether to prioritize performance, energy efficiency or any other factor. For example, if a program only needs to run within a certain timeframe and can afford a slight reduction in performance, developers may choose to trade some performance for improved energy efficiency, making more informed decisions thanks to the insights provided by the tool.
 
 To provide this insight to developers it is necessary to build a tool that can provide all of that. The tool needs to be pratical, which means that integrating it in an IDE is a very good option. With this the developer only needs to download an extension for an IDE and will have the insights desired.
-The tool will be an extension using Language Server Protocol (LSP), so it can be integrated in all the IDEs that support this feature (VScode, Eclipse, Neovim, Intellij IDEA). This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an Abstract Syntax Tree (ABS), from there its capable of analyzing the code and using an inference function it will output the estimated cost. \textbf{It will also be possible to make a more precise estimation, by running the code and also provide recommendations. optional/if i have time}.
+The tool will be an extension using Language Server Protocol (LSP), so it can be integrated in all the IDEs that support this feature (VScode, Eclipse, Neovim, Intellij IDEA). This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an AST, from there its capable of analyzing the code and using an inference function it will output the estimated cost. \textbf{It will also be possible to make a more precise estimation, by running the code and also provide recommendations. optional/if i have time}.
 
 \subsection{Step 1: Energy Profiling} \label{sec:work_step1_energy_profiling}
 
@@ -225,7 +226,6 @@ This process is more clearly illustrated in Figure \ref{fig:orchestrators_proces
   \label{fig:orchestrators_process}
 \end{figure}
 
-
 \subsection{Step 2: Energy Inference Function} \label{sec:work_step2_energy_inference_function}
 
 \begin{figure}%[h]
@@ -235,11 +235,18 @@ This process is more clearly illustrated in Figure \ref{fig:orchestrators_proces
   \label{fig:energy_inference_function}
 \end{figure}
 
-The inference function will receive as input the energy profiles obtained previously and the code that the developer wants to analyze. On receiving the code, static analyzes will be used in order to inspect the code using a Java parser (Spoon), which will provide the abstract syntax tree (AST). Later this AST will be used to feed a machine learning model with the return types of the function, collections used, loops and so on, alongside with the energy profiles. After that the model will output the estimated energy values to be displayed to the developer.
+The inference function will receive as input the energy profiles obtained previously and the code that the developer wants to analyze. On receiving the code, static analyzes will be used in order to inspect the code using a Java parser (Spoon), which will provide the AST. Later this AST will be used to feed a machine learning model with the return types of the function, collections used, loops and so on, alongside with the energy profiles. After that the model will output the estimated energy values to be displayed to the developer.
+The model will be trained using a variety of energy profiles and code inputs from different devices to achieve the most accurate energy estimates possible. This approach will improve its accuracy across devices with different hardware and software configurations.
 The estimation will be the total energy used by the program, the total energy used for each function and the snippets of the function that spend the most energy.
 
 The Figure \ref{fig:energy_inference_function} helps to visualize the function.
 
+\subsection{Step 3: Implementation and testing} \label{sec:work_step3_implementation_and_testing}
+
+Once the main components of the tool are built, they need to be assembled into the extension. When using it, the developers should be able to see the total energy estimate of their code in the IDE, and it should also show the estimates for each function and its most energy consuming lines.
+The estimate alone may be enough to understand if the code is high or low in energy consumption, for example, if the developer has 2 implementations of the same function and they both give different values, it may be easy to understand which one consumes the most. However, this may not always be the case, so the tool will also provide some information to help the developer know how good or bad the energy efficiency of the code is. \textbf{choose something to show to compare like how much a washing machine uses or something}
+
+Another important step is to test and ensure that the tool performs as expected on most machines, delivers the most accurate estimations possible, and undergoes a final comparison with other tools to evaluate its effectiveness.
 
 \section{Preliminary Results (optional)} \label{sec:preliminaryresults}
 
@@ -249,7 +256,7 @@ Perf is a Linux tool primarily designed for analyzing application performance ch
 
 Powertop was also tested, but it could only perform energy measurements on laptops, as it relies on battery drain data to calculate energy consumption. Since this approach doesn't align with our specific requirements, we considered Powertop as a last-resort option.
 
-Joularjx is a tool based on PowerJoular capable of measuring energy consumption of Java applications and it provides the energy used by the methods and overall program. Although it uses PowerJoular, when measuring the same program it gives different measurements.\textbf{why}
+JoularJX is a Java agent that attaches to the JVM at startup to monitor energy consumption. It runs in a separate thread, collecting CPU usage data for the JVM, its threads, and individual methods using statistical sampling. JoularJX provides power estimation to platform-specific tools, such as the Intel API, the Linux RAPL interface, or a custom regression model. It periodically analyzes stack traces to isolate energy consumption at the method level, taking into account execution paths and separating application-specific calls from system or agent-induced calls. That's how JoularJX is able to provide detailed insight into the energy consumption of Java applications.
 
 As described in the the \ref{sec:background_energy}, PowerJoular is the best option. As a command line program it can be easily adpated to measure any program or code snippet in most languages. So it was combined with the framework experiment-runner, that facilitates the process.
 

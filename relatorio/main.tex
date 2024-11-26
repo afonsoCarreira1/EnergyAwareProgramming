@@ -117,23 +117,15 @@ Another alternative is to use software-based tools. These tools are typically ea
 
 \subsection{Energy Tools} \label{sec:background_energy}
 
+There are some tools capable of displaying the energy consumption of programs, in this work, powerjoular will be used for energy profiling.
 
-There are some tools capable of displaying the energy consumption of programs.
-
-Intel RAPL (Running Average Power Limit) is a tool for monitoring power consumption. It utilizes Model-Specific Registers (MSRs), which are used for program execution tracing, performance monitoring, and toggling CPU features. These registers can store the total energy usage of the CPU and memory, allowing it to be read and analyzed. Most software based tools rely on RAPL to measure energy consumption, since it is prety accurate and is widely available in most CPUs
-
-Perf is a command line tool already available in linux, and is mainly used for performance monitoring and profiling. Although its not specific for energy measurement, it can do it, with Intel RAPL but not as pratical as other tools, specially when its needed to meausre a single process energy consumption.
-
-Powertop is another tool capable of providing the power consumption, however it only works for laptops, as it requires to check the battery to see how much energy was used and calculate the power consumption.
-
-Joularjx is a tool based on powerjoular and capable to measure energy consumption on Java programs, displaying the methods consumption.
-
-Experiment-Runner is a framework built in python made to facilitate experiments, it is easily customizable and can be used with energy measurement tools to monitor the power consumption of another process.
+Intel RAPL (Running Average Power Limit) is a tool for monitoring power consumption. It utilizes Model-Specific Registers (MSRs), which are used for program execution tracing, performance monitoring, and toggling CPU features. These registers can store the total energy usage of the CPU and memory, allowing it to be read and analyzed. Most software based tools rely on RAPL to measure energy consumption, since it is prety accurate and is widely available in most CPUs.
 
 To perform this work a tool is needed in order to measure the energy of programs, methods or code snippets. The tool used was powerjoular \cite{noureddine-ie-2022}, a open source tool, capable of measuring energy, from the CPU and GPU, using the Intel RAPL power data through the Linux powercap interface it can read the energy from the CPU and for the GPU it uses NVIDIA SMI to directly read the power consumption.
 To read the power consumption of specific processes, PowerJoular monitors the CPU cycles and utilization of each process. By knowing the total power consumption of the CPU through the RAPL interface, it can calculate the power usage of individual processes based on their CPU utilization.
 It is build in ADA, that is considered one of most energy efficient programming languages and it can monitor applications by name or PID.
 
+Experiment-Runner\cite{S2_Group_Experiment_Runner} is a framework built in python made to facilitate experiments, it is easily customizable and can be used with energy measurement tools, such as powerjoular, to monitor the power consumption of another process.
 
 \subsection{Code static and dynamic analysis} \label{sec:background_static_dynamic_analysis}
 Also, the tool proposed in this work will mainly use static analysis to achieve its goal, so it is crucial to understand why it is preferred over dynamic analysis in this context.
@@ -172,12 +164,17 @@ In this work\cite{8816747}, a tool (CT+) has been proposed that is capable of pe
 
 In addition, SEEP \cite{10.1145/2094091.2094106} uses symbolic execution for energy profiling, generating multiple binaries representing different code paths and input scenarios. By analyzing these binaries with hardware-based energy measurement devices, SEEP provides energy consumption data, offering a deeper understanding of code efficiency across various inputs and paths. This approach complements other tool, such as PEEK, which builds on SEEP to help developers optimize energy usage with minimal effort \cite{187026}. PEEK is an IDE-integrated framework that guides developers in writing energy-efficient code. It has a front end for IDE interfaces (e.g., Eclipse, Xcode), a middle end to manage data and versioning via Git, and a backend where energy analysis is performed—either through SEEP or hardware devices. Through these layers, PEEK identifies inefficiencies and suggests optimizations, supporting efficient coding practices. However, it has some limitations when compared to the proposed approach in this work, it uses dynamic analysis instead of static analysis, which was already explained in, \ref{sec:background_static_dynamic_analysis}, why it was choosen over dynamic analysis.
 
+Other tools worth mentioning are Perf, Powertop, and JoularJx.
 
-This solutions have some limitations, like the need to execute the code before showing the average energy cost to the developer and have limited collections.
+Perf is a command line tool already available in linux, and is mainly used for performance monitoring and profiling. Although its not specific for energy measurement, it can do it, with Intel RAPL but not as pratical as other tools, specially when its needed to meausre a single process energy consumption.
+
+Powertop is another tool capable of providing the power consumption, however it only works for laptops, as it requires to check the battery to see how much energy was used and calculate the power consumption.
+
+JoularJX\cite{noureddine-ie-2022} is a Java agent that attaches to the JVM at startup to monitor energy consumption. It runs in a separate thread, collecting CPU usage data for the JVM, its threads, and individual methods using statistical sampling. JoularJX provides power estimation to platform-specific tools, such as the Intel API, the Linux RAPL interface, or a custom regression model. It periodically analyzes stack traces to isolate energy consumption at the method level, taking into account execution paths and separating application-specific calls from system or agent-induced calls. That's how JoularJX is able to provide detailed insight into the energy consumption of Java applications.
+
+These solutions have some limitations, like the need to execute the code before showing the average energy cost to the developer or having limited collections.
 
 This work has the objective of creating a user friendly tool that quickly estimates energy consumption through static analysis and providing developers recommendations. This energy will then be displayed to the developer making him more aware of the energy consumption of the program and help make better decisions.
-
-
 
 
 %hasim collections
@@ -188,7 +185,7 @@ This work has the objective of creating a user friendly tool that quickly estima
 %Ivano Malavolta (API - Webassembler)
 % 
 
-Where the existing related technologies are described and explored. What is the state of the art on the topic you are working? 
+%Where the existing related technologies are described and explored. What is the state of the art on %the topic you are working? 
 
 \section{«Section(s) about your Work»} \label{sec:work}
 
@@ -257,7 +254,7 @@ Perf is a Linux tool primarily designed for analyzing application performance ch
 
 Powertop was also tested, but it could only perform energy measurements on laptops, as it relies on battery drain data to calculate energy consumption. Since this approach doesn't align with our specific requirements, we considered Powertop as a last-resort option.
 
-JoularJX is a Java agent that attaches to the JVM at startup to monitor energy consumption. It runs in a separate thread, collecting CPU usage data for the JVM, its threads, and individual methods using statistical sampling. JoularJX provides power estimation to platform-specific tools, such as the Intel API, the Linux RAPL interface, or a custom regression model. It periodically analyzes stack traces to isolate energy consumption at the method level, taking into account execution paths and separating application-specific calls from system or agent-induced calls. That's how JoularJX is able to provide detailed insight into the energy consumption of Java applications.
+JoularJx is a energy measurement tool capable of measuring the consumption of Java programs and its methods. However it is not as precise as other tools as it requires to measure the entire start of the JVM and whole functions instead of small code blocks.
 
 As described in the the \ref{sec:background_energy}, PowerJoular is the best option. As a command line program it can be easily adpated to measure any program or code snippet in most languages. So it was combined with the framework experiment-runner, that facilitates the process.
 

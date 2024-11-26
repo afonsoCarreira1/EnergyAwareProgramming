@@ -102,7 +102,6 @@ To create this tool, it is essential to understand the current state of the art,
 \item  Final conclusions (\ref{sec:conclusions}) of the work done until the moment, and explaination of what work will be continued to be done.\\
 \end{itemize}
 
-
 \section{Background} \label{sec:background}
 
 To fully understand the processes involved in this work, it is important to first understand what energy profiling is, as it will be frequently referenced and used later.
@@ -224,6 +223,8 @@ This process is more clearly illustrated in Figure \ref{fig:orchestrators_proces
   \label{fig:orchestrators_process}
 \end{figure}
 
+This process will be repeated across multiple machines to gather data from as many locations as possible. This global approach ensures that the model developed in the next step will generate accurate outputs applicable to a wide range of machines and scenarios.
+
 \subsection{Step 2: Energy Inference Function} \label{sec:work_step2_energy_inference_function}
 
 \begin{figure}%[h]
@@ -280,7 +281,7 @@ Since the experiment runner included an example demonstrating how to use the fra
 
 \section{Forthcoming Work and Conclusions} \label{sec:conclusions}
 
-This year, the work follows the following structure:
+During this year, the work will have the following structure:
 Building on the progress made so far, additional energy profiles must be created to develop a robust energy inference function. This task involves collecting profiles from different machines and gathering enough data to effectively train the machine learning model.
 
 After that the efforts will be on developing the actual energy inference function. This task is expected to be the most time consuming, as it is crucial to the tool functioning. It is possible that this task overlaps the energy profiling task as more profiles might need to be collected. The task will start by building the machine learning model and improving its accuracy for many possible cases, using the energy profiles. After that, the static analysis tool will be implemented and used to provide important code to be analyzed by the model.

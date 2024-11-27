@@ -99,7 +99,7 @@ To create this tool, it is essential to understand the current state of the art,
 
 \item The preliminary results (\ref{sec:preliminaryresults}) contains the tests made until the moment, and what results were obtained.
 
-\item  Final conclusions (\ref{sec:conclusions}) of the work done until the moment, and explaination of what work will be continued to be done.\\
+\item  Final conclusions (\ref{sec:forthcoming_work_and_conclusions}) of the work done until the moment, and explaination of what work will be continued to be done.\\
 \end{itemize}
 
 \section{Background} \label{sec:background}
@@ -279,8 +279,9 @@ Since the experiment runner included an example demonstrating how to use the fra
   \label{fig:4_orchs_comparison}
 \end{figure}
 
-\section{Forthcoming Work and Conclusions} \label{sec:conclusions}
+\section{Forthcoming Work and Conclusions} \label{sec:forthcoming_work_and_conclusions}
 
+\subsection{Forthcoming Work}
 During this year, the work will have the following structure:
 Building on the progress made so far, additional energy profiles must be created to develop a robust energy inference function. This task involves collecting profiles from different machines and gathering enough data to effectively train the machine learning model.
 
@@ -299,6 +300,10 @@ While developing the function and the extension, the writing of the thesis will 
 
 The work plan is illustrated more clearly in Figure \ref{fig:gantt_diagram}, which provides a visual representation of the described tasks. While the dates shown in the figure may not precisely align with the actual timeline, the sequence of tasks remains accurate.
 
+\subsection{Conclusion}
+
+The techniques and tools in past and recent research have been studied, and this work improves on those different works and tools, by providing an easy to use tool that is also easy accessible and provides energy estimations.
+For now, the tool to perform the energy profiling as been selected, (powerjoular) and a process to create the profiles has been made. This process, as explained in section \ref{sec:work_step1_energy_profiling}, allows to target specific parts of programs, or the entire program and measure the energy consumption. The selection of the tools had some setbacks. When testing powerjoular it was noticed that it didn't work correctly when using python as an orchestrator, obtaining different measurements than the other orchestrators, (Java, C, Bash), as explained in section \ref{sec:preliminaryresults}. Other than that, the tool worked fine, and its capable of completing its task of energy profiling. The next step is to start the development of the energy inference function. On completition it is expected that the tool can raise energy awareness among developers, and help facilitate the process of making energy efficient code.
 
 
 %It should include subsections that describe the work to be carried out during the rest of the year, and what its objectives are.

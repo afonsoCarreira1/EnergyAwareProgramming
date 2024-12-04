@@ -7,3 +7,5 @@ Jalen
 VScode
 Neovim
 Jstanley
+WALA
+SootUp

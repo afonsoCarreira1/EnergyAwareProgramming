@@ -1,1 +1,6 @@
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QFu et al.\\E$"}
+{"rule":"ENGLISH_WORD_REPEAT_BEGINNING_RULE","sentence":"^\\QSection (\\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q) of the work done until the moment, and explanation of what work will be continued to be done.\\E$"}
+{"rule":"ENGLISH_WORD_REPEAT_BEGINNING_RULE","sentence":"^\\QSection (\\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q) summarizes the work completed to date and outlines future research directions.\\E$"}
+{"rule":"SETUP_VERB","sentence":"^\\QThe Java program start and setup the necessary things to run (starting threads, reading/writing files, etc.) and then it sends a start signal to the orchestrator to start monitoring the computation wanted, and waits for some milliseconds.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qenergy inference function\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qorchestrators comparison\\E$"}

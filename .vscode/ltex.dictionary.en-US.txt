@@ -11,3 +11,8 @@ WALA
 SootUp
 Fu
 SVMs
+ChatGPT
+MSRs
+powercap
+linux
+Bytecode

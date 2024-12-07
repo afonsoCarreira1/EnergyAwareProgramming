@@ -142,6 +142,5 @@ public class Runner {
         //return Double.toString(Math.round(cpuPower));
         return String.format("%.5f", cpuPower);
     }
-
     
 }

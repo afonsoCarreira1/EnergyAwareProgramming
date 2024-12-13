@@ -12,9 +12,10 @@ class Runner:
     
     def __init__(self):
         #self.ROOT_DIR = Path("/home/afonso/Documents/joularjx")
-        self.ROOT_DIR = Path("/home/afonso/Documents/powerjoular_man")
+        self.ROOT_DIR = Path("/home/afonso/Documents/tese")
         self.start = 0
         self.stop = 0
+        self.frequency = .1
         signal.signal(signal.SIGUSR1, self.start_measurement_signal)
         signal.signal(signal.SIGUSR2, self.stop_measurement_signal)
 
@@ -53,7 +54,7 @@ class Runner:
         while self.start == 0: continue
         start_time = time.time()
         #profiler_cmd = f'powerjoular -l -p {os.getpid()} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
-        profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
+        profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -f {self.ROOT_DIR / "powerjoular.csv"}'
         print("parent",str(os.getpid()))
         print("child",self.target.pid)
 
@@ -81,7 +82,7 @@ class Runner:
             df = pd.read_csv(self.ROOT_DIR / f"powerjoular.csv-{pid}.csv")
             run_data = {
                 'avg_cpu': round(df['CPU Utilization'].sum(), 3),
-                'total_energy': round(df['CPU Power'].sum(), 3),
+                'total_energy': round(sum([x*self.frequency for x in df['CPU Power']]), 3),
             }
             print(f'CPU energy: {run_data['total_energy']} J')
             return run_data

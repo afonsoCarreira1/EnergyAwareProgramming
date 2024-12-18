@@ -12,3 +12,5 @@
 *.blg
 *.tmp
 *.ipynb
+*.vscode
+settings.json

@@ -17,6 +17,7 @@ public class Runner {
     static Double averageTime = 0.0;
     static long startTime;
     static long endTime;
+    static String frequency = ".1";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
@@ -68,7 +69,7 @@ public class Runner {
                 //System.out.println("child " + childPid);
                 startTime = System.currentTimeMillis();
                 System.out.println("Created powerjoular process at "+LocalDateTime.now());
-                ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p",childPid, "-D", "0.1","-f", "powerjoular.csv");
+                ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p",childPid, "-D", frequency,"-f", "powerjoular.csv");
                 try {
                     System.out.println("Started powerjoular process at "+LocalDateTime.now());
                     Process powerjoularProcess = powerjoularBuilder.start();
@@ -136,8 +137,9 @@ public class Runner {
         }
 
         Double cpuPower = 0.0;
+        Double freq = Double.parseDouble(frequency);
         for (int i = 0; i < cpuPowerValues.size(); i++) {
-            cpuPower += Double.parseDouble(cpuPowerValues.get(i));
+            cpuPower += Double.parseDouble(cpuPowerValues.get(i)) * freq;
         }
         //return Double.toString(Math.round(cpuPower));
         return String.format("%.5f", cpuPower);

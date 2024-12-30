@@ -23,6 +23,8 @@ double totalTime;
 short runCProgram;
 float totalPower = 0.0;
 float lastPower = 0.0;
+char* frequency = ".1";
+
 
 long long getCurrentTimestampMs()
 {
@@ -87,7 +89,7 @@ void runPowejoular()
     snprintf(childPidStr, sizeof(childPidStr), "%d", childPid);
         command[0] = "powerjoular";
         command[1] = "-D";
-        command[2] = "0.1";
+        command[2] = frequency;
         command[3] = "-p";
         command[4] = childPidStr;
         command[5] = "-f";
@@ -124,6 +126,8 @@ float sumCpuPower(const char *filename)
         int column = 0;
         float cpuPower = 0.0;
 
+        double freq = strtod(frequency, NULL); //cast frequency to double
+
         // Iterate through tokens to find the CPU Power column
         while (token != NULL)
         {
@@ -131,7 +135,7 @@ float sumCpuPower(const char *filename)
             if (column == 2)
             {
                 cpuPower = strtof(token, NULL); // Convert the string to float
-                totalCpuPower += cpuPower;      // Accumulate the CPU power
+                totalCpuPower += cpuPower * freq;      // Accumulate the CPU power
                 break;                          // No need to process further tokens
             }
             token = strtok(NULL, ",");

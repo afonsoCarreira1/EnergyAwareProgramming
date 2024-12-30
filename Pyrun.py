@@ -12,7 +12,7 @@ class Runner:
     
     def __init__(self):
         #self.ROOT_DIR = Path("/home/afonso/Documents/joularjx")
-        self.ROOT_DIR = Path("/home/afonso/Documents/tese")
+        self.ROOT_DIR = Path("/home/afonso/Documents/EnergyAwareProgramming")
         self.start = 0
         self.stop = 0
         self.frequency = .1
@@ -54,7 +54,7 @@ class Runner:
         while self.start == 0: continue
         start_time = time.time()
         #profiler_cmd = f'powerjoular -l -p {os.getpid()} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
-        profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -f {self.ROOT_DIR / "powerjoular.csv"}'
+        profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -D {self.frequency} -f {self.ROOT_DIR / "powerjoular.csv"}'
         print("parent",str(os.getpid()))
         print("child",self.target.pid)
 

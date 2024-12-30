@@ -9,7 +9,7 @@ calculate_total_power() {
         # Ensure that file exists before processing
         if [[ -f "$file" ]]; then
             # Sum the third column in the current file and add it to total_sum
-            local sum=$(awk -F',' '{if (NR>1) sum+=$3} END {print sum}' "$file")
+            local sum=$(awk -F',' -v frequency="$frequency" '{if (NR>1) sum+=$3 * frequency} END {print sum}' "$file")
             #total_sum=$((total_sum + sum))
             total_sum=$(echo "$total_sum + $sum" | bc)
         fi
@@ -24,7 +24,7 @@ calculate_total_power() {
 }
 
 show_power_for_last_run() {
-    sum=$(awk -F',' '{if (NR>1) sum+=$3} END {print sum}' powerjoular.csv-$child_pid.csv)
+    sum=$(awk -F',' -v frequency="$frequency" '{if (NR>1) sum+=$3 * frequency} END {print sum}' powerjoular.csv-$child_pid.csv)
     echo $sum
 }
 
@@ -41,7 +41,6 @@ trap_stop() {
     sudo kill $child_pid
     end_time=$(($(date +%s%N) / 1000000)) #$(date +%s)
     time_difference=$(echo "scale=3; ($end_time - $start_time) / 1000" | bc)
-    echo "Time was ${time_difference}s"
     power=$(show_power_for_last_run)
     total_power=$(echo "$total_power + $power" | bc)
     total_time=$(echo "$total_time + $time_difference" | bc)
@@ -67,6 +66,7 @@ total_power=0
 filename="${1:-"Fib"}"
 runCProgram="${2:-"f"}"
 numberOfRuns="${3:-"1"}"
+frequency=.1
 
 for (( run=1; run<=numberOfRuns; run++ )); do
     echo "Starting run $run of $numberOfRuns"
@@ -95,7 +95,7 @@ for (( run=1; run<=numberOfRuns; run++ )); do
     echo "Child PID: $child_pid"
 
     # Start powerjoular for the child process
-    sudo powerjoular -D 0.1 -p "$child_pid" -f "powerjoular.csv" &
+    sudo powerjoular -D "$frequency" -p "$child_pid" -f "powerjoular.csv" &
     powerjoular_pid=$!
 
     # Wait for USR2 signal to stop powerjoular and calculate the total power

@@ -36,9 +36,9 @@ class Runner:
             time.sleep(.2)
             result = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             pid_content = result.stdout.strip()
-            print(f"PID from file: {pid_content}")  
+            #print(f"PID from file: {pid_content}")  
         except subprocess.CalledProcessError as e:
-            print(f"An error occurred: {e.stderr.strip()}")
+            #print(f"An error occurred: {e.stderr.strip()}")
             exit()
         self.target.pid = int(pid_content)
 
@@ -55,8 +55,8 @@ class Runner:
         start_time = time.time()
         #profiler_cmd = f'powerjoular -l -p {os.getpid()} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
         profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -D {self.frequency} -f {self.ROOT_DIR / "powerjoular.csv"}'
-        print("parent",str(os.getpid()))
-        print("child",self.target.pid)
+        #print("parent",str(os.getpid()))
+        #print("child",self.target.pid)
 
         #self.profiler = subprocess.Popen(shlex.split(profiler_cmd))
         subprocess.Popen(shlex.split(profiler_cmd2))

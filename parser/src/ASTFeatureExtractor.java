@@ -2,6 +2,7 @@ import spoon.Launcher;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.*;
+import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.support.reflect.code.CtExpressionImpl;
 
@@ -24,10 +25,10 @@ public class ASTFeatureExtractor {
         launcher.addInputResource(inputPath);
         launcher.getEnvironment().setNoClasspath(true);
         CtModel model = launcher.buildModel();
-        HashMap<String,Map<String, Object>> methodsFeatures = new HashMap<>();
-        HashMap<String,CtMethod> methodsBody = new HashMap<>();
+        HashMap<String, Map<String, Object>> methodsFeatures = new HashMap<>();
+        HashMap<String, CtMethod> methodsBody = new HashMap<>();
 
-        //obtain all methods features
+        // obtain all methods features
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
             System.out.println("Analyzing method: " + method.getSimpleName());
             Map<String, Object> features = extractFeatures(method);
@@ -36,13 +37,14 @@ public class ASTFeatureExtractor {
             System.out.println(features);
             System.out.println("---------------------------------");
         }
-        
-        //for each method associate it with features of other methods
+
+        HashMap<String, Map<String, Object>> methodsFullChecked = new HashMap();
+
+        // for each method associate it with features of other methods
         for (CtMethod method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-            System.out.println("features of -> "+method.getSimpleName());
-            System.out.println(mergeFeatures(method,methodsFeatures,methodsBody));
+            methodsFullChecked.put(method.getSimpleName(),mergeFeatures(method, methodsFeatures, methodsBody));
         }
-        
+        System.out.println(methodsFullChecked);
     }
 
     public static Map<String, Object> extractFeatures(CtMethod<?> method) {
@@ -53,22 +55,45 @@ public class ASTFeatureExtractor {
         features.put("Assignments", method.getElements(new TypeFilter<>(CtAssignment.class)).size());
         features.put("BinaryOperators", method.getElements(new TypeFilter<>(CtBinaryOperator.class)).size());
         features.put("MethodInvocations", method.getElements(new TypeFilter<>(CtInvocation.class)).size());
+        
+        //count if the methods were called by a java collection or a custom object
+        Map<String, Integer> methodsUsed = new HashMap<>();
+        for (CtInvocation op : method.getElements(new TypeFilter<>(CtInvocation.class))) {
+            CtExpression<?> target = op.getTarget();
+            if (target != null) {
+                CtTypeReference<?> targetType = target.getType();
+                if (targetType != null) {
+                    String methodUsed = targetType.getQualifiedName();
+                    if (targetType.getQualifiedName().startsWith("java.util.")){
+                        methodsUsed.merge(methodUsed+"."+op.getExecutable(), 1, Integer::sum);
+                    }else {
+                        methodsUsed.merge("CustomObjectWithCustomMethod", 1, Integer::sum);
+                    }
+                }
+            } 
+        }
+        for (String key : methodsUsed.keySet()) {
+            features.put(key, methodsUsed.get(key));
+        }
+
 
         // 2. Depth of AST
-        //features.put("ASTDepth", calculateASTDepth(method));
+        // features.put("ASTDepth", calculateASTDepth(method));
 
         // 3. Branch Count
         int branchCount = 0;
         for (CtIf op : method.getElements(new TypeFilter<>(CtIf.class))) {
-            if (op.getElseStatement()!=null) branchCount+=2;
-            else branchCount++;
+            if (op.getElseStatement() != null)
+                branchCount += 2;
+            else
+                branchCount++;
         }
         features.put("BranchCount", branchCount);
 
         // 4. Loop Count
         int loopCount = method.getElements(new TypeFilter<>(CtFor.class)).size() +
-                        method.getElements(new TypeFilter<>(CtWhile.class)).size() +
-                        method.getElements(new TypeFilter<>(CtDo.class)).size();
+                method.getElements(new TypeFilter<>(CtWhile.class)).size() +
+                method.getElements(new TypeFilter<>(CtDo.class)).size();
         features.put("LoopCount", loopCount);
 
         // 5. Literals Count
@@ -83,17 +108,16 @@ public class ASTFeatureExtractor {
         for (String key : operatorCounts.keySet()) {
             features.put(key, operatorCounts.get(key));
         }
-        
 
         // 7. Variable Count and Reassignments
         features.put("VariableCount", method.getElements(new TypeFilter<>(CtVariable.class)).size());
         features.put("Reassignments", countReassignments(method));
 
         // 8. Cyclomatic Complexity
-        //features.put("CyclomaticComplexity", calculateCyclomaticComplexity(method));
+        // features.put("CyclomaticComplexity", calculateCyclomaticComplexity(method));
 
         // 9. Nesting Level
-        //features.put("MaxNestingLevel", calculateMaxNestingLevel(method));
+        // features.put("MaxNestingLevel", calculateMaxNestingLevel(method));
 
         return features;
     }
@@ -140,57 +164,59 @@ public class ASTFeatureExtractor {
         return 0;
     }
 
-    private static Map<String, Object> mergeFeatures(CtMethod method,HashMap<String,Map<String, Object>> allFeatures,HashMap<String,CtMethod> methodsBody){
-            Map<String, Object> methodfeatures = allFeatures.get(method.getSimpleName());
-            System.out.println("Analyzing method: " + method.getSimpleName());
-            Map<String, Object> features = new HashMap<>();
-            for (CtInvocation methodBody : method.getElements(new TypeFilter<>(CtInvocation.class))) {
-                //if (allFeatures.containsKey("allFeatures"))
-                //try {
-                    String[] methodSplit = methodBody.toString().split("\\.");
-                    String methodName = methodSplit[methodSplit.length-1].split("\\(")[0];
-                    //System.out.println("funCALL -> "+methodName);
-                    if (allFeatures.containsKey(methodName)) methodfeatures = sumMaps(methodfeatures,(mergeFeatures(methodsBody.get(methodName), allFeatures,methodsBody)));
-                    
-                //} catch (Exception e) {
-                    //System.out.println("Failed for : "+methodBody+" -> "+e);
-               // }
-                
+    private static Map<String, Object> mergeFeatures(CtMethod method, HashMap<String, Map<String, Object>> allFeatures,
+            HashMap<String, CtMethod> methodsBody) {
+        Map<String, Object> methodfeatures = allFeatures.get(method.getSimpleName());
+        System.out.println("Analyzing method: " + method.getSimpleName());
+        Map<String, Object> features = new HashMap<>();
+        for (CtInvocation methodBody : method.getElements(new TypeFilter<>(CtInvocation.class))) {
+            // if (allFeatures.containsKey("allFeatures"))
+            // try {
+            String[] methodSplit = methodBody.toString().split("\\.");
+            String methodName = methodSplit[methodSplit.length - 1].split("\\(")[0];
+            // System.out.println("funCALL -> "+methodName);
+            if (allFeatures.containsKey(methodName))
+                methodfeatures = sumMaps(methodfeatures,
+                        (mergeFeatures(methodsBody.get(methodName), allFeatures, methodsBody)));
+
+            // } catch (Exception e) {
+            // System.out.println("Failed for : "+methodBody+" -> "+e);
+            // }
+
+        }
+        // Map<String, Object> features = extractFeatures(method);
+        // System.out.println(features);
+        // System.out.println("---------------------------------");
+        return methodfeatures;
+    }
+
+    public static Map<String, Object> sumMaps(Map<String, Object> map1, Map<String, Object> map2) {
+        Map<String, Object> result = new HashMap<>();
+
+        // Add all keys from map1
+        for (String key : map1.keySet()) {
+            Object value1 = map1.get(key);
+            Object value2 = map2.get(key);
+
+            if (value1 instanceof Integer && value2 instanceof Integer) {
+                // Sum integer values
+                result.put(key, (Integer) value1 + (Integer) value2);
+            } else if (value1 != null && value2 == null) {
+                // If the key exists only in map1
+                result.put(key, value1);
+            } else if (value1 instanceof Map && value2 instanceof Map) {
+                // Recursively sum nested maps
+                result.put(key, sumMaps((Map<String, Object>) value1, (Map<String, Object>) value2));
             }
-            //Map<String, Object> features = extractFeatures(method);
-            //System.out.println(features);
-            //System.out.println("---------------------------------");
-            return methodfeatures;
         }
 
-
-        public static Map<String, Object> sumMaps(Map<String, Object> map1, Map<String, Object> map2) {
-            Map<String, Object> result = new HashMap<>();
-        
-            // Add all keys from map1
-            for (String key : map1.keySet()) {
-                Object value1 = map1.get(key);
-                Object value2 = map2.get(key);
-        
-                if (value1 instanceof Integer && value2 instanceof Integer) {
-                    // Sum integer values
-                    result.put(key, (Integer) value1 + (Integer) value2);
-                } else if (value1 != null && value2 == null) {
-                    // If the key exists only in map1
-                    result.put(key, value1);
-                } else if (value1 instanceof Map && value2 instanceof Map) {
-                    // Recursively sum nested maps
-                    result.put(key, sumMaps((Map<String, Object>) value1, (Map<String, Object>) value2));
-                }
+        // Add all keys from map2 that are not in map1
+        for (String key : map2.keySet()) {
+            if (!map1.containsKey(key)) {
+                result.put(key, map2.get(key));
             }
-        
-            // Add all keys from map2 that are not in map1
-            for (String key : map2.keySet()) {
-                if (!map1.containsKey(key)) {
-                    result.put(key, map2.get(key));
-                }
-            }
-        
-            return result;
         }
+
+        return result;
+    }
 }

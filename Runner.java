@@ -18,6 +18,7 @@ public class Runner {
     static long startTime;
     static long endTime;
     static String frequency = ".1";
+    static String loopSize = ""+15_000_000;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
@@ -50,7 +51,7 @@ public class Runner {
             Runtime.getRuntime().exec(command);
         }else {
             System.out.println("starting run at "+LocalDateTime.now());
-            String[] command = {"/bin/sh", "-c", "java java_progs/" + file + " " + ProcessHandle.current().pid()};
+            String[] command = {"/bin/sh", "-c", "java java_progs/" + file + " " + ProcessHandle.current().pid() + " " + loopSize};
             System.out.println("starting run at "+LocalDateTime.now());
             Runtime.getRuntime().exec(command);
         }
@@ -142,7 +143,8 @@ public class Runner {
             cpuPower += Double.parseDouble(cpuPowerValues.get(i)) * freq;
         }
         //return Double.toString(Math.round(cpuPower));
-        return String.format("%.5f", cpuPower);
+        cpuPower /= Integer.parseInt(loopSize);
+        return ""+cpuPower;//String.format("%.5f", cpuPower);
     }
     
 }

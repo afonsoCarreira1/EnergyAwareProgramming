@@ -1,18 +1,26 @@
+import java.beans.Introspector;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.ProcessBuilder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.time.LocalDateTime;
 import java_progs.WritePid;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
 public class Runner {
+    static String CSV_FILE_NAME = "features.csv";
     static String powerjoularPid = "";
     static String childPid = "";
     static Boolean readCFile = false;
@@ -22,7 +30,8 @@ public class Runner {
     static long endTime;
     static String frequency = ".1";
     static String loopSize = ""+20_000_000;
-    static HashSet<String> features = new HashSet<>();
+    static HashSet<String> featuresName = new HashSet<>();
+    static ArrayList<Map<String, Object>> programsFeatures = new ArrayList<>();
 
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
@@ -43,6 +52,8 @@ public class Runner {
             averageTime /= runs;
             System.out.println("In "+ runs + " runs the average power was " + averageJoules + "J");
             System.out.println("Average time was " + averageTime/1000/1+"s");
+            System.out.println("Creating features CSV file.");
+            createFeaturesCSV();
         } else {
             System.out.println("Invalid args");
         }
@@ -103,7 +114,7 @@ public class Runner {
                 System.out.println("Time taken: " + duration + " seconds, for "+loopSize + " operations");
                 averageJoules += Double.parseDouble(cpuUsage);
                 averageTime += endTime-startTime;
-                saveFeatureInTempFile(file);
+                saveFeatureInTempFile(file,cpuUsage);
                 synchronized (Runner.class) {
                     Runner.class.notify();
                 }
@@ -152,13 +163,68 @@ public class Runner {
     }
     
 
-    private static void saveFeatureInTempFile(String file) {
-        getFeaturesFromParser(file);
+    private static void saveFeatureInTempFile(String file, String cpuUsage) {
+        //TODO save the features to a temp file to not run ot of mem
+        getFeaturesFromParser(file,cpuUsage);
     }
 
-    private static void getFeaturesFromParser(String file) {
+    private static void getFeaturesFromParser(String file, String cpuUsage) {
         //String[] command = {"/bin/sh", "-c", "java java_progs/" + file + " " + ProcessHandle.current().pid() + " " + loopSize};
         HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(file);
+        String methodName = Introspector.decapitalize(file);
+        Map<String,Object> methodfeatures = methods.get(methodName);
+        featuresName.addAll(methodfeatures.keySet());
+        methodfeatures.put("EnergyUsed", cpuUsage);
+        programsFeatures.add(methodfeatures);
+        System.out.println(methodfeatures);
+    }
 
+    private static void createFeaturesCSV() throws IOException {
+        
+        try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter(CSV_FILE_NAME))) {
+            // Write the header row
+            List<String> featureList = new ArrayList<>(featuresName);
+            featureList.add("EnergyUsed");
+            csvWriter.write(String.join(",", featureList));
+            csvWriter.newLine();
+            for (int index = 0; index < programsFeatures.size(); index++) {
+                List<String> row = new ArrayList<>();
+                Map<String, Object> programFeatures = programsFeatures.get(index);
+                for (String feature : featureList) {
+                    if (programFeatures.get(feature) == null) {
+                        row.add("0");
+                    } else {
+                        row.add(programFeatures.get(feature).toString());
+                    }
+                }
+                csvWriter.write(String.join(",", row));
+                csvWriter.newLine();
+            }
+            
+
+            // Write each program's feature presence/TODO when i create the temp files
+            /*for (File tempFile : tempFiles) {
+                Map<String, Boolean> featureMap = new HashMap<>();
+                for (String feature : featureList) {
+                    featureMap.put(feature, false);
+                }
+
+                // Read the features from the temporary file
+                try (BufferedReader reader = new BufferedReader(new FileReader(tempFile))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        featureMap.put(line, true);
+                    }
+                }
+
+                // Write the row for this program
+                List<String> row = new ArrayList<>();
+                for (String feature : featureList) {
+                    row.add(featureMap.get(feature) ? "1" : "0");
+                }
+                csvWriter.write(String.join(",", row));
+                csvWriter.newLine();
+            }*/
+        }
     }
 }

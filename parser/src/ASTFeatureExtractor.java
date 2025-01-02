@@ -34,12 +34,12 @@ public class ASTFeatureExtractor {
 
         // obtain all methods features
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-            System.out.println("Analyzing method: " + method.getSimpleName());
+            //System.out.println("Analyzing method: " + method.getSimpleName());
             Map<String, Object> features = extractFeatures(method,"java_progs."+file);
             methodsFeatures.put(method.getSimpleName(), features);
             methodsBody.put(method.getSimpleName(), method);
-            System.out.println(features);
-            System.out.println("---------------------------------");
+            //System.out.println(features);
+            //System.out.println("---------------------------------");
         }
 
         HashMap<String, Map<String, Object>> methodsFullChecked = new HashMap();
@@ -48,7 +48,7 @@ public class ASTFeatureExtractor {
         for (CtMethod method : model.getElements(new TypeFilter<>(CtMethod.class))) {
             methodsFullChecked.put(method.getSimpleName(),mergeFeatures(method, methodsFeatures, methodsBody,new HashSet<String>()));
         }
-        System.out.println(methodsFullChecked);
+        //System.out.println(methodsFullChecked);
         return methodsFullChecked;
     }
 
@@ -210,7 +210,7 @@ public class ASTFeatureExtractor {
         else methodsAnalyzed.add(method.getSimpleName());
         Map<String, Object> methodfeatures = allFeatures.get(method.getSimpleName());
 
-        System.out.println("Analyzing method: " + method.getSimpleName());
+        //System.out.println("Analyzing method: " + method.getSimpleName());
         Map<String, Object> features = new HashMap<>();
         for (CtInvocation methodBody : method.getElements(new TypeFilter<>(CtInvocation.class))) {
             // if (allFeatures.containsKey("allFeatures"))

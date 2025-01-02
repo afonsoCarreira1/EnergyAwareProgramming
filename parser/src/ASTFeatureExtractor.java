@@ -20,6 +20,39 @@ import org.eclipse.jdt.core.dom.IfStatement;
 
 public class ASTFeatureExtractor {
 
+    public static HashMap<String, Map<String, Object>> getFeatures(String file) {
+        String inputPath = "java_progs/"+file+".java";
+        Path currentDir = Paths.get("").toAbsolutePath(); // Get the current directory
+        Path resolvedPath = currentDir.resolve(inputPath).normalize(); // Resolve and normalize the path
+        // Initialize Spoon launcher
+        Launcher launcher = new Launcher();
+        launcher.addInputResource(resolvedPath.toString());
+        launcher.getEnvironment().setNoClasspath(true);
+        CtModel model = launcher.buildModel();
+        HashMap<String, Map<String, Object>> methodsFeatures = new HashMap<>();
+        HashMap<String, CtMethod> methodsBody = new HashMap<>();
+
+        // obtain all methods features
+        for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
+            System.out.println("Analyzing method: " + method.getSimpleName());
+            Map<String, Object> features = extractFeatures(method,"java_progs."+file);
+            methodsFeatures.put(method.getSimpleName(), features);
+            methodsBody.put(method.getSimpleName(), method);
+            System.out.println(features);
+            System.out.println("---------------------------------");
+        }
+
+        HashMap<String, Map<String, Object>> methodsFullChecked = new HashMap();
+
+        // for each method associate it with features of other methods
+        for (CtMethod method : model.getElements(new TypeFilter<>(CtMethod.class))) {
+            methodsFullChecked.put(method.getSimpleName(),mergeFeatures(method, methodsFeatures, methodsBody,new HashSet<String>()));
+        }
+        System.out.println(methodsFullChecked);
+        return methodsFullChecked;
+    }
+
+    /* 
     public static void main(String[] args) {
         // Path to your Java file
         //String inputPath = "src/Test.java";
@@ -53,6 +86,7 @@ public class ASTFeatureExtractor {
         System.out.println(methodsFullChecked);
     }
 
+    */
     public static Map<String, Object> extractFeatures(CtMethod<?> method,String path) {
         Map<String, Object> features = new HashMap<>();
 

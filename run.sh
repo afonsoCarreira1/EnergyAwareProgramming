@@ -11,9 +11,11 @@ sudo rm powerjoular.*
     
     # Compile Java program (name provided as second argument, e.g., MyRunner.java)
     sudo javac java_progs/"$2".java #2>/dev/null
-    sudo javac -XDignore.symbol.file Runner.java #2>/dev/null
+    #sudo javac -XDignore.symbol.file Runner.java #2>/dev/null
+    javac -XDignore.symbol.file -cp /home/afonso/Documents/EnergyAwareProgramming/parser/lib/spoon-core-11.1.1-beta-18-jar-with-dependencies.jar -d out parser/src/OperatorExtractor.java parser/src/ASTFeatureExtractor.java java_progs/WritePid.java Runner.java
     if [ "$1" == "j" ]; then
-        sudo java Runner $filename $runCProgram $numberOfRuns
+        #sudo java -cp out Runner $filename $runCProgram $numberOfRuns
+        sudo java -cp /home/afonso/Documents/EnergyAwareProgramming/parser/lib/spoon-core-11.1.1-beta-18-jar-with-dependencies.jar:out Runner $filename $runCProgram $numberOfRuns
     elif [ "$1" == "p" ]; then
         sudo python3 Pyrun.py $filename $runCProgram $numberOfRuns
     elif [ "$1" == "b" ]; then

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.time.LocalDateTime;
 import java_progs.WritePid;
 import sun.misc.Signal;
@@ -102,6 +103,7 @@ public class Runner {
                 System.out.println("Time taken: " + duration + " seconds, for "+loopSize + " operations");
                 averageJoules += Double.parseDouble(cpuUsage);
                 averageTime += endTime-startTime;
+                saveFeatureInTempFile(file);
                 synchronized (Runner.class) {
                     Runner.class.notify();
                 }
@@ -150,11 +152,13 @@ public class Runner {
     }
     
 
-    private static void saveFeatureInTempFile() {
-
+    private static void saveFeatureInTempFile(String file) {
+        getFeaturesFromParser(file);
     }
 
     private static void getFeaturesFromParser(String file) {
-        String[] command = {"/bin/sh", "-c", "java java_progs/" + file + " " + ProcessHandle.current().pid() + " " + loopSize};
+        //String[] command = {"/bin/sh", "-c", "java java_progs/" + file + " " + ProcessHandle.current().pid() + " " + loopSize};
+        HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(file);
+
     }
 }

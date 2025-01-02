@@ -8,7 +8,7 @@ public class Fib extends Thread {
     final static int FIB_SIZE = 45;
     final static int NUMBER_THREADS = 1;
 
-    public static void main(String[] args) throws InterruptedException {
+    /*public static void main(String[] args) throws InterruptedException {
         try {
             WritePid.writePidToFile(Long.toString(ProcessHandle.current().pid()));//ManagementFactory.getRuntimeMXBean().getName()
             Runtime.getRuntime().exec("kill -USR1 " + args[0]);
@@ -40,7 +40,7 @@ public class Fib extends Thread {
         } catch (IOException e) {
             System.out.println("An error occurred while writing to the file: " + e.getMessage());
         }
-    }
+    }*/
 
     public static long fibonacci(int n) {
         if (n == 0)
@@ -51,9 +51,9 @@ public class Fib extends Thread {
             return fibonacci(n - 1) + fibonacci(n - 2);
     }
 
-    @Override
+    /*@Override
     public void run() {
         long f = fibonacci(FIB_SIZE);
         System.out.println(f);
-    }
+    }*/
 }

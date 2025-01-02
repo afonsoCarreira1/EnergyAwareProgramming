@@ -3,6 +3,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.ProcessBuilder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.time.LocalDateTime;
 import java_progs.WritePid;
@@ -18,7 +20,8 @@ public class Runner {
     static long startTime;
     static long endTime;
     static String frequency = ".1";
-    static String loopSize = ""+15_000_000;
+    static String loopSize = ""+20_000_000;
+    static HashSet<String> features = new HashSet<>();
 
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
@@ -47,12 +50,12 @@ public class Runner {
     public static void run(String file) throws IOException, InterruptedException{
         if (readCFile) {
             String[] command = {"pkexec", "./c_progs/" + file, Long.toString(ProcessHandle.current().pid())};
-            System.out.println("starting run at "+LocalDateTime.now());
+            //System.out.println("starting run at "+LocalDateTime.now());
             Runtime.getRuntime().exec(command);
         }else {
-            System.out.println("starting run at "+LocalDateTime.now());
+            //System.out.println("starting run at "+LocalDateTime.now());
             String[] command = {"/bin/sh", "-c", "java java_progs/" + file + " " + ProcessHandle.current().pid() + " " + loopSize};
-            System.out.println("starting run at "+LocalDateTime.now());
+            //System.out.println("starting run at "+LocalDateTime.now());
             Runtime.getRuntime().exec(command);
         }
 
@@ -60,19 +63,19 @@ public class Runner {
             public void handle(Signal sig){
                 System.out.println("Received START signal, starting powerjoular at "+LocalDateTime.now());
                 if (readCFile) {
-                    System.out.println("Read child PID at "+LocalDateTime.now());
+                    //System.out.println("Read child PID at "+LocalDateTime.now());
                     childPid = WritePid.captureCommandOutput();
                 }else {
-                    System.out.println("Read child PID at "+LocalDateTime.now());
+                    //System.out.println("Read child PID at "+LocalDateTime.now());
                     childPid = WritePid.readPidFromFile();
                 }
-                System.out.println("parent " + ProcessHandle.current().pid());
+                //System.out.println("parent " + ProcessHandle.current().pid());
                 //System.out.println("child " + childPid);
                 startTime = System.currentTimeMillis();
-                System.out.println("Created powerjoular process at "+LocalDateTime.now());
+                //System.out.println("Created powerjoular process at "+LocalDateTime.now());
                 ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p",childPid, "-D", frequency,"-f", "powerjoular.csv");
                 try {
-                    System.out.println("Started powerjoular process at "+LocalDateTime.now());
+                    //System.out.println("Started powerjoular process at "+LocalDateTime.now());
                     Process powerjoularProcess = powerjoularBuilder.start();
                     powerjoularPid = Long.toString(powerjoularProcess.pid());
                 } catch (IOException e) {
@@ -83,7 +86,7 @@ public class Runner {
 
         Signal.handle(new Signal("USR2"), new SignalHandler() {
             public void handle(Signal sig) {
-                System.out.println("Received END signal, stopping powerjoular at "+LocalDateTime.now());
+                //System.out.println("Received END signal, stopping powerjoular at "+LocalDateTime.now());
                 endTime = System.currentTimeMillis();
                 try {
                     Process killPowerjoular = Runtime.getRuntime().exec("sudo kill "+powerjoularPid);
@@ -96,7 +99,7 @@ public class Runner {
                 String cpuUsage = readCsv("powerjoular.csv-"+childPid+".csv");
                 System.out.println("Program used "+ cpuUsage +"J");
                 Double duration = (endTime-startTime)/1000.0;
-                System.out.println("Time taken: " + duration + " seconds");
+                System.out.println("Time taken: " + duration + " seconds, for "+loopSize + " operations");
                 averageJoules += Double.parseDouble(cpuUsage);
                 averageTime += endTime-startTime;
                 synchronized (Runner.class) {
@@ -111,7 +114,6 @@ public class Runner {
 
     private static String readCsv(String csvFile){ 
         List<String> cpuPowerValues = new ArrayList<>();
-
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
             String line;
             String[] headers = br.readLine().split(",");
@@ -147,4 +149,12 @@ public class Runner {
         return ""+cpuPower;//String.format("%.5f", cpuPower);
     }
     
+
+    private static void saveFeatureInTempFile() {
+
+    }
+
+    private static void getFeaturesFromParser(String file) {
+        String[] command = {"/bin/sh", "-c", "java java_progs/" + file + " " + ProcessHandle.current().pid() + " " + loopSize};
+    }
 }

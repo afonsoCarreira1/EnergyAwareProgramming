@@ -1,10 +1,12 @@
-package java_progs;
+package java_progs.progs;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.io.IOException;
 
-public class TestList {
+import java_progs.aux.WritePid;
+
+public class InsertEndArrayList {
     static int min = 0;
     static int max = 100_000;
     static Random rand = new Random();
@@ -16,32 +18,20 @@ public class TestList {
         }
     }
 
-    @SuppressWarnings("unused")
-    private static void insertInBegin(ArrayList<Integer> list) {
-        list.add(0, 100);
-    }
-
-    @SuppressWarnings("unused")
-    private static void insertInEnd(ArrayList<Integer> list, int n) {
+    private static void insertEndArrayList(ArrayList<Integer> list, int n) {
         list.add(n);
     }
 
-    @SuppressWarnings("unused")
-    private static void insertInMiddle(ArrayList<Integer> list) {
-        list.add(list.size() / 2, 100);
-    }
-
     public static void main(String[] args) throws IOException, InterruptedException {
-        int size = Integer.parseInt(args[1]);
+        int size = 20_000_000;
         ArrayList<Integer> list = new ArrayList<Integer>(100_000_000+size);
-        WritePid.writePidToFile(Long.toString(ProcessHandle.current().pid()));
+        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),size);
         insertRandomNumbers(list);
         int num = rand.nextInt((max - min) + 1) + min;
         Runtime.getRuntime().exec("kill -USR1 " + args[0]);
         for (int i = 0; i < size; i++) {
-            insertInEnd(list,num);
+            insertEndArrayList(list,num);
         }
         Runtime.getRuntime().exec("kill -USR2 " + args[0]);
     }
-
 }

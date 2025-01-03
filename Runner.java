@@ -14,8 +14,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import java_progs.aux.WritePid;
+
 import java.time.LocalDateTime;
-import java_progs.WritePid;
+
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
@@ -66,8 +69,9 @@ public class Runner {
             Runtime.getRuntime().exec(command);
         }else {
             //System.out.println("starting run at "+LocalDateTime.now());
-            String[] command = {"/bin/sh", "-c", "java java_progs/" + file + " " + ProcessHandle.current().pid() + " " + loopSize};
+            //String[] command = {"/bin/sh", "-c", "-cp","java_progs/out","java java_progs.progs." + file + " " + ProcessHandle.current().pid() + " " + loopSize};
             //System.out.println("starting run at "+LocalDateTime.now());
+            String command = "java -cp java_progs/out java_progs.progs." + file + " " + ProcessHandle.current().pid();
             Runtime.getRuntime().exec(command);
         }
 
@@ -79,7 +83,9 @@ public class Runner {
                     childPid = WritePid.captureCommandOutput();
                 }else {
                     //System.out.println("Read child PID at "+LocalDateTime.now());
-                    childPid = WritePid.readPidFromFile();
+                    ArrayList<String> pidAndLoopSize = WritePid.readTargetProgramInfo();
+                    childPid = pidAndLoopSize.get(0);
+                    loopSize = pidAndLoopSize.get(1);
                 }
                 //System.out.println("parent " + ProcessHandle.current().pid());
                 //System.out.println("child " + childPid);

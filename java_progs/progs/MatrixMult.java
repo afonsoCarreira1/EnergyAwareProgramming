@@ -1,7 +1,9 @@
-package java_progs;
+package java_progs.progs;
 
 import java.io.IOException;
 import java.util.Random;
+
+import java_progs.aux.WritePid;
 
 public class MatrixMult {
 

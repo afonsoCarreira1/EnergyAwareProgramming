@@ -1,8 +1,10 @@
-package java_progs;
+package java_progs.progs;
 
 import java.io.IOException;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
+
+import java_progs.aux.WritePid;
 
 public class Fib extends Thread {
     final static int FIB_SIZE = 40;
@@ -22,8 +24,8 @@ public class Fib extends Thread {
             String te = LocalDateTime.now().toString();
             Runtime.getRuntime().exec("kill -USR2 " + args[0]);
             
-            String time = ts + "\n"+te;
-            writeToFile(time, "java_progs/time.txt");
+            //String time = ts + "\n"+te;
+            //writeToFile(time, "java_progs/time.txt");
             //This is not measured beacuse the orchestrator sends the kill signal after USR2 signal
             long f2 = fibonacci(100);
             System.out.println("main: " + f2);

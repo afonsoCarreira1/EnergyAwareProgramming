@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 public class ASTFeatureExtractor {
 
     public static HashMap<String, Map<String, Object>> getFeatures(String file) {
-        String inputPath = "java_progs/"+file+".java";
+        String inputPath = "java_progs/progs/"+file+".java";
         Path currentDir = Paths.get("").toAbsolutePath(); // Get the current directory
         Path resolvedPath = currentDir.resolve(inputPath).normalize(); // Resolve and normalize the path
         // Initialize Spoon launcher

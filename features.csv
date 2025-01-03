@@ -1,2 +1,2 @@
 Reassignments,LoopCount,BranchCount,LiteralCount,MethodInvocations,java.util.ArrayList.add(java.lang.Object),Assignments,VariableCount,VariableDeclarations,BinaryOperators,EnergyUsed
-0,0,0,0,1,1,0,2,0,0,0.0
+0,0,0,0,1,1,0,2,0,0,6.854947934783171E-7

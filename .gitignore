@@ -14,4 +14,4 @@
 *.ipynb
 *.vscode
 settings.json
-*.out
+**/out/

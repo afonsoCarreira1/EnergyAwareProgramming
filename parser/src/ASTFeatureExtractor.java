@@ -105,7 +105,8 @@ public class ASTFeatureExtractor {
                 if (targetType != null) {
                     String methodUsed = targetType.getQualifiedName();
                     if (targetType.getQualifiedName().startsWith("java.util.")){
-                        methodsUsed.merge(methodUsed+"."+op.getExecutable(), 1, Integer::sum);
+                        String removedComma = op.getExecutable().toString().replace(",", " | ");
+                        methodsUsed.merge(methodUsed+"."+removedComma, 1, Integer::sum);
                     }else {
                         if (!path.equals(op.getTarget().toString())) methodsUsed.merge("CustomObjectWithCustomMethod", 1, Integer::sum);
                     }

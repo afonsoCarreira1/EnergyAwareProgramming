@@ -1,4 +1,4 @@
-package java_progs.progs;
+package java_progs;
 
 import java.io.IOException;
 import java.io.FileWriter;

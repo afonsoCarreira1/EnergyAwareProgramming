@@ -6,32 +6,33 @@ import java.util.Random;
 
 import java_progs.aux.WritePid;
 
-public class InsertMiddleArrayList {
+public class GetArrayList {
+    static int SIZE = 100_000_000;
+    static int LOOP_SIZE = 2_000_000_000;
     static int min = 0;
     static int max = 100_000;
     static Random rand = new Random();
 
     private static void insertRandomNumbers(ArrayList<Integer> list) {
-        for (int i = 0; i < 5_000_000; i++) {
+        for (int i = 0; i < SIZE; i++) {
             int randomNum = rand.nextInt((max - min) + 1) + min;
             list.add(randomNum);
         }
     }
 
-    private static void insertMiddleArrayList(ArrayList<Integer> list, int n) {
-        list.add(list.size() / 2, n);
+    private static int getArrayList(ArrayList<Integer> list, int n) {
+        return list.get(n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        int size = 1000;
-        ArrayList<Integer> list = new ArrayList<Integer>(5_000_000+size);
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),size);
+        ArrayList<Integer> list = new ArrayList<Integer>(SIZE);
+        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),LOOP_SIZE);
         insertRandomNumbers(list);
         int num = rand.nextInt((max - min) + 1) + min;
         Runtime.getRuntime().exec("kill -USR1 " + args[0]);
         Thread.sleep(100);
-        for (int i = 0; i < size; i++) {
-            insertMiddleArrayList(list,num);
+        for (int i = 0; i < LOOP_SIZE; i++) {
+            getArrayList(list,num);
         }
         Runtime.getRuntime().exec("kill -USR2 " + args[0]);
     }

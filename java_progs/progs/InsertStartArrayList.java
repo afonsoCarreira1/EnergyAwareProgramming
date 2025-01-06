@@ -29,6 +29,7 @@ public class InsertStartArrayList {
         insertRandomNumbers(list);
         int num = rand.nextInt((max - min) + 1) + min;
         Runtime.getRuntime().exec("kill -USR1 " + args[0]);
+        Thread.sleep(100);
         for (int i = 0; i < size; i++) {
             insertStartArrayList(list,num);
         }

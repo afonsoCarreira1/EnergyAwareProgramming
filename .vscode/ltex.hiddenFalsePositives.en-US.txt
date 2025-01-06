@@ -4,3 +4,4 @@
 {"rule":"SETUP_VERB","sentence":"^\\QThe Java program start and setup the necessary things to run (starting threads, reading/writing files, etc.) and then it sends a start signal to the orchestrator to start monitoring the computation wanted, and waits for some milliseconds.\\E$"}
 {"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qenergy inference function\\E$"}
 {"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qorchestrators comparison\\E$"}
+{"rule":"SETUP_VERB","sentence":"^\\QThe Java program starts and setup the necessary elements to run (starting threads, reading/writing files, etc.) and then before starting the computation it wants to measure, it sends a start signal to the orchestrator to start monitoring the computation wanted, and waits for some 100 milliseconds.\\E$"}

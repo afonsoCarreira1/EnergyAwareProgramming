@@ -249,9 +249,9 @@ The process described is responsible for generating energy profiles of various p
 
 This allows for more precise energy measurements, avoiding reading the JVM startup, and focusing only on the computation between the signals. The workflow is more clearly illustrated in Figure \ref{fig:orchestrators_process}.
 
-\begin{figure}%[h]
+\begin{figure}
   \centering
-  \includegraphics[width = 0.4 \textwidth]{figures/orchestrators_process.png}
+  \includegraphics[width = 0.4 \textwidth]{figures/orchestrators_process.pdf}
   \caption{Orchestrator Workflow}
   \label{fig:orchestrators_process}
 \end{figure}
@@ -262,10 +262,17 @@ The same workflow will be repeated across multiple machines to gather data from 
 
 \begin{figure}%[h]
   \centering
-  \includegraphics[width = 0.4 \textwidth]{figures/energy_inf_fun.png}
+  \includegraphics[width = 0.4 \textwidth]{figures/energy_inf_fun.pdf}
   \caption{Energy Inference Function}
   \label{fig:energy_inference_function}
 \end{figure}
+
+%\begin{figure}
+%  \centering
+%  \includegraphics[height=0.6\textheight, keepaspectratio, trim=70 225 0 0, clip]{figures/energy_inf_fun.pdf}
+%  \caption{Energy Inference Function}
+%  \label{fig:energy_inference_function}
+%\end{figure}
 
 The inference function will receive as input the energy profiles obtained previously and the code that the developer wants to analyze. On receiving the code, static analyzes will be used in order to inspect the code using a Java parser (Spoon), which will provide the AST. Later this AST will be used to feed a machine learning model with the return types of the function, parameters used, loops and so on, alongside with the energy profiles. After that the model will output the estimated energy values to be displayed to the developer.
 As explained in \ref{sec:background_machine_learning}, there are several ways of implementing an ML model. In this particular case, supervised ML is the best approach as it allows to train the model on previously collected energy profiles that contain the code and the energy consumed for that code. With these in mind, it is possible to test different algorithms, like the ones described in \ref{sec:background_machine_learning}, to achieve the best estimation possible.
@@ -308,7 +315,7 @@ Since the experiment runner included an example demonstrating how to use the fra
 
 \begin{figure}%[h]
   \centering
-  \includegraphics[width = 0.5 \textwidth]{figures/4_orchestrators_comparison.png}
+  \includegraphics[width = 0.5 \textwidth]{figures/4_orchestrators_comparison.pdf}
   \caption{orchestrators comparison}
   \label{fig:4_orchs_comparison}
 \end{figure}
@@ -328,7 +335,7 @@ While developing the function and the extension, the writing of the thesis will 
 
 \begin{figure*}%[h]
   \centering
-  \includegraphics[width = 1 \textwidth]{figures/gantt_diagram.png}
+  \includegraphics[width = 1 \textwidth]{figures/gantt_diagram.pdf}
   \caption{Work Plan}
   \label{fig:gantt_diagram}
 \end{figure*}

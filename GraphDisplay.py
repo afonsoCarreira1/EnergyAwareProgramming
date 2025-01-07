@@ -5,12 +5,13 @@ import glob
 import os
 from math import sqrt
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 import seaborn as sns
 
 def script_usage(args):
     if len(args) != 4:
         raise ValueError ("""Incorrect number of arguments arguments!
-                Usage example: GraphDisplay.py 4orch_fib Fib j""")
+                Usage example: python3 GraphDisplay.py 4orch_fib Fib j""")
 
 def create_orchestrators(orchestrators,files,c_or_java_prog,prog_name):
     return [{
@@ -74,6 +75,33 @@ def plot_graph(orch,prog_name,c_or_java_prog):
     plt.grid(False)
     plt.show(block=orch["name"]=="bash")
 
+
+def plot_combined_graph(orchs, prog_name, c_or_java_prog, pdf_filename="power_plot.pdf"):
+    """
+    Plot all orchestrator data on a single figure and save to PDF.
+    """
+    plt.figure(figsize=(10, 6))
+    plt.title(f'Power of 100 {prog_name} runs in {c_or_java_prog}', fontsize=18)
+    
+    for orch in orchs:
+        sns.lineplot(
+            data=orch["all_powers"],
+            color=orch["color"],
+            linestyle='-',
+            label=f"({orch['name']}) avg: {round(orch['average_power'])}j\nstd dev: {round(orch['standard_deviation'], 2)}"
+        )
+    
+    plt.xlabel('Run', fontsize=16)
+    plt.ylabel('CPU Power', fontsize=16)
+    plt.legend(fontsize=18)
+    plt.grid(False)
+    plt.tight_layout()
+    
+    # Save the plot to a PDF
+    with PdfPages(pdf_filename) as pdf:
+        pdf.savefig()  # Saves the current figure to the PDF
+    plt.show()
+
 def main():
     script_usage(sys.argv)
     args = sys.argv[1:]
@@ -85,8 +113,9 @@ def main():
         orch["all_powers"] = read_java_python_files(orch) # get the data from the files
         orch["average_power"] = calculate_average(orch)
         orch["standard_deviation"] = calculate_standard_deviation(orch)
-        plot_graph(orch,prog_name,c_or_java_prog)
+        #plot_graph(orch,prog_name,c_or_java_prog)
         #plot_hist(orch)
+    plot_combined_graph(orchs, prog_name, c_or_java_prog, pdf_filename=f"{prog_name}_power_plot.pdf")
 
 if __name__ == "__main__":
     main()

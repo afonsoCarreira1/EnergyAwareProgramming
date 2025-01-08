@@ -18,6 +18,7 @@ import java.util.Set;
 import java_progs.aux.WritePid;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -33,6 +34,7 @@ public class Runner {
     static long endTime;
     static String frequency = ".1";
     static String loopSize = "" + 20_000_000;
+    static String lastMeasurement = "";
     static HashSet<String> featuresName = new HashSet<>();
     static ArrayList<Map<String, Object>> programsFeatures = new ArrayList<>();
 
@@ -88,9 +90,8 @@ public class Runner {
                     childPid = WritePid.captureCommandOutput();
                 } else {
                     // System.out.println("Read child PID at "+LocalDateTime.now());
-                    ArrayList<String> pidAndLoopSize = WritePid.readTargetProgramInfo();
-                    childPid = pidAndLoopSize.get(0);
-                    loopSize = pidAndLoopSize.get(1);
+                    ArrayList<String> pidFromFile = WritePid.readTargetProgramInfo();
+                    childPid = pidFromFile.get(0);
                 }
                 // System.out.println("parent " + ProcessHandle.current().pid());
                 // System.out.println("child " + childPid);
@@ -113,6 +114,8 @@ public class Runner {
                 // System.out.println("Received END signal, stopping powerjoular at
                 // "+LocalDateTime.now());
                 endTime = System.currentTimeMillis();
+                ArrayList<String> loopSizeFromFile = WritePid.readTargetProgramInfo();
+                loopSize = loopSizeFromFile.get(1);
                 try {
                     Process killPowerjoular = Runtime.getRuntime().exec("sudo kill " + powerjoularPid);
                     killPowerjoular.waitFor();
@@ -150,11 +153,6 @@ public class Runner {
                     cpuPowerColumnIndex = i;
                     break;
                 }
-            }
-
-            if (cpuPowerColumnIndex == -1) {
-                System.out.println("Column 'CPU power' not found in the CSV file.");
-                return "Error";
             }
 
             while ((line = br.readLine()) != null) {

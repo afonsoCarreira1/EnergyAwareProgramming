@@ -1,7 +1,11 @@
-Reassignments,LoopCount,LiteralCount,Assignments,VariableDeclarations,BinaryOperators,DIV,java.util.ArrayList.add(int | java.lang.Object),BranchCount,java.util.ArrayList.size(),MethodInvocations,java.util.ArrayList.add(java.lang.Object),VariableCount,java.util.ArrayList.clone(),java.util.ArrayList.get(int),java.util.ArrayList.clear(),EnergyUsed
-0,0,0,0,0,0,0,0,0,0,1,0,2,0,1,0,0.0
-0,0,1,0,0,0,0,1,0,0,1,0,2,0,0,0,0.02285372151068015
-0,0,1,0,0,1,1,1,0,1,2,0,2,0,0,0,0.004660266342595622
-0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,7.588984584086517E-4
-0,0,0,0,0,0,0,0,0,0,1,1,2,0,0,0,6.413721217389724E-7
-0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1,0.025864998514918996
+Reassignments,LoopCount,LiteralCount,java.util.ArrayList.set(int | java.lang.Object),Assignments,VariableDeclarations,BinaryOperators,DIV,java.util.ArrayList.add(int | java.lang.Object),java.util.ArrayList.contains(java.lang.Object),BranchCount,java.util.ArrayList.size(),MethodInvocations,java.util.ArrayList.add(java.lang.Object),VariableCount,java.util.ArrayList.remove(int),java.util.ArrayList.clone(),java.util.ArrayList.get(int),java.util.ArrayList.clear(),EnergyUsed
+0,0,0,0,0,0,0,0,0,1,0,0,1,0,2,0,0,0,0,0.2877734853412688
+0,0,0,0,0,0,0,0,0,0,0,0,1,0,2,0,0,1,0,1.07518634693423E-6
+0,0,0,0,0,0,0,0,0,1,0,0,1,0,2,0,0,0,0,0.003002634917248663
+0,0,0,0,0,0,0,0,0,0,0,0,1,0,2,1,0,0,0,0.09688321683785034
+0,0,1,0,0,0,0,0,1,0,0,0,1,0,2,0,0,0,0,0.03365104596174264
+0,0,1,0,0,0,1,1,1,0,0,1,2,0,2,0,0,0,0,0.006278280047500578
+0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0.001706774685016371
+0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,0,0,0,0,2.224152033633413E-6
+0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0.022619882238519556
+0,0,0,1,0,0,0,0,0,0,0,0,1,0,3,0,0,0,0,7.257218420936007E-7

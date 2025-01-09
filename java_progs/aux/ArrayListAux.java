@@ -24,5 +24,9 @@ public class ArrayListAux {
     public static int getRandomNumberHalved() {
         return rand.nextInt(((max/2) - min) + 1) + min;
     }
+
+    public static Boolean areInputsFine(long inputSize, long memoryUsageOfType) {
+        return true;
+    }
     
 }

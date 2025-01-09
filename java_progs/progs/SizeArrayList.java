@@ -10,7 +10,7 @@ import java_progs.aux.WritePid;
 
 public class SizeArrayList {
     static int SIZE = 100_000_000;
-    static int LOOP_SIZE = 2_000_000_000;
+    static int loopSize = 2_000_000_000;
 
     private static int sizeArrayList(ArrayList<Integer> list, int n) {
         return list.size();
@@ -18,7 +18,7 @@ public class SizeArrayList {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         ArrayList<Integer> list = new ArrayList<Integer>(SIZE);
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),LOOP_SIZE);
+        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
         ArrayListAux.insertRandomNumbers(list,SIZE);
         int num = ArrayListAux.rand.nextInt((ArrayListAux.max - ArrayListAux.min) + 1) + ArrayListAux.min;
         Runtime.getRuntime().exec("kill -USR1 " + args[0]);

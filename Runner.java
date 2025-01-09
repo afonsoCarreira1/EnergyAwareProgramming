@@ -7,18 +7,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.ProcessBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import java_progs.aux.WritePid;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -43,7 +39,7 @@ public class Runner {
         for (int i = 0; i < programs.length; i++) {
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/progs/", "").replace(".java", "");//args[0];
-                //if (!(args[0].equals("test") && fileName.equals("SizeArrayList"))) continue;//just to test one prog file
+                if (!(args[0].equals("test") && fileName.equals("ClearArrayList"))) continue;//just to test one prog file
                 System.out.println("Starting profile for " + fileName + " program");
                 readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
@@ -119,9 +115,9 @@ public class Runner {
                 ArrayList<String> loopSizeFromFile = WritePid.readTargetProgramInfo();
                 loopSize = loopSizeFromFile.get(1);
                 try {
-                    Process killPowerjoular = Runtime.getRuntime().exec("sudo kill " + powerjoularPid);
+                    Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo kill", powerjoularPid});
                     killPowerjoular.waitFor();
-                    Process killTargetProgram = Runtime.getRuntime().exec("sudo kill " + childPid);
+                    Process killTargetProgram = Runtime.getRuntime().exec(new String[]{"sudo kill", childPid});
                     killTargetProgram.waitFor();
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();

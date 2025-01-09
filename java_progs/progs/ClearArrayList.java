@@ -9,7 +9,7 @@ import java_progs.aux.WritePid;
 
 public class ClearArrayList {
     static int SIZE = 100_000;
-    static int loopSize = 1_000;
+    static int loopSize = 3_000;
     
     private static void clearArrayList(ArrayList<Integer> list) {
         list.clear();

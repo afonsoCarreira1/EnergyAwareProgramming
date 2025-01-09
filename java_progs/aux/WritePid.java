@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -41,7 +40,8 @@ public class WritePid {
     public static String captureCommandOutput(){
         try {
             // Execute the command
-            Process process = Runtime.getRuntime().exec("pkexec cat c_progs/pidfile.txt");
+            Process process = Runtime.getRuntime().exec(new String[] {"pkexec", "cat", "c_progs/pidfile.txt"});
+            
 
             // Capture the output
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));

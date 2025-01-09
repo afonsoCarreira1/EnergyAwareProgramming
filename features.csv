@@ -1,11 +1,18 @@
-Reassignments,LoopCount,LiteralCount,java.util.ArrayList.set(int | java.lang.Object),Assignments,VariableDeclarations,BinaryOperators,DIV,java.util.ArrayList.add(int | java.lang.Object),java.util.ArrayList.contains(java.lang.Object),BranchCount,java.util.ArrayList.size(),MethodInvocations,java.util.ArrayList.add(java.lang.Object),VariableCount,java.util.ArrayList.remove(int),java.util.ArrayList.clone(),java.util.ArrayList.get(int),java.util.ArrayList.clear(),EnergyUsed
-0,0,0,0,0,0,0,0,0,1,0,0,1,0,2,0,0,0,0,0.2877734853412688
-0,0,0,0,0,0,0,0,0,0,0,0,1,0,2,0,0,1,0,1.07518634693423E-6
-0,0,0,0,0,0,0,0,0,1,0,0,1,0,2,0,0,0,0,0.003002634917248663
-0,0,0,0,0,0,0,0,0,0,0,0,1,0,2,1,0,0,0,0.09688321683785034
-0,0,1,0,0,0,0,0,1,0,0,0,1,0,2,0,0,0,0,0.03365104596174264
-0,0,1,0,0,0,1,1,1,0,0,1,2,0,2,0,0,0,0,0.006278280047500578
-0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0.001706774685016371
-0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,0,0,0,0,2.224152033633413E-6
-0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0.022619882238519556
-0,0,0,1,0,0,0,0,0,0,0,0,1,0,3,0,0,0,0,7.257218420936007E-7
+Reassignments,LoopCount,LiteralCount,java.util.ArrayList.addAll(java.util.Collection),java.util.ArrayList.set(int | java.lang.Object),Assignments,java.util.ArrayList.lastIndexOf(java.lang.Object),java.util.ArrayList.containsAll(java.util.Collection),VariableDeclarations,BinaryOperators,DIV,java.util.ArrayList.add(int | java.lang.Object),java.util.ArrayList.contains(java.lang.Object),BranchCount,java.util.ArrayList.size(),java.util.ArrayList.indexOf(java.lang.Object),MethodInvocations,java.util.ArrayList.add(java.lang.Object),VariableCount,java.util.ArrayList.remove(int),java.util.ArrayList.clone(),java.util.ArrayList.get(int),java.util.ArrayList.clear(),EnergyUsed
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,2,1,0,0,0,0.11005720578782055
+0,0,1,0,0,0,0,0,0,1,1,1,0,0,1,0,2,0,2,0,0,0,0,0.006325394723233796
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,2,0,0,1,0,8.221037060183709E-7
+0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,2,0,0,0,0,6.038403333335131E-5
+0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,2,0,0,0,0,0.030787786965457475
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0.023523123721798066
+0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,2,0,0,0,0,0.3203743455201951
+0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,2,0,0,0,0,7.875606516053877E-4
+0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,3,0,0,0,0,8.298964953953586E-7
+0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,2,0,0,0,0,0.0014547215502078033
+0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,2,0,0,0,0,0.002572250612396544
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,2,0,0,0,0,0.3022674111305092
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,0,0,0,0,2.43718171410616E-6
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0.0016759776492283154
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,2,0,0,0,0,0.009302931637702084
+0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,2,0,0,0,0,0.3461794171607361
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,2,0,0,0,0,7.665621244778278E-7

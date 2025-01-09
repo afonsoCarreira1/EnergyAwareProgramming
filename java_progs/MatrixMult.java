@@ -89,8 +89,8 @@ public class MatrixMult {
         long A[][] = createMatrix(row1, col1, true);
         long B[][] = createMatrix(row2, col2, true);
         WritePid.writePidToFile(Long.toString(ProcessHandle.current().pid()));
-        Runtime.getRuntime().exec("kill -USR1 " + args[0]);
+        Runtime.getRuntime().exec(new String[] {"kill", "-USR1", " + args[0]"});
         multiplyMatrix(row1, col1, A, row2, col2, B);
-        Runtime.getRuntime().exec("kill -USR2 " + args[0]);
+        Runtime.getRuntime().exec(new String[] {"kill", "-USR2", " + args[0]"});
     }
 }

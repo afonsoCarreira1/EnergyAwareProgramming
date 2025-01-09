@@ -8,14 +8,16 @@ numberOfRuns="${4:-"1"}"
 sudo rm powerjoular.*
     sudo gcc c_progs/"$2".c -o c_progs/"$2"
     sudo gcc OrchestratorC.c -o OrchestratorC
+    echo Compiling all Java programs...
     search_dir=java_progs/progs
         for entry in "$search_dir"/*
         do
-            removed_prefix=${entry#*java_progs/progs/}
-            removed_suffix=${removed_prefix%.java*}
-            javac -d java_progs/out java_progs/progs/$removed_suffix.java java_progs/aux/WritePid.java
+            #removed_prefix=${entry#*java_progs/progs/}
+            #removed_suffix=${removed_prefix%.java*}
+            #javac -d java_progs/out java_progs/progs/$removed_suffix.java java_progs/aux/WritePid.java
+            javac -d java_progs/out $entry java_progs/aux/WritePid.java
         done
-    
+    echo Compiled!
     # Compile Java program (name provided as second argument, e.g., MyRunner.java)zd}
     #javac -d java_progs/out java_progs/progs/$filename.java java_progs/aux/WritePid.java
     javac -XDignore.symbol.file -cp /home/afonso/Documents/EnergyAwareProgramming/parser/lib/spoon-core-11.1.1-beta-18-jar-with-dependencies.jar -d out parser/src/OperatorExtractor.java parser/src/ASTFeatureExtractor.java java_progs/aux/WritePid.java Runner.java
@@ -54,3 +56,4 @@ sudo rm powerjoular.*
     #echo "Optional number is passed to the program as an argument"
 fi
 sudo rm powerjoular.*
+sudo rm tmp/*

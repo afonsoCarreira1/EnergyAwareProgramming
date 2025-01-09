@@ -36,13 +36,14 @@ public class Runner {
     static String loopSize = "" + 20_000_000;
     static String lastMeasurement = "";
     static HashSet<String> featuresName = new HashSet<>();
-    static ArrayList<Map<String, Object>> programsFeatures = new ArrayList<>();
+    static long tmpFileNumber = 0;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         File[] programs = getAllProgramsNames();
         for (int i = 0; i < programs.length; i++) {
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/progs/", "").replace(".java", "");//args[0];
+                //if (!(args[0].equals("test") && fileName.equals("SizeArrayList"))) continue;//just to test one prog file
                 System.out.println("Starting profile for " + fileName + " program");
                 readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
@@ -73,12 +74,13 @@ public class Runner {
             // System.out.println("starting run at "+LocalDateTime.now());
             Runtime.getRuntime().exec(command);
         } else {
-            // System.out.println("starting run at "+LocalDateTime.now());
-            // String[] command = {"/bin/sh", "-c", "-cp","java_progs/out","java
-            // java_progs.progs." + file + " " + ProcessHandle.current().pid() + " " +
-            // loopSize};
-            // System.out.println("starting run at "+LocalDateTime.now());
-            String command = "java -cp java_progs/out java_progs.progs." + file + " " + ProcessHandle.current().pid();
+            String[] command = {
+                "java", 
+                "-cp", 
+                "java_progs/out", 
+                "java_progs.progs." + file, 
+                Long.toString(ProcessHandle.current().pid())
+            };
             Runtime.getRuntime().exec(command);
         }
 
@@ -130,7 +132,12 @@ public class Runner {
                 System.out.println("Time taken: " + duration + " seconds, for " + loopSize + " operations");
                 averageJoules += Double.parseDouble(cpuUsage);
                 averageTime += endTime - startTime;
-                saveFeatureInTempFile(file, cpuUsage);
+                try {
+                    saveFeature(file, cpuUsage);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 synchronized (Runner.class) {
                     Runner.class.notify();
                 }
@@ -173,12 +180,33 @@ public class Runner {
         return "" + cpuPower;// String.format("%.5f", cpuPower);
     }
 
-    private static void saveFeatureInTempFile(String file, String cpuUsage) {
+    private static void saveFeature(String file, String cpuUsage) throws IOException  {
         // TODO save the features to a temp file to not run ot of mem
         getFeaturesFromParser(file, cpuUsage);
     }
 
-    private static void getFeaturesFromParser(String file, String cpuUsage) {
+    private static void createFeaturesTempFile(Map<String, Object> methodfeatures) throws IOException{
+        try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter("tmp/tmp_"+tmpFileNumber+".csv"))) {
+            // Write the header row
+            List<String> featureList = new ArrayList<>(methodfeatures.keySet());
+            csvWriter.write(String.join(",", featureList));
+            csvWriter.newLine();
+                List<String> row = new ArrayList<>();
+                Map<String, Object> programFeatures = methodfeatures;
+                for (String feature : featureList) {
+                    if (programFeatures.get(feature) == null) {
+                        row.add("0");
+                    } else {
+                        row.add(programFeatures.get(feature).toString());
+                    }
+                }
+                csvWriter.write(String.join(",", row));
+                csvWriter.newLine();
+        }
+        tmpFileNumber++;
+    }
+
+    private static void getFeaturesFromParser(String file, String cpuUsage) throws IOException {
         // String[] command = {"/bin/sh", "-c", "java java_progs/" + file + " " +
         // ProcessHandle.current().pid() + " " + loopSize};
         HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(file);
@@ -186,7 +214,7 @@ public class Runner {
         Map<String, Object> methodfeatures = methods.get(methodName);
         featuresName.addAll(methodfeatures.keySet());
         methodfeatures.put("EnergyUsed", cpuUsage);
-        programsFeatures.add(methodfeatures);
+        createFeaturesTempFile(methodfeatures);
         //System.out.println(methodfeatures);
     }
 
@@ -197,9 +225,10 @@ public class Runner {
             featureList.add("EnergyUsed");
             csvWriter.write(String.join(",", featureList));
             csvWriter.newLine();
-            for (int index = 0; index < programsFeatures.size(); index++) {
+            File[] tmpFiles = getAllCSVTempFiles();
+            for (int i = 0; i < tmpFiles.length; i++) {
                 List<String> row = new ArrayList<>();
-                Map<String, Object> programFeatures = programsFeatures.get(index);
+                Map<String, Object> programFeatures = readCSVTempFile(tmpFiles[i].toString());
                 for (String feature : featureList) {
                     if (programFeatures.get(feature) == null) {
                         row.add("0");
@@ -213,7 +242,25 @@ public class Runner {
         }
     }
 
+    private static Map<String,Object> readCSVTempFile(String file) throws IOException {
+        Map<String, Object> programFeatures = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line0 = br.readLine();  // Read line 0
+            String line1 = br.readLine();  // Read line 1
+            String[] features = line0.split(",");
+            String[] featuresVal = line1.split(",");
+            for (int i = 0; i < features.length; i++) {
+                programFeatures.put(features[i], featuresVal[i]);
+            }
+        }
+        return programFeatures;
+    }
+
     private static File[] getAllProgramsNames() {
         return new File("java_progs/progs/").listFiles();
+    }
+
+    private static File[] getAllCSVTempFiles() {
+        return new File("tmp/").listFiles();
     }
 }

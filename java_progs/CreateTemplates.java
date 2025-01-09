@@ -149,7 +149,7 @@ public class CreateTemplates {
         Scanner myReader = new Scanner(myObj);
         StringBuilder f = new StringBuilder();
         while (myReader.hasNextLine()) {
-            f.append(myReader.nextLine());
+            f.append(myReader.nextLine()).append("\n");  // Append newline after each line
         }
         myReader.close();
         return f.toString();
@@ -162,8 +162,17 @@ public class CreateTemplates {
         //myWriter.write(program);
         //myWriter.close();
         BufferedWriter myWriter = new BufferedWriter(new FileWriter(file));
-        myWriter.write(program); // Write the content with line breaks
+        myWriter.write(program);
         myWriter.close();
+        //String[] ps = program.split("\n");
+        //System.out.println(program);
+        //if (true) return;
+        //for (String p: ps) {
+        //    myWriter.write(p);
+        //    myWriter.newLine();
+        //}
+        //myWriter.close();
+        
     }
 
     private static File[] getAllTemplates() {

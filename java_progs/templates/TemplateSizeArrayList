@@ -1,4 +1,4 @@
-package java_progs.templates;
+package java_progs.progs;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -10,27 +10,26 @@ import java_progs.aux.WritePid;
 public class TemplateSizeArrayList {
     static int SIZE = "size";
 
-    private static int sizeArrayList(ArrayList<"Type"> list, int n) {
+    private static int sizeArrayList(ArrayList<"Type"> list) {
         return list.size();
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         ArrayList<"Type"> list = new ArrayList<"Type">(SIZE);
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
-        ArrayListAux.insertRandomNumbers(list,SIZE);
-        int num = ArrayListAux.rand.nextInt((ArrayListAux.max - ArrayListAux.min) + 1) + ArrayListAux.min;
-        Runtime.getRuntime().exec(new String [] {"kill", "-USR1", "args[0]"});
+        ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
+        Runtime.getRuntime().exec(new String [] {"kill", "-USR1", args[0]});
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/*1s*/) {
-            sizeArrayList(list,num);
+            sizeArrayList(list);
             end = System.nanoTime();
             i++;
         }
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
         WritePid.writeTargetProgInfo(timeStamp,i);
-        Runtime.getRuntime().exec(new String [] {"kill", "-USR2", "args[0]"});
+        Runtime.getRuntime().exec(new String [] {"kill", "-USR2", args[0]});
     }
 }

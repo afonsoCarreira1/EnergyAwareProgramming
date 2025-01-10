@@ -9,15 +9,20 @@ sudo rm powerjoular.*
     sudo gcc c_progs/"$2".c -o c_progs/"$2"
     sudo gcc OrchestratorC.c -o OrchestratorC
     echo Compiling all Java programs...
-    search_dir=java_progs/progs
-        for entry in "$search_dir"/*
-        do
-            #removed_prefix=${entry#*java_progs/progs/}
-            #removed_suffix=${removed_prefix%.java*}
-            #javac -d java_progs/out java_progs/progs/$removed_suffix.java java_progs/aux/WritePid.java
-            javac -d java_progs/out $entry java_progs/aux/WritePid.java
-        done
-    echo Compiled!
+
+search_dir=java_progs/progs
+aux_file=java_progs/aux/WritePid.java
+output_dir=java_progs/out
+
+# Create the output directory if it doesn't exist
+mkdir -p "$output_dir"
+
+# Collect all .java files into a single list and compile together
+find "$search_dir" -name "*.java" > sources.txt
+echo "$aux_file" >> sources.txt  # Include the auxiliary file
+javac -d "$output_dir" @sources.txt
+
+echo Compiled!
     # Compile Java program (name provided as second argument, e.g., MyRunner.java)zd}
     #javac -d java_progs/out java_progs/progs/$filename.java java_progs/aux/WritePid.java
     javac -XDignore.symbol.file -cp /home/afonso/Documents/EnergyAwareProgramming/parser/lib/spoon-core-11.1.1-beta-18-jar-with-dependencies.jar -d out parser/src/OperatorExtractor.java parser/src/ASTFeatureExtractor.java java_progs/aux/WritePid.java Runner.java
@@ -57,3 +62,25 @@ sudo rm powerjoular.*
 fi
 sudo rm powerjoular.*
 sudo rm tmp/*
+
+
+compile_java_programs() {
+    local search_dir="java_progs/progs"  # Directory containing Java programs
+    local aux_file="java_progs/aux/WritePid.java"  # Auxiliary file
+    local output_dir="java_progs/out"  # Output directory for .class files
+
+    echo "Compiling all Java programs..."
+
+    # Ensure output directory exists
+    mkdir -p "$output_dir"
+
+    # Find all Java source files and compile them together
+    find "$search_dir" -name "*.java" > sources.txt
+    echo "$aux_file" >> sources.txt  # Include auxiliary file
+    javac -d "$output_dir" @sources.txt
+
+    # Clean up temporary sources.txt file
+    rm sources.txt
+
+    echo "Compiled!"
+}

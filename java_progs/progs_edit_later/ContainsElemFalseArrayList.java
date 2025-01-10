@@ -1,4 +1,4 @@
-package java_progs.progs;
+package java_progs.progs_edit_later;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -7,26 +7,27 @@ import java.util.ArrayList;
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class LastIndexOfElemTrueArrayList {
+public class ContainsElemFalseArrayList {
+
     static int SIZE = 10_000_000;
     static int loopSize = 1_000;
 
-    private static int lastIndexOfElemTrueArrayList (ArrayList<Integer> list, int n) {
-        return list.lastIndexOf(n);
+    private static Boolean containsElemFalseArrayList(ArrayList<Integer> list, int n) {
+        return list.contains(n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         ArrayList<Integer> list = new ArrayList<Integer>(SIZE);
         ArrayListAux.insertRandomNumbers(list, SIZE);
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), loopSize);
-        int num = ArrayListAux.getRandomNumber();
+        int num = -5;
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/* 1s */) {
-            lastIndexOfElemTrueArrayList(list, num);
+            containsElemFalseArrayList(list, num);
             end = System.nanoTime();
             i++;
         }

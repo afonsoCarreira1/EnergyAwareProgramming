@@ -1,4 +1,4 @@
-package java_progs.progs;
+package java_progs.progs_edit_later;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -8,26 +8,30 @@ import java.util.Random;
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class GetArrayList {
-    static int SIZE = 100_000_000;
-    static int loopSize = 2_000_000_000;
+public class InsertMiddleArrayList {
+    static int SIZE = 5_000_000;
+    static int min = 0;
+    static int max = 100_000;
+    static Random rand = new Random();
 
-    private static int getArrayList(ArrayList<Integer> list, int n) {
-        return list.get(n);
+
+    private static void insertMiddleArrayList(ArrayList<Integer> list, int n) {
+        list.add(list.size() / 2, n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ArrayList<Integer> list = new ArrayList<Integer>(SIZE);
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),loopSize);
+        int size = 1000;
+        ArrayList<Integer> list = new ArrayList<Integer>(5_000_000+size);
+        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),size);
         ArrayListAux.insertRandomNumbers(list,SIZE);
-        int num = ArrayListAux.rand.nextInt((ArrayListAux.max - ArrayListAux.min) + 1) + ArrayListAux.min;
+        int num = rand.nextInt((max - min) + 1) + min;
         Runtime.getRuntime().exec("kill -USR1 " + args[0]);
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/*1s*/) {
-            getArrayList(list,num);
+            insertMiddleArrayList(list,num);
             end = System.nanoTime();
             i++;
         }

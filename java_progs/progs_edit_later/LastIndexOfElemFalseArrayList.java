@@ -1,4 +1,4 @@
-package java_progs.progs;
+package java_progs.progs_edit_later;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class IndexOfElemFalseArrayList {
+public class LastIndexOfElemFalseArrayList {
     static int SIZE = 10_000_000;
     static int loopSize = 1_000;
 
-    private static int indexOfElemFalseArrayList (ArrayList<Integer> list, int n) {
-        return list.indexOf(n);
+    private static int lastIndexOfElemFalseArrayList (ArrayList<Integer> list, int n) {
+        return list.lastIndexOf(n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -26,7 +26,7 @@ public class IndexOfElemFalseArrayList {
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/* 1s */) {
-            indexOfElemFalseArrayList(list, num);
+            lastIndexOfElemFalseArrayList(list, num);
             end = System.nanoTime();
             i++;
         }

@@ -1,4 +1,4 @@
-package java_progs.progs;
+
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -7,31 +7,29 @@ import java.util.ArrayList;
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class ContainsAllElemRandomArrayList {
+public class TemplateAddAllElemArrayList {
+    static int SIZE = 250000;
+    static int loopSize = 100;
 
-    static int SIZE = 10_000;
-    static int loopSize = 10_000;
-
-    private static Boolean containsAllElemRandomArrayList(ArrayList<Integer> list, ArrayList<Integer> list2) {
-        return list.containsAll(list2);
+    private static Boolean addAllElemArrayList(ArrayList<Double> list, ArrayList<Double> list2) {
+        return list.addAll(list2);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ArrayList<Integer> list = new ArrayList<Integer>(SIZE*loopSize);
-        ArrayList<Integer>[] lists = new ArrayList[loopSize];
+        ArrayList<Double> list = new ArrayList<Double>(SIZE*loopSize);
+        ArrayList<Double>[] lists = new ArrayList<Double>[loopSize];
         for (int i = 0; i < loopSize; i++) {
-            lists[i] = ArrayListAux.insertRandomNumbers(new ArrayList<>(SIZE),SIZE);
+            lists[i] = ArrayListAux.insertRandomNumbers(new ArrayList<>(SIZE),SIZE,"Double");
         }
-        ArrayListAux.insertRandomNumbers(list, SIZE);
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), loopSize);
-        int num = ArrayListAux.getRandomNumber();
+        ArrayListAux.insertRandomNumbers(list, SIZE,"Double");
+        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), 0);
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/* 1s */&& i < loopSize) {
-            containsAllElemRandomArrayList(list, lists[i]);
+            addAllElemArrayList(list, lists[i]);
             end = System.nanoTime();
             i++;
         }

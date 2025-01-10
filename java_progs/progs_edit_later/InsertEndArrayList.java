@@ -1,4 +1,4 @@
-package java_progs.progs;
+package java_progs.progs_edit_later;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -8,20 +8,19 @@ import java.util.Random;
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class InsertMiddleArrayList {
-    static int SIZE = 5_000_000;
+public class InsertEndArrayList {
+    static int SIZE = 100_000_000;
     static int min = 0;
     static int max = 100_000;
     static Random rand = new Random();
 
-
-    private static void insertMiddleArrayList(ArrayList<Integer> list, int n) {
-        list.add(list.size() / 2, n);
+    private static void insertEndArrayList(ArrayList<Integer> list, int n) {
+        list.add(n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        int size = 1000;
-        ArrayList<Integer> list = new ArrayList<Integer>(5_000_000+size);
+        int size = 20_000_000;
+        ArrayList<Integer> list = new ArrayList<Integer>(100_000_000+size);
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),size);
         ArrayListAux.insertRandomNumbers(list,SIZE);
         int num = rand.nextInt((max - min) + 1) + min;
@@ -31,7 +30,7 @@ public class InsertMiddleArrayList {
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/*1s*/) {
-            insertMiddleArrayList(list,num);
+            insertEndArrayList(list,num);
             end = System.nanoTime();
             i++;
         }

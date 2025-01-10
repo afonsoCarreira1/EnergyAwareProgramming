@@ -61,7 +61,7 @@
 %%
 %% Keywords. The author(s) should pick words that accurately describe
 %% the work being presented. Separate the keywords with commas.
-\keywords{Green computing, Static code analysis, Energy prediction, Sustainability software, Energy-aware programming}
+\keywords{Green computing, Static code analysis, Energy prediction, Sustainable software, Energy-aware programming}
 
 \pagestyle{plain} % removes running headers
 
@@ -80,7 +80,7 @@ Some key reasons to prioritize energy efficiency in software, whether for mobile
 \begin{itemize}
   \item The dependence of mobile devices on batteries. All mobile devices rely on their batteries, so the software they run needs to make the best use of resources to conserve battery power.
   \item Reducing operating costs in data centers. It is crucial to reduce the operating cost of data centers by using energy-efficient programs. This reduction results in economic benefits for companies and contributes positively to environmental sustainability. 
-  \item Reducing energy consumption has a positive impact on our environment by saving energy that can be used for other things. 
+  \item Reducing energy consumption has a positive impact on our environment by saving energy that can be used more efficiently elsewhere. 
 \end{itemize}
 
 When developing a program, most of the time developers optimize for the time the program takes to complete, or the memory it uses, and not so often take into account the energy it uses. 
@@ -268,13 +268,6 @@ The same workflow will be repeated across multiple machines to gather data from 
   \caption{Energy Inference Function}
   \label{fig:energy_inference_function}
 \end{figure}
-
-%\begin{figure}
-%  \centering
-%  \includegraphics[height=0.6\textheight, keepaspectratio, trim=70 225 0 0, clip]{figures/energy_inf_fun.pdf}
-%  \caption{Energy Inference Function}
-%  \label{fig:energy_inference_function}
-%\end{figure}
 
 The inference function will receive as input the energy profiles obtained previously and the code that the developer wants to analyze. On receiving the code, static analyzes will be used in order to inspect the code using a Java parser (Spoon), which will provide the AST. Later this AST will be used to feed a machine learning model with the return types of the function, parameters used, loops and so on, alongside with the energy profiles. After that the model will output the estimated energy values to be displayed to the developer.
 As explained in \ref{sec:background_machine_learning}, there are several ways of implementing an ML model. In this particular case, supervised ML is the best approach as it allows to train the model on previously collected energy profiles that contain the code and the energy consumed for that code. With these in mind, it is possible to test different algorithms, like the ones described in \ref{sec:background_machine_learning}, to achieve the best estimation possible.

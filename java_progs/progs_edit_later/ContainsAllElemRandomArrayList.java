@@ -1,4 +1,4 @@
-package java_progs.progs;
+package java_progs.progs_edit_later;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -7,26 +7,31 @@ import java.util.ArrayList;
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class LastIndexOfElemFalseArrayList {
-    static int SIZE = 10_000_000;
-    static int loopSize = 1_000;
+public class ContainsAllElemRandomArrayList {
 
-    private static int lastIndexOfElemFalseArrayList (ArrayList<Integer> list, int n) {
-        return list.lastIndexOf(n);
+    static int SIZE = 10_000;
+    static int loopSize = 10_000;
+
+    private static Boolean containsAllElemRandomArrayList(ArrayList<Integer> list, ArrayList<Integer> list2) {
+        return list.containsAll(list2);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ArrayList<Integer> list = new ArrayList<Integer>(SIZE);
+        ArrayList<Integer> list = new ArrayList<Integer>(SIZE*loopSize);
+        ArrayList<Integer>[] lists = new ArrayList[loopSize];
+        for (int i = 0; i < loopSize; i++) {
+            lists[i] = ArrayListAux.insertRandomNumbers(new ArrayList<>(SIZE),SIZE);
+        }
         ArrayListAux.insertRandomNumbers(list, SIZE);
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), loopSize);
-        int num = -5;
+        int num = ArrayListAux.getRandomNumber();
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;
-        while (end - begin < 1000000000/* 1s */) {
-            lastIndexOfElemFalseArrayList(list, num);
+        while (end - begin < 1000000000/* 1s */&& i < loopSize) {
+            containsAllElemRandomArrayList(list, lists[i]);
             end = System.nanoTime();
             i++;
         }
@@ -34,5 +39,5 @@ public class LastIndexOfElemFalseArrayList {
         WritePid.writeTargetProgInfo(timeStamp, i);
         Runtime.getRuntime().exec(new String[] { "kill", "-USR2", args[0] });
     }
-
+    
 }

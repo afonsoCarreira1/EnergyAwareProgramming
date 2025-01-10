@@ -1,11 +1,13 @@
 package java_progs;
 
+import java.beans.Introspector;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
 
 public class CreateTemplates {
@@ -74,14 +76,14 @@ public class CreateTemplates {
     }
 
     static TypesInfo[] typesInfo = new TypesInfo[] {
-            new TypesInfo("int", 4),
-            new TypesInfo("char", 1),
-            new TypesInfo("double", 8),
-            new TypesInfo("long", 8),
-            new TypesInfo("short", 2),
-            new TypesInfo("float", 4),
-            new TypesInfo("boolean", 1),
-            new TypesInfo("byte", 1),
+            //new TypesInfo("int", 4),
+            //new TypesInfo("char", 1),
+            //new TypesInfo("double", 8),
+            //new TypesInfo("long", 8),
+            //new TypesInfo("short", 2),
+            //new TypesInfo("float", 4),
+            //new TypesInfo("boolean", 1),
+            //new TypesInfo("byte", 1),
             new TypesInfo("Integer", 16),
             new TypesInfo("Double", 16),
             new TypesInfo("Float", 16),
@@ -96,17 +98,19 @@ public class CreateTemplates {
         try {
             File[] templates = getAllTemplates();
         for (File template : templates) {
-            //System.out.println(template);
             int progNumber = 0;
             String program = readFile(template.toString());
-            String filePath = template.toString().replace("templates","progs2");
-            //System.out.println(filePath+progNumber+".java");
-            //if (true) return;
+            String fileName = template.toString().replace("java_progs/templates/Template","");
+            String filePath = template.toString().replace("templates","progs");
+            filePath = filePath.replace("Template", "");
             boolean hasLoopSize = program.contains("loopSize");
             for (TypesInfo typeInfo : typesInfo) {
                 String programTemp = program.replace("\"Type\"", typeInfo.type);
                 ArrayList<String> newPrograms = replaceSizes(programTemp,typeInfo,hasLoopSize);
                 for (String newProgram : newPrograms) {
+                    String newMethodName = Introspector.decapitalize(fileName);
+                    newProgram = newProgram.replace("Template"+fileName, fileName+progNumber);
+                    newProgram = newProgram.replace(newMethodName,newMethodName+progNumber);
                     createJavaProgramFile(filePath+progNumber+".java", newProgram);
                     progNumber++;
                 }
@@ -120,7 +124,7 @@ public class CreateTemplates {
     }
 
     private static ArrayList<String> replaceSizes(String program,TypesInfo typeInfo,boolean hasLoopSize) {
-        ArrayList<String> programs = new ArrayList<>();
+        HashSet<String> programs = new HashSet<String>();
         for (SizeInfo sizeInfo : typeInfo.sizesWitLoopSize) {
             String programTemp = program.replace("\"size\"", ""+sizeInfo.size);
             if (hasLoopSize) {
@@ -128,14 +132,16 @@ public class CreateTemplates {
             }
             programs.add(programTemp);
         }
-        return programs;
+        return new ArrayList<>(programs);
     }
 
     private static void createInputRange(TypesInfo[] typesInfo) {
         for (TypesInfo typeInfo : typesInfo) {
             for (int s : SizeInfo.sizes) {
                 for (int ls : SizeInfo.loopSizes) {
-                    if (s * ls * typeInfo.memory <= 1500000000/* this is around 1.5GB, a little less */) {
+                    //16000000000
+                    long memoryUsageExpected = (long) s * ls * typeInfo.memory;
+                    if (memoryUsageExpected <= 1500000000/* this is around 1.5GB, a little less */) {
                         typeInfo.sizesWitLoopSize .add(new SizeInfo(s, ls));
                     }
                 }
@@ -156,23 +162,9 @@ public class CreateTemplates {
     }
 
     private static void createJavaProgramFile(String file, String program) throws IOException {
-        //File myObj = new File(file);
-        //myObj.createNewFile(); // create file if needed
-        //FileWriter myWriter = new FileWriter(file);
-        //myWriter.write(program);
-        //myWriter.close();
         BufferedWriter myWriter = new BufferedWriter(new FileWriter(file));
         myWriter.write(program);
-        myWriter.close();
-        //String[] ps = program.split("\n");
-        //System.out.println(program);
-        //if (true) return;
-        //for (String p: ps) {
-        //    myWriter.write(p);
-        //    myWriter.newLine();
-        //}
-        //myWriter.close();
-        
+        myWriter.close();    
     }
 
     private static File[] getAllTemplates() {

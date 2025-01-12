@@ -1,10 +1,11 @@
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
+//import java.util.HashMap;
+//import java.util.LinkedList;
 
 
 public class Test {
 
+    @SuppressWarnings("unused")
     private static void insertInEnd(int n) {
         ArrayList<Integer> list = new ArrayList<>();
         list.add(n);

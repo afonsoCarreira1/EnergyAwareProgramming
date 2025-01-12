@@ -2,7 +2,7 @@ package java_progs;
 
 import java.io.IOException;
 import java.io.FileWriter;
-import java.time.LocalDateTime;
+//import java.time.LocalDateTime;
 
 import java_progs.aux.WritePid;
 
@@ -12,17 +12,17 @@ public class Fib extends Thread {
 
     public static void main(String[] args) throws InterruptedException {
         try {
-            WritePid.writePidToFile(Long.toString(ProcessHandle.current().pid()));//ManagementFactory.getRuntimeMXBean().getName()
-            Runtime.getRuntime().exec("kill -USR1 " + args[0]);
-            String ts = LocalDateTime.now().toString();
+            WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
+            Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
+            //String ts = LocalDateTime.now().toString();
             for (int i = 0; i < NUMBER_THREADS - 1; i++) {
                 Fib thread = new Fib();
                 thread.start();
             }
             long f = fibonacci(FIB_SIZE);
             System.out.println("main: " + f);
-            String te = LocalDateTime.now().toString();
-            Runtime.getRuntime().exec("kill -USR2 " + args[0]);
+            //String te = LocalDateTime.now().toString();
+            Runtime.getRuntime().exec(new String[] { "kill", "-USR2", args[0] });
             
             //String time = ts + "\n"+te;
             //writeToFile(time, "java_progs/time.txt");

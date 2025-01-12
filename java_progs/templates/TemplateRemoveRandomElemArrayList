@@ -1,4 +1,4 @@
-package java_progs.progs_edit_later;
+package java_progs.progs;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -7,27 +7,26 @@ import java.util.ArrayList;
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class SetElemArrayList {
-    static int SIZE = 10_000_000;
-    static int loopSize = 1_000;
+public class TemplateRemoveRandomElemArrayList {
+    static int SIZE = "size";
+    static int loopSize = "loopSize";
     
-    private static void setElemArrayList(ArrayList<Integer> list,int i, int n) {
-        list.set(i,n);
+    private static void removeRandomElemArrayList(ArrayList<"Type"> list,int n) {
+        list.remove(n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ArrayList<Integer> list = new ArrayList<Integer>(SIZE);
-        ArrayListAux.insertRandomNumbers(list,SIZE);
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),loopSize);
-        int num = ArrayListAux.getRandomNumber();
-        int pos = ArrayListAux.rand.nextInt(SIZE + 1);
+        ArrayList<"Type"> list = new ArrayList<"Type">(SIZE);
+        ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
+        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
+        int num = ArrayListAux.getRandomNumberHalved();
         Runtime.getRuntime().exec(new String []{"kill","-USR1",args[0]});
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/*1s*/) {
-            setElemArrayList(list,pos,num);
+            removeRandomElemArrayList(list,num);
             end = System.nanoTime();
             i++;
         }

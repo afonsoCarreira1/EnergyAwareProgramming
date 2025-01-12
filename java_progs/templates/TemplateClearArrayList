@@ -1,4 +1,4 @@
-package java_progs.progs_edit_later;
+package java_progs.progs;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -7,26 +7,28 @@ import java.util.ArrayList;
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class RemoveRandomElemArrayList {
-    static int SIZE = 10_000_000;
-    static int loopSize = 1_000;
+public class TemplateClearArrayList {
+    static int SIZE = "size";
+    static int loopSize = "loopSize";
     
-    private static void removeRandomElemArrayList(ArrayList<Integer> list,int n) {
-        list.remove(n);
+    private static void clearArrayList(ArrayList<"Type"> list) {
+        list.clear();
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ArrayList<Integer> list = new ArrayList<Integer>(SIZE);
-        ArrayListAux.insertRandomNumbers(list,SIZE);
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),loopSize);
-        int num = ArrayListAux.getRandomNumberHalved();
+        @SuppressWarnings("unchecked")
+        ArrayList<"Type">[] lists = new ArrayList[loopSize];
+        for (int i = 0; i < loopSize; i++) {
+            lists[i] = ArrayListAux.insertRandomNumbers(new ArrayList<"Type">(SIZE),SIZE,""Type"");
+        }
+        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
         Runtime.getRuntime().exec(new String []{"kill","-USR1",args[0]});
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;
-        while (end - begin < 1000000000/*1s*/) {
-            removeRandomElemArrayList(list,num);
+        while (end - begin < 1000000000/*1s*/ && i < loopSize) {
+            clearArrayList(lists[i]);
             end = System.nanoTime();
             i++;
         }
@@ -34,5 +36,4 @@ public class RemoveRandomElemArrayList {
         WritePid.writeTargetProgInfo(timeStamp,i);
         Runtime.getRuntime().exec(new String []{"kill","-USR2",args[0]});
     }
-    
 }

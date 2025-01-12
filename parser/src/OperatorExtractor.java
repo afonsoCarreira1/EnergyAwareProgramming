@@ -1,6 +1,4 @@
-import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
-import spoon.reflect.code.CtOperatorAssignment;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.declaration.CtMethod;
@@ -8,8 +6,6 @@ import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.support.reflect.code.CtOperatorAssignmentImpl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class OperatorExtractor {
 

@@ -131,8 +131,7 @@ public class Runner {
                 try {
                     saveFeature(file, cpuUsage);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    System.out.println("Error saving feature");
                 }
                 synchronized (Runner.class) {
                     Runner.class.notify();
@@ -178,7 +177,6 @@ public class Runner {
     }
 
     private static void saveFeature(String file, String cpuUsage) throws IOException  {
-        // TODO save the features to a temp file to not run ot of mem
         getFeaturesFromParser(file, cpuUsage);
     }
 

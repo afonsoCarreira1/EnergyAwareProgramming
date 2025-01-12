@@ -1,4 +1,4 @@
-package java_progs.progs_edit_later;
+package java_progs.progs;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -7,24 +7,24 @@ import java.util.ArrayList;
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class ContainsAllElemRandomArrayList {
+public class TemplateContainsAllElemRandomArrayList {
 
-    static int SIZE = 10_000;
-    static int loopSize = 10_000;
+    static int SIZE = "size";
+    static int loopSize = "loopSize";
 
-    private static Boolean containsAllElemRandomArrayList(ArrayList<Integer> list, ArrayList<Integer> list2) {
+    private static Boolean containsAllElemRandomArrayList(ArrayList<"Type"> list, ArrayList<"Type"> list2) {
         return list.containsAll(list2);
     }
 
+    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws IOException, InterruptedException {
-        ArrayList<Integer> list = new ArrayList<Integer>(SIZE*loopSize);
-        ArrayList<Integer>[] lists = new ArrayList[loopSize];
+        ArrayList<"Type"> list = new ArrayList<"Type">(SIZE*loopSize);
+        ArrayList<"Type">[] lists = new ArrayList[loopSize];
         for (int i = 0; i < loopSize; i++) {
-            lists[i] = ArrayListAux.insertRandomNumbers(new ArrayList<>(SIZE),SIZE);
+            lists[i] = ArrayListAux.insertRandomNumbers(new ArrayList<"Type">(SIZE),SIZE,""Type"");
         }
-        ArrayListAux.insertRandomNumbers(list, SIZE);
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), loopSize);
-        int num = ArrayListAux.getRandomNumber();
+        ArrayListAux.insertRandomNumbers(list, SIZE,""Type"");
+        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), 0);
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
         Thread.sleep(100);
         long begin = System.nanoTime();

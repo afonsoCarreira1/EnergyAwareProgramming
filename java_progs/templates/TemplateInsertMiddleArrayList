@@ -1,31 +1,27 @@
-package java_progs.progs_edit_later;
+package java_progs.progs;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Random;
 
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class InsertMiddleArrayList {
-    static int SIZE = 5_000_000;
-    static int min = 0;
-    static int max = 100_000;
-    static Random rand = new Random();
+public class TemplateInsertMiddleArrayList {
+    static int SIZE = "size";
+    static int loopSize = "loopSize";
 
 
-    private static void insertMiddleArrayList(ArrayList<Integer> list, int n) {
+    private static void insertMiddleArrayList(ArrayList<"Type"> list, "Type" n) {
         list.add(list.size() / 2, n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        int size = 1000;
-        ArrayList<Integer> list = new ArrayList<Integer>(5_000_000+size);
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),size);
-        ArrayListAux.insertRandomNumbers(list,SIZE);
-        int num = rand.nextInt((max - min) + 1) + min;
-        Runtime.getRuntime().exec("kill -USR1 " + args[0]);
+        ArrayList<"Type"> list = new ArrayList<"Type">(SIZE+loopSize);
+        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
+        ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
+        "Type" num = ArrayListAux.getRandomValueOfType(""Type"");
+        Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
@@ -37,6 +33,6 @@ public class InsertMiddleArrayList {
         }
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
         WritePid.writeTargetProgInfo(timeStamp,i);
-        Runtime.getRuntime().exec("kill -USR2 " + args[0]);
+        Runtime.getRuntime().exec(new String[] { "kill", "-USR2", args[0] });
     }
 }

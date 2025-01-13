@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import java_progs.aux.WritePid;
 
@@ -29,10 +31,23 @@ public class Runner {
     static long startTime;
     static long endTime;
     static String frequency = ".1";
-    static String loopSize = "" + 20_000_000;
+    static String loopSize = "";
     static String lastMeasurement = "";
     static HashSet<String> featuresName = new HashSet<>();
-    static long tmpFileNumber = 0;
+    private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();  // Use all available processors
+
+
+
+    /*public static void main2(String[] args) {
+        File[] programs = getAllProgramsNames();  // Assuming this method returns all files
+        ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
+
+        for (File program : programs) {
+            executor.submit(() -> processFile(program));
+        }
+
+        executor.shutdown();  // Initiates shutdown after all tasks are submitted
+    }*/
 
     public static void main(String[] args) throws IOException, InterruptedException {
         File[] programs = getAllProgramsNames();
@@ -180,8 +195,8 @@ public class Runner {
         getFeaturesFromParser(file, cpuUsage);
     }
 
-    private static void createFeaturesTempFile(Map<String, Object> methodfeatures) throws IOException{
-        try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter("tmp/tmp_"+tmpFileNumber+".csv"))) {
+    private static void createFeaturesTempFile(String fileName,Map<String, Object> methodfeatures) throws IOException{
+        try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter("tmp/tmp_"+fileName+".csv"))) {
             // Write the header row
             List<String> featureList = new ArrayList<>(methodfeatures.keySet());
             csvWriter.write(String.join(",", featureList));
@@ -198,7 +213,7 @@ public class Runner {
                 csvWriter.write(String.join(",", row));
                 csvWriter.newLine();
         }
-        tmpFileNumber++;
+        //tmpFileNumber++;
     }
 
     private static void getFeaturesFromParser(String file, String cpuUsage) throws IOException {
@@ -209,7 +224,7 @@ public class Runner {
         Map<String, Object> methodfeatures = methods.get(methodName);
         featuresName.addAll(methodfeatures.keySet());
         methodfeatures.put("EnergyUsed", cpuUsage);
-        createFeaturesTempFile(methodfeatures);
+        createFeaturesTempFile(file,methodfeatures);
         //System.out.println(methodfeatures);
     }
 

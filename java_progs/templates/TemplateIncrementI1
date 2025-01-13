@@ -1,0 +1,35 @@
+package java_progs.progs;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+
+import java_progs.aux.ArrayListAux;
+import java_progs.aux.WritePid;
+
+public class TemplateIncrementI1 {
+    static int SIZE = "size";
+    static int loopSize = "loopSize";
+
+    private static "Type" incrementI1("Type" n) {
+        return n++;
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        int sum = ArrayListAux.getDeafaultValues(""Type"");
+        "Type" defaultNum = ArrayListAux.getDeafaultValues(""Type"");
+        Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
+        Thread.sleep(100);
+        long begin = System.nanoTime();
+        long end = begin;
+        int i = 0;
+        while (end - begin < 1_000_000_000) {
+            sum += incrementI1(defaultNum);
+            end = System.nanoTime();
+            i++;
+        }
+        System.out.println("Final sum: " + sum);
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
+        WritePid.writeTargetProgInfo(timeStamp,i);
+        Runtime.getRuntime().exec(new String[] { "kill", "-USR2", args[0] });
+    }
+}

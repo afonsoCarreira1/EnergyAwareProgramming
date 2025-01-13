@@ -102,6 +102,30 @@ public class ArrayListAux {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T getDeafaultValues(String type){
+        switch (type.toLowerCase()) {
+            case "int":
+                return (T) Integer.valueOf(0);
+            case "double":
+                return (T) Double.valueOf(0.0);
+            case "float":
+                return (T) Float.valueOf(0f);
+            case "long":
+                return (T) Long.valueOf(0);
+            case "boolean":
+                return (T) Boolean.valueOf(false);
+            case "short":
+                return (T) Short.valueOf("0");
+            case "integer":
+                return (T) Integer.valueOf(0);
+            case "character":
+                return (T) Character.valueOf('a');
+            default:
+                throw new IllegalArgumentException("Unsupported type: " + type);
+        }
+    }
+
     public static Boolean areInputsFine(long inputSize, long memoryUsageOfType) {
         return true;
     }

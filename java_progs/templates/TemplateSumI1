@@ -15,7 +15,7 @@ public class TemplateSumI1 {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        int sum = ArrayListAux.getDeafaultValues(""Type"");
+        "Type" sum = ArrayListAux.getDeafaultValues(""Type"");
         "Type" n1 = ArrayListAux.getRandomValueOfType(""Type"");
         "Type" n2 = ArrayListAux.getRandomValueOfType(""Type"");
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });

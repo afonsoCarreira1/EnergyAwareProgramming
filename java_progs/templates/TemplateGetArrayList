@@ -19,7 +19,7 @@ public class TemplateGetArrayList {
         ArrayList<"Type"> list = new ArrayList<"Type">(SIZE);
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
         ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
-        int num = ArrayListAux.getRandomNumber();
+        int num = ArrayListAux.getRandomIndex(SIZE);
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
         Thread.sleep(100);
         long begin = System.nanoTime();

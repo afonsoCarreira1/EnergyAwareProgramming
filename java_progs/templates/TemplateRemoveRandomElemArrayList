@@ -16,23 +16,30 @@ public class TemplateRemoveRandomElemArrayList {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ArrayList<"Type"> list = new ArrayList<"Type">(SIZE);
+        int i = 0;
+        try {
+            ArrayList<"Type"> list = new ArrayList<"Type">(SIZE);
         ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
-        int num = ArrayListAux.getRandomNumberHalved();
+        int pos = ArrayListAux.getRandomIndexQuartered(SIZE);
         Runtime.getRuntime().exec(new String []{"kill","-USR1",args[0]});
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
-        int i = 0;
         while (end - begin < 1000000000/*1s*/) {
-            removeRandomElemArrayList(list,num);
+            removeRandomElemArrayList(list,pos);
             end = System.nanoTime();
             i++;
         }
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
         WritePid.writeTargetProgInfo(timeStamp,i);
         Runtime.getRuntime().exec(new String []{"kill","-USR2",args[0]});
+        } catch (Exception e) {
+            String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
+            WritePid.writeTargetProgInfo(timeStamp,i);
+            Runtime.getRuntime().exec(new String []{"kill","-USR2",args[0]});
+        }
+        
     }
     
 }

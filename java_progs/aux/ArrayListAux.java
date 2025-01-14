@@ -36,12 +36,17 @@ public class ArrayListAux {
         return list;
     }
 
-    public static int getRandomNumber() {
-        return rand.nextInt((max - min) + 1) + min;
+    public static int getRandomIndex(int listSize) {
+        return rand.nextInt(listSize);
+        
     }
 
-    public static int getRandomNumberHalved() {
-        return rand.nextInt(((max/2) - min) + 1) + min;
+    public static int getRandomIndexHalved(int listSize) {
+        return rand.nextInt((listSize-1)/2);  
+    }
+
+    public static int getRandomIndexQuartered(int listSize) {
+        return rand.nextInt((listSize-1)/4);  
     }
 
     @SuppressWarnings("unchecked")

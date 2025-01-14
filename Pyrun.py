@@ -45,7 +45,7 @@ class Runner:
     def m(self,file,run_c_prog):
         if run_c_prog:self.run_c_prog(file)
         else:
-            self.target = subprocess.Popen(['java', f'java_progs/{file}', str(os.getpid())],stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.ROOT_DIR,)
+            self.target = subprocess.Popen(['java', f'java_progs/out/java_progs/progs/{file}', str(os.getpid())],stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.ROOT_DIR,)
             time.sleep(.5)
             with open("java_progs/pid.txt", 'r') as file:
                 child_pid = int(file.read().split('\n')[0])

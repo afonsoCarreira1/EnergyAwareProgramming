@@ -48,9 +48,15 @@ trap_stop() {
     echo "Time was ${time_difference}s" 
 }
 
+#"java", 
+#                "-cp", 
+#                "java_progs/out", 
+#                "java_progs.progs." + file, 
+#                Long.toString(ProcessHandle.current().pid())
+
 get_program_to_run(){
     if [ "$runCProgram" == "f" ]; then
-        sudo java java_progs/$filename $myPID &
+        sudo java -cp java_progs/out java_progs.progs.$filename $myPID &
     else
         sudo ./c_progs/$filename $myPID &
     fi

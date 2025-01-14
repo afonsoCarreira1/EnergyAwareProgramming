@@ -19,7 +19,7 @@ public class TemplateSetElemArrayList {
         ArrayList<"Type"> list = new ArrayList<"Type">(SIZE);
         ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
-        int pos = ArrayListAux.getRandomNumber();
+        int pos = ArrayListAux.getRandomIndex(SIZE);
         "Type" num = ArrayListAux.getRandomValueOfType(""Type"");
         Runtime.getRuntime().exec(new String []{"kill","-USR1",args[0]});
         Thread.sleep(100);

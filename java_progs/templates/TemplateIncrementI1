@@ -15,7 +15,7 @@ public class TemplateIncrementI1 {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        int sum = ArrayListAux.getDeafaultValues(""Type"");
+        "Type" sum = ArrayListAux.getDeafaultValues(""Type"");
         "Type" defaultNum = ArrayListAux.getDeafaultValues(""Type"");
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
         Thread.sleep(100);

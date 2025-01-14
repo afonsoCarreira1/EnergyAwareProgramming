@@ -21,35 +21,35 @@ public class CreateTemplates {
                 100,
                 1_000,
                 10_000,
-                50_000,
+                //50_000,
                 100_000,
-                250_000,
+                //250_000,
                 500_000,
                 1_000_000,
-                2_000_000,
+                //2_000_000,
                 5_000_000,
-                10_000_000,
-                20_000_000,
+                //10_000_000,
+                //20_000_000,
                 50_000_000,
-                100_000_000,
+                //100_000_000,
                 200_000_000,
-                500_000_000,
-                1_000_000_000
+                //500_000_000,
+                //1_000_000_000
         };
         static int[] loopSizes = new int[] {
                 1,
                 10,
                 100,
-                500,
+                //500,
                 1_000,
-                2_500,
+                //2_500,
                 5_000,
-                7_500,
+                //7_500,
                 10_000,
                 20_000,
-                30_000,
+                //30_000,
                 50_000,
-                75_000,
+                //75_000,
                 100_000
         };
 
@@ -105,7 +105,8 @@ public class CreateTemplates {
                 filePath = filePath.replace("Template", "");
                 boolean hasLoopSize = program.contains("loopSize");
                 for (TypesInfo typeInfo : typesInfo) {
-                    String programTemp = program.replace("\"Type\"", typeInfo.type);
+                    if (skipChar(fileName,typeInfo)) continue;
+                    String programTemp = program.replace("\"Type\"", typeInfo.type);;
                     ArrayList<String> newPrograms = replaceSizes(programTemp, typeInfo, hasLoopSize);
                     for (String newProgram : newPrograms) {
                         String newMethodName = Introspector.decapitalize(fileName);
@@ -120,6 +121,13 @@ public class CreateTemplates {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private static Boolean skipChar(String fileName,TypesInfo typeInfo) {
+        if (fileName.toLowerCase().contains("sum") || fileName.toLowerCase().contains("increment")){
+            if (typeInfo.type.equals("Character") || typeInfo.type.equals("char")) {return true;}
+        }
+        return false;
     }
 
     private static ArrayList<String> replaceSizes(String program, TypesInfo typeInfo, boolean hasLoopSize) {

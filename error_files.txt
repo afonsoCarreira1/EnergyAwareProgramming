@@ -1,9 +1,0 @@
-java_progs/progs/AddAllElemArrayList200.java
-java_progs/progs/ClearArrayList78.java
-java_progs/progs/ContainsElemTrueArrayList376.java
-java_progs/progs/ContainsElemTrueArrayList419.java
-java_progs/progs/IndexOfElemFalseArrayList218.java
-java_progs/progs/IndexOfElemTrueArrayList188.java
-java_progs/progs/InsertMiddleArrayList181.java
-java_progs/progs/InsertMiddleArrayList410.java
-java_progs/progs/LastIndexOfElemFalseArrayList75.java

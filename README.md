@@ -1,4 +1,4 @@
-## GraphDisplay.py
+## GraphDisplay.py (OUTDATED)
 This file runs the powerjoular files stored in 4orch_fib or matrixMulFiles.
 
 To run:

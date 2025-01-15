@@ -27,7 +27,6 @@ public class TemplateAddAllElemList {
         }
         ArrayListAux.insertRandomNumbers(list, SIZE,""Type"");
         TemplatesAux.sendStartSignalToOrchestrator(args[0]);
-        Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         while (end - begin < 1000000000/* 1s */&& iter < loopSize) {

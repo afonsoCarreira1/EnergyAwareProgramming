@@ -1,11 +1,10 @@
 package java_progs.progs;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util."ImportListCollection";
 
 import java_progs.aux.ArrayListAux;
-import java_progs.aux.WritePid;
+import java_progs.aux.TemplatesAux;
 
 public class TemplateIndexOfElemTrueList {
     static int SIZE = "size";
@@ -16,23 +15,21 @@ public class TemplateIndexOfElemTrueList {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
+        int iter = 0;
+        try{
+            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
         ArrayListAux.insertRandomNumbers(list, SIZE,""Type"");
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), 0);
         "Type" n = ArrayListAux.getRandomValueOfType(""Type"");
-        Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
-        Thread.sleep(100);
+        TemplatesAux.sendStartSignalToOrchestrator(args[0]);
         long begin = System.nanoTime();
         long end = begin;
-        int i = 0;
         while (end - begin < 1000000000/* 1s */) {
             indexOfElemTrueList(list, n);
             end = System.nanoTime();
-            i++;
+            iter++;
         }
-        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
-        WritePid.writeTargetProgInfo(timeStamp, i);
-        Runtime.getRuntime().exec(new String[] { "kill", "-USR2", args[0] });
+        }catch (Exception e) {TemplatesAux.writeErrorInFile(""filename"","Error caught by th program.\n"+e.getMessage());}
+        finally {TemplatesAux.sendStopSignalToOrchestrator(args[0],iter);}
     }
 
 }

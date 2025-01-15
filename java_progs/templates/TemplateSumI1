@@ -1,10 +1,9 @@
 package java_progs.progs;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 
 import java_progs.aux.ArrayListAux;
-import java_progs.aux.WritePid;
+import java_progs.aux.TemplatesAux;
 
 public class TemplateSumI1 {
     static int SIZE = "size";
@@ -15,22 +14,21 @@ public class TemplateSumI1 {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        "Type" sum = ArrayListAux.getDeafaultValues(""Type"");
-        "Type" n1 = ArrayListAux.getRandomValueOfType(""Type"");
-        "Type" n2 = ArrayListAux.getRandomValueOfType(""Type"");
-        Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
-        Thread.sleep(100);
-        long begin = System.nanoTime();
-        long end = begin;
-        int i = 0;
-        while (end - begin < 1_000_000_000) {
-            sum += sumI1(n1,n2);
-            end = System.nanoTime();
-            i++;
-        }
-        System.out.println("Final sum: " + sum);
-        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
-        WritePid.writeTargetProgInfo(timeStamp,i);
-        Runtime.getRuntime().exec(new String[] { "kill", "-USR2", args[0] });
+        int iter = 0;
+        try {
+            "Type" sum = ArrayListAux.getDeafaultValues(""Type"");
+            "Type" n1 = ArrayListAux.getRandomValueOfType(""Type"");
+            "Type" n2 = ArrayListAux.getRandomValueOfType(""Type"");
+            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
+            long begin = System.nanoTime();
+            long end = begin;
+            while (end - begin < 1_000_000_000) {
+                sum += sumI1(n1,n2);
+                end = System.nanoTime();
+                iter++;
+            }
+            System.out.println("Final sum: " + sum);
+        }catch (Exception e) {TemplatesAux.writeErrorInFile(""filename"","Error caught by th program.\n"+e.getMessage());}
+        finally {TemplatesAux.sendStopSignalToOrchestrator(args[0],iter);}
     }
 }

@@ -12,9 +12,10 @@ public class TemplatesAux {
         Runtime.getRuntime().exec(new String[] { "kill", "-USR2", pid });
     }
 
-    public static void sendStartSignalToOrchestrator(String pid) throws IOException {
+    public static void sendStartSignalToOrchestrator(String pid) throws IOException, InterruptedException {
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), 0);
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", pid });
+        Thread.sleep(100);
     }
 
     public static void writeErrorInFile(String filename, String errorMessage) {

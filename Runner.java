@@ -39,7 +39,7 @@ public class Runner {
             System.out.println(i);
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/progs/", "").replace(".java", "");//args[0];
-                //if (!(args[0].equals("test") && fileName.equals("SetElemArrayList110"))) continue;//just to test one prog file
+                //if (!(args[0].equals("test") && fileName.equals("AddAllElemListArrayList0"))) continue;//just to test one prog file
                 System.out.println("Starting profile for " + fileName + " program");
                 readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);

@@ -2,7 +2,7 @@ package java_progs.progs;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util."ImportListCollection";
 
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
@@ -11,15 +11,17 @@ public class TemplateClearArrayList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
     
-    private static void clearArrayList(ArrayList<"Type"> list) {
+    private static void clearArrayList("ListCollection"<"Type"> list) {
         list.clear();
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         @SuppressWarnings("unchecked")
-        ArrayList<"Type">[] lists = new ArrayList[loopSize];
+        "ListCollection"<"Type">[] lists = new "ListCollection"[loopSize];
         for (int i = 0; i < loopSize; i++) {
-            lists[i] = ArrayListAux.insertRandomNumbers(new ArrayList<"Type">(SIZE),SIZE,""Type"");
+            "ListCollection"<"Type"> l = new "ListCollection"<"Type">"(SIZE)";
+            ArrayListAux.insertRandomNumbers(l,SIZE,""Type"");
+            lists[i] = l;
         }
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
         Runtime.getRuntime().exec(new String []{"kill","-USR1",args[0]});

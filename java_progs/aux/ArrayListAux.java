@@ -1,6 +1,7 @@
 package java_progs.aux;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class ArrayListAux {
@@ -9,7 +10,7 @@ public class ArrayListAux {
     public static Random rand = new Random();
 
     @SuppressWarnings("unchecked")
-    public static <T> ArrayList<T> insertRandomNumbers(ArrayList<T> list, int size, String type) {
+    public static <T> List<T> insertRandomNumbers(List<T> list, int size, String type) {
             for (int i = 0; i < size; i++) {
                 if (type.equals("Integer")) {
                    int randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;

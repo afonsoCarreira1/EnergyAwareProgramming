@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import java_progs.aux.WritePid;
 
@@ -34,20 +32,6 @@ public class Runner {
     static String loopSize = "";
     static String lastMeasurement = "";
     static HashSet<String> featuresName = new HashSet<>();
-    private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();  // Use all available processors
-
-
-
-    /*public static void main2(String[] args) {
-        File[] programs = getAllProgramsNames();  // Assuming this method returns all files
-        ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
-
-        for (File program : programs) {
-            executor.submit(() -> processFile(program));
-        }
-
-        executor.shutdown();  // Initiates shutdown after all tasks are submitted
-    }*/
 
     public static void main(String[] args) throws IOException, InterruptedException {
         File[] programs = getAllProgramsNames();

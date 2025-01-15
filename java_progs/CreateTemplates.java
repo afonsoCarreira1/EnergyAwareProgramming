@@ -104,9 +104,14 @@ public class CreateTemplates {
                 String filePath = template.toString().replace("templates", "progs");
                 filePath = filePath.replace("Template", "");
                 boolean hasLoopSize = program.contains("loopSize");
+                String[] listCollections = new String[] {"ArrayList","Vector","LinkedList","Stack","CopyOnWriteArrayList"};
+            for (String listCollection : listCollections) {
+                String pTemp = program.replace("\"ListCollection\"", listCollection);
+                pTemp = changeListPackage(listCollection,pTemp);
+                pTemp = changeListSize(listCollection,pTemp);
                 for (TypesInfo typeInfo : typesInfo) {
                     if (skipChar(fileName,typeInfo)) continue;
-                    String programTemp = program.replace("\"Type\"", typeInfo.type);;
+                    String programTemp = pTemp.replace("\"Type\"", typeInfo.type);;
                     ArrayList<String> newPrograms = replaceSizes(programTemp, typeInfo, hasLoopSize);
                     for (String newProgram : newPrograms) {
                         String newMethodName = Introspector.decapitalize(fileName);
@@ -117,10 +122,22 @@ public class CreateTemplates {
                     }
                 }
             }
+                
+            }
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private static String changeListPackage(String listCollection,String program) {
+        if (listCollection.equals("CopyOnWriteArrayList")) return program.replace("\"ImportListCollection\"", "concurrent."+listCollection);
+        else return program.replace("\"ImportListCollection\"", listCollection);
+    }
+
+    private static String changeListSize(String listCollection,String program) {
+        if (listCollection.equals("ArrayList") || listCollection.equals("Vector")) return program.replaceAll("\"\\((.*)\\)\"", "\\($1\\)");
+                else return program.replaceAll("\"\\(.*\\)\"", "\\(\\)");
     }
 
     private static Boolean skipChar(String fileName,TypesInfo typeInfo) {

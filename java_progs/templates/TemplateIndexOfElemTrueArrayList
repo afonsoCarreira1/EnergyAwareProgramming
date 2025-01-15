@@ -2,7 +2,7 @@ package java_progs.progs;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util."ImportListCollection";
 
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
@@ -11,12 +11,12 @@ public class TemplateIndexOfElemTrueArrayList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
 
-    private static int indexOfElemTrueArrayList (ArrayList<"Type"> list, "Type" n) {
+    private static int indexOfElemTrueArrayList ("ListCollection"<"Type"> list, "Type" n) {
         return list.indexOf(n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ArrayList<"Type"> list = new ArrayList<"Type">(SIZE);
+        "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
         ArrayListAux.insertRandomNumbers(list, SIZE,""Type"");
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), 0);
         "Type" n = ArrayListAux.getRandomValueOfType(""Type"");

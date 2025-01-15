@@ -2,7 +2,7 @@ package java_progs.progs;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util."ImportListCollection";
 
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
@@ -12,18 +12,18 @@ public class TemplateCloneArrayList {
     static int loopSize = "loopSize";
 
     @SuppressWarnings("unchecked")
-    private static ArrayList<"Type"> cloneArrayList(ArrayList<"Type"> list) {
-        return (ArrayList<"Type">) list.clone();
+    private static "ListCollection"<"Type"> cloneArrayList("ListCollection"<"Type"> list) {
+        return ("ListCollection"<"Type">) list.clone();
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ArrayList<"Type"> list = new ArrayList<"Type">(SIZE);
+        "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
         ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
         Thread.sleep(100);
         @SuppressWarnings("unused")
-        ArrayList<"Type"> tempArrayList = new ArrayList<"Type">();
+        "ListCollection"<"Type"> tempArrayList = new "ListCollection"<"Type">();
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;

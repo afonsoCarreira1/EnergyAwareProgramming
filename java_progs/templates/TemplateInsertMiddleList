@@ -7,33 +7,32 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class TemplateSetElemArrayList {
+public class TemplateInsertMiddleList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
-    
-    private static void setElemArrayList("ListCollection"<"Type"> list,int i, "Type" n) {
-        list.set(i,n);
+
+
+    private static void insertMiddleList("ListCollection"<"Type"> list, "Type" n) {
+        list.add(list.size() / 2, n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
-        ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
+        "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE+loopSize)";
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
-        int pos = ArrayListAux.getRandomIndex(SIZE);
+        ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
         "Type" num = ArrayListAux.getRandomValueOfType(""Type"");
-        Runtime.getRuntime().exec(new String []{"kill","-USR1",args[0]});
+        Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/*1s*/) {
-            setElemArrayList(list,pos,num);
+            insertMiddleList(list,num);
             end = System.nanoTime();
             i++;
         }
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
         WritePid.writeTargetProgInfo(timeStamp,i);
-        Runtime.getRuntime().exec(new String []{"kill","-USR2",args[0]});
+        Runtime.getRuntime().exec(new String[] { "kill", "-USR2", args[0] });
     }
-    
 }

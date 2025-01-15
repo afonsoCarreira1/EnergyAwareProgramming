@@ -1,22 +1,23 @@
 package java_progs.progs;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util."ImportListCollection";
 
 import java_progs.aux.ArrayListAux;
-import java_progs.aux.WritePid;
+import java_progs.aux.TemplatesAux;
 
-public class TemplateAddAllElemArrayList {
+public class TemplateAddAllElemList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
 
-    private static Boolean addAllElemArrayList("ListCollection"<"Type"> list, "ListCollection"<"Type"> list2) {
+    private static Boolean addAllElemList("ListCollection"<"Type"> list, "ListCollection"<"Type"> list2) {
         return list.addAll(list2);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE*loopSize)";
+        int iter = 0;
+        try {
+            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE*loopSize)";
         @SuppressWarnings("unchecked")
         "ListCollection"<"Type">[] lists = new "ListCollection"[loopSize];
         for (int i = 0; i < loopSize; i++) {
@@ -25,20 +26,17 @@ public class TemplateAddAllElemArrayList {
             lists[i] = l;
         }
         ArrayListAux.insertRandomNumbers(list, SIZE,""Type"");
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), 0);
-        Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
+        TemplatesAux.sendStartSignalToOrchestrator(args[0]);
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
-        int i = 0;
-        while (end - begin < 1000000000/* 1s */&& i < loopSize) {
-            addAllElemArrayList(list, lists[i]);
+        while (end - begin < 1000000000/* 1s */&& iter < loopSize) {
+            addAllElemList(list, lists[iter]);
             end = System.nanoTime();
-            i++;
+            iter++;
         }
-        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
-        WritePid.writeTargetProgInfo(timeStamp, i);
-        Runtime.getRuntime().exec(new String[] { "kill", "-USR2", args[0] });
+        } catch (Exception e) {TemplatesAux.writeErrorInFile(""filename"","Error caught by th program.\n"+e.getMessage());}
+        finally {TemplatesAux.sendStopSignalToOrchestrator(args[0],iter);}
     }
     
 }

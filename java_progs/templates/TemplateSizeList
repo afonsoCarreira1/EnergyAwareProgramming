@@ -7,10 +7,10 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class TemplateSizeArrayList {
+public class TemplateSizeList {
     static int SIZE = "size";
 
-    private static int sizeArrayList("ListCollection"<"Type"> list) {
+    private static int sizeList("ListCollection"<"Type"> list) {
         return list.size();
     }
 
@@ -24,7 +24,7 @@ public class TemplateSizeArrayList {
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/*1s*/) {
-            sizeArrayList(list);
+            sizeList(list);
             end = System.nanoTime();
             i++;
         }

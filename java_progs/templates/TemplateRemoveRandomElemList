@@ -7,11 +7,11 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class TemplateRemoveRandomElemArrayList {
+public class TemplateRemoveRandomElemList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
     
-    private static void removeRandomElemArrayList("ListCollection"<"Type"> list,int n) {
+    private static void removeRandomElemList("ListCollection"<"Type"> list,int n) {
         list.remove(n);
     }
 
@@ -27,7 +27,7 @@ public class TemplateRemoveRandomElemArrayList {
         long begin = System.nanoTime();
         long end = begin;
         while (end - begin < 1000000000/*1s*/) {
-            removeRandomElemArrayList(list,pos);
+            removeRandomElemList(list,pos);
             end = System.nanoTime();
             i++;
         }

@@ -98,7 +98,6 @@ public class CreateTemplates {
         try {
             File[] templates = getAllTemplates();
             for (File template : templates) {
-                int progNumber = 0;
                 String program = readFile(template.toString());
                 String fileName = template.toString().replace("java_progs/templates/Template", "");
                 String filePath = template.toString().replace("templates", "progs");
@@ -106,6 +105,7 @@ public class CreateTemplates {
                 boolean hasLoopSize = program.contains("loopSize");
                 String[] listCollections = new String[] {"ArrayList","Vector","LinkedList","Stack","CopyOnWriteArrayList"};
             for (String listCollection : listCollections) {
+                int progNumber = 0;
                 String pTemp = program.replace("\"ListCollection\"", listCollection);
                 pTemp = changeListPackage(listCollection,pTemp);
                 pTemp = changeListSize(listCollection,pTemp);
@@ -115,9 +115,10 @@ public class CreateTemplates {
                     ArrayList<String> newPrograms = replaceSizes(programTemp, typeInfo, hasLoopSize);
                     for (String newProgram : newPrograms) {
                         String newMethodName = Introspector.decapitalize(fileName);
-                        newProgram = newProgram.replace("Template" + fileName, fileName + progNumber);
-                        newProgram = newProgram.replace(newMethodName, newMethodName + progNumber);
-                        createJavaProgramFile(filePath + progNumber + ".java", newProgram);
+                        newProgram = newProgram.replace("Template" + fileName, fileName+listCollection+progNumber);
+                        newProgram = newProgram.replace(newMethodName, newMethodName + listCollection + progNumber);
+                        newProgram = newProgram.replace("\"filename\"",listCollection+progNumber);
+                        createJavaProgramFile(filePath +listCollection+ progNumber + ".java", newProgram);
                         progNumber++;
                     }
                 }

@@ -7,30 +7,27 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class TemplateClearArrayList {
+public class TemplateSetElemList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
     
-    private static void clearArrayList("ListCollection"<"Type"> list) {
-        list.clear();
+    private static void setElemList("ListCollection"<"Type"> list,int i, "Type" n) {
+        list.set(i,n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        @SuppressWarnings("unchecked")
-        "ListCollection"<"Type">[] lists = new "ListCollection"[loopSize];
-        for (int i = 0; i < loopSize; i++) {
-            "ListCollection"<"Type"> l = new "ListCollection"<"Type">"(SIZE)";
-            ArrayListAux.insertRandomNumbers(l,SIZE,""Type"");
-            lists[i] = l;
-        }
+        "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
+        ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
+        int pos = ArrayListAux.getRandomIndex(SIZE);
+        "Type" num = ArrayListAux.getRandomValueOfType(""Type"");
         Runtime.getRuntime().exec(new String []{"kill","-USR1",args[0]});
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;
-        while (end - begin < 1000000000/*1s*/ && i < loopSize) {
-            clearArrayList(lists[i]);
+        while (end - begin < 1000000000/*1s*/) {
+            setElemList(list,pos,num);
             end = System.nanoTime();
             i++;
         }
@@ -38,4 +35,5 @@ public class TemplateClearArrayList {
         WritePid.writeTargetProgInfo(timeStamp,i);
         Runtime.getRuntime().exec(new String []{"kill","-USR2",args[0]});
     }
+    
 }

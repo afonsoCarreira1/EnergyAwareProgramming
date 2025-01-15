@@ -7,11 +7,11 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class TemplateLastIndexOfElemFalseArrayList {
+public class TemplateLastIndexOfElemFalseList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
 
-    private static int lastIndexOfElemFalseArrayList ("ListCollection"<"Type"> list, "Type" n) {
+    private static int lastIndexOfElemFalseList ("ListCollection"<"Type"> list, "Type" n) {
         return list.lastIndexOf(n);
     }
 
@@ -26,7 +26,7 @@ public class TemplateLastIndexOfElemFalseArrayList {
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/* 1s */) {
-            lastIndexOfElemFalseArrayList(list, num);
+            lastIndexOfElemFalseList(list, num);
             end = System.nanoTime();
             i++;
         }

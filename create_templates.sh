@@ -1,11 +1,18 @@
 #!/bin/bash
 
-sudo rm -r java_progs/progs/*
+sudo rm -r java_progs/progs/* #remove java programs
+rm java_progs/out/java_progs/progs/* #remove compiled classes
 javac java_progs/CreateTemplates.java
 java java_progs/CreateTemplates
+
+#compile aux files
 javac java_progs/aux/ArrayListAux.java
+javac java_progs/aux/TemplatesAux.java
+javac java_progs/aux/WritePid.java
 mv java_progs/aux/ArrayListAux.class java_progs/out/java_progs/aux
-rm java_progs/out/java_progs/progs/* #remove compiled classes
+mv java_progs/aux/TemplatesAux.class java_progs/out/java_progs/aux
+mv java_progs/aux/WritePid.class java_progs/out/java_progs/aux
+
 
 
 #echo Compiling all Java programs...

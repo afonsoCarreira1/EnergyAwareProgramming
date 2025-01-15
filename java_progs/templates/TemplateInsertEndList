@@ -7,12 +7,12 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class TemplateInsertStartArrayList {
+public class TemplateInsertEndList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
 
-    private static void insertStartArrayList("ListCollection"<"Type"> list, "Type" n) {
-        list.add(0, n);
+    private static void insertEndList("ListCollection"<"Type"> list, "Type" n) {
+        list.add(n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -26,7 +26,7 @@ public class TemplateInsertStartArrayList {
         long end = begin;
         int i = 0;
         while (end - begin < 1000000000/*1s*/) {
-            insertStartArrayList(list,num);
+            insertEndList(list,num);
             end = System.nanoTime();
             i++;
         }

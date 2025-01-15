@@ -7,31 +7,32 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.WritePid;
 
-public class TemplateGetArrayList {
+public class TemplateIndexOfElemTrueList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
 
-    private static "Type" getArrayList("ListCollection"<"Type"> list, int n) {
-        return list.get(n);
+    private static int indexOfElemTrueList ("ListCollection"<"Type"> list, "Type" n) {
+        return list.indexOf(n);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
-        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()),0);
-        ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
-        int num = ArrayListAux.getRandomIndex(SIZE);
+        ArrayListAux.insertRandomNumbers(list, SIZE,""Type"");
+        WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), 0);
+        "Type" n = ArrayListAux.getRandomValueOfType(""Type"");
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", args[0] });
         Thread.sleep(100);
         long begin = System.nanoTime();
         long end = begin;
         int i = 0;
-        while (end - begin < 1000000000/*1s*/) {
-            getArrayList(list,num);
+        while (end - begin < 1000000000/* 1s */) {
+            indexOfElemTrueList(list, n);
             end = System.nanoTime();
             i++;
         }
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
-        WritePid.writeTargetProgInfo(timeStamp,i);
+        WritePid.writeTargetProgInfo(timeStamp, i);
         Runtime.getRuntime().exec(new String[] { "kill", "-USR2", args[0] });
     }
+
 }

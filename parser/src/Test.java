@@ -1,15 +1,23 @@
 import java.util.ArrayList;
 //import java.util.HashMap;
 //import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class Test {
 
-    @SuppressWarnings("unused")
-    private static void insertInEnd(int n) {
-        ArrayList<Integer> list = new ArrayList<>();
-        list.add(n);
+    public static void main(String[] args) {
+        HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures("file");
+        Map<String, Object> methodfeatures = methods.get("t");
+        System.out.println(methodfeatures);
     }
+
+    //@SuppressWarnings("unused")
+    //private static void insertInEnd(int n) {
+    //    ArrayList<Integer> list = new ArrayList<>();
+    //    list.add(n);
+    //}
 
     /*public static void main(String[] args) {
         //ArrayList<Integer> l = new ArrayList<Integer>();

@@ -1,27 +1,39 @@
 import spoon.Launcher;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.*;
+import spoon.reflect.cu.CompilationUnit;
 import spoon.reflect.declaration.*;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.visitor.CtImportVisitor;
 import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.support.reflect.code.CtExpressionImpl;
+import spoon.support.reflect.declaration.CtImportImpl;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.eclipse.jdt.core.dom.IfStatement;
 
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
+
 public class ASTFeatureExtractor {
 
     public static HashMap<String, Map<String, Object>> getFeatures(String file) {
-        String inputPath = "java_progs/progs/"+file+".java";
+        // String inputPath = "java_progs/progs/"+file+".java";
+        String inputPath = "src/TestFile.java";
         Path currentDir = Paths.get("").toAbsolutePath(); // Get the current directory
         Path resolvedPath = currentDir.resolve(inputPath).normalize(); // Resolve and normalize the path
         // Initialize Spoon launcher
@@ -32,62 +44,48 @@ public class ASTFeatureExtractor {
         HashMap<String, Map<String, Object>> methodsFeatures = new HashMap<>();
         HashMap<String, CtMethod> methodsBody = new HashMap<>();
 
+        Set<String> importSet = new HashSet<>();
+        readImportFromFile(resolvedPath.toString(),importSet);
+
         // obtain all methods features
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-            //System.out.println("Analyzing method: " + method.getSimpleName());
-            Map<String, Object> features = extractFeatures(method,"java_progs."+file);
+            // System.out.println("Analyzing method: " + method.getSimpleName());
+            Map<String, Object> features = extractFeatures(method, "java_progs." + file,importSet);
             methodsFeatures.put(method.getSimpleName(), features);
             methodsBody.put(method.getSimpleName(), method);
-            //System.out.println(features);
-            //System.out.println("---------------------------------");
+            // System.out.println(features);
+            // System.out.println("---------------------------------");
         }
 
         HashMap<String, Map<String, Object>> methodsFullChecked = new HashMap();
 
         // for each method associate it with features of other methods
         for (CtMethod method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-            methodsFullChecked.put(method.getSimpleName(),mergeFeatures(method, methodsFeatures, methodsBody,new HashSet<String>()));
+            methodsFullChecked.put(method.getSimpleName(),
+                    mergeFeatures(method, methodsFeatures, methodsBody, new HashSet<String>()));
         }
-        //System.out.println(methodsFullChecked);
+        // System.out.println(methodsFullChecked);
         return methodsFullChecked;
     }
 
-    /* 
-    public static void main(String[] args) {
-        // Path to your Java file
-        //String inputPath = "src/Test.java";
-        String inputPath = "../java_progs/"+args[0]+".java";
-        Path currentDir = Paths.get("").toAbsolutePath(); // Get the current directory
-        Path resolvedPath = currentDir.resolve(inputPath).normalize(); // Resolve and normalize the path
-        // Initialize Spoon launcher
-        Launcher launcher = new Launcher();
-        launcher.addInputResource(resolvedPath.toString());
-        launcher.getEnvironment().setNoClasspath(true);
-        CtModel model = launcher.buildModel();
-        HashMap<String, Map<String, Object>> methodsFeatures = new HashMap<>();
-        HashMap<String, CtMethod> methodsBody = new HashMap<>();
-
-        // obtain all methods features
-        for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-            System.out.println("Analyzing method: " + method.getSimpleName());
-            Map<String, Object> features = extractFeatures(method,"java_progs."+args[0]);
-            methodsFeatures.put(method.getSimpleName(), features);
-            methodsBody.put(method.getSimpleName(), method);
-            System.out.println(features);
-            System.out.println("---------------------------------");
+    public static void readImportFromFile(String file,Set<String> importSet) {
+        File myObj = new File(file);
+        try (Scanner myReader = new Scanner(myObj)) {
+            StringBuilder f = new StringBuilder();
+            while (myReader.hasNextLine()) {
+                f.append(myReader.nextLine()).append("\n");
+            }
+            myReader.close();
+            Scanner scanner = new Scanner(f.toString());
+            Stream<MatchResult> stream = scanner.findAll(Pattern.compile("import.*;"));
+            stream.forEach(i -> importSet.add(i.group().replace("import", "").replace(";", "").strip()));
+            scanner.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-
-        HashMap<String, Map<String, Object>> methodsFullChecked = new HashMap();
-
-        // for each method associate it with features of other methods
-        for (CtMethod method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-            methodsFullChecked.put(method.getSimpleName(),mergeFeatures(method, methodsFeatures, methodsBody,new HashSet<String>()));
-        }
-        System.out.println(methodsFullChecked);
     }
 
-    */
-    public static Map<String, Object> extractFeatures(CtMethod<?> method,String path) {
+    public static Map<String, Object> extractFeatures(CtMethod<?> method, String path,Set<String> importSet) {
         Map<String, Object> features = new HashMap<>();
 
         // 1. Node Types Count
@@ -95,8 +93,8 @@ public class ASTFeatureExtractor {
         features.put("Assignments", method.getElements(new TypeFilter<>(CtAssignment.class)).size());
         features.put("BinaryOperators", method.getElements(new TypeFilter<>(CtBinaryOperator.class)).size());
         features.put("MethodInvocations", method.getElements(new TypeFilter<>(CtInvocation.class)).size());
-        
-        //count if the methods were called by a java collection or a custom object
+
+        // count if the methods were called by a java collection or a custom object
         Map<String, Integer> methodsUsed = new HashMap<>();
         for (CtInvocation op : method.getElements(new TypeFilter<>(CtInvocation.class))) {
             CtExpression<?> target = op.getTarget();
@@ -104,19 +102,19 @@ public class ASTFeatureExtractor {
                 CtTypeReference<?> targetType = target.getType();
                 if (targetType != null) {
                     String methodUsed = targetType.getQualifiedName();
-                    if (targetType.getQualifiedName().startsWith("java.util.")){
+                    if (targetType.getQualifiedName().startsWith("java.util.")) {
                         String removedComma = op.getExecutable().toString().replace(",", " | ");
-                        methodsUsed.merge(methodUsed+"."+removedComma, 1, Integer::sum);
-                    }else {
-                        if (!path.equals(op.getTarget().toString())) methodsUsed.merge("CustomObjectWithCustomMethod", 1, Integer::sum);
+                        methodsUsed.merge(methodUsed + "." + removedComma, 1, Integer::sum);
+                    } else {
+                        if (!path.equals(op.getTarget().toString()))
+                            methodsUsed.merge("CustomObjectWithCustomMethod", 1, Integer::sum);
                     }
                 }
-            } 
+            }
         }
         for (String key : methodsUsed.keySet()) {
             features.put(key, methodsUsed.get(key));
         }
-
 
         // 2. Depth of AST
         // features.put("ASTDepth", calculateASTDepth(method));
@@ -154,6 +152,10 @@ public class ASTFeatureExtractor {
         features.put("VariableCount", method.getElements(new TypeFilter<>(CtVariable.class)).size());
         features.put("Reassignments", countReassignments(method));
 
+        // 8. Get variables types
+        getVariablesType(method, features);
+
+        getUsedImportsInMethod(method, importSet,features);
         // 8. Cyclomatic Complexity
         // features.put("CyclomaticComplexity", calculateCyclomaticComplexity(method));
 
@@ -161,6 +163,71 @@ public class ASTFeatureExtractor {
         // features.put("MaxNestingLevel", calculateMaxNestingLevel(method));
 
         return features;
+    }
+
+    private static void getUsedImportsInMethod(CtMethod<?> method, Set<String> importSet,Map<String, Object> features) {
+        Set<String> usedImports = new HashSet<>();
+
+        // Find type references in the method body
+        List<CtTypeReference<?>> typeReferences = method.getElements(new TypeFilter<>(CtTypeReference.class));
+
+        for (CtTypeReference<?> typeRef : typeReferences) {
+            String qualifiedName = typeRef.getQualifiedName();
+            for (String importStatement : importSet) {
+                // Check if the import is part of the type reference
+                if (qualifiedName.startsWith(importStatement.replace("import ", "").replace(";", ""))) {
+                    usedImports.add(importStatement);
+                }
+            }
+        }
+        features.put("ImportsUsed", usedImports.size());
+    }
+
+    private static void getVariablesType(CtMethod<?> method, Map<String, Object> features) {
+        Map<String, Integer> typeCounts = new HashMap<>();
+        List<CtVariable<?>> variables = method.getElements(new TypeFilter<>(CtVariable.class));
+        for (CtVariable<?> variable : variables) {
+            CtTypeReference<?> typeRef = variable.getType();
+            // String typeName = typeRef.getQualifiedName();
+            String typeName = getFullTypeName(typeRef);
+
+            if (isCustomObject(typeRef)) {
+                typeName = "CustomObject";
+            }
+            typeCounts.put(typeName, typeCounts.getOrDefault(typeName, 0) + 1);
+        }
+        for (String key : typeCounts.keySet()) {
+            features.put(key, typeCounts.get(key));
+        }
+    }
+
+    private static String getFullTypeName(CtTypeReference<?> typeRef) {
+        if (isCustomObject(typeRef)) {
+            return "CustomObject";
+        }
+
+        StringBuilder typeName = new StringBuilder(typeRef.getQualifiedName());
+        List<CtTypeReference<?>> generics = typeRef.getActualTypeArguments();
+
+        if (!generics.isEmpty()) {
+            typeName.append("<");
+            for (int i = 0; i < generics.size(); i++) {
+                if (i > 0) {
+                    typeName.append(" | ");
+                }
+                // Recursive call for nested generics, with custom type handling
+                typeName.append(getFullTypeName(generics.get(i)));
+            }
+            typeName.append(">");
+        }
+        return typeName.toString();
+    }
+
+    private static boolean isCustomObject(CtTypeReference<?> typeRef) {
+        if (typeRef.getPackage() == null)
+            return false;
+        String packageName = typeRef.getPackage().getQualifiedName();
+        return !(packageName.startsWith("java.") || packageName.startsWith("javax.") || packageName.startsWith("org."));
     }
 
     private static int calculateASTDepth(CtElement element) {
@@ -206,12 +273,14 @@ public class ASTFeatureExtractor {
     }
 
     private static Map<String, Object> mergeFeatures(CtMethod method, HashMap<String, Map<String, Object>> allFeatures,
-            HashMap<String, CtMethod> methodsBody,HashSet<String> methodsAnalyzed) {
-        if (methodsAnalyzed.contains(method.getSimpleName())) return allFeatures.get(method.getSimpleName());
-        else methodsAnalyzed.add(method.getSimpleName());
+            HashMap<String, CtMethod> methodsBody, HashSet<String> methodsAnalyzed) {
+        if (methodsAnalyzed.contains(method.getSimpleName()))
+            return allFeatures.get(method.getSimpleName());
+        else
+            methodsAnalyzed.add(method.getSimpleName());
         Map<String, Object> methodfeatures = allFeatures.get(method.getSimpleName());
 
-        //System.out.println("Analyzing method: " + method.getSimpleName());
+        // System.out.println("Analyzing method: " + method.getSimpleName());
         Map<String, Object> features = new HashMap<>();
         for (CtInvocation methodBody : method.getElements(new TypeFilter<>(CtInvocation.class))) {
             // if (allFeatures.containsKey("allFeatures"))
@@ -221,7 +290,7 @@ public class ASTFeatureExtractor {
             // System.out.println("funCALL -> "+methodName);
             if (allFeatures.containsKey(methodName))
                 methodfeatures = sumMaps(methodfeatures,
-                        (mergeFeatures(methodsBody.get(methodName), allFeatures, methodsBody,methodsAnalyzed)));
+                        (mergeFeatures(methodsBody.get(methodName), allFeatures, methodsBody, methodsAnalyzed)));
 
             // } catch (Exception e) {
             // System.out.println("Failed for : "+methodBody+" -> "+e);

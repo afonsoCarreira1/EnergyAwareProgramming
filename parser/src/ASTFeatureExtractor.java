@@ -12,6 +12,7 @@ import spoon.support.reflect.declaration.CtImportImpl;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,8 +25,12 @@ import java.util.Set;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import org.eclipse.jdt.core.dom.IfStatement;
 
@@ -42,8 +47,9 @@ public class ASTFeatureExtractor {
         Path resolvedPath = currentDir.resolve(inputPath).normalize(); // Resolve and normalize the path
         // Initialize Spoon launcher
         Launcher launcher = new Launcher();
-        launcher.addInputResource("src");
-        launcher.addInputResource("example_dir");
+        addRelevantPackages(launcher);
+        //launcher.addInputResource("src");
+        //  ("example_dir");
         launcher.getEnvironment().setNoClasspath(true);
         CtModel model = launcher.buildModel();
         HashMap<String, Map<String, Object>> methodsFeatures = new HashMap<>();
@@ -52,45 +58,14 @@ public class ASTFeatureExtractor {
         Set<String> importSet = new HashSet<>();
         readImportFromFile(resolvedPath.toString(), importSet);
 
-        for (String imp : new ArrayList<String>(importSet)) {
-            if (!imp.toLowerCase().contains("java")) {
-                // System.out.println(imp);
-                launcher.addInputResource(imp);
-            }
-        }
-
-        for (CtType<?> ctType : model.getElements(new TypeFilter<>(CtType.class))) {
-            if (ctType.getSimpleName().equals(file)) {
-                ctType.getElements(new TypeFilter<>(CtTypeReference.class)).forEach(typeRef -> {
-                    // if (typeRef.getSimpleName().equals("TestObject")) {
-                    CtType<?> testObjectClass = typeRef.getDeclaration();
-                    if (testObjectClass != null) {
-                        // System.out.println("Found CustomObject: " + testObjectClass.getPosition());
-                    }
-                    // }
-                });
-            }
-        }
-
         // obtain all methods features
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-
-            // System.out.println("Analyzing method: " + method.getSimpleName());
             Map<String, Object> features = extractFeatures(method, "java_progs." + file, importSet);
-            // System.out.println(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName());
-            // if
-            // ((method.getDeclaringType().getSimpleName()+"."+method.getSimpleName()).equals("TestObject.yes")){
-            // System.out.println(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName());
-            // System.out.println(features);
-            // }
             String methodParams = getMethodParamsType(method);
             String mapName = method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
                     + methodParams + ")";
-            // System.out.println(mapName);
             methodsFeatures.put(mapName, features);
             methodsBody.put(mapName, method);
-            // System.out.println(features);
-            // System.out.println("---------------------------------");
         }
 
         HashMap<String, Map<String, Object>> methodsFullChecked = new HashMap<String, Map<String, Object>>();
@@ -103,22 +78,43 @@ public class ASTFeatureExtractor {
             methodsFullChecked.put(mapName,
                     mergeFeatures(method, methodsFeatures, methodsBody, new HashSet<String>()));
         }
-        // System.out.println(methodsFullChecked);
         return methodsFullChecked;
+    }
+
+    public static void addRelevantPackages(Launcher launcher) {
+        Path currentDir = Paths.get(System.getProperty("user.dir"));
+        String[] pathSplit = currentDir.toString().split("/");
+        String parentDir = pathSplit[pathSplit.length-1];
+        launcher.addInputResource(parentDir);
+            try {
+                Files.walkFileTree(currentDir, new SimpleFileVisitor<Path>() {
+                    //@Override
+                    //public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    //    System.out.println("File: " + file);
+                    //    return FileVisitResult.CONTINUE;
+                    //}
+
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                        //System.out.println("Directory: " + dir);
+                        launcher.addInputResource(dir.toString());
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
     }
 
     public static String getMethodParamsType(CtMethod<?> method) {
         StringBuilder paramString = new StringBuilder();
         List<CtParameter<?>> l = method.getParameters();
-
         for (CtParameter<?> parameter : l) {
             if (paramString.length() > 0) {
-                paramString.append(" | "); // Separator between parameters
+                paramString.append(" | ");
             }
-            paramString.append(parameter.getType().getSimpleName()) // Add type
-            // .append(" ")
-            // .append(parameter.getSimpleName())
-            ; // Add name
+            paramString.append(parameter.getType().getSimpleName()); // Add type    
         }
         return paramString.toString();
     }

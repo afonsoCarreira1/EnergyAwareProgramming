@@ -47,14 +47,14 @@ public class ASTFeatureExtractor {
         launcher.getEnvironment().setNoClasspath(true);
         CtModel model = launcher.buildModel();
         HashMap<String, Map<String, Object>> methodsFeatures = new HashMap<>();
-        HashMap<String, CtMethod> methodsBody = new HashMap<>();
+        HashMap<String, CtMethod<?>> methodsBody = new HashMap<>();
 
         Set<String> importSet = new HashSet<>();
-        readImportFromFile(resolvedPath.toString(),importSet);
+        readImportFromFile(resolvedPath.toString(), importSet);
 
         for (String imp : new ArrayList<String>(importSet)) {
             if (!imp.toLowerCase().contains("java")) {
-                //System.out.println(imp);
+                // System.out.println(imp);
                 launcher.addInputResource(imp);
             }
         }
@@ -62,43 +62,68 @@ public class ASTFeatureExtractor {
         for (CtType<?> ctType : model.getElements(new TypeFilter<>(CtType.class))) {
             if (ctType.getSimpleName().equals(file)) {
                 ctType.getElements(new TypeFilter<>(CtTypeReference.class)).forEach(typeRef -> {
-                    //if (typeRef.getSimpleName().equals("TestObject")) {
-                        CtType<?> testObjectClass = typeRef.getDeclaration();
-                        if (testObjectClass != null) {
-                            //System.out.println("Found CustomObject: " + testObjectClass.getPosition());
-                        } 
-                    //}
+                    // if (typeRef.getSimpleName().equals("TestObject")) {
+                    CtType<?> testObjectClass = typeRef.getDeclaration();
+                    if (testObjectClass != null) {
+                        // System.out.println("Found CustomObject: " + testObjectClass.getPosition());
+                    }
+                    // }
                 });
             }
         }
 
         // obtain all methods features
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-            
+
             // System.out.println("Analyzing method: " + method.getSimpleName());
-            Map<String, Object> features = extractFeatures(method, "java_progs." + file,importSet);
-            //if ((method.getDeclaringType().getSimpleName()+"."+method.getSimpleName()).equals("TestObject.yes")){
-            //    System.out.println(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName());
-            //    System.out.println(features);
-            //}
-            methodsFeatures.put(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName(), features);
-            methodsBody.put(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName(), method);
+            Map<String, Object> features = extractFeatures(method, "java_progs." + file, importSet);
+            // System.out.println(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName());
+            // if
+            // ((method.getDeclaringType().getSimpleName()+"."+method.getSimpleName()).equals("TestObject.yes")){
+            // System.out.println(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName());
+            // System.out.println(features);
+            // }
+            String methodParams = getMethodParamsType(method);
+            String mapName = method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
+                    + methodParams + ")";
+            // System.out.println(mapName);
+            methodsFeatures.put(mapName, features);
+            methodsBody.put(mapName, method);
             // System.out.println(features);
             // System.out.println("---------------------------------");
         }
 
-        HashMap<String, Map<String, Object>> methodsFullChecked = new HashMap();
-        
+        HashMap<String, Map<String, Object>> methodsFullChecked = new HashMap<String, Map<String, Object>>();
+
         // for each method associate it with features of other methods
-        for (CtMethod method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-            methodsFullChecked.put(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName(),
+        for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
+            String methodParams = getMethodParamsType(method);
+            String mapName = method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
+                    + methodParams + ")";
+            methodsFullChecked.put(mapName,
                     mergeFeatures(method, methodsFeatures, methodsBody, new HashSet<String>()));
         }
         // System.out.println(methodsFullChecked);
         return methodsFullChecked;
     }
 
-    public static void readImportFromFile(String file,Set<String> importSet) {
+    public static String getMethodParamsType(CtMethod<?> method) {
+        StringBuilder paramString = new StringBuilder();
+        List<CtParameter<?>> l = method.getParameters();
+
+        for (CtParameter<?> parameter : l) {
+            if (paramString.length() > 0) {
+                paramString.append(" | "); // Separator between parameters
+            }
+            paramString.append(parameter.getType().getSimpleName()) // Add type
+            // .append(" ")
+            // .append(parameter.getSimpleName())
+            ; // Add name
+        }
+        return paramString.toString();
+    }
+
+    public static void readImportFromFile(String file, Set<String> importSet) {
         File myObj = new File(file);
         try (Scanner myReader = new Scanner(myObj)) {
             StringBuilder f = new StringBuilder();
@@ -115,7 +140,7 @@ public class ASTFeatureExtractor {
         }
     }
 
-    public static Map<String, Object> extractFeatures(CtMethod<?> method, String path,Set<String> importSet) {
+    public static Map<String, Object> extractFeatures(CtMethod<?> method, String path, Set<String> importSet) {
         Map<String, Object> features = new HashMap<>();
 
         // 1. Node Types Count
@@ -167,10 +192,11 @@ public class ASTFeatureExtractor {
 
         // 5. Literals Count
         features.put("LiteralCount", method.getElements(new TypeFilter<>(CtLiteral.class)).size());
-        //for (CtLiteral lt : method.getElements(new TypeFilter<>(CtLiteral.class))) {
-        //    if ((method.getDeclaringType().getSimpleName()+"."+method.getSimpleName()).equals("TestObject2.yes"))
-        //    System.out.println(lt);
-        //}
+        // for (CtLiteral lt : method.getElements(new TypeFilter<>(CtLiteral.class))) {
+        // if
+        // ((method.getDeclaringType().getSimpleName()+"."+method.getSimpleName()).equals("TestObject2.yes"))
+        // System.out.println(lt);
+        // }
 
         // 6. Operator Usage
         Map<String, Integer> operatorCounts = new HashMap<>();
@@ -189,7 +215,7 @@ public class ASTFeatureExtractor {
         // 8. Get variables types
         getVariablesType(method, features);
 
-        getUsedImportsInMethod(method, importSet,features);
+        getUsedImportsInMethod(method, importSet, features);
         // 8. Cyclomatic Complexity
         // features.put("CyclomaticComplexity", calculateCyclomaticComplexity(method));
 
@@ -199,7 +225,8 @@ public class ASTFeatureExtractor {
         return features;
     }
 
-    private static void getUsedImportsInMethod(CtMethod<?> method, Set<String> importSet,Map<String, Object> features) {
+    private static void getUsedImportsInMethod(CtMethod<?> method, Set<String> importSet,
+            Map<String, Object> features) {
         Set<String> usedImports = new HashSet<>();
 
         // Find type references in the method body
@@ -306,49 +333,49 @@ public class ASTFeatureExtractor {
         return 0;
     }
 
-    private static Map<String, Object> mergeFeatures(CtMethod method, HashMap<String, Map<String, Object>> allFeatures,
-            HashMap<String, CtMethod> methodsBody, HashSet<String> methodsAnalyzed) {
-        if (methodsAnalyzed.contains(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName()))
-            return allFeatures.get(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName());
+    private static Map<String, Object> mergeFeatures(CtMethod<?> method,
+            HashMap<String, Map<String, Object>> allFeatures,
+            HashMap<String, CtMethod<?>> methodsBody, HashSet<String> methodsAnalyzed) {
+        String methodParams = getMethodParamsType(method);
+        String mapName = method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "(" + methodParams
+                + ")";
+        if (methodsAnalyzed.contains(mapName))
+            return allFeatures.get(mapName);
         else
-            methodsAnalyzed.add(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName());
-        Map<String, Object> methodfeatures = allFeatures.get(method.getDeclaringType().getSimpleName()+"."+method.getSimpleName());
+            methodsAnalyzed.add(mapName);
+        Map<String, Object> methodfeatures = allFeatures.get(mapName);
 
-        //if ((method.getDeclaringType().getSimpleName()+"."+method.getSimpleName()).equals("TestFile.t")) {
-        //    System.out.println("Analyzing method: " + method.getDeclaringType().getSimpleName()+"."+method.getSimpleName());
-        //    System.out.println(method.getBody());
-        //    System.out.println(allFeatures.get("TestObject.yes"));
-        //}
-        //Map<String, Object> features = new HashMap<>();
-        for (CtInvocation methodBody : method.getElements(new TypeFilter<>(CtInvocation.class))) {
-            
-            // if (allFeatures.containsKey("allFeatures"))
-            // try {
-            //String[] methodSplit = methodBody.toString().split("\\.");
-            //System.out.println(methodBody);
+        for (CtInvocation<?> methodBody : method.getElements(new TypeFilter<>(CtInvocation.class))) {
 
             CtExecutableReference<?> executableRef = methodBody.getExecutable();
             String methodName = executableRef.getSimpleName();
-            String methodNameWithClass = executableRef.getDeclaringType().getSimpleName()+"."+methodName;
-            //System.out.println(methodNameWithClass);
-            //String methodName = methodSplit[methodSplit.length - 1].split("\\(")[0];
-            if (allFeatures.containsKey(methodNameWithClass))
+            String methodNameWithClass = executableRef.getDeclaringType().getSimpleName() + "." + methodName;
+            List<CtTypeReference<?>> parameterTypes = executableRef.getParameters();
+            String methodParamsInBody = getParamTypesFromMethodBody(parameterTypes);
+            String methodNameWithClassAndParams = methodNameWithClass + "(" + methodParamsInBody + ")";
+            if (allFeatures.containsKey(methodNameWithClassAndParams)) 
                 methodfeatures = sumMaps(methodfeatures,
-                        (mergeFeatures(methodsBody.get(methodNameWithClass), allFeatures, methodsBody, methodsAnalyzed)));
-
-            // } catch (Exception e) {
-            // System.out.println("Failed for : "+methodBody+" -> "+e);
-            // }
-
+                        (mergeFeatures(methodsBody.get(methodNameWithClassAndParams), allFeatures, methodsBody,
+                                methodsAnalyzed)));
         }
-        // Map<String, Object> features = extractFeatures(method);
-        // System.out.println(features);
-        // System.out.println("---------------------------------");
         return methodfeatures;
+    }
+
+    public static String getParamTypesFromMethodBody(List<CtTypeReference<?>> parameterTypes) {
+        StringBuilder paramTypesString = new StringBuilder();
+        for (int i = 0; i < parameterTypes.size(); i++) {
+            if (i > 0) {
+                paramTypesString.append(" | "); // Separator
+            }
+            paramTypesString.append(parameterTypes.get(i).getSimpleName()); // Append type name
+        }
+
+        return paramTypesString.toString();
     }
 
     public static Map<String, Object> sumMaps(Map<String, Object> map1, Map<String, Object> map2) {
         Map<String, Object> result = new HashMap<>();
+        // if (map1 == null || map2 == null) return result;
 
         // Add all keys from map1
         for (String key : map1.keySet()) {

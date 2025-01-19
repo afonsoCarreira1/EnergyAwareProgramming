@@ -9,7 +9,7 @@ public class Test {
 
     public static void main(String[] args) {
         HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures("file");
-        Map<String, Object> methodfeatures = methods.get("t");
+        Map<String, Object> methodfeatures = methods.get("TestFile.t");
         System.out.println(methodfeatures);
     }
 

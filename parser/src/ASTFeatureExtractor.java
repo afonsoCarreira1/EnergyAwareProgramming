@@ -63,9 +63,7 @@ public class ASTFeatureExtractor {
         // obtain all methods features
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
             Map<String, Object> features = extractFeatures(method, "java_progs." + file, importSet);
-            String methodParams = getMethodParamsType(method);
-            String mapName = method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
-                    + methodParams + ")";
+            String mapName = getMethodMapName(method);
             methodsFeatures.put(mapName, features);
             methodsBody.put(mapName, method);
         }
@@ -74,27 +72,34 @@ public class ASTFeatureExtractor {
 
         // for each method associate it with features of other methods
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-            String methodParams = getMethodParamsType(method);
-            String mapName = method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
-                    + methodParams + ")";
+            String mapName = getMethodMapName(method);
             methodsFullChecked.put(mapName,
                     mergeFeatures(method, methodsFeatures, methodsBody, new HashSet<String>()));
         }
 
+        Map<String,CtMethod<?>> allMethodsImplementations = new HashMap<>();
+        for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))){
+            String mapName = getMethodMapName(method);
+            allMethodsImplementations.put(mapName, method);
+        }
+
         // for each method count its loopDepth
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
-            String methodParams = getMethodParamsType(method);
-            String mapName = method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
-                    + methodParams + ")";
+            String mapName = getMethodMapName(method);
             Map<String,Object> methodFeatures = methodsFullChecked.get(mapName);
             if (!method.getSimpleName().equals("t")) continue;
             //System.out.println(method.getBody());
-            int maxLoopDepth = calculateMaxLoopDepth(method.getBody(),methodsFullChecked,new HashSet<>(),0);
+            int maxLoopDepth = calculateMaxLoopDepth(method.getBody(),allMethodsImplementations,new HashSet<>(),0);
             methodFeatures.put("MaxLoopDepth", maxLoopDepth);
             methodsFullChecked.put(mapName,methodFeatures);
         }
 
         return methodsFullChecked;
+    }
+
+    public static String getMethodMapName(CtMethod<?> method) {
+        return method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
+        + getMethodParamsType(method) + ")";
     }
 
     public static void addRelevantPackages(Launcher launcher) {
@@ -350,18 +355,29 @@ public class ASTFeatureExtractor {
         return 0;
     }
 
-    private static int calculateMaxLoopDepth(CtElement element, HashMap<String, Map<String, Object>> methodsFullChecked,HashSet<String> visited,int maxDepthSoFar) {
+    private static int calculateMaxLoopDepth(CtElement element, Map<String,CtMethod<?>> allMethodsImplementations,HashSet<String> visited,int maxDepthSoFar) {
         if(visited.contains(element.toString())) return maxDepthSoFar;
         visited.add(element.toString());
         int maxDepth = maxDepthSoFar;
         List<CtElement> methodElements = element.getElements(null);
         for (CtElement methodElement : methodElements) {
             int currentMaxDepth = maxDepthSoFar;
+            //System.out.println(methodElement.getClass().getSimpleName());
             if (methodElement instanceof CtLoop) {
                 CtLoop l = (CtLoop) methodElement;
-                //System.out.println(l.getBody());
-                //System.out.println(currentMaxDepth);
-                currentMaxDepth = calculateMaxLoopDepth(l.getBody(),methodsFullChecked,visited,currentMaxDepth+1);
+                currentMaxDepth = calculateMaxLoopDepth(l.getBody(),allMethodsImplementations,visited,currentMaxDepth+1);
+            }
+            else if (methodElement instanceof CtInvocation) {
+                CtInvocation<?> m = (CtInvocation<?>) methodElement;
+                CtExecutableReference<?> executableRef = m.getExecutable();
+                String methodName = executableRef.getSimpleName();
+                String methodNameWithClass = executableRef.getDeclaringType().getSimpleName() + "." + methodName;
+                List<CtTypeReference<?>> parameterTypes = executableRef.getParameters();
+                String methodParamsInBody = getParamTypesFromMethodBody(parameterTypes);
+                String methodNameWithClassAndParams = methodNameWithClass + "(" + methodParamsInBody + ")";
+                if (allMethodsImplementations.containsKey(methodNameWithClassAndParams)){
+                    currentMaxDepth = calculateMaxLoopDepth(allMethodsImplementations.get(methodNameWithClassAndParams).getBody(),allMethodsImplementations,visited,currentMaxDepth);
+                }
             }
             maxDepth = Math.max(maxDepth, currentMaxDepth);
         }

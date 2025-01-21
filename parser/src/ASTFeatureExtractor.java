@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -215,6 +216,8 @@ public class ASTFeatureExtractor {
         getVariablesType(method, features);
 
         getUsedImportsInMethod(method, importSet, features);
+
+        checkThreadUsage(method, features);
         // 8. Cyclomatic Complexity
         // features.put("CyclomaticComplexity", calculateCyclomaticComplexity(method));
 
@@ -251,7 +254,7 @@ public class ASTFeatureExtractor {
                 CtTypeReference<?> targetType = target.getType();
                 if (targetType != null) {
                     String methodUsed = targetType.getQualifiedName();
-                    if (targetType.getQualifiedName().startsWith("java.util.")) {
+                    if (targetType.getQualifiedName().startsWith("java.util.") || targetType.getQualifiedName().startsWith("sun.")) {
                         String removedComma = op.getExecutable().toString().replace(",", " | ");
                         methodsUsed.merge(methodUsed + "." + removedComma, 1, Integer::sum);
                     } else {
@@ -310,7 +313,7 @@ public class ASTFeatureExtractor {
         if (typeRef.getPackage() == null)
             return false;
         String packageName = typeRef.getPackage().getQualifiedName();
-        return !(packageName.startsWith("java.") || packageName.startsWith("javax.") || packageName.startsWith("org."));
+        return !(packageName.startsWith("java.") || packageName.startsWith("javax.") || packageName.startsWith("org.") || packageName.startsWith("sun."));
     }
 
     private static int calculateASTDepth(CtElement element) {
@@ -383,6 +386,93 @@ public class ASTFeatureExtractor {
         }
         return maxDepth;
     }
+
+    private static void checkThreadUsage(CtMethod<?> method, Map<String, Object> features) {
+        CtClass<?> declaringClass = (CtClass<?>) method.getDeclaringType();
+
+        int threadUsageCount = 0;
+
+        // Check if the declaring class extends Thread or implements Runnable
+        boolean isThreadSubclass = isSubclassOf(declaringClass, "java.lang.Thread");
+        if (isThreadSubclass) {
+            threadUsageCount++;
+        }
+
+        boolean isRunnableImplementation = implementsInterface(declaringClass, "java.lang.Runnable");
+        if (isRunnableImplementation) {
+            threadUsageCount++;
+        }
+
+        // Check for thread-related invocations in the method body
+        //long threadInvocationCount = 0;
+        //if (method.getBody() != null) {
+        //    threadInvocationCount += method.getBody().getElements(new TypeFilter<>(CtInvocation.class)).stream()
+        //        .mapToLong(invocation -> {
+        //            String methodName = invocation.getExecutable().getSimpleName();
+        //            if (methodName.equals("start") || methodName.equals("run") || methodName.equals("submit")) {
+        //                return getLoopMultiplier(invocation);
+        //            }
+        //            return 0;
+        //        }).sum();
+        //}
+        long threadInvocationCount = method.getBody() != null
+            ? method.getBody().getElements(new TypeFilter<>(CtInvocation.class)).stream()
+                .filter(invocation -> {
+                    String methodName = invocation.getExecutable().getSimpleName();
+                    String declaringType = invocation.getExecutable().getDeclaringType() != null 
+                    ? invocation.getExecutable().getDeclaringType().getQualifiedName() : "";
+                    HashSet<String> threadLibs = new HashSet<>(Arrays.asList("java.lang.Thread", "java.util.concurrent", "java.lang.Runnable", "java.util.Timer"));
+                    return (threadLibs.contains(declaringType) && (methodName.equals("start") || methodName.equals("run") || methodName.equals("submit")));
+                }).count(): 0;
+        threadUsageCount += threadInvocationCount;
+
+        // Check for direct instantiation of Thread or Runnable in the method
+        //long threadInstantiationCount = 0;
+        //if (method.getBody() != null) {
+        //    threadInstantiationCount += method.getBody().getElements(new TypeFilter<>(CtConstructorCall.class)).stream()
+        //        .mapToLong(ctor -> {
+        //            String typeName = ctor.getType().getQualifiedName();
+        //            if (typeName.equals("java.lang.Thread") || typeName.equals("java.lang.Runnable")) {
+        //                return getLoopMultiplier(ctor);
+        //            }
+        //            return 0;
+        //        }).sum();
+        //}
+        long threadInstantiationCount = method.getBody() != null
+            ? method.getBody().getElements(new TypeFilter<>(CtConstructorCall.class)).stream()
+                .filter(ctor -> {
+                    String typeName = ctor.getType().getQualifiedName();
+                    return typeName.equals("java.lang.Thread") || typeName.equals("java.lang.Runnable");
+                }).count() : 0;
+        threadUsageCount += threadInstantiationCount;
+        features.put("ThreadUsage", threadUsageCount); 
+        
+    }
+
+    private static boolean isSubclassOf(CtClass<?> clazz, String superclass) {
+        if (clazz == null) return false;
+        CtTypeReference<?> superClassRef = clazz.getSuperclass();
+        return superClassRef != null && superClassRef.getQualifiedName().equals(superclass);
+    }
+
+    private static boolean implementsInterface(CtClass<?> clazz, String interfaceName) {
+        if (clazz == null) return false;
+        return clazz.getSuperInterfaces().stream()
+            .anyMatch(iface -> iface.getQualifiedName().equals(interfaceName));
+    }
+
+    private static long getLoopMultiplier(CtElement element) {
+        long multiplier = 1;
+        CtElement current = element;
+        while (current != null) {
+            if (current instanceof CtLoop) {
+                multiplier *= 10; 
+            }
+            current = current.getParent();
+        }
+        return multiplier;
+    }
+
 
     private static Map<String, Object> mergeFeatures(CtMethod<?> method,
             HashMap<String, Map<String, Object>> allFeatures,

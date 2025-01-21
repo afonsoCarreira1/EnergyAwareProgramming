@@ -1,8 +1,13 @@
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap ;
 
 import parser.example_dir.ExampleExternalFile;
 import parser.example_dir.more_depth.MoreDepthFile;
+
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 public class TestFile {
 
@@ -16,22 +21,25 @@ public class TestFile {
         //f.negative();
         //MoreDepthFile mdf = new MoreDepthFile();
 
-    @SuppressWarnings("unused")
-    private static void t(){
+    //@SuppressWarnings("unused")
+    private static void t() throws InterruptedException{ 
         for (int i = 0; i < 10; i++) {
-            loopariliuz(i);
+            do {
+                Thread t = new Thread();
+                t.start();
+                start();
+            } while (i < 2);
         }
-        do {
-            
-        } while (true);
     }
 
-    private static void loopariliuz(int i) {
-        while (true) {
-            while (true) {
-                
-            }
-        }
-    }
-    
+    private static void start(){}
+//
+    //private static void loopariliuz(int i) {
+    //    while (true) {
+    //        while (true) {
+    //            
+    //        }
+    //    }
+    //}
+   
 }

@@ -98,66 +98,6 @@ public class ASTFeatureExtractor {
         return methodsFullChecked;
     }
 
-    public static String getMethodMapName(CtMethod<?> method) {
-        return method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
-        + getMethodParamsType(method) + ")";
-    }
-
-    public static void addRelevantPackages(Launcher launcher) {
-        Path currentDir = Paths.get(System.getProperty("user.dir"));
-        String[] pathSplit = currentDir.toString().split("/");
-        String parentDir = pathSplit[pathSplit.length-1];
-        launcher.addInputResource(parentDir);
-            try {
-                Files.walkFileTree(currentDir, new SimpleFileVisitor<Path>() {
-                    //@Override
-                    //public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    //    System.out.println("File: " + file);
-                    //    return FileVisitResult.CONTINUE;
-                    //}
-
-                    @Override
-                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                        //System.out.println("Directory: " + dir);
-                        launcher.addInputResource(dir.toString());
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-    }
-
-    public static String getMethodParamsType(CtMethod<?> method) {
-        StringBuilder paramString = new StringBuilder();
-        List<CtParameter<?>> l = method.getParameters();
-        for (CtParameter<?> parameter : l) {
-            if (paramString.length() > 0) {
-                paramString.append(" | ");
-            }
-            paramString.append(parameter.getType().getSimpleName()); // Add type    
-        }
-        return paramString.toString();
-    }
-
-    public static void readImportFromFile(String file, Set<String> importSet) {
-        File myObj = new File(file);
-        try (Scanner myReader = new Scanner(myObj)) {
-            StringBuilder f = new StringBuilder();
-            while (myReader.hasNextLine()) {
-                f.append(myReader.nextLine()).append("\n");
-            }
-            myReader.close();
-            Scanner scanner = new Scanner(f.toString());
-            Stream<MatchResult> stream = scanner.findAll(Pattern.compile("import.*;"));
-            stream.forEach(i -> importSet.add(i.group().replace("import", "").replace(";", "").strip()));
-            scanner.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static Map<String, Object> extractFeatures(CtMethod<?> method, String path, Set<String> importSet) {
         Map<String, Object> features = new HashMap<>();
 
@@ -219,13 +159,74 @@ public class ASTFeatureExtractor {
 
         checkThreadUsage(method, features);
         // 8. Cyclomatic Complexity
-        // features.put("CyclomaticComplexity", calculateCyclomaticComplexity(method));
+        features.put("CyclomaticComplexity", calculateCyclomaticComplexity(method));
 
         // 9. Nesting Level
         // features.put("MaxNestingLevel", calculateMaxNestingLevel(method));
 
         return features;
     }
+
+    public static String getMethodMapName(CtMethod<?> method) {
+        return method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
+        + getMethodParamsType(method) + ")";
+    }
+
+    public static void addRelevantPackages(Launcher launcher) {
+        Path currentDir = Paths.get(System.getProperty("user.dir"));
+        String[] pathSplit = currentDir.toString().split("/");
+        String parentDir = pathSplit[pathSplit.length-1];
+        launcher.addInputResource(parentDir);
+            try {
+                Files.walkFileTree(currentDir, new SimpleFileVisitor<Path>() {
+                    //@Override
+                    //public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    //    System.out.println("File: " + file);
+                    //    return FileVisitResult.CONTINUE;
+                    //}
+
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                        //System.out.println("Directory: " + dir);
+                        launcher.addInputResource(dir.toString());
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+    }
+
+    public static String getMethodParamsType(CtMethod<?> method) {
+        StringBuilder paramString = new StringBuilder();
+        List<CtParameter<?>> l = method.getParameters();
+        for (CtParameter<?> parameter : l) {
+            if (paramString.length() > 0) {
+                paramString.append(" | ");
+            }
+            paramString.append(parameter.getType().getSimpleName()); // Add type    
+        }
+        return paramString.toString();
+    }
+
+    public static void readImportFromFile(String file, Set<String> importSet) {
+        File myObj = new File(file);
+        try (Scanner myReader = new Scanner(myObj)) {
+            StringBuilder f = new StringBuilder();
+            while (myReader.hasNextLine()) {
+                f.append(myReader.nextLine()).append("\n");
+            }
+            myReader.close();
+            Scanner scanner = new Scanner(f.toString());
+            Stream<MatchResult> stream = scanner.findAll(Pattern.compile("import.*;"));
+            stream.forEach(i -> importSet.add(i.group().replace("import", "").replace(";", "").strip()));
+            scanner.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private static void getUsedImportsInMethod(CtMethod<?> method, Set<String> importSet,
             Map<String, Object> features) {
@@ -341,9 +342,11 @@ public class ASTFeatureExtractor {
     private static int calculateCyclomaticComplexity(CtMethod<?> method) {
         int complexity = 1; // Start with 1 for the method itself
         complexity += method.getElements(new TypeFilter<>(CtIf.class)).size();
-        complexity += method.getElements(new TypeFilter<>(CtFor.class)).size();
-        complexity += method.getElements(new TypeFilter<>(CtWhile.class)).size();
+        complexity += method.getElements(new TypeFilter<>(CtLoop.class)).size();
         complexity += method.getElements(new TypeFilter<>(CtSwitch.class)).size();
+        complexity += method.getElements(new TypeFilter<>(CtCase.class)).size();
+        complexity += method.getElements(new TypeFilter<>(CtConditional.class)).size();
+        complexity += method.getElements(new TypeFilter<>(CtCatch.class)).size();
         return complexity;
     }
 

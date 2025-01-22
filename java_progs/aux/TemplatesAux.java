@@ -6,9 +6,14 @@ import java.io.IOException;
 
 public class TemplatesAux {
 
+    public static boolean stop = false;
+
+    public static void writeProgramInfo(int i) {
+        WritePid.writeTargetProgInfo("timeStamp", i);
+    }
+
     public static void sendStopSignalToOrchestrator(String pid, int i) throws IOException {
         //String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
-        WritePid.writeTargetProgInfo("timeStamp", i);
         Runtime.getRuntime().exec(new String[] { "kill", "-USR2", pid });
     }
 
@@ -26,6 +31,18 @@ public class TemplatesAux {
         try (FileWriter writer = new FileWriter("errorFiles/" + filename+".txt")) {
             writer.write(errorMessage);
         } catch (IOException e) {}
+    }
+
+    public static void launchTimerThread() {
+        Thread timerThread = new Thread(() -> {
+            try {
+                Thread.sleep(100);
+                stop = true;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        timerThread.start();
     }
 
 }

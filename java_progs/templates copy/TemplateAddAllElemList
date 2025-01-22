@@ -14,12 +14,8 @@ public class TemplateAddAllElemList {
         return list.addAll(list2);
     }
 
-    private static void computation("ListCollection"<"Type"> list,"ListCollection"<"Type">[] lists, int iter) {
-        int i = 0;
-        while (!TemplatesAux.stop && i<iter) {
-            addAllElemList(list, lists[i]);
-            i++;
-        }
+    private static void getIter() {
+        
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -43,14 +39,14 @@ public class TemplateAddAllElemList {
             }
             TemplatesAux.writeProgramInfo(iter);
             TemplatesAux.sendStartSignalToOrchestrator(args[0]);
-            TemplatesAux.launchTimerThread();
-            computation(list,lists,iter);
-        } catch (OutOfMemoryError e) {
-            TemplatesAux.writeErrorInFile(""filename"", "Out of memory error caught by the program.\n" + e.getMessage());
-        } 
-        catch (Exception e) {
-            TemplatesAux.writeErrorInFile(""filename"","Error caught by th program.\n"+e.getMessage());
-        }
+            //long begin = System.nanoTime();
+            //long end = begin;
+            //while (end - begin < 1000000000/* 1s */&& iter < loopSize) {
+            //    addAllElemList(list, lists[iter]);
+            //    end = System.nanoTime();
+            //    iter++;
+            //}
+        } catch (Exception e) {TemplatesAux.writeErrorInFile(""filename"","Error caught by th program.\n"+e.getMessage());}
         finally {TemplatesAux.sendStopSignalToOrchestrator(args[0],iter);}
     }
     

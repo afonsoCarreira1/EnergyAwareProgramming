@@ -42,15 +42,16 @@ import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 @SuppressWarnings("unchecked")
 public class ASTFeatureExtractor {
 
-    public static HashMap<String, Map<String, Object>> getFeatures(String file) {
-        // String inputPath = "java_progs/progs/"+file+".java";
-        String inputPath = "src/TestFile.java";
-        file = "TestFile";
+    public static HashMap<String, Map<String, Object>> getFeatures(String file,Boolean readOnlyFile) {
+         String inputPath = "java_progs/progs/"+file+".java";
+        //String inputPath = "src/TestFile.java";
+        //file = "TestFile";
         Path currentDir = Paths.get("").toAbsolutePath(); // Get the current directory
         Path resolvedPath = currentDir.resolve(inputPath).normalize(); // Resolve and normalize the path
         // Initialize Spoon launcher
         Launcher launcher = new Launcher();
-        addRelevantPackages(launcher);
+        if (readOnlyFile)  launcher.addInputResource(inputPath);
+        else addRelevantPackages(launcher);
         //launcher.addInputResource("src");
         //  ("example_dir");
         launcher.getEnvironment().setNoClasspath(true);

@@ -2,6 +2,7 @@ import java.beans.Introspector;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,6 +12,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import java_progs.aux.WritePid;
 
@@ -36,10 +40,10 @@ public class Runner {
     public static void main(String[] args) throws IOException, InterruptedException {
         File[] programs = getAllProgramsNames();
         for (int i = 0; i < programs.length; i++) {
-            System.out.println(i);
+            //System.out.println(i);
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/progs/", "").replace(".java", "");//args[0];
-                //if (!(args[0].equals("test") && fileName.equals("AddAllElemListArrayList0"))) continue;//just to test one prog file
+                if (!(args[0].equals("test") && fileName.equals("AddAllElemListArrayList0"))) continue;//just to test one prog file
                 System.out.println("Starting profile for " + fileName + " program");
                 readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
@@ -72,6 +76,8 @@ public class Runner {
         } else {
             String[] command = {
                 "java", 
+                "-Xmx4056M",
+                "-Xms4056M",
                 "-cp", 
                 "java_progs/out", 
                 "java_progs.progs." + file, 
@@ -202,15 +208,48 @@ public class Runner {
     }
 
     private static void getFeaturesFromParser(String file, String cpuUsage) throws IOException {
-        // String[] command = {"/bin/sh", "-c", "java java_progs/" + file + " " +
-        // ProcessHandle.current().pid() + " " + loopSize};
-        HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(file);
-        String methodName = Introspector.decapitalize(file);
+        HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(file,true);
+        String methodName = getFunMapName(file);
         Map<String, Object> methodfeatures = methods.get(methodName);
         featuresName.addAll(methodfeatures.keySet());
         methodfeatures.put("EnergyUsed", cpuUsage);
         createFeaturesTempFile(file,methodfeatures);
-        //System.out.println(methodfeatures);
+    }
+
+    private static String getFunMapName(String file){
+        String mapName = "";
+        File myObj = new File("java_progs/progs/"+file+".java");
+        try (Scanner myReader = new Scanner(myObj)) {
+            StringBuilder f = new StringBuilder();
+            while (myReader.hasNextLine()) {
+                f.append(myReader.nextLine()).append("\n");
+            }
+            myReader.close();
+            String txt = f.toString();
+            String regex = Introspector.decapitalize(file)+"\\s*\\((.*)\\)\\s*\\{";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(txt);
+            
+            // Check if the pattern matches
+            //if (matcher.find()) {
+            //    // Extract and print the first group (contents inside the parentheses)
+            //    System.out.println("Extracted group: " + matcher.group(1));
+            //} else {
+            //    System.out.println("No match found.");
+            //}
+            matcher.find();
+            String[] params = matcher.group(1).split(",");
+            for(String param : params){
+                param = param.strip();
+                String type = param.split(" ")[0].replaceAll("<.*>", "");
+                if (mapName.isEmpty()) mapName += type;
+                else mapName += " | "+type;
+            }
+            //scanner.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return file + "."+Introspector.decapitalize(file)+"("+mapName+")";// Class.methodName(type1 | type2)
     }
 
     private static void createFeaturesCSV() throws IOException {

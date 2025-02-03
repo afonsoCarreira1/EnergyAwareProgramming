@@ -59,20 +59,33 @@ public class ASTFeatureExtractor {
         CtModel model = launcher.buildModel();
         HashMap<String, Map<String, Object>> methodsFeatures = new HashMap<>();
         HashMap<String, CtMethod<?>> methodsBody = new HashMap<>();
+        //Map<String, Object> featuresExtractedFromMethod = new HashMap<>();
 
         Set<String> importSet = new HashSet<>();
         readImportFromFile(resolvedPath.toString(), importSet);
+
+        Map<String,CtMethod<?>> allMethodsImplementations = new HashMap<>();
+        for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))){
+            String mapName = getMethodMapName(method);
+            allMethodsImplementations.put(mapName, method);
+        }
 
         // obtain all methods features
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
             Map<String, Object> features = extractFeatures(method, "java_progs." + file, importSet);
             String mapName = getMethodMapName(method);
+            //System.out.println("method -> "+mapName);
+            accountFeaturesInsideLoops(features,method.getBody(),allMethodsImplementations,new HashSet<>(),0);
+            removeExtraFeaturesCounted(features);
             methodsFeatures.put(mapName, features);
+            //System.out.println(features.get("VariableDeclarationsDepth_0"));
+            //System.out.println(features.get("VariableDeclarationsDepth_1"));
             methodsBody.put(mapName, method);
         }
 
-        HashMap<String, Map<String, Object>> methodsFullChecked = new HashMap<String, Map<String, Object>>();
+        
 
+        HashMap<String, Map<String, Object>> methodsFullChecked = new HashMap<String, Map<String, Object>>();
         // for each method associate it with features of other methods
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
             String mapName = getMethodMapName(method);
@@ -80,11 +93,7 @@ public class ASTFeatureExtractor {
                     mergeFeatures(method, methodsFeatures, methodsBody, new HashSet<String>()));
         }
 
-        Map<String,CtMethod<?>> allMethodsImplementations = new HashMap<>();
-        for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))){
-            String mapName = getMethodMapName(method);
-            allMethodsImplementations.put(mapName, method);
-        }
+        
 
         // for each method count its loopDepth
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))) {
@@ -93,9 +102,12 @@ public class ASTFeatureExtractor {
             if (!method.getSimpleName().equals("t")) continue;
             //System.out.println(method.getBody());
             int maxLoopDepth = calculateMaxLoopDepth(method.getBody(),allMethodsImplementations,new HashSet<>(),0);
+            //accountFeaturesInsideLoops(featuresExtractedFromMethod,method.getBody(),allMethodsImplementations,new HashSet<>(),0);
             methodFeatures.put("MaxLoopDepth", maxLoopDepth);
             methodsFullChecked.put(mapName,methodFeatures);
         }
+        //removeExtraFeaturesCounted(featuresExtractedFromMethod);
+        
 
         return methodsFullChecked;
     }
@@ -104,10 +116,10 @@ public class ASTFeatureExtractor {
         Map<String, Object> features = new HashMap<>();
 
         // 1. Node Types Count
-        features.put("VariableDeclarations", method.getElements(new TypeFilter<>(CtLocalVariable.class)).size());
-        features.put("Assignments", method.getElements(new TypeFilter<>(CtAssignment.class)).size());
-        features.put("BinaryOperators", method.getElements(new TypeFilter<>(CtBinaryOperator.class)).size());
-        features.put("MethodInvocations", method.getElements(new TypeFilter<>(CtInvocation.class)).size());
+        //features.put("VariableDeclarations", method.getElements(new TypeFilter<>(CtLocalVariable.class)).size());
+        //features.put("Assignments", method.getElements(new TypeFilter<>(CtAssignment.class)).size());
+        //features.put("BinaryOperators", method.getElements(new TypeFilter<>(CtBinaryOperator.class)).size());
+        //features.put("MethodInvocations", method.getElements(new TypeFilter<>(CtInvocation.class)).size());
 
         //method return type
         CtPackageReference returnTypeInfo = method.getType().getPackage();
@@ -175,6 +187,96 @@ public class ASTFeatureExtractor {
         return features;
     }
 
+    private static int accountFeaturesInsideLoops(Map<String, Object> features,CtElement element, Map<String,CtMethod<?>> allMethodsImplementations,HashSet<String> visited,int maxDepthSoFar) {
+        if(visited.contains(element.toString())) return maxDepthSoFar;
+        visited.add(element.toString());
+
+        if(element instanceof CtBlock) {
+            //System.out.println(element);
+            String key = "VariableDeclarationsDepth_"+maxDepthSoFar;
+            int val = element.getElements(new TypeFilter<>(CtLocalVariable.class)).size();
+            features.put(key,features.containsKey(key) ? (Integer) features.get(key)+val : val);
+        } 
+        //else if(methodElement instanceof CtAssignment) {
+        //    insertOrSumFeature(features,"AssignmentsDepth_"+maxDepth);
+        //} else if(methodElement instanceof CtBinaryOperator) {
+        //    insertOrSumFeature(features,"BinaryOperatorsDepth_"+maxDepth);
+        //} else if(methodElement instanceof CtInvocation) {
+        //    insertOrSumFeature(features,"MethodInvocationsDepth_"+maxDepth);
+        //}
+
+        int maxDepth = maxDepthSoFar;
+        List<CtElement> methodElements = element.getElements(null);
+        for (CtElement methodElement : methodElements) {
+            int currentMaxDepth = maxDepthSoFar;
+            //System.out.println(methodElement.getClass().getSimpleName());
+            if (methodElement instanceof CtLoop) {
+                CtLoop l = (CtLoop) methodElement;
+                currentMaxDepth = accountFeaturesInsideLoops(features,l.getBody(),allMethodsImplementations,visited,currentMaxDepth+1);
+            }
+            else if (methodElement instanceof CtInvocation) {
+                CtInvocation<?> m = (CtInvocation<?>) methodElement;
+                CtExecutableReference<?> executableRef = m.getExecutable();
+                String methodName = executableRef.getSimpleName();
+                String methodNameWithClass = executableRef.getDeclaringType().getSimpleName() + "." + methodName;
+                List<CtTypeReference<?>> parameterTypes = executableRef.getParameters();
+                String methodParamsInBody = getParamTypesFromMethodBody(parameterTypes);
+                String methodNameWithClassAndParams = methodNameWithClass + "(" + methodParamsInBody + ")";
+                if (allMethodsImplementations.containsKey(methodNameWithClassAndParams)){
+                    currentMaxDepth = accountFeaturesInsideLoops(features,allMethodsImplementations.get(methodNameWithClassAndParams).getBody(),allMethodsImplementations,visited,currentMaxDepth);
+                }
+            }
+            maxDepth = Math.max(maxDepth, currentMaxDepth);
+            //if(methodElement instanceof CtLocalVariable) {
+            //    System.out.println(methodElement);
+            //    System.out.println(element.toString());
+            //    //insertOrSumFeature(features,"VariableDeclarationsDepth_"+maxDepth);
+            //    features.put("VariableDeclarations", element.getElements(new TypeFilter<>(CtLocalVariable.class)).size());
+            //} else if(methodElement instanceof CtAssignment) {
+            //    insertOrSumFeature(features,"AssignmentsDepth_"+maxDepth);
+            //} else if(methodElement instanceof CtBinaryOperator) {
+            //    insertOrSumFeature(features,"BinaryOperatorsDepth_"+maxDepth);
+            //} else if(methodElement instanceof CtInvocation) {
+            //    insertOrSumFeature(features,"MethodInvocationsDepth_"+maxDepth);
+            //}
+        }
+        return maxDepth;
+    }
+
+    public static void insertOrSumFeature(Map<String, Object> features,String key) {
+        features.put(key, features.containsKey(key) ? (Integer) features.get(key) + 1 : 1);
+    }
+
+    public static void removeExtraFeaturesCounted(Map<String, Object> features) {
+        //System.out.println("features -> "+features);
+        ArrayList<String> featuresToClean = new ArrayList<>(Arrays.asList("VariableDeclarationsDepth"));
+        for (String featureToClean : featuresToClean ) {
+            int startingDepth = 0;
+            while (true) {
+                String startingKey = featureToClean +"_"+startingDepth;
+                if (!features.containsKey(startingKey)) break;
+                int currentDepth = startingDepth;
+                int extraVars = 0;
+                //while (true) {
+                //    String key = featureToClean + "_" + (currentDepth+1);
+                //    if (!features.containsKey(key)) break;
+                //    extraVars += (Integer) features.get(key);
+                //    currentDepth++;
+                //}
+                String key = featureToClean + "_" + (currentDepth+1);
+                if (!features.containsKey(key)) break;
+                extraVars += (Integer) features.get(key);
+                currentDepth++;
+                //System.out.println("startingKey -> " + startingKey);
+                //System.out.println("features.get(startingKey) -> " + features.get(startingKey));
+                //System.out.println("extraVars -> " + extraVars);
+                features.put(startingKey, (Integer) features.get(startingKey)-extraVars);
+                startingDepth++;
+            }
+            
+        }
+    }
+
     public static String getMethodMapName(CtMethod<?> method) {
         return method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
         + getMethodParamsType(method) + ")";
@@ -234,7 +336,6 @@ public class ASTFeatureExtractor {
             e.printStackTrace();
         }
     }
-
 
     private static void getUsedImportsInMethod(CtMethod<?> method, Set<String> importSet,
             Map<String, Object> features) {
@@ -532,9 +633,13 @@ public class ASTFeatureExtractor {
         for (String key : map1.keySet()) {
             Object value1 = map1.get(key);
             Object value2 = map2.get(key);
-
-            if (value1 instanceof Integer && value2 instanceof Integer) {
+            if (key.startsWith("VariableDeclarationsDepth")) {
+                result.put(key, value1);
+            }
+            else if (value1 instanceof Integer && value2 instanceof Integer) {
                 // Sum integer values
+                //System.out.println(key);
+                //System.out.println("value1: " +value1 +" + " +"value2: "+value2 );
                 result.put(key, (Integer) value1 + (Integer) value2);
             } else if (value1 != null && value2 == null) {
                 // If the key exists only in map1
@@ -542,7 +647,7 @@ public class ASTFeatureExtractor {
             } else if (value1 instanceof Map && value2 instanceof Map) {
                 // Recursively sum nested maps
                 result.put(key, sumMaps((Map<String, Object>) value1, (Map<String, Object>) value2));
-            } else if(key == "MethodReturnType") {
+            } else if(key.equals("MethodReturnType")) {
                 result.put(key, value1);
             }
         }

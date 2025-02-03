@@ -8,7 +8,6 @@ import java_progs.aux.TemplatesAux;
 
 public class TemplateInsertEndList {
     static int SIZE = "size";
-    static int loopSize = "loopSize";
 
     private static void insertEndList("ListCollection"<"Type"> list, "Type" n) {
         list.add(n);
@@ -17,7 +16,7 @@ public class TemplateInsertEndList {
     public static void main(String[] args) throws IOException, InterruptedException {
         int iter = 0;
         try {    
-            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE+loopSize)";
+            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
             ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
             "Type" num = ArrayListAux.getRandomValueOfType(""Type"");
             TemplatesAux.sendStartSignalToOrchestrator(args[0]);
@@ -28,7 +27,7 @@ public class TemplateInsertEndList {
                 end = System.nanoTime();
                 iter++;
             }
-        }catch (Exception e) {TemplatesAux.writeErrorInFile(""filename"","Error caught by th program.\n"+e.getMessage());}
+        }catch (Exception e) {TemplatesAux.writeErrorInFile(""filename"","Error caught by the program.\n"+e.getMessage());}
         finally {TemplatesAux.sendStopSignalToOrchestrator(args[0],iter);}   
     }
 }

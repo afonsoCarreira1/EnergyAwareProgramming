@@ -46,6 +46,7 @@ class Runner:
         if run_c_prog:self.run_c_prog(file)
         else:
             self.target = subprocess.Popen(['java', f'java_progs/out/java_progs/progs/{file}', str(os.getpid())],stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.ROOT_DIR,)
+            self.target = subprocess.Popen(['java', file, str(os.getpid())],stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.ROOT_DIR,)
             time.sleep(.5)
             with open("java_progs/pid.txt", 'r') as file:
                 child_pid = int(file.read().split('\n')[0])
@@ -55,6 +56,7 @@ class Runner:
         start_time = time.time()
         #profiler_cmd = f'powerjoular -l -p {os.getpid()} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
         profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -D {self.frequency} -f {self.ROOT_DIR / "powerjoular.csv"}'
+        profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -c -f {self.ROOT_DIR / "powerjoular.csv"}'
         #print("parent",str(os.getpid()))
         #print("child",self.target.pid)
 

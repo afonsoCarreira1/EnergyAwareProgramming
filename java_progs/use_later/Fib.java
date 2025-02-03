@@ -7,7 +7,7 @@ import java.io.FileWriter;
 import java_progs.aux.WritePid;
 
 public class Fib extends Thread {
-    final static int FIB_SIZE = 40;
+    final static int FIB_SIZE = 45;
     final static int NUMBER_THREADS = 1;
 
     public static void main(String[] args) throws InterruptedException {

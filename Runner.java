@@ -211,6 +211,7 @@ public class Runner {
         HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(file,true);
         String methodName = getFunMapName(file);
         Map<String, Object> methodfeatures = methods.get(methodName);
+        System.out.println(methodfeatures);
         featuresName.addAll(methodfeatures.keySet());
         methodfeatures.put("EnergyUsed", cpuUsage);
         createFeaturesTempFile(file,methodfeatures);

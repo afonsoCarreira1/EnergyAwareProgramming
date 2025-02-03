@@ -11,8 +11,12 @@ import sun.misc.SignalHandler;
 
 public class TestFile {
 
-    private static void t(){ 
-        
+    private static TestObject t(){ 
+        //f();
+        //d();
+        return new TestObject();
     }
-   
+
+    //private static void f() {}
+    //private static double d() {return 0.0;}
 }

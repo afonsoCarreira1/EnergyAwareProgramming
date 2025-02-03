@@ -4,6 +4,7 @@ import spoon.reflect.code.*;
 import spoon.reflect.cu.CompilationUnit;
 import spoon.reflect.declaration.*;
 import spoon.reflect.reference.CtExecutableReference;
+import spoon.reflect.reference.CtPackageReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.CtImportVisitor;
 import spoon.reflect.visitor.filter.CompositeFilter;
@@ -43,9 +44,9 @@ import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 public class ASTFeatureExtractor {
 
     public static HashMap<String, Map<String, Object>> getFeatures(String file,Boolean readOnlyFile) {
-         String inputPath = "java_progs/progs/"+file+".java";
-        //String inputPath = "src/TestFile.java";
-        //file = "TestFile";
+        //String inputPath = "java_progs/progs/"+file+".java";
+        String inputPath = "src/TestFile.java";
+        file = "TestFile";
         Path currentDir = Paths.get("").toAbsolutePath(); // Get the current directory
         Path resolvedPath = currentDir.resolve(inputPath).normalize(); // Resolve and normalize the path
         // Initialize Spoon launcher
@@ -107,6 +108,12 @@ public class ASTFeatureExtractor {
         features.put("Assignments", method.getElements(new TypeFilter<>(CtAssignment.class)).size());
         features.put("BinaryOperators", method.getElements(new TypeFilter<>(CtBinaryOperator.class)).size());
         features.put("MethodInvocations", method.getElements(new TypeFilter<>(CtInvocation.class)).size());
+
+        //method return type
+        CtPackageReference returnTypeInfo = method.getType().getPackage();
+        if (returnTypeInfo != null && returnTypeInfo.getSimpleName().isEmpty()) 
+            features.put("MethodReturnType","CustomObject");
+        else features.put("MethodReturnType",method.getType());
 
         // count if the methods were called by a java collection or a custom object
         countMethodsOrigin(method,path,features);
@@ -535,6 +542,8 @@ public class ASTFeatureExtractor {
             } else if (value1 instanceof Map && value2 instanceof Map) {
                 // Recursively sum nested maps
                 result.put(key, sumMaps((Map<String, Object>) value1, (Map<String, Object>) value2));
+            } else if(key == "MethodReturnType") {
+                result.put(key, value1);
             }
         }
 

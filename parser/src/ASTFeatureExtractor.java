@@ -1,29 +1,22 @@
 import spoon.Launcher;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.*;
-import spoon.reflect.cu.CompilationUnit;
 import spoon.reflect.declaration.*;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtPackageReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.visitor.CtImportVisitor;
-import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.TypeFilter;
-import spoon.support.reflect.code.CtExpressionImpl;
-import spoon.support.reflect.declaration.CtImportImpl;
 
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.MatchResult;
@@ -35,10 +28,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-
-import org.eclipse.jdt.core.dom.IfStatement;
-
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 
 @SuppressWarnings("unchecked")
 public class ASTFeatureExtractor {
@@ -190,26 +179,11 @@ public class ASTFeatureExtractor {
     private static int accountFeaturesInsideLoops(Map<String, Object> features,CtElement element, Map<String,CtMethod<?>> allMethodsImplementations,HashSet<String> visited,int maxDepthSoFar) {
         if(visited.contains(element.toString())) return maxDepthSoFar;
         visited.add(element.toString());
-
-        if(element instanceof CtBlock) {
-            //System.out.println(element);
-            String key = "VariableDeclarationsDepth_"+maxDepthSoFar;
-            int val = element.getElements(new TypeFilter<>(CtLocalVariable.class)).size();
-            features.put(key,features.containsKey(key) ? (Integer) features.get(key)+val : val);
-        } 
-        //else if(methodElement instanceof CtAssignment) {
-        //    insertOrSumFeature(features,"AssignmentsDepth_"+maxDepth);
-        //} else if(methodElement instanceof CtBinaryOperator) {
-        //    insertOrSumFeature(features,"BinaryOperatorsDepth_"+maxDepth);
-        //} else if(methodElement instanceof CtInvocation) {
-        //    insertOrSumFeature(features,"MethodInvocationsDepth_"+maxDepth);
-        //}
-
+        getFeaturesWithDepth(element,maxDepthSoFar,features);
         int maxDepth = maxDepthSoFar;
         List<CtElement> methodElements = element.getElements(null);
         for (CtElement methodElement : methodElements) {
             int currentMaxDepth = maxDepthSoFar;
-            //System.out.println(methodElement.getClass().getSimpleName());
             if (methodElement instanceof CtLoop) {
                 CtLoop l = (CtLoop) methodElement;
                 currentMaxDepth = accountFeaturesInsideLoops(features,l.getBody(),allMethodsImplementations,visited,currentMaxDepth+1);
@@ -227,18 +201,6 @@ public class ASTFeatureExtractor {
                 }
             }
             maxDepth = Math.max(maxDepth, currentMaxDepth);
-            //if(methodElement instanceof CtLocalVariable) {
-            //    System.out.println(methodElement);
-            //    System.out.println(element.toString());
-            //    //insertOrSumFeature(features,"VariableDeclarationsDepth_"+maxDepth);
-            //    features.put("VariableDeclarations", element.getElements(new TypeFilter<>(CtLocalVariable.class)).size());
-            //} else if(methodElement instanceof CtAssignment) {
-            //    insertOrSumFeature(features,"AssignmentsDepth_"+maxDepth);
-            //} else if(methodElement instanceof CtBinaryOperator) {
-            //    insertOrSumFeature(features,"BinaryOperatorsDepth_"+maxDepth);
-            //} else if(methodElement instanceof CtInvocation) {
-            //    insertOrSumFeature(features,"MethodInvocationsDepth_"+maxDepth);
-            //}
         }
         return maxDepth;
     }
@@ -247,9 +209,22 @@ public class ASTFeatureExtractor {
         features.put(key, features.containsKey(key) ? (Integer) features.get(key) + 1 : 1);
     }
 
+    public static void getFeaturesWithDepth(CtElement element, int maxDepthSoFar, Map<String, Object> features) {
+        if(element instanceof CtBlock) {
+            HashMap<String,Integer> featuresToAdd = new HashMap<>();
+            featuresToAdd.put("VariableDeclarationsDepth_"+maxDepthSoFar, element.getElements(new TypeFilter<>(CtLocalVariable.class)).size());
+            featuresToAdd.put("AssignmentsDepth_"+maxDepthSoFar, element.getElements(new TypeFilter<>(CtAssignment.class)).size());
+            featuresToAdd.put("BinaryOperatorsDepth_"+maxDepthSoFar, element.getElements(new TypeFilter<>(CtBinaryOperator.class)).size());
+            featuresToAdd.put("MethodInvocationsDepth_"+maxDepthSoFar, element.getElements(new TypeFilter<>(CtInvocation.class)).size());
+            List<String> keys = new ArrayList<>(featuresToAdd.keySet());
+            for (String key : keys) {
+                features.put(key,features.containsKey(key) ? (Integer) features.get(key)+featuresToAdd.get(key) : featuresToAdd.get(key));
+            }
+        }
+    }
+
     public static void removeExtraFeaturesCounted(Map<String, Object> features) {
-        //System.out.println("features -> "+features);
-        ArrayList<String> featuresToClean = new ArrayList<>(Arrays.asList("VariableDeclarationsDepth"));
+        ArrayList<String> featuresToClean = new ArrayList<>(Arrays.asList("VariableDeclarationsDepth","AssignmentsDepth","BinaryOperatorsDepth","MethodInvocationsDepth"));
         for (String featureToClean : featuresToClean ) {
             int startingDepth = 0;
             while (true) {
@@ -257,23 +232,13 @@ public class ASTFeatureExtractor {
                 if (!features.containsKey(startingKey)) break;
                 int currentDepth = startingDepth;
                 int extraVars = 0;
-                //while (true) {
-                //    String key = featureToClean + "_" + (currentDepth+1);
-                //    if (!features.containsKey(key)) break;
-                //    extraVars += (Integer) features.get(key);
-                //    currentDepth++;
-                //}
                 String key = featureToClean + "_" + (currentDepth+1);
                 if (!features.containsKey(key)) break;
                 extraVars += (Integer) features.get(key);
                 currentDepth++;
-                //System.out.println("startingKey -> " + startingKey);
-                //System.out.println("features.get(startingKey) -> " + features.get(startingKey));
-                //System.out.println("extraVars -> " + extraVars);
                 features.put(startingKey, (Integer) features.get(startingKey)-extraVars);
                 startingDepth++;
             }
-            
         }
     }
 
@@ -426,17 +391,6 @@ public class ASTFeatureExtractor {
         return !(packageName.startsWith("java.") || packageName.startsWith("javax.") || packageName.startsWith("org.") || packageName.startsWith("sun."));
     }
 
-    private static int calculateASTDepth(CtElement element) {
-        if (element == null || element.getDirectChildren().isEmpty()) {
-            return 1;
-        }
-        int maxDepth = 0;
-        for (CtElement child : element.getDirectChildren()) {
-            maxDepth = Math.max(maxDepth, calculateASTDepth(child));
-        }
-        return maxDepth + 1;
-    }
-
     private static int countReassignments(CtMethod<?> method) {
         int count = 0;
         List<CtAssignment<?, ?>> assignments = method.getElements(new TypeFilter<>(CtAssignment.class));
@@ -457,17 +411,6 @@ public class ASTFeatureExtractor {
         complexity += method.getElements(new TypeFilter<>(CtConditional.class)).size();
         complexity += method.getElements(new TypeFilter<>(CtCatch.class)).size();
         return complexity;
-    }
-
-    private static int calculateMaxNestingLevel(CtElement element) {
-        if (element instanceof CtLoop || element instanceof CtIf || element instanceof CtSwitch) {
-            int maxLevel = 0;
-            for (CtElement child : element.getDirectChildren()) {
-                maxLevel = Math.max(maxLevel, calculateMaxNestingLevel(child));
-            }
-            return maxLevel + 1;
-        }
-        return 0;
     }
 
     private static int calculateMaxLoopDepth(CtElement element, Map<String,CtMethod<?>> allMethodsImplementations,HashSet<String> visited,int maxDepthSoFar) {
@@ -584,7 +527,6 @@ public class ASTFeatureExtractor {
         }
         return multiplier;
     }
-
 
     private static Map<String, Object> mergeFeatures(CtMethod<?> method,
             HashMap<String, Map<String, Object>> allFeatures,

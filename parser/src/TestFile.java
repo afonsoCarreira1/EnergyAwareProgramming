@@ -12,14 +12,10 @@ import sun.misc.SignalHandler;
 public class TestFile {
 
     private static void t(){ 
-        int n = 0;
-        f();
-    }
-
-    private static void f() {
+        int a = 0;
+        a = 1;
         for (int i = 0; i < 10; i++) {
-            int amansa2 = 0;
+            a = 2;
         }
-        int amansa = 0;
     }
 }

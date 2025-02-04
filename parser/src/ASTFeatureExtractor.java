@@ -140,7 +140,7 @@ public class ASTFeatureExtractor {
         features.put("LoopCount", loopCount);
 
         // 5. Literals Count
-        features.put("LiteralCount", method.getElements(new TypeFilter<>(CtLiteral.class)).size());
+        //features.put("LiteralCount", method.getElements(new TypeFilter<>(CtLiteral.class)).size());
         // for (CtLiteral lt : method.getElements(new TypeFilter<>(CtLiteral.class))) {
         // if
         // ((method.getDeclaringType().getSimpleName()+"."+method.getSimpleName()).equals("TestObject2.yes"))
@@ -148,18 +148,11 @@ public class ASTFeatureExtractor {
         // }
 
         // 6. Operator Usage
-        Map<String, Integer> operatorCounts = new HashMap<>();
-        ArrayList<String> operators = OperatorExtractor.extractOperators(method);
-        for (int i = 0; i < operators.size(); i++) {
-            operatorCounts.merge(operators.get(i), 1, Integer::sum);
-        }
-        for (String key : operatorCounts.keySet()) {
-            features.put(key, operatorCounts.get(key));
-        }
+        //getOperators(method,features);
 
         // 7. Variable Count and Reassignments
-        features.put("VariableCount", method.getElements(new TypeFilter<>(CtVariable.class)).size());
-        features.put("Reassignments", countReassignments(method));
+        //features.put("VariableCount", method.getElements(new TypeFilter<>(CtVariable.class)).size());
+        //features.put("Reassignments", countReassignments(method));
 
         // 8. Get variables types
         getVariablesType(method, features);
@@ -174,6 +167,17 @@ public class ASTFeatureExtractor {
         // features.put("MaxNestingLevel", calculateMaxNestingLevel(method));
 
         return features;
+    }
+
+    private static void getOperators(CtBlock<?> body, Map<String, Object> features,String complementFeatureName) {
+        Map<String, Integer> operatorCounts = new HashMap<>();
+        ArrayList<String> operators = OperatorExtractor.extractOperators(body,complementFeatureName);
+        for (int i = 0; i < operators.size(); i++) {
+            operatorCounts.merge(operators.get(i), 1, Integer::sum);
+        }
+        for (String key : operatorCounts.keySet()) {
+            features.put(key, operatorCounts.get(key));
+        }
     }
 
     private static int accountFeaturesInsideLoops(Map<String, Object> features,CtElement element, Map<String,CtMethod<?>> allMethodsImplementations,HashSet<String> visited,int maxDepthSoFar) {
@@ -211,11 +215,15 @@ public class ASTFeatureExtractor {
 
     public static void getFeaturesWithDepth(CtElement element, int maxDepthSoFar, Map<String, Object> features) {
         if(element instanceof CtBlock) {
+            getOperators((CtBlock<?>)element,features,"Depth_"+maxDepthSoFar);
             HashMap<String,Integer> featuresToAdd = new HashMap<>();
             featuresToAdd.put("VariableDeclarationsDepth_"+maxDepthSoFar, element.getElements(new TypeFilter<>(CtLocalVariable.class)).size());
             featuresToAdd.put("AssignmentsDepth_"+maxDepthSoFar, element.getElements(new TypeFilter<>(CtAssignment.class)).size());
             featuresToAdd.put("BinaryOperatorsDepth_"+maxDepthSoFar, element.getElements(new TypeFilter<>(CtBinaryOperator.class)).size());
             featuresToAdd.put("MethodInvocationsDepth_"+maxDepthSoFar, element.getElements(new TypeFilter<>(CtInvocation.class)).size());
+            featuresToAdd.put("LiteralCountDepth_"+maxDepthSoFar, element.getElements(new TypeFilter<>(CtLiteral.class)).size());
+            featuresToAdd.put("VariableCountDepth_"+maxDepthSoFar, element.getElements(new TypeFilter<>(CtVariable.class)).size());
+            featuresToAdd.put("ReassignmentsDepth_"+maxDepthSoFar, countReassignments((CtBlock<?>) element));
             List<String> keys = new ArrayList<>(featuresToAdd.keySet());
             for (String key : keys) {
                 features.put(key,features.containsKey(key) ? (Integer) features.get(key)+featuresToAdd.get(key) : featuresToAdd.get(key));
@@ -223,9 +231,25 @@ public class ASTFeatureExtractor {
         }
     }
 
+    //TODO change this so i dont have to write every new feature that accounts for depth
     public static void removeExtraFeaturesCounted(Map<String, Object> features) {
-        ArrayList<String> featuresToClean = new ArrayList<>(Arrays.asList("VariableDeclarationsDepth","AssignmentsDepth","BinaryOperatorsDepth","MethodInvocationsDepth"));
-        for (String featureToClean : featuresToClean ) {
+        //ArrayList<String> featuresToClean = new ArrayList<> ();
+        ArrayList<String> featuresToClean = new ArrayList<>(
+            Arrays.asList("VariableDeclarationsDepth",
+            "AssignmentsDepth",
+            "BinaryOperatorsDepth",
+            "MethodInvocationsDepth",
+            "LiteralCountDepth",
+            "VariableCountDepth",
+            "ReassignmentsDepth",
+            "PLUSDepth","MINUSDepth","MULDepth","DIVDepth","MODDepth",
+            "LTDepth","LEDepth","GTDepth","GEDepth","EQDepth",
+            "POSTINCDepth","POSTDECDepth","PREINCDepth","PREDECDepth"
+            ));
+        //for (String feature : features.keySet()) {
+        //    if (feature.contains("Depth_")) featuresToClean.add(feature.split("_")[0]); //System.out.println(feature);
+        //}
+        for (String featureToClean : featuresToClean) {
             int startingDepth = 0;
             while (true) {
                 String startingKey = featureToClean +"_"+startingDepth;
@@ -351,7 +375,6 @@ public class ASTFeatureExtractor {
             CtTypeReference<?> typeRef = variable.getType();
             // String typeName = typeRef.getQualifiedName();
             String typeName = getFullTypeName(typeRef);
-
             if (isCustomObject(typeRef)) {
                 typeName = "CustomObject";
             }
@@ -391,9 +414,9 @@ public class ASTFeatureExtractor {
         return !(packageName.startsWith("java.") || packageName.startsWith("javax.") || packageName.startsWith("org.") || packageName.startsWith("sun."));
     }
 
-    private static int countReassignments(CtMethod<?> method) {
+    private static int countReassignments(CtBlock<?> body) {
         int count = 0;
-        List<CtAssignment<?, ?>> assignments = method.getElements(new TypeFilter<>(CtAssignment.class));
+        List<CtAssignment<?, ?>> assignments = body.getElements(new TypeFilter<>(CtAssignment.class));
         for (CtAssignment<?, ?> assignment : assignments) {
             if (assignment.getAssigned() instanceof CtVariableAccess) {
                 count++;
@@ -514,18 +537,6 @@ public class ASTFeatureExtractor {
         if (clazz == null) return false;
         return clazz.getSuperInterfaces().stream()
             .anyMatch(iface -> iface.getQualifiedName().equals(interfaceName));
-    }
-
-    private static long getLoopMultiplier(CtElement element) {
-        long multiplier = 1;
-        CtElement current = element;
-        while (current != null) {
-            if (current instanceof CtLoop) {
-                multiplier *= 10; 
-            }
-            current = current.getParent();
-        }
-        return multiplier;
     }
 
     private static Map<String, Object> mergeFeatures(CtMethod<?> method,

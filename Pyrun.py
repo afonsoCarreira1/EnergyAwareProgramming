@@ -45,8 +45,9 @@ class Runner:
     def m(self,file,run_c_prog):
         if run_c_prog:self.run_c_prog(file)
         else:
-            self.target = subprocess.Popen(['java', f'java_progs/out/java_progs/progs/{file}', str(os.getpid())],stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.ROOT_DIR,)
-            self.target = subprocess.Popen(['java', file, str(os.getpid())],stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.ROOT_DIR,)
+            #self.target = subprocess.Popen(['java', f'java_progs/out/java_progs/progs/{file}', str(os.getpid())],stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.ROOT_DIR,)
+            #self.target = subprocess.Popen(['java', file, str(os.getpid())],stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.ROOT_DIR,)
+            self.target = subprocess.Popen(['timeout', '10s','java', f'java_progs/use_later/{file}', str(os.getpid())],stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.ROOT_DIR,)
             time.sleep(.5)
             with open("java_progs/pid.txt", 'r') as file:
                 child_pid = int(file.read().split('\n')[0])
@@ -56,7 +57,7 @@ class Runner:
         start_time = time.time()
         #profiler_cmd = f'powerjoular -l -p {os.getpid()} -D .1 -f {self.ROOT_DIR / "powerjoular.csv"}'
         profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -D {self.frequency} -f {self.ROOT_DIR / "powerjoular.csv"}'
-        profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -c -f {self.ROOT_DIR / "powerjoular.csv"}'
+        #profiler_cmd2 = f'powerjoular -l -p {self.target.pid} -c -f {self.ROOT_DIR / "powerjoular.csv"}'
         #print("parent",str(os.getpid()))
         #print("child",self.target.pid)
 
@@ -65,7 +66,11 @@ class Runner:
         print(f"Started measurement for PID {self.target.pid}")
 
         print("Waiting for process to finish...")
-        while self.stop == 0:continue
+        while self.target.poll() is None and self.stop == 0:
+            print("Process is still running...")
+            time.sleep(.5)
+        print('code:',self.target.poll())
+        #while self.stop == 0:continue
         print("Java process finished execution.")
         end_time = time.time()
         try:

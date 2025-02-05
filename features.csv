@@ -1,2 +1,1 @@
-Reassignments,LoopCount,ThreadUsage,CyclomaticComplexity,LiteralCount,java.util.ArrayList<java.lang.Integer>,java.util.ArrayList.addAll(java.util.Collection),Assignments,VariableDeclarations,BinaryOperators,ImportsUsed,BranchCount,MethodInvocations,VariableCount,EnergyUsed
-0,0,0,1,0,2,1,0,0,0,1,0,1,2,NaN
+EnergyUsed

@@ -36,14 +36,15 @@ public class Runner {
     static String loopSize = "";
     static String lastMeasurement = "";
     static HashSet<String> featuresName = new HashSet<>();
+    static Boolean timedOut = false;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         File[] programs = getAllProgramsNames();
         for (int i = 0; i < programs.length; i++) {
             //System.out.println(i);
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
-                String fileName = programs[i].toString().replace("java_progs/progs/", "").replace(".java", "");//args[0];
-                if (!(args[0].equals("test") && fileName.equals("AddAllElemListArrayList0"))) continue;//just to test one prog file
+                String fileName = programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
+                if (!(args[0].equals("test") && fileName.equals("Fib"))) continue;//just to test one prog file
                 System.out.println("Starting profile for " + fileName + " program");
                 readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
@@ -75,6 +76,8 @@ public class Runner {
             Runtime.getRuntime().exec(command);
         } else {
             String[] command = {
+                //"timeout",
+                //"10s",
                 "java", 
                 "-Xmx4056M",
                 "-Xms4056M",
@@ -146,6 +149,27 @@ public class Runner {
         });
         synchronized (Runner.class) {
             Runner.class.wait();
+        }
+    }
+
+    private static void handleTimeOuts() {
+        try {
+            Thread.sleep(10000);
+            if (timedOut)
+            try {
+                Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularPid});
+                killPowerjoular.waitFor();
+                Process killTargetProgram = Runtime.getRuntime().exec(new String[]{"sudo", "kill", childPid});
+                killTargetProgram.waitFor();
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        synchronized (Runner.class) {
+            Runner.class.notify();
         }
     }
 
@@ -292,7 +316,8 @@ public class Runner {
     }
 
     private static File[] getAllProgramsNames() {
-        return new File("java_progs/progs/").listFiles();
+        //return new File("java_progs/progs/").listFiles();
+        return new File("java_progs/out/java_progs/progs/").listFiles();
     }
 
     private static File[] getAllCSVTempFiles() {

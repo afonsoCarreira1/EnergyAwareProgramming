@@ -14,6 +14,7 @@ public class TemplateCloneList {
         return ("ListCollection"<"Type">) list.clone();
     }
 
+    @SuppressWarnings("unused")
     private static void computation("ListCollection"<"Type"> list) {
         "ListCollection"<"Type"> tempList = new "ListCollection"<"Type">();
         while (!TemplatesAux.stop) {

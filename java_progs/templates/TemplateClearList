@@ -6,37 +6,43 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.TemplatesAux;
 
-public class TemplateInsertStartList {
+public class TemplateClearList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
-
-    private static void insertStartList("ListCollection"<"Type"> list, "Type" n) {
-        list.add(0, n);
+    
+    private static void clearList("ListCollection"<"Type"> list) {
+        list.clear();
     }
 
-    private static void computation("ListCollection"<"Type"> list, int num) {
-        while (!TemplatesAux.stop) {
-            insertStartList(list,num);
+    private static void computation("ListCollection"<"Type">[] lists, int iter) {
+        int i = 0;
+        while (!TemplatesAux.stop && i<iter) {
+            clearList(lists[i]);
+            i++;
         }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         int iter = 0;
         try {
-            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE+loopSize)";
-            ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
-            "Type" num = ArrayListAux.getRandomValueOfType(""Type"");
+            @SuppressWarnings("unchecked")
+            "ListCollection"<"Type">[] lists = new "ListCollection"[loopSize];
+            for (int i = 0; i < loopSize; i++) {
+                "ListCollection"<"Type"> l = new "ListCollection"<"Type">"(SIZE)";
+                ArrayListAux.insertRandomNumbers(l,SIZE,""Type"");
+                lists[i] = l;
+            }
             long begin = System.nanoTime();
             long end = begin;
-            while (end - begin < 1000000000/*1s*/) {
-                insertStartList(list,num);
+            while (end - begin < 1000000000/*1s*/ && iter < loopSize) {
+                clearList(lists[iter]);
                 end = System.nanoTime();
                 iter++;
             }
             TemplatesAux.writeProgramInfo(iter);
             TemplatesAux.sendStartSignalToOrchestrator(args[0]);
             TemplatesAux.launchTimerThread();
-            computation(list, num);
+            computation(lists,iter);
         } catch (OutOfMemoryError e) {
             TemplatesAux.writeErrorInFile(""filename"", "Out of memory error caught by the program.\n" + e.getMessage());
         } 

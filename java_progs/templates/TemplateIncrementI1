@@ -1,42 +1,41 @@
 package java_progs.progs;
 
 import java.io.IOException;
-import java.util."ImportListCollection";
 
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.TemplatesAux;
 
-public class TemplateInsertStartList {
-    static int SIZE = "size";
-    static int loopSize = "loopSize";
+public class TemplateIncrementI1 {
 
-    private static void insertStartList("ListCollection"<"Type"> list, "Type" n) {
-        list.add(0, n);
+    private static "Type" incrementI1("Type" n) {
+        return n++;
     }
 
-    private static void computation("ListCollection"<"Type"> list, int num) {
+    private static void computation("Type" defaultNum) {
+        "Type" sum = defaultNum;
         while (!TemplatesAux.stop) {
-            insertStartList(list,num);
+            sum += incrementI1(defaultNum);
         }
+        System.out.println("Final sum: " + sum);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         int iter = 0;
         try {
-            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE+loopSize)";
-            ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
-            "Type" num = ArrayListAux.getRandomValueOfType(""Type"");
+            "Type" sum = ArrayListAux.getDefaultValues(""Type"");
+            "Type" defaultNum = ArrayListAux.getDefaultValues(""Type"");
             long begin = System.nanoTime();
             long end = begin;
-            while (end - begin < 1000000000/*1s*/) {
-                insertStartList(list,num);
+            while (end - begin < 1_000_000_000) {
+                sum += incrementI1(defaultNum);
                 end = System.nanoTime();
                 iter++;
             }
+            System.out.println("Final sum: " + sum);
             TemplatesAux.writeProgramInfo(iter);
             TemplatesAux.sendStartSignalToOrchestrator(args[0]);
             TemplatesAux.launchTimerThread();
-            computation(list, num);
+            computation(defaultNum);
         } catch (OutOfMemoryError e) {
             TemplatesAux.writeErrorInFile(""filename"", "Out of memory error caught by the program.\n" + e.getMessage());
         } 

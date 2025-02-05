@@ -51,7 +51,7 @@ public class TemplateAddAllElemList {
         catch (Exception e) {
             TemplatesAux.writeErrorInFile(""filename"","Error caught by th program.\n"+e.getMessage());
         }
-        finally {TemplatesAux.sendStopSignalToOrchestrator(args[0],iter);}
+        finally {TemplatesAux.sendStopSignalToOrchestrator(args[0]);}
     }
     
 }

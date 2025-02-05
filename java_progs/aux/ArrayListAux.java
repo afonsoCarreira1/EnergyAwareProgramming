@@ -1,6 +1,5 @@
 package java_progs.aux;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -109,7 +108,7 @@ public class ArrayListAux {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getDeafaultValues(String type){
+    public static <T> T getDefaultValues(String type){
         switch (type.toLowerCase()) {
             case "int":
                 return (T) Integer.valueOf(0);

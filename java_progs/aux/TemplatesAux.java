@@ -12,8 +12,7 @@ public class TemplatesAux {
         WritePid.writeTargetProgInfo("timeStamp", i);
     }
 
-    public static void sendStopSignalToOrchestrator(String pid, int i) throws IOException {
-        //String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
+    public static void sendStopSignalToOrchestrator(String pid) throws IOException {
         Runtime.getRuntime().exec(new String[] { "kill", "-USR2", pid });
     }
 

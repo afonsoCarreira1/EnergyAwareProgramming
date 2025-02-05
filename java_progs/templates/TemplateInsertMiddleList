@@ -6,17 +6,18 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.TemplatesAux;
 
-public class TemplateInsertStartList {
+public class TemplateInsertMiddleList {
     static int SIZE = "size";
     static int loopSize = "loopSize";
 
-    private static void insertStartList("ListCollection"<"Type"> list, "Type" n) {
-        list.add(0, n);
+
+    private static void insertMiddleList("ListCollection"<"Type"> list, "Type" n) {
+        list.add(list.size() / 2, n);
     }
 
-    private static void computation("ListCollection"<"Type"> list, int num) {
+    private static void computation("ListCollection"<"Type"> list, "Type" num) {
         while (!TemplatesAux.stop) {
-            insertStartList(list,num);
+            insertMiddleList(list,num);
         }
     }
 
@@ -29,7 +30,7 @@ public class TemplateInsertStartList {
             long begin = System.nanoTime();
             long end = begin;
             while (end - begin < 1000000000/*1s*/) {
-                insertStartList(list,num);
+                insertMiddleList(list,num);
                 end = System.nanoTime();
                 iter++;
             }

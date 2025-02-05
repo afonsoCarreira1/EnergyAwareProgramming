@@ -6,37 +6,37 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.TemplatesAux;
 
-public class TemplateInsertStartList {
+public class TemplateSetElemList {
     static int SIZE = "size";
-    static int loopSize = "loopSize";
-
-    private static void insertStartList("ListCollection"<"Type"> list, "Type" n) {
-        list.add(0, n);
+    
+    private static void setElemList("ListCollection"<"Type"> list,int i, "Type" n) {
+        list.set(i,n);
     }
 
-    private static void computation("ListCollection"<"Type"> list, int num) {
+    private static void computation("ListCollection"<"Type"> list, int pos, "Type" num) {
         while (!TemplatesAux.stop) {
-            insertStartList(list,num);
+            setElemList(list,pos,num);
         }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         int iter = 0;
         try {
-            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE+loopSize)";
+            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
             ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
+            int pos = ArrayListAux.getRandomIndex(SIZE);
             "Type" num = ArrayListAux.getRandomValueOfType(""Type"");
             long begin = System.nanoTime();
             long end = begin;
             while (end - begin < 1000000000/*1s*/) {
-                insertStartList(list,num);
+                setElemList(list,pos,num);
                 end = System.nanoTime();
                 iter++;
             }
             TemplatesAux.writeProgramInfo(iter);
             TemplatesAux.sendStartSignalToOrchestrator(args[0]);
             TemplatesAux.launchTimerThread();
-            computation(list, num);
+            computation(list, pos, num);
         } catch (OutOfMemoryError e) {
             TemplatesAux.writeErrorInFile(""filename"", "Out of memory error caught by the program.\n" + e.getMessage());
         } 
@@ -45,4 +45,5 @@ public class TemplateInsertStartList {
         }
         finally {TemplatesAux.sendStopSignalToOrchestrator(args[0]);}
     }
+    
 }

@@ -14,7 +14,7 @@ public class TemplateInsertStartList {
         list.add(0, n);
     }
 
-    private static void computation("ListCollection"<"Type"> list, int num) {
+    private static void computation("ListCollection"<"Type"> list, "Type" num) {
         while (!TemplatesAux.stop) {
             insertStartList(list,num);
         }

@@ -23,13 +23,16 @@ public class TemplatesAux {
     }
 
     public static void writeErrorInFile(String filename, String errorMessage) {
+        System.out.println("this happened -> "+errorMessage);
         try {
-            File myObj = new File(filename+".txt");
+            File myObj = new File("errorFiles/" +filename+".txt");
             myObj.createNewFile();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
         try (FileWriter writer = new FileWriter("errorFiles/" + filename+".txt")) {
             writer.write(errorMessage);
-        } catch (IOException e) {}
+        } catch (IOException e) {System.out.println(e.getMessage());}
     }
 
     public static void launchTimerThread() {

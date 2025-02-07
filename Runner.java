@@ -38,6 +38,8 @@ public class Runner {
     static HashSet<String> featuresName = new HashSet<>();
     static Thread timeOutThread = null;
     static short timeOutTime = 10;//seconds
+    static String maxInputSize = null;
+    static String maxInputLoopSize = null;
 
     public static void main(String[] args) throws IOException, InterruptedException  {
         File[] programs = getAllProgramsNames();
@@ -53,6 +55,8 @@ public class Runner {
                 for (int j = 0; j < runs; j++) {
                     System.out.println("---------------------------------------");
                     System.out.println("Run number: " + (j + 1));
+                    timeOutThread = handleTimeOutThread();
+                    checkIfInputAvoidProgramTimeout(fileName);
                     run(fileName);
                 }
                 averageJoules /= runs;
@@ -111,7 +115,6 @@ public class Runner {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                timeOutThread = handleTimeOutThread();
                 timeOutThread.start();          
             }
         });
@@ -151,6 +154,36 @@ public class Runner {
         synchronized (Runner.class) {
             Runner.class.wait();
         }
+    }
+
+    private static String readFile(String file) {
+        String program = "";
+        File myObj = new File("java_progs/progs/"+file+".java");
+        try (Scanner myReader = new Scanner(myObj)) {
+            StringBuilder f = new StringBuilder();
+            while (myReader.hasNextLine()) {
+                f.append(myReader.nextLine()).append("\n");
+            }
+            myReader.close();
+            program = f.toString();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return program;
+    }
+
+    private static void checkIfInputAvoidProgramTimeout(String fileName) {
+        String program = readFile(fileName);
+        String size = findMatchInPattern(program,"static int SIZE = " + "(\\d+)" + ";");
+        String loopSize = findMatchInPattern(program,"static int loopSize = " + "(\\d+)" + ";");
+        
+    }
+
+    private static String findMatchInPattern(String txt, String regex) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(txt);
+        if (!matcher.find()) return null;
+        return matcher.group(1);
     }
 
     private static Thread handleTimeOutThread() {
@@ -255,6 +288,7 @@ public class Runner {
             }
             myReader.close();
             String txt = f.toString();
+            checkIfInputAvoidProgramTimeout(txt);
             String regex = Introspector.decapitalize(file)+"\\s*\\((.*)\\)\\s*\\{";
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(txt);
@@ -327,4 +361,5 @@ public class Runner {
     private static File[] getAllCSVTempFiles() {
         return new File("tmp/").listFiles();
     }
+
 }

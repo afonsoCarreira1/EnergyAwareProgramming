@@ -36,15 +36,16 @@ public class Runner {
     static String loopSize = "";
     static String lastMeasurement = "";
     static HashSet<String> featuresName = new HashSet<>();
-    static Boolean timedOut = false;
+    static Thread timeOutThread = null;
+    static short timeOutTime = 10;//seconds
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException  {
         File[] programs = getAllProgramsNames();
         for (int i = 0; i < programs.length; i++) {
             //System.out.println(i);
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
-                if (!(args[0].equals("test") && fileName.equals("Fib"))) continue;//just to test one prog file
+                if (!(args[0].equals("test") && fileName.equals("ArrayListContainsAllElemRandom"))) continue;//just to test one prog file
                 System.out.println("Starting profile for " + fileName + " program");
                 readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
@@ -61,7 +62,6 @@ public class Runner {
                 System.out.println("Creating features CSV file.");
                 averageJoules = 0.0;
                 averageTime = 0.0;
-                //createFeaturesCSV();
             } else {
                 System.out.println("Invalid args");
             }
@@ -76,8 +76,6 @@ public class Runner {
             Runtime.getRuntime().exec(command);
         } else {
             String[] command = {
-                //"timeout",
-                //"10s",
                 "java", 
                 "-Xmx4056M",
                 "-Xms4056M",
@@ -113,11 +111,14 @@ public class Runner {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                timeOutThread = handleTimeOutThread();
+                timeOutThread.start();          
             }
         });
 
         Signal.handle(new Signal("USR2"), new SignalHandler() {
             public void handle(Signal sig) {
+                timeOutThread.interrupt();
                 // System.out.println("Received END signal, stopping powerjoular at
                 // "+LocalDateTime.now());
                 endTime = System.currentTimeMillis();
@@ -152,25 +153,28 @@ public class Runner {
         }
     }
 
-    private static void handleTimeOuts() {
-        try {
-            Thread.sleep(10000);
-            if (timedOut)
-            try {
-                Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularPid});
-                killPowerjoular.waitFor();
-                Process killTargetProgram = Runtime.getRuntime().exec(new String[]{"sudo", "kill", childPid});
-                killTargetProgram.waitFor();
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        
-        synchronized (Runner.class) {
-            Runner.class.notify();
-        }
+    private static Thread handleTimeOutThread() {
+        return new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(timeOutTime*1000);
+                    System.out.println("Program timed out.\nKilling process.");
+                    try {
+                        Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularPid});
+                        killPowerjoular.waitFor();
+                        Process killTargetProgram = Runtime.getRuntime().exec(new String[]{"sudo", "kill", childPid});
+                        killTargetProgram.waitFor();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    synchronized (Runner.class) {
+                        Runner.class.notify();
+                    }
+                } catch (InterruptedException e) {
+                    if (!(e instanceof InterruptedException)) e.printStackTrace();
+                } 
+            }  
+        };  
     }
 
     private static String readCsv(String csvFile) {

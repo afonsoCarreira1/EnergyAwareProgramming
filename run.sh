@@ -60,7 +60,7 @@ sudo gcc OrchestratorC.c -o OrchestratorC
     echo "b - Use Bash orchestrator"
     #echo "Optional number is passed to the program as an argument"
 fi
-#sudo rm powerjoular.*
+sudo rm powerjoular.*
 sudo rm tmp/*
 
 

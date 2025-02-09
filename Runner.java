@@ -173,19 +173,25 @@ public class Runner {
 
     private static boolean programThrowedError(String filename) {
         File f = new File("errorFiles/"+filename+".txt");
-        return f.exists() && !f.isDirectory();
+        if (f.exists() && !f.isDirectory()) return true;
+        //f = new File("errorFiles/"+"MemError"+filename+".txt");
+        //if (f.exists() && !f.isDirectory()) {
+        //    avoidSize = getCurrentInputSize(filename);
+        //    programToSkip = filename.split("\\d")[0];
+        //    return true;
+        //}
+        return false;
     }
 
     private static boolean skipProgram(String fileName) {
-        //System.out.println("programToSkip -> "+programToSkip + " | avoidSize -> "+avoidSize);
-        //System.out.println("fileName");
         if (programToSkip == null || avoidSize == null) return false;
         if (!fileName.split("\\d")[0].contains(programToSkip)) {
             programToSkip = null;
+            avoidSize = null;
             return false;
         }
         if (getCurrentInputSize(fileName) < avoidSize) return false;
-        System.out.println("Skipping "+fileName+", input size too large.");
+        System.out.println("Skipping "+fileName+", input size too large. It would take a lot of time.");
         return true;
     }
 
@@ -219,7 +225,7 @@ public class Runner {
         return matcher.group(1);
     }
 
-    private static Thread handleTimeOutThread(String fileName) {
+    private static Thread handleTimeOutThread(String filename) {
         return new Thread() {
             public void run() {
                 try {
@@ -230,8 +236,8 @@ public class Runner {
                         killPowerjoular.waitFor();
                         Process killTargetProgram = Runtime.getRuntime().exec(new String[]{"sudo", "kill", childPid});
                         killTargetProgram.waitFor();
-                        avoidSize = getCurrentInputSize(fileName);
-                        programToSkip = fileName.split("\\d")[0];
+                        avoidSize = getCurrentInputSize(filename);
+                        programToSkip = filename.split("\\d")[0];
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.ProcessBuilder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,31 +34,40 @@ public class Runner {
     static long startTime;
     static long endTime;
     static String frequency = ".1";
-    static String loopSize = "";
-    static String lastMeasurement = "";
+    static String loopSize = null;
+    static String lastMeasurement = null;
     static HashSet<String> featuresName = new HashSet<>();
     static Thread timeOutThread = null;
     static short timeOutTime = 10;//seconds
     static String maxInputSize = null;
     static String maxInputLoopSize = null;
+    static Long avoidSize = null;
+    static String programToSkip = null;
 
     public static void main(String[] args) throws IOException, InterruptedException  {
         File[] programs = getAllProgramsNames();
+        Arrays.sort(programs);
         for (int i = 0; i < programs.length; i++) {
+            System.out.println("---------------------------------------");
             //System.out.println(i);
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
-                if (!(args[0].equals("test") && fileName.equals("ArrayListContainsAllElemRandom"))) continue;//just to test one prog file
+                //if (!(args[0].equals("test") && fileName.equals("ArrayListContainsAllElemRandom1"))) continue;//just to test one prog file
+                if (skipProgram(fileName)) continue;
                 System.out.println("Starting profile for " + fileName + " program");
                 readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
                 System.out.println("Running " + (runs == 1 ? "1 time." : runs + " times."));
                 for (int j = 0; j < runs; j++) {
-                    System.out.println("---------------------------------------");
+                    //System.out.println("---------------------------------------");
                     System.out.println("Run number: " + (j + 1));
-                    timeOutThread = handleTimeOutThread();
-                    checkIfInputAvoidProgramTimeout(fileName);
+                    timeOutThread = handleTimeOutThread(fileName);
+                    timeOutThread.start();
                     run(fileName);
+                }
+                if (programThrowedError(fileName)) {
+                    System.out.println("Error in "+fileName+". Check logs for more info.");
+                    continue;
                 }
                 averageJoules /= runs;
                 averageTime /= runs;
@@ -114,8 +124,7 @@ public class Runner {
                     powerjoularPid = Long.toString(powerjoularProcess.pid());
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
-                timeOutThread.start();          
+                }   
             }
         });
 
@@ -134,6 +143,12 @@ public class Runner {
                     killTargetProgram.waitFor();
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
+                }
+                if (programThrowedError(file)) {
+                    synchronized (Runner.class) {
+                        Runner.class.notify();
+                    }
+                    return;
                 }
                 String cpuUsage = readCsv("powerjoular.csv-" + childPid + ".csv");
                 System.out.println("Program used " + cpuUsage + "J");
@@ -156,6 +171,24 @@ public class Runner {
         }
     }
 
+    private static boolean programThrowedError(String filename) {
+        File f = new File("errorFiles/"+filename+".txt");
+        return f.exists() && !f.isDirectory();
+    }
+
+    private static boolean skipProgram(String fileName) {
+        //System.out.println("programToSkip -> "+programToSkip + " | avoidSize -> "+avoidSize);
+        //System.out.println("fileName");
+        if (programToSkip == null || avoidSize == null) return false;
+        if (!fileName.split("\\d")[0].contains(programToSkip)) {
+            programToSkip = null;
+            return false;
+        }
+        if (getCurrentInputSize(fileName) < avoidSize) return false;
+        System.out.println("Skipping "+fileName+", input size too large.");
+        return true;
+    }
+
     private static String readFile(String file) {
         String program = "";
         File myObj = new File("java_progs/progs/"+file+".java");
@@ -172,11 +205,11 @@ public class Runner {
         return program;
     }
 
-    private static void checkIfInputAvoidProgramTimeout(String fileName) {
+    private static Long getCurrentInputSize(String fileName) {
         String program = readFile(fileName);
         String size = findMatchInPattern(program,"static int SIZE = " + "(\\d+)" + ";");
         String loopSize = findMatchInPattern(program,"static int loopSize = " + "(\\d+)" + ";");
-        
+        return size != null && loopSize != null ? Long.parseLong(size) + Long.parseLong(loopSize): size != null ? Long.parseLong(size) : 0;
     }
 
     private static String findMatchInPattern(String txt, String regex) {
@@ -186,7 +219,7 @@ public class Runner {
         return matcher.group(1);
     }
 
-    private static Thread handleTimeOutThread() {
+    private static Thread handleTimeOutThread(String fileName) {
         return new Thread() {
             public void run() {
                 try {
@@ -197,6 +230,8 @@ public class Runner {
                         killPowerjoular.waitFor();
                         Process killTargetProgram = Runtime.getRuntime().exec(new String[]{"sudo", "kill", childPid});
                         killTargetProgram.waitFor();
+                        avoidSize = getCurrentInputSize(fileName);
+                        programToSkip = fileName.split("\\d")[0];
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -272,7 +307,7 @@ public class Runner {
         HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(file,true);
         String methodName = getFunMapName(file);
         Map<String, Object> methodfeatures = methods.get(methodName);
-        System.out.println(methodfeatures);
+        //System.out.println(methodfeatures);
         featuresName.addAll(methodfeatures.keySet());
         methodfeatures.put("EnergyUsed", cpuUsage);
         createFeaturesTempFile(file,methodfeatures);
@@ -288,7 +323,6 @@ public class Runner {
             }
             myReader.close();
             String txt = f.toString();
-            checkIfInputAvoidProgramTimeout(txt);
             String regex = Introspector.decapitalize(file)+"\\s*\\((.*)\\)\\s*\\{";
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(txt);

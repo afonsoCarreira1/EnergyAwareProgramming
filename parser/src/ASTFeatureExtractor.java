@@ -33,9 +33,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 public class ASTFeatureExtractor {
 
     public static HashMap<String, Map<String, Object>> getFeatures(String file,Boolean readOnlyFile) {
-        //String inputPath = "java_progs/progs/"+file+".java";
-        String inputPath = "src/TestFile.java";
-        file = "TestFile";
+        String inputPath = "java_progs/progs/"+file+".java";
+        //String inputPath = "src/TestFile.java";
+        //file = "TestFile";
         Path currentDir = Paths.get("").toAbsolutePath(); // Get the current directory
         Path resolvedPath = currentDir.resolve(inputPath).normalize(); // Resolve and normalize the path
         // Initialize Spoon launcher

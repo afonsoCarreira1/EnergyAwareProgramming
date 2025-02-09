@@ -1,1 +1,6 @@
-EnergyUsed
+LoopCount,VariableCountDepth_0,ThreadUsage,CyclomaticComplexity,MethodReturnType,MINUSDepth_0,MethodInvocationsDepth_0,LiteralCountDepth_0,ReassignmentsDepth_0,CustomObjectWithCustomMethod,int,ImportsUsed,AssignmentsDepth_0,BinaryOperatorsDepth_0,BranchCount,EQDepth_0,PLUSDepth_0,VariableDeclarationsDepth_0,EnergyUsed
+0,0,0,9,long,6,6,18,0,6,3,0,0,15,12,6,3,0,4.649476635590612E-6
+0,0,0,9,long,6,6,18,0,6,3,0,0,15,12,6,3,0,2.616002637386412
+0,0,0,9,long,6,6,18,0,6,3,0,0,15,12,6,3,0,0.0013481188624206116
+0,0,0,9,long,6,6,18,0,6,3,0,0,15,12,6,3,0,1.3851704820310027E-7
+0,0,0,9,long,6,6,18,0,6,3,0,0,15,12,6,3,0,5.631020341758772E-6

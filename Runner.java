@@ -48,12 +48,12 @@ public class Runner {
         File[] programs = getAllProgramsNames();
         Arrays.sort(programs);
         for (int i = 0; i < programs.length; i++) {
-            System.out.println("---------------------------------------");
             //System.out.println(i);
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
-                //if (!(args[0].equals("test") && fileName.equals("ArrayListContainsAllElemRandom1"))) continue;//just to test one prog file
+                if (!(args[0].equals("test") && fileName.equals("ContainsAllElemRandomArrayListArrayList0"))) continue;//just to test one prog file
                 if (skipProgram(fileName)) continue;
+                System.out.println("---------------------------------------");
                 System.out.println("Starting profile for " + fileName + " program");
                 readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
@@ -83,10 +83,9 @@ public class Runner {
         createFeaturesCSV();
     }
 
-    public static void run(String file) throws IOException, InterruptedException {
+    public static void run(String filename) throws IOException, InterruptedException {
         if (readCFile) {
-            String[] command = { "pkexec", "./c_progs/" + file, Long.toString(ProcessHandle.current().pid()) };
-            // System.out.println("starting run at "+LocalDateTime.now());
+            String[] command = { "pkexec", "./c_progs/" + filename, Long.toString(ProcessHandle.current().pid()) };
             Runtime.getRuntime().exec(command);
         } else {
             String[] command = {
@@ -95,12 +94,19 @@ public class Runner {
                 "-Xms4056M",
                 "-cp", 
                 "java_progs/out", 
-                "java_progs.progs." + file, 
+                "java_progs.progs." + filename, 
                 Long.toString(ProcessHandle.current().pid())
             };
             Runtime.getRuntime().exec(command);
         }
+        handleStartSignal();
+        handleStopSignal(filename);
+        synchronized (Runner.class) {
+            Runner.class.wait();
+        }
+    }
 
+    private static void handleStartSignal() {
         Signal.handle(new Signal("USR1"), new SignalHandler() {
             public void handle(Signal sig) {
                 System.out.println("Received START signal, starting powerjoular at " + LocalDateTime.now());
@@ -127,7 +133,9 @@ public class Runner {
                 }   
             }
         });
+    }
 
+    private static void handleStopSignal(String filename) {
         Signal.handle(new Signal("USR2"), new SignalHandler() {
             public void handle(Signal sig) {
                 timeOutThread.interrupt();
@@ -144,7 +152,7 @@ public class Runner {
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
-                if (programThrowedError(file)) {
+                if (programThrowedError(filename)) {
                     synchronized (Runner.class) {
                         Runner.class.notify();
                     }
@@ -157,7 +165,7 @@ public class Runner {
                 averageJoules += Double.parseDouble(cpuUsage);
                 averageTime += endTime - startTime;
                 try {
-                    saveFeature(file, cpuUsage);
+                    saveFeature(filename, cpuUsage);
                 } catch (IOException e) {
                     System.out.println("Error saving feature");
                 }
@@ -166,20 +174,11 @@ public class Runner {
                 }
             }
         });
-        synchronized (Runner.class) {
-            Runner.class.wait();
-        }
     }
 
     private static boolean programThrowedError(String filename) {
         File f = new File("errorFiles/"+filename+".txt");
         if (f.exists() && !f.isDirectory()) return true;
-        //f = new File("errorFiles/"+"MemError"+filename+".txt");
-        //if (f.exists() && !f.isDirectory()) {
-        //    avoidSize = getCurrentInputSize(filename);
-        //    programToSkip = filename.split("\\d")[0];
-        //    return true;
-        //}
         return false;
     }
 
@@ -319,40 +318,19 @@ public class Runner {
         createFeaturesTempFile(file,methodfeatures);
     }
 
-    private static String getFunMapName(String file){
+    private static String getFunMapName(String filename){
         String mapName = "";
-        File myObj = new File("java_progs/progs/"+file+".java");
-        try (Scanner myReader = new Scanner(myObj)) {
-            StringBuilder f = new StringBuilder();
-            while (myReader.hasNextLine()) {
-                f.append(myReader.nextLine()).append("\n");
-            }
-            myReader.close();
-            String txt = f.toString();
-            String regex = Introspector.decapitalize(file)+"\\s*\\((.*)\\)\\s*\\{";
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(txt);
-            
-            // Check if the pattern matches
-            //if (matcher.find()) {
-            //    // Extract and print the first group (contents inside the parentheses)
-            //    System.out.println("Extracted group: " + matcher.group(1));
-            //} else {
-            //    System.out.println("No match found.");
-            //}
-            matcher.find();
-            String[] params = matcher.group(1).split(",");
-            for(String param : params){
-                param = param.strip();
-                String type = param.split(" ")[0].replaceAll("<.*>", "");
-                if (mapName.isEmpty()) mapName += type;
-                else mapName += " | "+type;
-            }
-            //scanner.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        String program = readFile(filename);
+        String regex = Introspector.decapitalize(filename)+"\\s*\\((.*)\\)\\s*\\{";
+        String match = findMatchInPattern(program,regex);
+        String[] params = match.split(",");
+        for(String param : params){
+            param = param.strip();
+            String type = param.split(" ")[0].replaceAll("<.*>", "");
+            if (mapName.isEmpty()) mapName += type;
+            else mapName += " | "+type;
         }
-        return file + "."+Introspector.decapitalize(file)+"("+mapName+")";// Class.methodName(type1 | type2)
+        return filename + "."+Introspector.decapitalize(filename)+"("+mapName+")";
     }
 
     private static void createFeaturesCSV() throws IOException {

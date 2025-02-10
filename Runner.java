@@ -25,22 +25,19 @@ import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
 public class Runner {
-    static String CSV_FILE_NAME = "features.csv";
+    final static String CSV_FILE_NAME = "features.csv";
+    final static String frequency = ".1";
+    final static short timeOutTime = 10;//seconds
     static String powerjoularPid = "";
     static String childPid = "";
-    static Boolean readCFile = false;
     static Double averageJoules = 0.0;
     static Double averageTime = 0.0;
     static long startTime;
     static long endTime;
-    static String frequency = ".1";
     static String loopSize = null;
     static String lastMeasurement = null;
     static HashSet<String> featuresName = new HashSet<>();
     static Thread timeOutThread = null;
-    static short timeOutTime = 10;//seconds
-    static String maxInputSize = null;
-    static String maxInputLoopSize = null;
     static Long avoidSize = null;
     static String programToSkip = null;
 
@@ -55,7 +52,7 @@ public class Runner {
                 if (skipProgram(fileName)) continue;
                 System.out.println("---------------------------------------");
                 System.out.println("Starting profile for " + fileName + " program");
-                readCFile = args[1].equals("t");
+                Boolean readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
                 System.out.println("Running " + (runs == 1 ? "1 time." : runs + " times."));
                 for (int j = 0; j < runs; j++) {
@@ -63,7 +60,7 @@ public class Runner {
                     System.out.println("Run number: " + (j + 1));
                     timeOutThread = handleTimeOutThread(fileName);
                     timeOutThread.start();
-                    run(fileName);
+                    run(fileName,readCFile);
                 }
                 if (programThrowedError(fileName)) {
                     System.out.println("Error in "+fileName+". Check logs for more info.");
@@ -83,7 +80,7 @@ public class Runner {
         createFeaturesCSV();
     }
 
-    public static void run(String filename) throws IOException, InterruptedException {
+    public static void run(String filename, Boolean readCFile) throws IOException, InterruptedException {
         if (readCFile) {
             String[] command = { "pkexec", "./c_progs/" + filename, Long.toString(ProcessHandle.current().pid()) };
             Runtime.getRuntime().exec(command);
@@ -99,14 +96,14 @@ public class Runner {
             };
             Runtime.getRuntime().exec(command);
         }
-        handleStartSignal();
+        handleStartSignal(readCFile);
         handleStopSignal(filename);
         synchronized (Runner.class) {
             Runner.class.wait();
         }
     }
 
-    private static void handleStartSignal() {
+    private static void handleStartSignal(Boolean readCFile) {
         Signal.handle(new Signal("USR1"), new SignalHandler() {
             public void handle(Signal sig) {
                 System.out.println("Received START signal, starting powerjoular at " + LocalDateTime.now());
@@ -211,10 +208,17 @@ public class Runner {
     }
 
     private static Long getCurrentInputSize(String fileName) {
+        ArrayList<String> inputs = getInputValues(fileName);
+        String size = inputs.get(0);
+        String loopSize = inputs.get(1);
+        return size != null && loopSize != null ? Long.parseLong(size) + Long.parseLong(loopSize): size != null ? Long.parseLong(size) : 0;
+    }
+
+    private static ArrayList<String> getInputValues(String fileName) {
         String program = readFile(fileName);
         String size = findMatchInPattern(program,"static int SIZE = " + "(\\d+)" + ";");
         String loopSize = findMatchInPattern(program,"static int loopSize = " + "(\\d+)" + ";");
-        return size != null && loopSize != null ? Long.parseLong(size) + Long.parseLong(loopSize): size != null ? Long.parseLong(size) : 0;
+        return new ArrayList<>(Arrays.asList(size,loopSize));
     }
 
     private static String findMatchInPattern(String txt, String regex) {
@@ -313,7 +317,10 @@ public class Runner {
         String methodName = getFunMapName(file);
         Map<String, Object> methodfeatures = methods.get(methodName);
         //System.out.println(methodfeatures);
+        ArrayList<String> inputs = getInputValues(file);
         featuresName.addAll(methodfeatures.keySet());
+        methodfeatures.put("input1", inputs.get(0));
+        if(inputs.get(1) != null) methodfeatures.put("input2", inputs.get(1));
         methodfeatures.put("EnergyUsed", cpuUsage);
         createFeaturesTempFile(file,methodfeatures);
     }
@@ -337,6 +344,8 @@ public class Runner {
         try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter(CSV_FILE_NAME))) {
             // Write the header row
             List<String> featureList = new ArrayList<>(featuresName);
+            featureList.add("input1");
+            featureList.add("input2");
             featureList.add("EnergyUsed");
             csvWriter.write(String.join(",", featureList));
             csvWriter.newLine();

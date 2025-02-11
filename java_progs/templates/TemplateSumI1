@@ -25,7 +25,6 @@ public class TemplateSumI1 {
             "Type" sum = ArrayListAux.getDefaultValues(""Type"");
             "Type" n1 = ArrayListAux.getRandomValueOfType(""Type"");
             "Type" n2 = ArrayListAux.getRandomValueOfType(""Type"");
-            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
             long begin = System.nanoTime();
             long end = begin;
             while (end - begin < 1_000_000_000) {

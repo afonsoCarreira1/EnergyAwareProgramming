@@ -121,17 +121,17 @@ public class CreateTemplates {
     public static ArrayList<CollectionInfo> getCollections() {
         ArrayList<CollectionInfo> collections = new ArrayList<>();
         // lists
-        collections.add(new CollectionInfo("ArrayList", "List", new HashSet<>()));
-        collections.add(new CollectionInfo("Vector", "List", new HashSet<>()));
-        collections.add(new CollectionInfo("LinkedList", "List", new HashSet<>()));
-        collections.add(new CollectionInfo("Stack", "List", new HashSet<>()));
-        collections.add(new CollectionInfo("CopyOnWriteArrayList", "List", new HashSet<>()));
+        collections.add(new CollectionInfo("ArrayList", "List", new HashSet<>(Arrays.asList("RemoveRandomElemSets"))));
+        collections.add(new CollectionInfo("Vector", "List", new HashSet<>(Arrays.asList("RemoveRandomElemSets"))));
+        collections.add(new CollectionInfo("LinkedList", "List", new HashSet<>(Arrays.asList("RemoveRandomElemSets"))));
+        collections.add(new CollectionInfo("Stack", "List", new HashSet<>(Arrays.asList("RemoveRandomElemSets"))));
+        collections.add(new CollectionInfo("CopyOnWriteArrayList", "List", new HashSet<>(Arrays.asList("RemoveRandomElemSets"))));
         // sets
-        collections.add(new CollectionInfo("HashSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol"))));
-        collections.add(new CollectionInfo("LinkedHashSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol"))));
-        collections.add(new CollectionInfo("TreeSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol"))));
-        collections.add(new CollectionInfo("ConcurrentSkipListSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol"))));
-        collections.add(new CollectionInfo("CopyOnWriteArraySet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","CloneCol"))));
+        collections.add(new CollectionInfo("HashSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
+        collections.add(new CollectionInfo("LinkedHashSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
+        collections.add(new CollectionInfo("TreeSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
+        collections.add(new CollectionInfo("ConcurrentSkipListSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
+        collections.add(new CollectionInfo("CopyOnWriteArraySet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","CloneCol","RemoveRandomElemCol"))));
         return collections;
     }
 

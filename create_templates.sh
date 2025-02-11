@@ -4,6 +4,11 @@ sudo rm -r java_progs/progs/* #remove java programs
 rm java_progs/out/java_progs/progs/* #remove compiled classes
 javac java_progs/CreateTemplates.java
 java java_progs/CreateTemplates
+#javac -cp ".:/home/afonso/Documents/EnergyAwareProgramming/parser/lib/spoon-core-11.1.1-beta-18-jar-with-dependencies.jar:/home/afonso/Documents/EnergyAwareProgramming/parser/lib/slf4j-simple-2.0.16.jar" java_progs/CreateTemplates.java
+#java -cp ".:/home/afonso/Documents/EnergyAwareProgramming/parser/lib/spoon-core-11.1.1-beta-18-jar-with-dependencies.jar:/home/afonso/Documents/EnergyAwareProgramming/parser/lib/slf4j-simple-2.0.16.jar" java_progs.CreateTemplates
+echo Deleting old programs...
+sleep 5
+echo Deleted all old programs!
 
 #compile aux files
 javac java_progs/aux/ArrayListAux.java

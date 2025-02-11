@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Scanner;
 
@@ -15,6 +16,7 @@ public class CreateTemplates {
     static class CollectionInfo {
         private String collectionName;
         private String collectionType;
+        private HashSet<String> invalidTemplatesForThisCollection;
 
         public String getCollectionName() {
             return this.collectionName;
@@ -24,9 +26,14 @@ public class CreateTemplates {
             return this.collectionType;
         }
 
-        CollectionInfo(String collectionName, String collectionType) {
+        public Boolean isTemplateInvalidForThisCollection(String templateName) {
+            return invalidTemplatesForThisCollection.contains(templateName);
+        }
+
+        CollectionInfo(String collectionName, String collectionType, HashSet<String> invalidMethods) {
             this.collectionName = collectionName;
             this.collectionType = collectionType;
+            this.invalidTemplatesForThisCollection = invalidMethods;
         }
     }
 
@@ -114,18 +121,17 @@ public class CreateTemplates {
     public static ArrayList<CollectionInfo> getCollections() {
         ArrayList<CollectionInfo> collections = new ArrayList<>();
         // lists
-        collections.add(new CollectionInfo("ArrayList", "List"));
-        collections.add(new CollectionInfo("Vector", "List"));
-        collections.add(new CollectionInfo("LinkedList", "List"));
-        collections.add(new CollectionInfo("Stack", "List"));
-        collections.add(new CollectionInfo("CopyOnWriteArrayList", "List"));
+        collections.add(new CollectionInfo("ArrayList", "List", new HashSet<>()));
+        collections.add(new CollectionInfo("Vector", "List", new HashSet<>()));
+        collections.add(new CollectionInfo("LinkedList", "List", new HashSet<>()));
+        collections.add(new CollectionInfo("Stack", "List", new HashSet<>()));
+        collections.add(new CollectionInfo("CopyOnWriteArrayList", "List", new HashSet<>()));
         // sets
-        collections.add(new CollectionInfo("HashSet", "Set"));
-        collections.add(new CollectionInfo("LinkedHashSet", "Set"));
-        collections.add(new CollectionInfo("TreeSet", "Set"));
-        collections.add(new CollectionInfo("ConcurrentSkipListSet", "Set"));
-        collections.add(new CollectionInfo("CopyOnWriteArraySet", "Set"));
-
+        collections.add(new CollectionInfo("HashSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol"))));
+        collections.add(new CollectionInfo("LinkedHashSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol"))));
+        collections.add(new CollectionInfo("TreeSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol"))));
+        collections.add(new CollectionInfo("ConcurrentSkipListSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol"))));
+        collections.add(new CollectionInfo("CopyOnWriteArraySet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","CloneCol"))));
         return collections;
     }
 
@@ -149,8 +155,8 @@ public class CreateTemplates {
                     pTemp = changeListPackage(collection.getCollectionName(), pTemp);
                     // pTemp = changeListSize(listCollection,pTemp);
                     for (TypesInfo typeInfo : typesInfo) {
-                        if (skipChar(fileName, typeInfo))
-                            continue;
+                        if (skipProgram(fileName, collection)) continue;
+                        if (skipChar(fileName, typeInfo)) continue;
                         String programTemp = pTemp.replace("\"Type\"", typeInfo.type);
                         programTemp = createArrayOrCollection(programTemp, typeInfo, collection);
                         ArrayList<String> newPrograms = replaceSizes(programTemp, typeInfo, hasLoopSize);
@@ -161,6 +167,7 @@ public class CreateTemplates {
                             newProgram = newProgram.replace(newMethodName,
                                     newMethodName + collection.collectionName + progNumber);
                             newProgram = newProgram.replace("\"filename\"", collection.collectionName + progNumber);
+                            //if (!programHasErrors(newProgram))
                             createJavaProgramFile(filePath + collection.collectionName + progNumber + ".java",
                                     newProgram);
                             progNumber++;
@@ -280,4 +287,48 @@ public class CreateTemplates {
         return new File("java_progs/templates/").listFiles();
     }
 
+    private static Boolean skipProgram(String templateName, CollectionInfo collectionInfo) {
+        return collectionInfo.isTemplateInvalidForThisCollection(templateName);
+    }
+
+    //private static Boolean programHasErrors(String program) throws Exception {
+        //try {
+        //    Launcher launcher = new Launcher();
+        //    launcher.getEnvironment().setNoClasspath(true); // Avoid missing dependencies issues
+        //    launcher.getEnvironment().setIgnoreSyntaxErrors(false); // Stop on syntax errors
+//
+        //    // Add the Java code as an in-memory file
+        //    launcher.addInputResource(new VirtualFile(program, "Example.java"));
+//
+        //    // Try to build the model
+        //    CtModel model = launcher.buildModel();
+//
+        //    // Check if any types were extracted
+        //    return model.getAllTypes().isEmpty();
+        //} catch (Exception e) {
+        //    return true; // Syntax error detected
+        //}
+        //Launcher launcher = new Launcher();
+        //launcher.getEnvironment().setNoClasspath(true); // Prevent dependency issues
+        //launcher.getEnvironment().setAutoImports(true); // Handle imports automatically
+        //launcher.getEnvironment().setIgnoreDuplicateDeclarations(true);
+        //launcher.getEnvironment().setCommentEnabled(false); // Ignore comments
+//
+        //// Add Java code as a "virtual file"
+        //launcher.addInputResource(new VirtualFile(program, "Test.java"));
+//
+        //// Build the model
+        //CtModel model = launcher.buildModel();
+//
+        //// Check for type errors
+        //model.getAllTypes().forEach(type -> {
+        //    System.out.println("Analyzing: " + type.getQualifiedName());
+        //    try {
+        //        //type.validate(); // Validate types (throws exception on errors)
+        //        launcher.getEnvironment().reportProgressMessage("Checking type: " + type.getQualifiedName());
+        //    } catch (Exception e) {
+        //        System.err.println("Type Error Detected: " + e.getMessage());
+        //    }
+        //});
+    //}
 }

@@ -38,7 +38,7 @@ public class TemplateContainsAllElemRandomCol {
             long end = begin;
             int iter = 0;
             while (end - begin < 1000000000/* 1s */ && iter < loopSize) {
-                containsAllElemRandomCol(list, lists[iter]);
+                containsAllElemRandomCol(list, arr[iter]);
                 end = System.nanoTime();
                 iter++;
             }

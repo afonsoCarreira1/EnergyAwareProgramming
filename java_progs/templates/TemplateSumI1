@@ -34,8 +34,7 @@ public class TemplateSumI1 {
                 iter++;
             }
             System.out.println("Final sum: " + sum);
-            TemplatesAux.writeProgramInfo(iter);
-            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
+            TemplatesAux.sendStartSignalToOrchestrator(args[0], iter);
             TemplatesAux.launchTimerThread();
             computation(n1, n2, ArrayListAux.getDefaultValues(""Type""));
         } catch (OutOfMemoryError e) {

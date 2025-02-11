@@ -6,38 +6,32 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.TemplatesAux;
 
-public class TemplateCloneList {
+public class TemplateSizeCol {
     static int SIZE = "size";
 
-    @SuppressWarnings("unchecked")
-    private static "ListCollection"<"Type"> cloneList("ListCollection"<"Type"> list) {
-        return ("ListCollection"<"Type">) list.clone();
+    private static int sizeCol("ListCollection"<"Type"> list) {
+        return list.size();
     }
 
-    @SuppressWarnings("unused")
     private static void computation("ListCollection"<"Type"> list) {
-        "ListCollection"<"Type"> tempList = new "ListCollection"<"Type">();
         while (!TemplatesAux.stop) {
-            tempList = cloneList(list);
+            sizeCol(list);
         }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         int iter = 0;
         try {
-            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
+            createNewCollectionLeftSide list createNewCollectionRightSide
             ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
-            @SuppressWarnings("unused")
-            "ListCollection"<"Type"> tempList = new "ListCollection"<"Type">();
             long begin = System.nanoTime();
             long end = begin;
             while (end - begin < 1000000000/*1s*/) {
-                tempList = cloneList(list);
+                sizeCol(list);
                 end = System.nanoTime();
                 iter++;
             }
-            TemplatesAux.writeProgramInfo(iter);
-            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
+            TemplatesAux.sendStartSignalToOrchestrator(args[0], iter);
             TemplatesAux.launchTimerThread();
             computation(list);
         } catch (OutOfMemoryError e) {
@@ -47,5 +41,6 @@ public class TemplateCloneList {
             TemplatesAux.writeErrorInFile(""filename"","Error caught by th program.\n"+e.getMessage());
         }
         finally {TemplatesAux.sendStopSignalToOrchestrator(args[0]);}
-    }
+        }
+        
 }

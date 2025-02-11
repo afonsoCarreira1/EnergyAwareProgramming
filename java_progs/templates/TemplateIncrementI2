@@ -32,8 +32,7 @@ public class TemplateIncrementI2 {
                 iter++;
             }
             System.out.println("Final sum: " + sum);
-            TemplatesAux.writeProgramInfo(iter);
-            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
+            TemplatesAux.sendStartSignalToOrchestrator(args[0], iter);
             TemplatesAux.launchTimerThread();
             computation(defaultNum);
         } catch (OutOfMemoryError e) {

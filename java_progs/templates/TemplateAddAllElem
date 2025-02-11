@@ -6,30 +6,29 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.TemplatesAux;
 
-public class TemplateAddAllElemList {
+public class TemplateAddAllElem {
     static int SIZE = "size";
     static int loopSize = "loopSize";
 
-    private static Boolean addAllElemList("ListCollection"<"Type"> list, "ListCollection"<"Type"> list2) {
+    private static Boolean addAllElem("ListCollection"<"Type"> list, "ListCollection"<"Type"> list2) {
         return list.addAll(list2);
     }
 
     private static void computation("ListCollection"<"Type"> list,"ListCollection"<"Type">[] lists, int iter) {
         int i = 0;
         while (!TemplatesAux.stop && i<iter) {
-            addAllElemList(list, lists[i]);
+            addAllElem(list, lists[i]);
             i++;
         }
     }
-
+    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws IOException, InterruptedException {
         int iter = 0;
         try {
-            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE*loopSize)";
-            @SuppressWarnings("unchecked")
-            "ListCollection"<"Type">[] lists = new "ListCollection"[loopSize];
+            createNewCollectionLeftSide list createNewCollectionRightSide
+            createCollectionInitArrayLeftSide lists createCollectionInitArrayRightSide
             for (int i = 0; i < loopSize; i++) {
-                "ListCollection"<"Type"> l = new "ListCollection"<"Type">"(SIZE)";
+                createNewCollectionLeftSide l createNewCollectionRightSide
                 ArrayListAux.insertRandomNumbers(l,SIZE,""Type"");
                 lists[i] = l;
             }
@@ -37,12 +36,11 @@ public class TemplateAddAllElemList {
             long begin = System.nanoTime();
             long end = begin;
             while (end - begin < 1000000000/* 1s */&& iter < loopSize) {
-                addAllElemList(list, lists[iter]);
+                addAllElem(list, lists[iter]);
                 end = System.nanoTime();
                 iter++;
             }
-            TemplatesAux.writeProgramInfo(iter);
-            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
+            TemplatesAux.sendStartSignalToOrchestrator(args[0], iter);
             TemplatesAux.launchTimerThread();
             computation(list,lists,iter);
         } catch (OutOfMemoryError e) {

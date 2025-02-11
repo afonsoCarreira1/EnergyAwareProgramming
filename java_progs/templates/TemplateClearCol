@@ -6,18 +6,18 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.TemplatesAux;
 
-public class TemplateClearList {
+public class TemplateClearCol {
     static int SIZE = "size";
     static int loopSize = "loopSize";
     
-    private static void clearList("ListCollection"<"Type"> list) {
+    private static void clearCol("ListCollection"<"Type"> list) {
         list.clear();
     }
 
     private static void computation("ListCollection"<"Type">[] lists, int iter) {
         int i = 0;
         while (!TemplatesAux.stop && i<iter) {
-            clearList(lists[i]);
+            clearCol(lists[i]);
             i++;
         }
     }
@@ -26,21 +26,20 @@ public class TemplateClearList {
         int iter = 0;
         try {
             @SuppressWarnings("unchecked")
-            "ListCollection"<"Type">[] lists = new "ListCollection"[loopSize];
+            createCollectionInitArrayLeftSide lists createCollectionInitArrayRightSide
             for (int i = 0; i < loopSize; i++) {
-                "ListCollection"<"Type"> l = new "ListCollection"<"Type">"(SIZE)";
+                createNewCollectionLeftSide l createNewCollectionRightSide
                 ArrayListAux.insertRandomNumbers(l,SIZE,""Type"");
                 lists[i] = l;
             }
             long begin = System.nanoTime();
             long end = begin;
             while (end - begin < 1000000000/*1s*/ && iter < loopSize) {
-                clearList(lists[iter]);
+                clearCol(lists[iter]);
                 end = System.nanoTime();
                 iter++;
             }
-            TemplatesAux.writeProgramInfo(iter);
-            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
+            TemplatesAux.sendStartSignalToOrchestrator(args[0], iter);
             TemplatesAux.launchTimerThread();
             computation(lists,iter);
         } catch (OutOfMemoryError e) {

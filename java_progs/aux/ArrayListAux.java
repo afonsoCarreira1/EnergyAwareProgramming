@@ -2,6 +2,7 @@ package java_progs.aux;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class ArrayListAux {
     public static int min = 0;
@@ -34,6 +35,34 @@ public class ArrayListAux {
                 }
             }
         return list;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Set<T> insertRandomNumbers(Set<T> set, int size, String type) {
+            for (int i = 0; i < size; i++) {
+                if (type.equals("Integer")) {
+                   int randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                   set.add((T) Integer.valueOf(randomNum)); 
+                } else if (type.equals("Double")){
+                    double randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                    set.add((T) Double.valueOf(randomNum)); 
+                }
+                else if (type.equals("Float")){
+                    float randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                    set.add((T) Float.valueOf(randomNum)); 
+                }
+                else if (type.equals("Long")){
+                    long randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                    set.add((T) Long.valueOf(randomNum)); 
+                }
+                else if (type.equals("Character")){
+                    char minChar = 'a';
+                    char maxChar = 'z';
+                    char randomChar = (char) (rand.nextInt((maxChar - minChar) + 1) + minChar);
+                    set.add((T) Character.valueOf(randomChar));
+                }
+            }
+        return set;
     }
 
     public static int getRandomIndex(int listSize) {

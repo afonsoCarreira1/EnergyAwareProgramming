@@ -6,19 +6,19 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.TemplatesAux;
 
-public class TemplateContainsAllElemRandomArrayList {
+public class TemplateContainsAllElemRandomCol {
 
     static int SIZE = "size";
     static int loopSize = "loopSize";
 
-    private static Boolean containsAllElemRandomArrayList("ListCollection"<"Type"> list, "ListCollection"<"Type"> list2) {
+    private static Boolean containsAllElemRandomCol("ListCollection"<"Type"> list, "ListCollection"<"Type"> list2) {
         return list.containsAll(list2);
     }
 
-    private static void computation("ListCollection"<"Type"> list, "ListCollection"<"Type">[] lists, int iter) {
+    private static void computation("ListCollection"<"Type"> list, "ListCollection"<"Type">[] arr, int iter) {
         int i = 0;
         while (!TemplatesAux.stop && i < iter) {
-            containsAllElemRandomArrayList(list, lists[i]);
+            containsAllElemRandomCol(list, arr[i]);
             i++;
         }
     }
@@ -26,25 +26,25 @@ public class TemplateContainsAllElemRandomArrayList {
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws IOException, InterruptedException {
         try {
-            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE*loopSize)";
-            "ListCollection"<"Type">[] lists = new "ListCollection"[loopSize];
+            createNewCollectionLeftSide list createNewCollectionRightSide;
+            createCollectionInitArrayLeftSide arr createCollectionInitArrayRightSide
             for (int i = 0; i < loopSize; i++) {
-                "ListCollection"<"Type"> l = new "ListCollection"<"Type">"(SIZE)";
+                createNewCollectionLeftSide l createNewCollectionRightSide
                 ArrayListAux.insertRandomNumbers(l, SIZE, ""Type"");
-                lists[i] = l;
+                arr[i] = l;
             }
             ArrayListAux.insertRandomNumbers(list, SIZE, ""Type"");
             long begin = System.nanoTime();
             long end = begin;
             int iter = 0;
             while (end - begin < 1000000000/* 1s */ && iter < loopSize) {
-                containsAllElemRandomArrayList(list, lists[iter]);
+                containsAllElemRandomCol(list, lists[iter]);
                 end = System.nanoTime();
                 iter++;
             }
             TemplatesAux.sendStartSignalToOrchestrator(args[0],iter);
             TemplatesAux.launchTimerThread();
-            computation(list, lists, iter);
+            computation(list, arr, iter);
         } catch (OutOfMemoryError e) {
             TemplatesAux.writeErrorInFile(""filename"", "Out of memory error caught by the program.\n" + e.getMessage());
         } 

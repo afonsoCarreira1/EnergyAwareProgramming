@@ -12,6 +12,24 @@ import java.util.Scanner;
 
 public class CreateTemplates {
 
+    static class CollectionInfo {
+        private String collectionName;
+        private String collectionType;
+
+        public String getCollectionName() {
+            return this.collectionName;
+        }
+
+        public String getCollectionType() {
+            return this.collectionType;
+        }
+
+        CollectionInfo(String collectionName, String collectionType) {
+            this.collectionName = collectionName;
+            this.collectionType = collectionType;
+        }
+    }
+
     static class SizeInfo {
         public int size;
         public int loopSize;
@@ -21,35 +39,35 @@ public class CreateTemplates {
                 100,
                 1_000,
                 10_000,
-                //50_000,
+                // 50_000,
                 100_000,
-                //250_000,
+                // 250_000,
                 500_000,
                 1_000_000,
-                //2_000_000,
+                // 2_000_000,
                 5_000_000,
-                //10_000_000,
-                //20_000_000,
+                // 10_000_000,
+                // 20_000_000,
                 50_000_000,
-                //100_000_000,
+                // 100_000_000,
                 200_000_000,
-                //500_000_000,
-                //1_000_000_000
+                // 500_000_000,
+                // 1_000_000_000
         };
         static int[] loopSizes = new int[] {
                 1,
                 10,
                 100,
-                //500,
+                // 500,
                 1_000,
-                //2_500,
+                // 2_500,
                 5_000,
-                //7_500,
+                // 7_500,
                 10_000,
                 20_000,
-                //30_000,
+                // 30_000,
                 50_000,
-                //75_000,
+                // 75_000,
                 100_000
         };
 
@@ -93,6 +111,24 @@ public class CreateTemplates {
 
     static ArrayList<SizeInfo> sizeCombinations = new ArrayList<>();
 
+    public static ArrayList<CollectionInfo> getCollections() {
+        ArrayList<CollectionInfo> collections = new ArrayList<>();
+        // lists
+        collections.add(new CollectionInfo("ArrayList", "List"));
+        collections.add(new CollectionInfo("Vector", "List"));
+        collections.add(new CollectionInfo("LinkedList", "List"));
+        collections.add(new CollectionInfo("Stack", "List"));
+        collections.add(new CollectionInfo("CopyOnWriteArrayList", "List"));
+        // sets
+        collections.add(new CollectionInfo("HashSet", "Set"));
+        collections.add(new CollectionInfo("LinkedHashSet", "Set"));
+        collections.add(new CollectionInfo("TreeSet", "Set"));
+        collections.add(new CollectionInfo("ConcurrentSkipListSet", "Set"));
+        collections.add(new CollectionInfo("CopyOnWriteArraySet", "Set"));
+
+        return collections;
+    }
+
     public static void main(String[] args) throws IOException, FileNotFoundException {
         createInputRange(typesInfo);
         try {
@@ -103,27 +139,34 @@ public class CreateTemplates {
                 String filePath = template.toString().replace("templates", "progs");
                 filePath = filePath.replace("Template", "");
                 boolean hasLoopSize = program.contains("loopSize");
-                String[] listCollections = new String[] {"ArrayList","Vector","LinkedList","Stack","CopyOnWriteArrayList"};
-            for (String listCollection : listCollections) {
-                int progNumber = 0;
-                String pTemp = program.replace("\"ListCollection\"", listCollection);
-                pTemp = changeListPackage(listCollection,pTemp);
-                pTemp = changeListSize(listCollection,pTemp);
-                for (TypesInfo typeInfo : typesInfo) {
-                    if (skipChar(fileName,typeInfo)) continue;
-                    String programTemp = pTemp.replace("\"Type\"", typeInfo.type);;
-                    ArrayList<String> newPrograms = replaceSizes(programTemp, typeInfo, hasLoopSize);
-                    for (String newProgram : newPrograms) {
-                        String newMethodName = Introspector.decapitalize(fileName);
-                        newProgram = newProgram.replace("Template" + fileName, fileName+listCollection+progNumber);
-                        newProgram = newProgram.replace(newMethodName, newMethodName + listCollection + progNumber);
-                        newProgram = newProgram.replace("\"filename\"",listCollection+progNumber);
-                        createJavaProgramFile(filePath +listCollection+ progNumber + ".java", newProgram);
-                        progNumber++;
+                ArrayList<CollectionInfo> collections = getCollections();
+                // String[] listCollections = new String[]
+                // {"ArrayList","Vector","LinkedList","Stack","CopyOnWriteArrayList"};
+                // for (String listCollection : listCollections) {
+                for (CollectionInfo collection : collections) {
+                    int progNumber = 0;
+                    String pTemp = program.replace("\"ListCollection\"", collection.getCollectionName());
+                    pTemp = changeListPackage(collection.getCollectionName(), pTemp);
+                    // pTemp = changeListSize(listCollection,pTemp);
+                    for (TypesInfo typeInfo : typesInfo) {
+                        if (skipChar(fileName, typeInfo))
+                            continue;
+                        String programTemp = pTemp.replace("\"Type\"", typeInfo.type);
+                        programTemp = createArrayOrCollection(programTemp, typeInfo, collection);
+                        ArrayList<String> newPrograms = replaceSizes(programTemp, typeInfo, hasLoopSize);
+                        for (String newProgram : newPrograms) {
+                            String newMethodName = Introspector.decapitalize(fileName);
+                            newProgram = newProgram.replace("Template" + fileName,
+                                    fileName + collection.collectionName + progNumber);
+                            newProgram = newProgram.replace(newMethodName,
+                                    newMethodName + collection.collectionName + progNumber);
+                            newProgram = newProgram.replace("\"filename\"", collection.collectionName + progNumber);
+                            createJavaProgramFile(filePath + collection.collectionName + progNumber + ".java",
+                                    newProgram);
+                            progNumber++;
+                        }
                     }
                 }
-            }
-                
             }
 
         } catch (Exception e) {
@@ -131,19 +174,33 @@ public class CreateTemplates {
         }
     }
 
-    private static String changeListPackage(String listCollection,String program) {
-        if (listCollection.equals("CopyOnWriteArrayList")) return program.replace("\"ImportListCollection\"", "concurrent."+listCollection);
-        else return program.replace("\"ImportListCollection\"", listCollection);
+    private static String createArrayOrCollection(String program, TypesInfo typeInfo, CollectionInfo collection) {
+        String pTemp = createNewCollectionLeftSide("createNewCollectionLeftSide", program, typeInfo, collection);
+        pTemp = createNewCollectionRightSide("createNewCollectionRightSide", pTemp, typeInfo, collection);
+        pTemp = createCollectionInitArrayLeftSide("createCollectionInitArrayLeftSide", pTemp, typeInfo, collection);
+        pTemp = createCollectionInitArrayRightSide("createCollectionInitArrayRightSide", pTemp, typeInfo, collection);
+        return pTemp;
     }
 
-    private static String changeListSize(String listCollection,String program) {
-        if (listCollection.equals("ArrayList") || listCollection.equals("Vector")) return program.replaceAll("\"\\((.*)\\)\"", "\\($1\\)");
-                else return program.replaceAll("\"\\(.*\\)\"", "\\(\\)");
+    private static String changeListPackage(String listCollection, String program) {
+        if (listCollection.contains("CopyOnWriteArray") || listCollection.contains("Concurrent"))
+            return program.replace("\"ImportListCollection\"", "concurrent." + listCollection);
+        else
+            return program.replace("\"ImportListCollection\"", listCollection);
     }
 
-    private static Boolean skipChar(String fileName,TypesInfo typeInfo) {
-        if (fileName.toLowerCase().contains("sum") || fileName.toLowerCase().contains("increment")){
-            if (typeInfo.type.equals("Character") || typeInfo.type.equals("char")) {return true;}
+    private static String changeListSize(String listCollection, String program) {
+        if (listCollection.equals("ArrayList") || listCollection.equals("Vector"))
+            return program.replaceAll("\"\\((.*)\\)\"", "\\($1\\)");
+        else
+            return program.replaceAll("\"\\(.*\\)\"", "\\(\\)");
+    }
+
+    private static Boolean skipChar(String fileName, TypesInfo typeInfo) {
+        if (fileName.toLowerCase().contains("sum") || fileName.toLowerCase().contains("increment")) {
+            if (typeInfo.type.equals("Character") || typeInfo.type.equals("char")) {
+                return true;
+            }
         }
         return false;
     }
@@ -173,6 +230,33 @@ public class CreateTemplates {
             }
         }
 
+    }
+
+    private static String createNewCollectionLeftSide(String replaceKeyword, String program, TypesInfo typeInfo,
+            CollectionInfo collection) {
+        String newLine = collection.collectionName + "<" + typeInfo.type + ">";
+        return program.replace(replaceKeyword, newLine);
+    }
+
+    private static String createNewCollectionRightSide(String replaceKeyword, String program, TypesInfo typeInfo,
+            CollectionInfo collection) {
+        String newLine = " = new " + collection.collectionName + " <" + typeInfo.type + ">();";
+        return program.replace(replaceKeyword, newLine);
+    }
+
+    private static String createCollectionInitArrayLeftSide(String replaceKeyword, String program, TypesInfo typeInfo,
+            CollectionInfo collection) {
+        String newLine = collection.collectionName + "<" + typeInfo.type + ">[]";
+        return program.replace(replaceKeyword, newLine);
+    }
+
+    private static String createCollectionInitArrayRightSide(String replaceKeyword, String program, TypesInfo typeInfo,
+            CollectionInfo collection) {
+        String newLine = " = ";
+        newLine += "(" + collection.collectionName + "<" + typeInfo.type + ">[]) ";
+        newLine += "new ";
+        newLine += collection.collectionName + "[loopSize];";
+        return program.replace(replaceKeyword, newLine);
     }
 
     private static String readFile(String file) throws FileNotFoundException {

@@ -6,34 +6,33 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.TemplatesAux;
 
-public class TemplateIndexOfElemFalseList {
+public class TemplateIndexOfElemTrueCol {
     static int SIZE = "size";
 
-    private static int indexOfElemFalseList ("ListCollection"<"Type"> list, "Type" n) {
+    private static int indexOfElemTrueCol("ListCollection"<"Type"> list, "Type" n) {
         return list.indexOf(n);
     }
 
     private static void computation("ListCollection"<"Type"> list, "Type" n) {
         while (!TemplatesAux.stop) {
-            indexOfElemFalseList(list, n);
+            indexOfElemTrueCol(list, n);
         }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         int iter = 0;
-        try {
-            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
+        try{
+            createNewCollectionLeftSide list createNewCollectionRightSide
             ArrayListAux.insertRandomNumbers(list, SIZE,""Type"");
-            "Type" n = ArrayListAux.getRandomValueOfTypeOutsideBounds(""Type"");
+            "Type" n = ArrayListAux.getRandomValueOfType(""Type"");
             long begin = System.nanoTime();
             long end = begin;
             while (end - begin < 1000000000/* 1s */) {
-                indexOfElemFalseList(list, n);
+                indexOfElemTrueCol(list, n);
                 end = System.nanoTime();
                 iter++;
             }
-            TemplatesAux.writeProgramInfo(iter);
-            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
+            TemplatesAux.sendStartSignalToOrchestrator(args[0], iter);
             TemplatesAux.launchTimerThread();
             computation(list, n);
         } catch (OutOfMemoryError e) {

@@ -6,35 +6,34 @@ import java.util."ImportListCollection";
 import java_progs.aux.ArrayListAux;
 import java_progs.aux.TemplatesAux;
 
-public class TemplateSetElemList {
+public class TemplateSetElemCol {
     static int SIZE = "size";
     
-    private static void setElemList("ListCollection"<"Type"> list,int i, "Type" n) {
+    private static void setElemCol("ListCollection"<"Type"> list,int i, "Type" n) {
         list.set(i,n);
     }
 
     private static void computation("ListCollection"<"Type"> list, int pos, "Type" num) {
         while (!TemplatesAux.stop) {
-            setElemList(list,pos,num);
+            setElemCol(list,pos,num);
         }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         int iter = 0;
         try {
-            "ListCollection"<"Type"> list = new "ListCollection"<"Type">"(SIZE)";
+            createNewCollectionLeftSide list createNewCollectionRightSide
             ArrayListAux.insertRandomNumbers(list,SIZE,""Type"");
             int pos = ArrayListAux.getRandomIndex(SIZE);
             "Type" num = ArrayListAux.getRandomValueOfType(""Type"");
             long begin = System.nanoTime();
             long end = begin;
             while (end - begin < 1000000000/*1s*/) {
-                setElemList(list,pos,num);
+                setElemCol(list,pos,num);
                 end = System.nanoTime();
                 iter++;
             }
-            TemplatesAux.writeProgramInfo(iter);
-            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
+            TemplatesAux.sendStartSignalToOrchestrator(args[0], iter);
             TemplatesAux.launchTimerThread();
             computation(list, pos, num);
         } catch (OutOfMemoryError e) {

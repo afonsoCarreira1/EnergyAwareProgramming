@@ -39,5 +39,5 @@ echo "p - Use Python orchestrator"
 echo "c - Use C orchestrator"
 echo "b - Use Bash orchestrator"
 fi
-sudo rm powerjoular.*
-sudo rm tmp/*
+#sudo rm powerjoular.*
+#sudo rm tmp/*

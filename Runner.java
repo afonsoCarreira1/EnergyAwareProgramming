@@ -45,12 +45,13 @@ public class Runner {
         File[] programs = getAllProgramsNames();
         Arrays.sort(programs);
         for (int i = 0; i < programs.length; i++) {
-            //System.out.println(i);
+            
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
-                if (!(args[0].equals("test") && fileName.equals("ContainsAllElemRandomArrayListArrayList0"))) continue;//just to test one prog file
+                if (!(args[0].equals("test") && fileName.equals("AddAllElemConcurrentSkipListSet41"))) continue;//just to test one prog file
                 if (skipProgram(fileName)) continue;
                 System.out.println("---------------------------------------");
+                //System.out.println("Program number -> " + i);
                 System.out.println("Starting profile for " + fileName + " program");
                 Boolean readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
@@ -272,7 +273,7 @@ public class Runner {
                 String[] values = line.split(",");
                 cpuPowerValues.add(values[cpuPowerColumnIndex]);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             //e.printStackTrace();
             System.out.println("Program ran so fast it did not create a CSV file or other error.");
         }
@@ -319,9 +320,10 @@ public class Runner {
         //System.out.println(methodfeatures);
         ArrayList<String> inputs = getInputValues(file);
         featuresName.addAll(methodfeatures.keySet());
-        methodfeatures.put("input1", inputs.get(0));
-        if(inputs.get(1) != null) methodfeatures.put("input2", inputs.get(1));
+        methodfeatures.put("Input1", inputs.get(0));
+        if(inputs.get(1) != null) methodfeatures.put("Input2", inputs.get(1));
         methodfeatures.put("EnergyUsed", cpuUsage);
+        methodfeatures.put("Filename", file);
         createFeaturesTempFile(file,methodfeatures);
     }
 
@@ -344,9 +346,10 @@ public class Runner {
         try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter(CSV_FILE_NAME))) {
             // Write the header row
             List<String> featureList = new ArrayList<>(featuresName);
-            featureList.add("input1");
-            featureList.add("input2");
+            featureList.add("Input1");
+            featureList.add("Input2");
             featureList.add("EnergyUsed");
+            featureList.add("Filename");
             csvWriter.write(String.join(",", featureList));
             csvWriter.newLine();
             File[] tmpFiles = getAllCSVTempFiles();

@@ -1,0 +1,9 @@
+LoopCount,VariableCountDepth_0,java.util.concurrent.ConcurrentSkipListSet.addAll(java.util.Collection),ThreadUsage,CyclomaticComplexity,MethodInvocationsDepth_0,LiteralCountDepth_0,ReassignmentsDepth_0,ReturnType_java_lang_Boolean,ImportsUsed,AssignmentsDepth_0,BinaryOperatorsDepth_0,BranchCount,VariableDeclarationsDepth_0,java.util.concurrent.ConcurrentSkipListSet<java.lang.Integer>,Input1,Input2,EnergyUsed,Filename
+0,0,1,0,1,1,0,0,1,1,0,0,0,0,2,10,5000,NaN,AddAllElemConcurrentSkipListSet41
+0,0,1,0,1,1,0,0,1,1,0,0,0,0,2,10,4000,0.0,AddAllElemConcurrentSkipListSet42
+0,0,1,0,1,1,0,0,1,1,0,0,0,0,2,10,3000,0.0,AddAllElemConcurrentSkipListSet43
+0,0,1,0,1,1,0,0,1,1,0,0,0,0,2,10,2000,0.0,AddAllElemConcurrentSkipListSet44
+0,0,1,0,1,1,0,0,1,1,0,0,0,0,2,10,1000,0.0,AddAllElemConcurrentSkipListSet45
+0,0,1,0,1,1,0,0,1,1,0,0,0,0,2,10,10000,0.0,AddAllElemConcurrentArrayList1
+0,0,1,0,1,1,0,0,1,1,0,0,0,0,2,10,1000,0.0,AddAllElemVector
+0,0,1,0,1,1,0,0,1,1,0,0,0,0,2,10,1000,0.0,AddAllElemStack

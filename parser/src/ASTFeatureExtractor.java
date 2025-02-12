@@ -113,8 +113,8 @@ public class ASTFeatureExtractor {
         //method return type
         CtPackageReference returnTypeInfo = method.getType().getPackage();
         if (returnTypeInfo != null && returnTypeInfo.getSimpleName().isEmpty()) 
-            features.put("MethodReturnType","CustomObject");
-        else features.put("MethodReturnType",method.getType());
+            insertOrSumFeature(features,"ReturnTypeCustomObject");
+        else insertOrSumFeature(features,"ReturnType_"+method.getType().toString().replace(".","_"));
 
         // count if the methods were called by a java collection or a custom object
         countMethodsOrigin(method,path,features);

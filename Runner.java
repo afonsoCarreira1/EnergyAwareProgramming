@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.lang.ProcessBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,40 +41,41 @@ public class Runner {
     static Thread timeOutThread = null;
     static Long avoidSize = null;
     static String programToSkip = null;
+    static StringBuilder log = new StringBuilder();
 
     public static void main(String[] args) throws IOException, InterruptedException  {
-        File[] programs = getAllProgramsNames();
-        Arrays.sort(programs);
+        //File[] programs = getAllProgramsNames();
+        String[] programs = getAllFilenamesInDir("java_progs/out/java_progs/progs/");
+        Arrays.sort(programs, Comparator.comparing(Runner::extractFilename).thenComparingInt(Runner::extractNumber));
+        String logFilename = createLogFile();
         for (int i = 0; i < programs.length; i++) {
-            
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
-                if (!(args[0].equals("test") && fileName.equals("AddAllElemConcurrentSkipListSet41"))) continue;//just to test one prog file
+                //if (!(args[0].equals("test") && fileName.equals("AddAllElemConcurrentSkipListSet41"))) continue;//just to test one prog file
+                log.append("---------------------------------------\n");
+                log.append("Program number -> " + i + "\n");
+                System.out.println("Program number -> " + i + "\n");
                 if (skipProgram(fileName)) continue;
-                System.out.println("---------------------------------------");
-                //System.out.println("Program number -> " + i);
-                System.out.println("Starting profile for " + fileName + " program");
+                log.append("Starting profile for " + fileName + " program\n");
                 Boolean readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
-                System.out.println("Running " + (runs == 1 ? "1 time." : runs + " times."));
+                log.append("Running " + (runs == 1 ? "1 time.\n" : runs + " times.\n"));
                 for (int j = 0; j < runs; j++) {
-                    //System.out.println("---------------------------------------");
-                    System.out.println("Run number: " + (j + 1));
                     timeOutThread = handleTimeOutThread(fileName);
                     timeOutThread.start();
                     run(fileName,readCFile);
                 }
                 if (programThrowedError(fileName)) {
-                    System.out.println("Error in "+fileName+". Check logs for more info.");
+                    log.append("Error in "+fileName+". Check logs for more info.\n");
                     continue;
                 }
                 averageJoules /= runs;
                 averageTime /= runs;
-                System.out.println("In " + runs + " runs the average power was " + averageJoules + "J");
-                System.out.println("Average time was " + averageTime / 1000 / 1 + "s");
-                System.out.println("Creating features CSV file.");
+                log.append("In " + runs + " runs the average power was " + averageJoules + "J\n");
+                log.append("Average time was " + averageTime / 1000 / 1 + "s\n");
                 averageJoules = 0.0;
                 averageTime = 0.0;
+                saveLog(logFilename);
             } else {
                 System.out.println("Invalid args");
             }
@@ -107,23 +109,18 @@ public class Runner {
     private static void handleStartSignal(Boolean readCFile) {
         Signal.handle(new Signal("USR1"), new SignalHandler() {
             public void handle(Signal sig) {
-                System.out.println("Received START signal, starting powerjoular at " + LocalDateTime.now());
+                log.append("Received START signal, starting powerjoular at " + LocalDateTime.now() + "\n");
                 if (readCFile) {
-                    // System.out.println("Read child PID at "+LocalDateTime.now());
                     childPid = WritePid.captureCommandOutput();
                 } else {
-                    // System.out.println("Read child PID at "+LocalDateTime.now());
                     ArrayList<String> pidFromFile = WritePid.readTargetProgramInfo();
                     childPid = pidFromFile.get(0);
                 }
-                // System.out.println("parent " + ProcessHandle.current().pid());
-                // System.out.println("child " + childPid);
+                log.append("ParentPID: "+ProcessHandle.current().pid()+" ChildPID: " + childPid + "\n");
                 startTime = System.currentTimeMillis();
-                // System.out.println("Created powerjoular process at "+LocalDateTime.now());
                 ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", childPid, "-D",
                         frequency, "-f", "powerjoular.csv");
                 try {
-                    // System.out.println("Started powerjoular process at "+LocalDateTime.now());
                     Process powerjoularProcess = powerjoularBuilder.start();
                     powerjoularPid = Long.toString(powerjoularProcess.pid());
                 } catch (IOException e) {
@@ -137,8 +134,6 @@ public class Runner {
         Signal.handle(new Signal("USR2"), new SignalHandler() {
             public void handle(Signal sig) {
                 timeOutThread.interrupt();
-                // System.out.println("Received END signal, stopping powerjoular at
-                // "+LocalDateTime.now());
                 endTime = System.currentTimeMillis();
                 ArrayList<String> loopSizeFromFile = WritePid.readTargetProgramInfo();
                 loopSize = loopSizeFromFile.get(1);
@@ -157,15 +152,15 @@ public class Runner {
                     return;
                 }
                 String cpuUsage = readCsv("powerjoular.csv-" + childPid + ".csv");
-                System.out.println("Program used " + cpuUsage + "J");
+                log.append("Program used " + cpuUsage + "J\n");
                 Double duration = (endTime - startTime) / 1000.0;
-                System.out.println("Time taken: " + duration + " seconds, for " + loopSize + " operations");
+                log.append("Time taken: " + duration + " seconds, for " + loopSize + " operations\n");
                 averageJoules += Double.parseDouble(cpuUsage);
                 averageTime += endTime - startTime;
                 try {
                     saveFeature(filename, cpuUsage);
                 } catch (IOException e) {
-                    System.out.println("Error saving feature");
+                    log.append("Error saving feature\n");
                 }
                 synchronized (Runner.class) {
                     Runner.class.notify();
@@ -188,7 +183,7 @@ public class Runner {
             return false;
         }
         if (getCurrentInputSize(fileName) < avoidSize) return false;
-        System.out.println("Skipping "+fileName+", input size too large. It would take a lot of time.");
+        log.append("Skipping "+fileName+", input size too large. It would take a lot of time.\n");
         return true;
     }
 
@@ -234,7 +229,7 @@ public class Runner {
             public void run() {
                 try {
                     Thread.sleep(timeOutTime*1000);
-                    System.out.println("Program timed out.\nKilling process.");
+                    log.append("Program timed out.\nKilling process.\n");
                     try {
                         Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularPid});
                         killPowerjoular.waitFor();
@@ -275,16 +270,24 @@ public class Runner {
             }
         } catch (Exception e) {
             //e.printStackTrace();
-            System.out.println("Program ran so fast it did not create a CSV file or other error.");
+            log.append("Program ran so fast it did not create a CSV file or other error.\n");
+        }
+        Double cpuPower = 0.0;
+        //TODO fix this so when i catches "+Inf***********" ignores it
+        try {
+            
+            Double freq = Double.parseDouble(frequency);
+            for (int i = 0; i < cpuPowerValues.size(); i++) {
+                cpuPower += Double.parseDouble(cpuPowerValues.get(i)) * freq;
+            }
+            // return Double.toString(Math.round(cpuPower));
+            cpuPower /= Integer.parseInt(loopSize);
+            
+        } catch (Exception e) {
+            cpuPower = 0.0;
+            log.append("Error with powerjoular csv.\n");
         }
 
-        Double cpuPower = 0.0;
-        Double freq = Double.parseDouble(frequency);
-        for (int i = 0; i < cpuPowerValues.size(); i++) {
-            cpuPower += Double.parseDouble(cpuPowerValues.get(i)) * freq;
-        }
-        // return Double.toString(Math.round(cpuPower));
-        cpuPower /= Integer.parseInt(loopSize);
         return "" + cpuPower;// String.format("%.5f", cpuPower);
     }
 
@@ -352,7 +355,7 @@ public class Runner {
             featureList.add("Filename");
             csvWriter.write(String.join(",", featureList));
             csvWriter.newLine();
-            File[] tmpFiles = getAllCSVTempFiles();
+            File[] tmpFiles = getAllFilesInDir("tmp/");
             for (int i = 0; i < tmpFiles.length; i++) {
                 List<String> row = new ArrayList<>();
                 Map<String, Object> programFeatures = readCSVTempFile(tmpFiles[i].toString());
@@ -369,6 +372,27 @@ public class Runner {
         }
     }
 
+    private static int extractNumber(String filename) {
+        return Integer.parseInt(filename.replaceAll("\\D+",""));
+    }
+
+    private static String extractFilename(String filename) {
+        return filename.replaceAll("\\d+\\.class$","");
+    }
+
+    private static void saveLog(String filename) {
+        File file = new File("logs/runner_logs/" + filename + ".txt");
+        FileWriter fr;
+        try {
+            fr = new FileWriter(file, true);
+            fr.write(log.toString());
+            fr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        log.setLength(0);
+    }
+
     private static Map<String,Object> readCSVTempFile(String file) throws IOException {
         Map<String, Object> programFeatures = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
@@ -383,13 +407,41 @@ public class Runner {
         return programFeatures;
     }
 
-    private static File[] getAllProgramsNames() {
-        //return new File("java_progs/progs/").listFiles();
-        return new File("java_progs/out/java_progs/progs/").listFiles();
+    private static String[] getAllFilenamesInDir(String dir) {
+        File[] files =  getAllFilesInDir(dir);
+        String[] filenames = new String[files.length];
+        for (int i = 0; i < files.length; i++) {
+            filenames[i] = files[i].getName();
+        }
+        return filenames;
     }
 
-    private static File[] getAllCSVTempFiles() {
-        return new File("tmp/").listFiles();
+    private static File[] getAllFilesInDir(String dir) {
+        return new File(dir).listFiles();
+    }
+
+    private static String createLogFile() {
+        String dir = "logs/runner_logs";
+        String[] files = getAllFilenamesInDir(dir);
+        Arrays.sort(files, Comparator.comparing(Runner::extractNumber));
+        if (files.length == 0) {
+            createFile(dir+"/","RunnerLog_0");
+            return "RunnerLog_0";
+        }
+        else {
+            String filename = "RunnerLog_"+(Integer.parseInt(files[files.length-1].replaceAll("\\D+",""))+1);
+            createFile(dir+"/",filename);
+            return filename;
+        }
+    }
+
+    private static void createFile(String dir,String filename) {
+        try {
+            File myObj = new File(dir + filename + ".txt");
+            myObj.createNewFile();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
     }
 
 }

@@ -44,10 +44,10 @@ public class TemplateAddAllElem {
             TemplatesAux.launchTimerThread();
             computation(list,lists,iter);
         } catch (OutOfMemoryError e) {
-            TemplatesAux.writeErrorInFile(""filename"", "Out of memory error caught by the program.\n" + e.getMessage());
+            TemplatesAux.writeErrorInFile("AddAllElem"filename"", "Out of memory error caught by the program.\n" + e.getMessage());
         } 
         catch (Exception e) {
-            TemplatesAux.writeErrorInFile(""filename"","Error caught by th program.\n"+e.getMessage());
+            TemplatesAux.writeErrorInFile("AddAllElem"filename"","Error caught by th program.\n"+e.getMessage());
         }
         finally {TemplatesAux.sendStopSignalToOrchestrator(args[0]);}
     }

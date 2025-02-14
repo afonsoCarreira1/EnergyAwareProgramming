@@ -43,16 +43,16 @@ public class CreateTemplates {
         static int[] sizes = new int[] {
                 1,
                 10,
-                100,
+                ///////100,
                 1_000,
                 10_000,
                 // 50_000,
                 100_000,
                 // 250_000,
-                500_000,
+                //////500_000,
                 1_000_000,
                 // 2_000_000,
-                5_000_000,
+                ///////5_000_000,
                 // 10_000_000,
                 // 20_000_000,
                 50_000_000,
@@ -64,16 +64,16 @@ public class CreateTemplates {
         static int[] loopSizes = new int[] {
                 1,
                 10,
-                100,
+                /////100,
                 // 500,
                 1_000,
                 // 2_500,
                 5_000,
                 // 7_500,
                 10_000,
-                20_000,
+                //////20_000,
                 // 30_000,
-                50_000,
+                /////50_000,
                 // 75_000,
                 100_000
         };
@@ -127,11 +127,11 @@ public class CreateTemplates {
         collections.add(new CollectionInfo("Stack", "List", new HashSet<>(Arrays.asList("RemoveRandomElemSets"))));
         collections.add(new CollectionInfo("CopyOnWriteArrayList", "List", new HashSet<>(Arrays.asList("RemoveRandomElemSets"))));
         // sets
-        collections.add(new CollectionInfo("HashSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
-        collections.add(new CollectionInfo("LinkedHashSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
-        collections.add(new CollectionInfo("TreeSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
-        collections.add(new CollectionInfo("ConcurrentSkipListSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
-        collections.add(new CollectionInfo("CopyOnWriteArraySet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","CloneCol","RemoveRandomElemCol"))));
+        //collections.add(new CollectionInfo("HashSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
+        //collections.add(new CollectionInfo("LinkedHashSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
+        //collections.add(new CollectionInfo("TreeSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
+        //collections.add(new CollectionInfo("ConcurrentSkipListSet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","RemoveRandomElemCol"))));
+        //collections.add(new CollectionInfo("CopyOnWriteArraySet", "Set", new HashSet<>(Arrays.asList("GetCol","IndexOfElemFalseCol","IndexOfElemTrueCol","InsertMiddleCol","InsertStartCol","LastIndexOfElemTrueCol","LastIndexOfElemFalseCol","SetElemCol","CloneCol","RemoveRandomElemCol"))));
         return collections;
     }
 
@@ -290,45 +290,4 @@ public class CreateTemplates {
     private static Boolean skipProgram(String templateName, CollectionInfo collectionInfo) {
         return collectionInfo.isTemplateInvalidForThisCollection(templateName);
     }
-
-    //private static Boolean programHasErrors(String program) throws Exception {
-        //try {
-        //    Launcher launcher = new Launcher();
-        //    launcher.getEnvironment().setNoClasspath(true); // Avoid missing dependencies issues
-        //    launcher.getEnvironment().setIgnoreSyntaxErrors(false); // Stop on syntax errors
-//
-        //    // Add the Java code as an in-memory file
-        //    launcher.addInputResource(new VirtualFile(program, "Example.java"));
-//
-        //    // Try to build the model
-        //    CtModel model = launcher.buildModel();
-//
-        //    // Check if any types were extracted
-        //    return model.getAllTypes().isEmpty();
-        //} catch (Exception e) {
-        //    return true; // Syntax error detected
-        //}
-        //Launcher launcher = new Launcher();
-        //launcher.getEnvironment().setNoClasspath(true); // Prevent dependency issues
-        //launcher.getEnvironment().setAutoImports(true); // Handle imports automatically
-        //launcher.getEnvironment().setIgnoreDuplicateDeclarations(true);
-        //launcher.getEnvironment().setCommentEnabled(false); // Ignore comments
-//
-        //// Add Java code as a "virtual file"
-        //launcher.addInputResource(new VirtualFile(program, "Test.java"));
-//
-        //// Build the model
-        //CtModel model = launcher.buildModel();
-//
-        //// Check for type errors
-        //model.getAllTypes().forEach(type -> {
-        //    System.out.println("Analyzing: " + type.getQualifiedName());
-        //    try {
-        //        //type.validate(); // Validate types (throws exception on errors)
-        //        launcher.getEnvironment().reportProgressMessage("Checking type: " + type.getQualifiedName());
-        //    } catch (Exception e) {
-        //        System.err.println("Type Error Detected: " + e.getMessage());
-        //    }
-        //});
-    //}
 }

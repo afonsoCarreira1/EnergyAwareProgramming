@@ -39,5 +39,16 @@ echo "p - Use Python orchestrator"
 echo "c - Use C orchestrator"
 echo "b - Use Bash orchestrator"
 fi
-sudo rm powerjoular.*
-sudo rm tmp/*
+
+filename_with_date=$(date +%Y-%m-%d_%H:%M:%S)
+mkdir logs/run_$filename_with_date
+mkdir logs/run_$filename_with_date/powerjoular_files
+mkdir logs/run_$filename_with_date/tmp_files
+mkdir logs/run_$filename_with_date/error_files
+mv powerjoular.* logs/run_$filename_with_date/powerjoular_files
+mv tmp/* logs/run_$filename_with_date/tmp_files
+mv errorFiles/* logs/run_$filename_with_date/error_files
+mv logs/runner_logs/* logs/run_$filename_with_date
+cp features.csv logs/run_$filename_with_date
+#sudo rm powerjoular.*
+#sudo rm tmp/*

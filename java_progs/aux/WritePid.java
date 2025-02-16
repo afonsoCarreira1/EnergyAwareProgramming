@@ -27,14 +27,16 @@ public class WritePid {
     public static ArrayList<String> readTargetProgramInfo() {
         String pid = "";
         String loopSize = "";
+        String log = "";
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             pid = reader.readLine().trim();
             loopSize = reader.readLine().trim();
             //System.out.println("Successfully read " + pid + " from " + filename);
-        } catch (IOException | NumberFormatException e) {
-            System.out.println("An error occurred while reading the file: " + e.getMessage());
+        } catch (Exception e) {
+            log = e.getMessage();
+            //System.out.println("An error occurred while reading the file: " + e.getMessage());
         }
-        return new ArrayList<String>(Arrays.asList(pid,loopSize));
+        return new ArrayList<String>(Arrays.asList(pid,loopSize,log));
     }
 
     public static String captureCommandOutput(){

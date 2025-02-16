@@ -28,7 +28,7 @@ import sun.misc.SignalHandler;
 public class Runner {
     final static String CSV_FILE_NAME = "features.csv";
     final static String frequency = ".1";
-    final static short timeOutTime = 10;//seconds
+    final static short timeOutTime = 25;//seconds
     static String powerjoularPid = "";
     static String childPid = "";
     static Double averageJoules = 0.0;
@@ -54,7 +54,7 @@ public class Runner {
                 //if (!(args[0].equals("test") && fileName.equals("AddAllElemConcurrentSkipListSet41"))) continue;//just to test one prog file
                 log.append("---------------------------------------\n");
                 log.append("Program number -> " + i + "\n");
-                System.out.println("Program number -> " + i + "\n");
+                //System.out.println("Program number -> " + i);
                 if (skipProgram(fileName)) continue;
                 log.append("Starting profile for " + fileName + " program\n");
                 Boolean readCFile = args[1].equals("t");
@@ -145,10 +145,12 @@ public class Runner {
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
+                if (!loopSizeFromFile.get(2).isEmpty()) log.append(loopSizeFromFile.get(2)+"\n");
                 if (programThrowedError(filename)) {
-                    synchronized (Runner.class) {
-                        Runner.class.notify();
-                    }
+                    //synchronized (Runner.class) {
+                    //    Runner.class.notify();
+                    //}
+                    notifyRunnerClass();
                     return;
                 }
                 String cpuUsage = readCsv("powerjoular.csv-" + childPid + ".csv");
@@ -162,11 +164,18 @@ public class Runner {
                 } catch (IOException e) {
                     log.append("Error saving feature\n");
                 }
-                synchronized (Runner.class) {
-                    Runner.class.notify();
-                }
+                notifyRunnerClass();
+                //synchronized (Runner.class) {
+                //    Runner.class.notify();
+                //}
             }
         });
+    }
+
+    private static void notifyRunnerClass(){
+        synchronized (Runner.class) {
+            Runner.class.notify();
+        }
     }
 
     private static boolean programThrowedError(String filename) {
@@ -184,6 +193,7 @@ public class Runner {
         }
         if (getCurrentInputSize(fileName) < avoidSize) return false;
         log.append("Skipping "+fileName+", input size too large. It would take a lot of time.\n");
+        log.append("Current program size: "+getCurrentInputSize(fileName) + " avoidSize: "+avoidSize+"\n");
         return true;
     }
 
@@ -207,7 +217,14 @@ public class Runner {
         ArrayList<String> inputs = getInputValues(fileName);
         String size = inputs.get(0);
         String loopSize = inputs.get(1);
-        return size != null && loopSize != null ? Long.parseLong(size) + Long.parseLong(loopSize): size != null ? Long.parseLong(size) : 0;
+        long totalValue = size != null ? Long.parseLong(size) : 0;
+        if (loopSize != null) {
+            long ls = Long.parseLong(loopSize);
+            totalValue *= ls;
+            totalValue += ls;
+        }
+        return totalValue;
+        //return size != null && loopSize != null ? Long.parseLong(size) + Long.parseLong(loopSize): size != null ? Long.parseLong(size) : 0;
     }
 
     private static ArrayList<String> getInputValues(String fileName) {
@@ -244,7 +261,9 @@ public class Runner {
                         Runner.class.notify();
                     }
                 } catch (InterruptedException e) {
-                    if (!(e instanceof InterruptedException)) e.printStackTrace();
+                    return;
+                } catch (Exception e) {
+                    log.append(e.getMessage()+"\n");
                 } 
             }  
         };  
@@ -422,17 +441,20 @@ public class Runner {
 
     private static String createLogFile() {
         String dir = "logs/runner_logs";
-        String[] files = getAllFilenamesInDir(dir);
-        Arrays.sort(files, Comparator.comparing(Runner::extractNumber));
-        if (files.length == 0) {
-            createFile(dir+"/","RunnerLog_0");
-            return "RunnerLog_0";
-        }
-        else {
-            String filename = "RunnerLog_"+(Integer.parseInt(files[files.length-1].replaceAll("\\D+",""))+1);
-            createFile(dir+"/",filename);
-            return filename;
-        }
+        //String[] files = getAllFilenamesInDir(dir);
+        //Arrays.sort(files, Comparator.comparing(Runner::extractNumber));
+        String filename = "log";//LocalDateTime.now().toString();
+        createFile(dir+"/",filename);
+        return filename;
+        //if (files.length == 0) {
+        //    createFile(dir+"/","RunnerLog_0");
+        //    return "RunnerLog_0";
+        //}
+        //else {
+        //    String filename = "RunnerLog_"+(Integer.parseInt(files[files.length-1].replaceAll("\\D+",""))+1);
+        //    createFile(dir+"/",filename);
+        //    return filename;
+        //}
     }
 
     private static void createFile(String dir,String filename) {

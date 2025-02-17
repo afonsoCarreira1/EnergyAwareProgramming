@@ -31,4 +31,5 @@ mkdir -p "$output_dir"
 find "$search_dir" -name "*.java" > sources.txt
 echo "$aux_file" >> sources.txt  # Include the auxiliary file
 javac -d "$output_dir" @sources.txt
+rm sources.txt
 echo Compiled!

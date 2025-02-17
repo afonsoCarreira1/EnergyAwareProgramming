@@ -54,7 +54,7 @@ def save_figure_pdf(df, regressor):
 
 def plot_prediction_vs_feature(regressor, X, y, column_name):
     """
-    Plots predicted energy vs. a selected feature.
+    Plots predicted energy vs. a selected feature on a log scale.
 
     Parameters:
     - regressor: Trained DecisionTreeRegressor model
@@ -67,31 +67,38 @@ def plot_prediction_vs_feature(regressor, X, y, column_name):
         return
 
     y_pred = regressor.predict(X)  # Predict using full feature set
-
+    feature_values_input1 = set(X['Input1'])
+    print(f"Input1 (Size of each List) - Unique Values: {feature_values_input1}")
+    feature_values_input2 = set(X['Input2'])
+    print(f"Input2 (Number of Lists in Array) - Unique Values: {feature_values_input2}")
     plt.figure(figsize=(8, 6))
-    #plt.scatter(X[column_name], y, label="Actual Energy", alpha=0.6, color="blue")
-    plt.scatter(X[column_name], y_pred, label="Predicted Energy", alpha=0.6, color="red", marker="x")
-    plt.xlabel(column_name)
-    plt.ylabel("Energy")
-    plt.title(f"Predicted vs. Actual Energy for {column_name}")
-    plt.legend()
-    plt.grid()
-    plt.show()
+    
+    # Log scale transformation (handle zero or negative values carefully)
+    X_log = np.log1p(X[column_name])  # log1p handles zero safely (log(1 + x))
+    #y_pred_log = np.log1p(y_pred)
 
+    plt.scatter(X_log, y_pred, label="Predicted Energy (log scale)", alpha=0.6, color="red", marker="x")
+    plt.xlabel(f"log(1 + {column_name})")
+    plt.ylabel("Energy")
+    plt.xscale("log")
+    plt.title(f"Log-Scaled Predicted Energy vs. {column_name}")
+    plt.legend()
+    plt.grid(False)
+    plt.show()
 
 
 def model(df):
     # Separate features and target
     X = df.iloc[:, :-1]  # All columns except the last one
     y = df.iloc[:, -1]   # Energy column
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
     # Initialize and train the DecisionTreeRegressor
     regressor = DecisionTreeRegressor(random_state=42)
     regressor.fit(X_train, y_train)
     get_scores(regressor,X_test,y_test)
     #save_figure_pdf(df,regressor)
-    plot_prediction_vs_feature(regressor, X_train, y_train, 'Input1')
+    plot_prediction_vs_feature(regressor, X_train, y_train, 'Input2')
 
 
 #print(df)

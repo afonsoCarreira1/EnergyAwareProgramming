@@ -67,15 +67,16 @@ public class ArrayListAux {
 
     public static int getRandomIndex(int listSize) {
         return rand.nextInt(listSize);
-        
     }
 
     public static int getRandomIndexHalved(int listSize) {
-        return rand.nextInt((listSize-1)/2);  
+        int n = rand.nextInt((listSize-1)/2);  
+        return n < 0 || n >= listSize ? 0 : n; 
     }
 
     public static int getRandomIndexQuartered(int listSize) {
-        return rand.nextInt((listSize-1)/4);  
+        int n = rand.nextInt((listSize-1)/4);  
+        return n < 0 || n >= listSize ? 0 : n;
     }
 
     @SuppressWarnings("unchecked")

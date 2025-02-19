@@ -7,6 +7,10 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 from sklearn.tree import plot_tree
 
+import re, seaborn as sns
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.colors import ListedColormap
+
 df = pd.read_csv('ml/features.csv')
 
 def print_full_df(df):
@@ -52,9 +56,18 @@ def save_figure_pdf(df, regressor):
     plt.close()  # Close the plot to avoid displaying it inline
 
 
+def comparison(y,y_pred):
+    comparison_df = pd.DataFrame({
+    'Real Energy': y[:20],
+    'Predicted Energy': y_pred[:20],
+    'Difference': y[:20] - y_pred[:20]
+    })
+    # Exibir a comparação
+    print(comparison_df)
+
 def plot_prediction_vs_feature(regressor, X, y, column_name):
     """
-    Plots predicted energy vs. a selected feature on a log scale.
+    Plots predicted energy vs. a selected feature on a log scale, alongside real energy values.
 
     Parameters:
     - regressor: Trained DecisionTreeRegressor model
@@ -71,17 +84,24 @@ def plot_prediction_vs_feature(regressor, X, y, column_name):
     print(f"Input1 (Size of each List) - Unique Values: {feature_values_input1}")
     feature_values_input2 = set(X['Input2'])
     print(f"Input2 (Number of Lists in Array) - Unique Values: {feature_values_input2}")
+
+    comparison(y,y_pred)
+
     plt.figure(figsize=(8, 6))
     
     # Log scale transformation (handle zero or negative values carefully)
     X_log = np.log1p(X[column_name])  # log1p handles zero safely (log(1 + x))
-    #y_pred_log = np.log1p(y_pred)
 
-    plt.scatter(X_log, y_pred, label="Predicted Energy (log scale)", alpha=0.6, color="red", marker="x")
+    # Plotting the actual values in blue
+    plt.scatter(X_log, y, label="Real Energy", alpha=0.6, color="blue", marker="o")
+
+    # Plotting the predicted values in red
+    plt.scatter(X_log, y_pred, label="Predicted Energy", alpha=0.6, color="red", marker="x")
+    
     plt.xlabel(f"log(1 + {column_name})")
     plt.ylabel("Energy")
-    plt.xscale("log")
-    plt.title(f"Log-Scaled Predicted Energy vs. {column_name}")
+    plt.xscale("log")  # Log scale for the X-axis
+    plt.title(f"Log-Scaled Predicted vs Real Energy for {column_name}")
     plt.legend()
     plt.grid(False)
     plt.show()
@@ -98,8 +118,28 @@ def model(df):
     regressor.fit(X_train, y_train)
     get_scores(regressor,X_test,y_test)
     #save_figure_pdf(df,regressor)
-    plot_prediction_vs_feature(regressor, X_train, y_train, 'Input2')
+    #plot_prediction_vs_feature(regressor, X_test, y_test, 'Input2')
+    plot3D(regressor,X_test,y_test)
 
+
+def plot3D(regressor, X, y):
+    # axes instance
+    fig = plt.figure(figsize=(6,6))
+    ax = Axes3D(fig, auto_add_to_figure=False)
+    fig.add_axes(ax)
+    # get colormap from seaborn
+    cmap = ListedColormap(sns.color_palette("husl", 256).as_hex())
+    x = np.log1p(X['Input1'])
+    y = np.log1p(X['Input2'])
+    z = regressor.predict(X)
+    # plot
+    sc = ax.scatter(x, y, z, s=40, c=x, marker='o', cmap=cmap, alpha=1)
+    ax.set_xlabel('Input1')
+    ax.set_ylabel('Input2')
+    ax.set_zlabel('Energy')
+    # legend
+    plt.legend(*sc.legend_elements(), bbox_to_anchor=(1.05, 1), loc=2)
+    plt.show()
 
 #print(df)
 df = clean_data(df)

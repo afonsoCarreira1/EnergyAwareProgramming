@@ -49,13 +49,14 @@ public class Runner {
         Arrays.sort(programs, Comparator.comparing(Runner::extractFilename).thenComparingInt(Runner::extractNumber));
         String logFilename = createLogFile();
         for (int i = 0; i < programs.length; i++) {
+            Thread.sleep(100);
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
-                //if (!(args[0].equals("test") && fileName.equals("AddAllElemConcurrentSkipListSet41"))) continue;//just to test one prog file
+                //if (!(args[0].equals("test") && fileName.equals("AddAllElemCopyOnWriteArrayList18"))) continue;//just to test one prog file
                 log.append("---------------------------------------\n");
                 log.append("Program number -> " + i + "\n");
                 //System.out.println("Program number -> " + i);
-                if (skipProgram(fileName)) continue;
+                //if (skipProgram(fileName)) continue;
                 log.append("Starting profile for " + fileName + " program\n");
                 Boolean readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
@@ -133,7 +134,9 @@ public class Runner {
     private static void handleStopSignal(String filename) {
         Signal.handle(new Signal("USR2"), new SignalHandler() {
             public void handle(Signal sig) {
+                log.append("Received STOP signal at " + LocalDateTime.now() + "\n");
                 timeOutThread.interrupt();
+                try {timeOutThread.join();} catch (InterruptedException e) {log.append(e+"\n");}
                 endTime = System.currentTimeMillis();
                 ArrayList<String> loopSizeFromFile = WritePid.readTargetProgramInfo();
                 loopSize = loopSizeFromFile.get(1);
@@ -253,6 +256,10 @@ public class Runner {
                         Process killTargetProgram = Runtime.getRuntime().exec(new String[]{"sudo", "kill", childPid});
                         killTargetProgram.waitFor();
                         avoidSize = getCurrentInputSize(filename);
+                        ArrayList<String> inputs = getInputValues(filename);
+                        String s = inputs.get(0) != null ? inputs.get(0) : "0";
+                        String ls = inputs.get(1) != null ? inputs.get(1) : "0";
+                        log.append("SIZE = "+s+" listSize = "+ls +"\navoidSize = "+avoidSize+"\n");
                         programToSkip = filename.split("\\d")[0];
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -270,6 +277,8 @@ public class Runner {
     }
 
     private static String readCsv(String csvFile) {
+        try {Thread.sleep(100);
+        } catch (InterruptedException e) {e.printStackTrace();}
         List<String> cpuPowerValues = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
             String line;
@@ -289,10 +298,11 @@ public class Runner {
             }
         } catch (Exception e) {
             //e.printStackTrace();
+            log.append(e + "\n");
             log.append("Program ran so fast it did not create a CSV file or other error.\n");
         }
         Double cpuPower = 0.0;
-        //TODO fix this so when i catches "+Inf***********" ignores it
+        //TODO fix this so when it catches "+Inf***********" ignores it
         try {
             
             Double freq = Double.parseDouble(frequency);

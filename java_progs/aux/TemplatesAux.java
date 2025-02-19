@@ -38,7 +38,7 @@ public class TemplatesAux {
     public static void launchTimerThread() {
         Thread timerThread = new Thread(() -> {
             try {
-                Thread.sleep(100);
+                Thread.sleep(1100);
                 stop = true;
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

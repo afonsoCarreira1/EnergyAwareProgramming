@@ -6,6 +6,9 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 from sklearn.tree import plot_tree
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+
 
 import re, seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
@@ -106,20 +109,74 @@ def plot_prediction_vs_feature(regressor, X, y, column_name):
     plt.grid(False)
     plt.show()
 
-
 def model(df):
     # Separate features and target
     X = df.iloc[:, :-1]  # All columns except the last one
     y = df.iloc[:, -1]   # Energy column
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42) 
 
     # Initialize and train the DecisionTreeRegressor
-    regressor = DecisionTreeRegressor(random_state=42)
+    #regressor = DecisionTreeRegressor(random_state=42)
+    regressor = DecisionTreeRegressor(max_depth=25, min_samples_split=2, random_state=42)
     regressor.fit(X_train, y_train)
     get_scores(regressor,X_test,y_test)
+    cross_validate_model(regressor,X,y)
+    best_model = tune_hyperparameters(X_train,y_train)
+    print('Scores of best model')
+    get_scores(best_model,X_test,y_test)
     #save_figure_pdf(df,regressor)
     #plot_prediction_vs_feature(regressor, X_test, y_test, 'Input2')
-    plot3D(regressor,X_test,y_test)
+    #plot3D(regressor,X_test,y_test)
+
+
+# Function 1: Hyperparameter Tuning using GridSearchCV
+def tune_hyperparameters(X_train, y_train):
+    param_grid = {
+        'max_depth': [3, 5, 10, 15, None],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 5],
+        'max_features': [None, 'sqrt', 'log2'],
+    }
+    
+    grid_search = GridSearchCV(estimator=DecisionTreeRegressor(random_state=42),
+                               param_grid=param_grid, 
+                               cv=5,
+                               scoring='neg_mean_squared_error',
+                               n_jobs=-1,
+                               verbose=1)
+    
+    grid_search.fit(X_train, y_train)
+    best_model = grid_search.best_estimator_
+    print(f"Best Parameters: {grid_search.best_params_}")
+    
+    return best_model
+
+
+
+def cross_validate_model(model, X, y):
+    cv_scores = cross_val_score(model, X, y, cv=10, scoring='neg_mean_squared_error')
+    mean_cv_mse = -cv_scores.mean()  # Negate because cross_val_score returns negative values
+    print(f"Mean Cross-Validation MSE: {mean_cv_mse}")
+    return mean_cv_mse
+
+def random_forest_regression(X_train, y_train, X_test, y_test):
+    rf_regressor = RandomForestRegressor(random_state=42)
+    rf_regressor.fit(X_train, y_train)
+    rf_r2 = rf_regressor.score(X_test, y_test)
+    rf_mse = mean_squared_error(y_test, rf_regressor.predict(X_test))
+    print(f"Random Forest R²: {rf_r2}")
+    print(f"Random Forest MSE: {rf_mse}")
+    return rf_regressor
+
+
+def gradient_boosting_regression(X_train, y_train, X_test, y_test):
+    gb_regressor = GradientBoostingRegressor(random_state=42)
+    gb_regressor.fit(X_train, y_train)
+    gb_r2 = gb_regressor.score(X_test, y_test)
+    gb_mse = mean_squared_error(y_test, gb_regressor.predict(X_test))
+    print(f"Gradient Boosting R²: {gb_r2}")
+    print(f"Gradient Boosting MSE: {gb_mse}")
+    return gb_regressor
 
 
 def plot3D(regressor, X, y):

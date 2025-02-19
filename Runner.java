@@ -42,6 +42,7 @@ public class Runner {
     static Long avoidSize = null;
     static String programToSkip = null;
     static StringBuilder log = new StringBuilder();
+    static volatile boolean notifiedRunnerClass = false;
 
     public static void main(String[] args) throws IOException, InterruptedException  {
         //File[] programs = getAllProgramsNames();
@@ -49,14 +50,14 @@ public class Runner {
         Arrays.sort(programs, Comparator.comparing(Runner::extractFilename).thenComparingInt(Runner::extractNumber));
         String logFilename = createLogFile();
         for (int i = 0; i < programs.length; i++) {
-            Thread.sleep(100);
+            //Thread.sleep(100);
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
                 //if (!(args[0].equals("test") && fileName.equals("AddAllElemCopyOnWriteArrayList18"))) continue;//just to test one prog file
                 log.append("---------------------------------------\n");
                 log.append("Program number -> " + i + "\n");
                 //System.out.println("Program number -> " + i);
-                //if (skipProgram(fileName)) continue;
+                if (skipProgram(fileName)) continue;
                 log.append("Starting profile for " + fileName + " program\n");
                 Boolean readCFile = args[1].equals("t");
                 int runs = Integer.parseInt(args[2]);
@@ -105,6 +106,11 @@ public class Runner {
         synchronized (Runner.class) {
             Runner.class.wait();
         }
+        while (!notifiedRunnerClass) {
+            //Thread.sleep(1000);
+            //System.out.println("mim sta spera");
+        }
+        notifiedRunnerClass = false;
     }
 
     private static void handleStartSignal(Boolean readCFile) {
@@ -135,6 +141,8 @@ public class Runner {
         Signal.handle(new Signal("USR2"), new SignalHandler() {
             public void handle(Signal sig) {
                 log.append("Received STOP signal at " + LocalDateTime.now() + "\n");
+                if (notifiedRunnerClass) return;
+                notifiedRunnerClass = true;
                 timeOutThread.interrupt();
                 try {timeOutThread.join();} catch (InterruptedException e) {log.append(e+"\n");}
                 endTime = System.currentTimeMillis();
@@ -150,9 +158,6 @@ public class Runner {
                 }
                 if (!loopSizeFromFile.get(2).isEmpty()) log.append(loopSizeFromFile.get(2)+"\n");
                 if (programThrowedError(filename)) {
-                    //synchronized (Runner.class) {
-                    //    Runner.class.notify();
-                    //}
                     notifyRunnerClass();
                     return;
                 }
@@ -168,9 +173,6 @@ public class Runner {
                     log.append("Error saving feature\n");
                 }
                 notifyRunnerClass();
-                //synchronized (Runner.class) {
-                //    Runner.class.notify();
-                //}
             }
         });
     }
@@ -249,6 +251,8 @@ public class Runner {
             public void run() {
                 try {
                     Thread.sleep(timeOutTime*1000);
+                    // Ensure only one notification happens
+                    if (notifiedRunnerClass) return;
                     log.append("Program timed out.\nKilling process.\n");
                     try {
                         Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularPid});
@@ -264,9 +268,8 @@ public class Runner {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    synchronized (Runner.class) {
-                        Runner.class.notify();
-                    }
+                    notifiedRunnerClass = true;
+                    notifyRunnerClass();
                 } catch (InterruptedException e) {
                     return;
                 } catch (Exception e) {

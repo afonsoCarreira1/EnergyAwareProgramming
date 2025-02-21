@@ -53,7 +53,7 @@ public class Runner {
             //Thread.sleep(100);
             if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                 String fileName = programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
-                //if (!(args[0].equals("test") && fileName.equals("AddAllElemCopyOnWriteArrayList18"))) continue;//just to test one prog file
+                //if (!(args[0].equals("test") && fileName.equals("AddAllElemArrayList98"))) continue;//just to test one prog file
                 log.append("---------------------------------------\n");
                 log.append("Program number -> " + i + "\n");
                 //System.out.println("Program number -> " + i);
@@ -106,10 +106,10 @@ public class Runner {
         synchronized (Runner.class) {
             Runner.class.wait();
         }
-        while (!notifiedRunnerClass) {
+        //while (!notifiedRunnerClass) {
             //Thread.sleep(1000);
             //System.out.println("mim sta spera");
-        }
+        //}
         notifiedRunnerClass = false;
     }
 

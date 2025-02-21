@@ -24,6 +24,7 @@ def clean_data(df):
     # remove NaN and infinity
     last_column = df.columns[-2]
     df = df.replace([np.inf, -np.inf], np.nan)  # Replace infinity with NaN
+    df = df.replace(0.0, np.nan)
     df = df.dropna(subset=[last_column])
     return df
 
@@ -113,6 +114,8 @@ def model(df):
     # Separate features and target
     X = df.iloc[:, :-1]  # All columns except the last one
     y = df.iloc[:, -1]   # Energy column
+    #y = y*10**6
+    #print(y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42) 
 
     # Initialize and train the DecisionTreeRegressor
@@ -126,7 +129,7 @@ def model(df):
     get_scores(best_model,X_test,y_test)
     #save_figure_pdf(df,regressor)
     #plot_prediction_vs_feature(regressor, X_test, y_test, 'Input2')
-    #plot3D(regressor,X_test,y_test)
+    plot3D(regressor,X_test,y_test)
 
 
 # Function 1: Hyperparameter Tuning using GridSearchCV
@@ -200,7 +203,7 @@ def plot3D(regressor, X, y):
 
 #print(df)
 df = clean_data(df)
-df = separate_data(df,'')
+df = separate_data(df,'ArrayList')
 #print(df)
 df = drop_column(df,'Filename')
 #print(df)

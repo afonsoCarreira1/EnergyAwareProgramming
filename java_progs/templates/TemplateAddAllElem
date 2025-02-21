@@ -14,11 +14,12 @@ public class TemplateAddAllElem {
         return list.addAll(list2);
     }
 
-    private static void computation("ListCollection"<"Type"> list,"ListCollection"<"Type">[] lists, int iter) {
-        int i = 0;
-        while (!TemplatesAux.stop && i<iter) {
-            addAllElem(list, lists[i]);
-            i++;
+    private static void computation("ListCollection"<"Type"> list,"ListCollection"<"Type">[] lists) {
+        //int i = 0;
+        while (!TemplatesAux.stop) {
+            for (int j = 0; !TemplatesAux.stop && j < loopSize; j++) {
+               addAllElem(list, lists[j]);
+            }  
         }
     }
     @SuppressWarnings("unchecked")
@@ -35,14 +36,16 @@ public class TemplateAddAllElem {
             ArrayListAux.insertRandomNumbers(list, SIZE,""Type"");
             long begin = System.nanoTime();
             long end = begin;
-            while (end - begin < 1000000000/* 1s */&& iter < loopSize) {
-                addAllElem(list, lists[iter]);
-                end = System.nanoTime();
-                iter++;
+            while (end - begin < 1000000000/* 1s */) {
+                for (int j = 0; end - begin < 1000000000 && j < loopSize; j++) {
+                    addAllElem(list, lists[j]);
+                    end = System.nanoTime();
+                    iter++;
+                } 
             }
             TemplatesAux.sendStartSignalToOrchestrator(args[0], iter);
             TemplatesAux.launchTimerThread();
-            computation(list,lists,iter);
+            computation(list,lists);
         } catch (OutOfMemoryError e) {
             TemplatesAux.writeErrorInFile("AddAllElem"filename"", "Out of memory error caught by the program.\n" + e.getMessage());
         } 

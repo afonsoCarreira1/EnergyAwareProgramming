@@ -222,14 +222,14 @@ public class Runner {
         ArrayList<String> inputs = getInputValues(fileName);
         String size = inputs.get(0);
         String loopSize = inputs.get(1);
-        long totalValue = size != null ? Long.parseLong(size) : 0;
-        if (loopSize != null) {
-            long ls = Long.parseLong(loopSize);
-            totalValue *= ls;
-            totalValue += ls;
-        }
-        return totalValue;
-        //return size != null && loopSize != null ? Long.parseLong(size) + Long.parseLong(loopSize): size != null ? Long.parseLong(size) : 0;
+        //long totalValue = size != null ? Long.parseLong(size) : 0;
+        //if (loopSize != null) {
+        //    long ls = Long.parseLong(loopSize);
+        //    totalValue *= ls;
+        //    totalValue += ls;
+        //}
+        //return totalValue;
+        return size != null && loopSize != null ? Long.parseLong(size) + Long.parseLong(loopSize): size != null ? Long.parseLong(size) : 0;
     }
 
     private static ArrayList<String> getInputValues(String fileName) {

@@ -22,3 +22,5 @@ errorFiles/
 templates f/
 templates_old/
 logs/
+ml/outputs/
+ml/ml_env/

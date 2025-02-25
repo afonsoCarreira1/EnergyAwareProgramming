@@ -1,3 +1,4 @@
+from datetime import datetime
 import numpy as np 
 import matplotlib.pyplot as plt 
 import pandas as pd 
@@ -8,13 +9,16 @@ from sklearn.metrics import r2_score
 from sklearn.tree import plot_tree
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from pysr import PySRRegressor
+
 
 
 import re, seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
 
-df = pd.read_csv('ml/features.csv')
+df = pd.read_csv('features_4700.csv')
 
 def print_full_df(df):
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
@@ -62,7 +66,6 @@ def save_figure_pdf(df, regressor):
     # Save plot to PDF with higher resolution
     plt.savefig('ml/decision_tree_visualization.svg', format='svg', bbox_inches='tight', dpi=300)
     plt.close()  # Close the plot to avoid displaying it inline
-
 
 def comparison(y,y_pred):
     comparison_df = pd.DataFrame({
@@ -123,42 +126,70 @@ def model(df):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42) 
 
     # Initialize and train the DecisionTreeRegressor
-    regressor = DecisionTreeRegressor(random_state=42)
-    regressor.fit(X_train, y_train)
-    get_scores(regressor,X_test,y_test)
-    cross_validate_model(regressor,X,y)
-    best_model = tune_hyperparameters(X_train,y_train)
-    print('Scores of best model')
-    get_scores(best_model,X_test,y_test)
-    cross_validate_model(best_model,X,y)
-    random_forest_regression(X_train, X_test, y_train, y_test)
-    gradient_boosting_regression(X_train, X_test, y_train, y_test)
+    #print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    decision_tree_regressor(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    random_forest_regression(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    linear_regression(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    pysr(X,y,X_train, X_test, y_train, y_test)
+
     #save_figure_pdf(df,regressor)
     #plot_prediction_vs_feature(regressor, X_test, y_test, 'Input2')
     #plot3D(regressor,X_test,y_test)
 
+def tune_hyperparameters(X,y,X_train, X_test, y_train, y_test, selected_model):
+    print(f'Best model scores of {selected_model}')
 
-
-def tune_hyperparameters(X_train, y_train):
+    #faster
     param_grid = {
         'max_depth': [3, 5, 10, 15, None],
         'min_samples_split': [2, 5, 10],
         'min_samples_leaf': [1, 2, 5],
         'max_features': [None, 'sqrt', 'log2'],
     }
-    
-    grid_search = GridSearchCV(estimator=DecisionTreeRegressor(random_state=42),
+
+    #takes a lot of time
+    #param_grid = {
+    #'max_depth': [3, 5, 10, 15, None, 20, 30],
+    #'min_samples_split': [2, 5, 10, 20, 50],
+    #'min_samples_leaf': [1, 2, 5, 10],
+    #'max_features': [None, 'sqrt', 'log2', 0.1, 0.3, 0.5, 0.7],
+    #'criterion': ['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+    #'splitter': ['best', 'random'],
+    #'max_leaf_nodes': [None, 10, 50, 100],
+    #'min_impurity_decrease': [0.0, 0.01, 0.1],
+    #'ccp_alpha': [0.0, 0.01, 0.1]
+    #}
+
+
+    models = {
+    "decision_tree_regressor": DecisionTreeRegressor(random_state=42),
+    "random_forest": RandomForestRegressor(random_state=42),
+    "gradient_boosting": GradientBoostingRegressor(random_state=42),
+    }
+
+    grid_search = GridSearchCV(estimator=models[selected_model],
                                param_grid=param_grid, 
                                cv=5,
                                scoring='neg_mean_squared_error',
                                n_jobs=-1,
-                               verbose=1)
+                               verbose=0)
     
     grid_search.fit(X_train, y_train)
     best_model = grid_search.best_estimator_
     #print(f"Best Parameters: {grid_search.best_params_}")
     
-    return best_model
+    get_scores(best_model,X_test,y_test)
+    cross_validate_model(best_model,X,y)
 
 def cross_validate_model(model, X, y):
     cv_scores = cross_val_score(model, X, y, cv=10, scoring='neg_mean_squared_error')
@@ -166,24 +197,71 @@ def cross_validate_model(model, X, y):
     print(f"Mean Cross-Validation MSE: {mean_cv_mse}")
     return mean_cv_mse
 
-def random_forest_regression(X_train, X_test, y_train, y_test):
+def decision_tree_regressor(X,y,X_train, X_test, y_train, y_test):
+    print('decision tree regression')
+    regressor = DecisionTreeRegressor(random_state=42)
+    regressor.fit(X_train, y_train)
+    get_scores(regressor,X_test,y_test)
+    cross_validate_model(regressor,X,y)
+    tune_hyperparameters(X,y,X_train, X_test, y_train, y_test,'decision_tree_regressor')
+
+def random_forest_regression(X,y,X_train, X_test, y_train, y_test):
+    print('random forest')
     rf_regressor = RandomForestRegressor(random_state=42)
     rf_regressor.fit(X_train, y_train)
     rf_r2 = rf_regressor.score(X_test, y_test)
     rf_mse = mean_squared_error(y_test, rf_regressor.predict(X_test))
     print(f"Random Forest R²: {rf_r2}")
     print(f"Random Forest MSE: {rf_mse}")
+    cross_validate_model(rf_regressor,X,y)
+    tune_hyperparameters(X,y,X_train, X_test, y_train, y_test,'random_forest')
     return rf_regressor
 
-def gradient_boosting_regression(X_train, X_test, y_train, y_test):
+def gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test):
+    print('gradient boosting')
     gb_regressor = GradientBoostingRegressor(random_state=42)
     gb_regressor.fit(X_train, y_train)
     gb_r2 = gb_regressor.score(X_test, y_test)
     gb_mse = mean_squared_error(y_test, gb_regressor.predict(X_test))
     print(f"Gradient Boosting R²: {gb_r2}")
     print(f"Gradient Boosting MSE: {gb_mse}")
+    cross_validate_model(gb_regressor,X,y)
+    tune_hyperparameters(X,y,X_train, X_test, y_train, y_test,'gradient_boosting')
     return gb_regressor
 
+def linear_regression(X,y,X_train, X_test, y_train, y_test):
+    print('linear regression')
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    get_scores(model,X_test,y_test)
+    cross_validate_model(model,X,y)
+    #tune_hyperparameters(X_train, X_test, y_train, y_test,'linear_regression')
+
+def pysr(X,y,X_train, X_test, y_train, y_test):
+    print('pysr')
+    #model = PySRRegressor(
+    #    niterations=100,             # Increase number of iterations for deeper exploration
+    #    unary_operators=["sin", "cos", "exp", "log", "sqrt", "abs"],  # Add more unary operators for better flexibility
+    #    binary_operators=["+", "-", "*", "/", "^"],  # Add subtraction, division, and exponentiation
+    #    constraints={"^": (-1, 1)}, #for the ^ bin op
+    #    population_size=200,         # Larger population for more diversity in the search
+    #    select_k_features=1,         # Increase to select top-3 features for efficiency
+    #    verbosity=0,                 # Show more detailed progress
+    #    progress=False               # Optionally, suppress per-iteration progress
+    #)
+
+    model = PySRRegressor(
+    niterations=40,
+    unary_operators=["sin", "cos", "exp"],
+    binary_operators=["+", "*"],
+    population_size=100,
+    select_k_features=1,
+    verbosity=0
+    )
+
+    model.fit(X_train, y_train)
+    get_scores(model,X_test,y_test)
+    #cross_validate_model(model,X,y)
 
 def plot3D(regressor, X, y):
     # axes instance
@@ -206,7 +284,7 @@ def plot3D(regressor, X, y):
 
 #print(df)
 df = clean_data(df)
-df = separate_data(df,'ArrayList')
+df = separate_data(df,'Stack')
 #print(df)
 df = drop_column(df,'Filename')
 

@@ -28,7 +28,7 @@ import sun.misc.SignalHandler;
 public class Runner {
     final static String CSV_FILE_NAME = "features.csv";
     final static String frequency = ".1";
-    final static short timeOutTime = 25;//seconds
+    final static short timeOutTime = 60;//seconds
     static String powerjoularPid = "";
     static String childPid = "";
     static Double averageJoules = 0.0;

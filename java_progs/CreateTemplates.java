@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 
 public class CreateTemplates {
 
@@ -40,7 +42,9 @@ public class CreateTemplates {
     static class SizeInfo {
         public int size;
         public int loopSize;
-        static int[] sizes = new int[] {
+        public static ArrayList<Integer> sizes = createInputRange(5,2,1);
+        public static ArrayList<Integer> loopSizes = createInputRange(1, 1.5, 0);
+        /*static int[] sizes = new int[] {
             1,  
             5,  
             10,  
@@ -87,7 +91,7 @@ public class CreateTemplates {
             //500_000_000,  
             //750_000_000,  
             //1_000_000_000  
-        };
+        };*/
         /*static int[] loopSizes = new int[] {
             1,  
             5,  
@@ -135,7 +139,7 @@ public class CreateTemplates {
                  //500_000_000,
                  //1_000_000_000
         };*/
-        static int[] loopSizes = new int[] {
+        /*static int[] loopSizes = new int[] {
                 1,
                 10,
                 100,
@@ -150,12 +154,31 @@ public class CreateTemplates {
                 50_000,
                 75_000,
                 100_000
-        };
+        };*/
 
         SizeInfo(int size, int loopSize) {
             this.size = size;
             this.loopSize = loopSize;
         }
+
+        private static ArrayList<Integer> createInputRange(int initialvalue, double factor, int exponent){
+            Set<Integer> numberSet = new HashSet<>();
+            Random random = new Random();
+            int max_value = initialvalue * 100_000;
+            while (initialvalue < max_value) {
+                int min = initialvalue;
+                int max = initialvalue*10;
+                double nums = Math.pow(factor, exponent);
+                for (int j = 0; j < nums; j++) {
+                    int num = min + random.nextInt(max - min + 1);
+                    numberSet.add(num);
+                }
+                initialvalue = initialvalue*10;
+                exponent++;
+            }
+            return new ArrayList<>(numberSet);
+        }
+
     }
 
     static class TypesInfo {
@@ -211,6 +234,8 @@ public class CreateTemplates {
 
     public static void main(String[] args) throws IOException, FileNotFoundException {
         createInputRange(typesInfo);
+        System.out.println(SizeInfo.loopSizes);
+        System.out.println(SizeInfo.loopSizes.size());
         try {
             File[] templates = getAllTemplates();
             for (File template : templates) {

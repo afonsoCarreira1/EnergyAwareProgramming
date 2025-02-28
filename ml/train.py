@@ -17,8 +17,8 @@ from pysr import PySRRegressor
 import re, seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
-
-df = pd.read_csv('features_4700.csv')
+#features/addAll_features/features_4700.csv
+df = pd.read_csv('features/addAll_features/features_4700.csv')
 
 def print_full_df(df):
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
@@ -76,7 +76,7 @@ def comparison(y,y_pred):
     # Exibir a comparação
     print(comparison_df)
 
-def plot_prediction_vs_feature(regressor, X, y, column_name):
+def plot_prediction_vs_feature(model, X, y, column_name):
     """
     Plots predicted energy vs. a selected feature on a log scale, alongside real energy values.
 
@@ -90,25 +90,44 @@ def plot_prediction_vs_feature(regressor, X, y, column_name):
         print(f"Column '{column_name}' not found in dataset!")
         return
 
-    y_pred = regressor.predict(X)  # Predict using full feature set
+    y_pred = model.predict(X)  # Predict using full feature set
     feature_values_input1 = set(X['Input1'])
     print(f"Input1 (Size of each List) - Unique Values: {feature_values_input1}")
-    feature_values_input2 = set(X['Input2'])
-    print(f"Input2 (Number of Lists in Array) - Unique Values: {feature_values_input2}")
-
     comparison(y,y_pred)
-
     plt.figure(figsize=(8, 6))
-    
-    # Log scale transformation (handle zero or negative values carefully)
-    X_log = np.log1p(X[column_name])  # log1p handles zero safely (log(1 + x))
-
-    # Plotting the actual values in blue
+    X_log = np.log1p(X[column_name])
     plt.scatter(X_log, y, label="Real Energy", alpha=0.6, color="blue", marker="o")
-
-    # Plotting the predicted values in red
     plt.scatter(X_log, y_pred, label="Predicted Energy", alpha=0.6, color="red", marker="x")
+    plt.xlabel(f"log(1 + {column_name})")
+    plt.ylabel("Energy")
+    plt.xscale("log")  # Log scale for the X-axis
+    plt.title(f"Log-Scaled Predicted vs Real Energy for {column_name}")
+    plt.legend()
+    plt.grid(False)
+    plt.show()
+
+def plot_energy_vs_feature(X, y, column_name):
+    """
+    Plots predicted energy vs. a selected feature on a log scale, alongside real energy values.
+
+    Parameters:
+    - regressor: Trained DecisionTreeRegressor model
+    - X: Feature dataset (DataFrame)
+    - y: True energy values (Series)
+    - column_name: The feature column to plot against predictions
+    """
+    if column_name not in X.columns:
+        print(f"Column '{column_name}' not found in dataset!")
+        return
     
+    #feature_values_input1 = set(X[column_name])
+    #print(f"Input1 (Size of each List) - Unique Values: {feature_values_input1}")
+    plt.figure(figsize=(8, 6))
+    X_log = X[column_name]#np.log1p(X[column_name])
+    df = pd.DataFrame({'x': X_log, 'y': y})
+    df_avg = df.groupby('x', as_index=False)['y'].mean()
+    plt.scatter(X_log, y, label="Real Energy", alpha=0.6, color="blue", marker="o")
+    plt.scatter(df_avg['x'], df_avg['y'], label="Averaged Energy", alpha=0.6, color="blue", marker="o")
     plt.xlabel(f"log(1 + {column_name})")
     plt.ylabel("Energy")
     plt.xscale("log")  # Log scale for the X-axis
@@ -127,24 +146,25 @@ def model(df):
 
     # Initialize and train the DecisionTreeRegressor
     #print('----------------------')
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    decision_tree_regressor(X,y,X_train, X_test, y_train, y_test)
-    print('----------------------')
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    random_forest_regression(X,y,X_train, X_test, y_train, y_test)
-    print('----------------------')
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test)
-    print('----------------------')
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    linear_regression(X,y,X_train, X_test, y_train, y_test)
-    print('----------------------')
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #decision_tree_regressor(X,y,X_train, X_test, y_train, y_test)
+    #print('----------------------')
+    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #random_forest_regression(X,y,X_train, X_test, y_train, y_test)
+    #print('----------------------')
+    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test)
+    #print('----------------------')
+    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #linear_regression(X,y,X_train, X_test, y_train, y_test)
+    #print('----------------------')
+    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     pysr(X,y,X_train, X_test, y_train, y_test)
 
     #save_figure_pdf(df,regressor)
+    #plot_energy_vs_feature(X,y,'Input1')
     #plot_prediction_vs_feature(regressor, X_test, y_test, 'Input2')
-    #plot3D(regressor,X_test,y_test)
+    #plot3D(X,y)
 
 def tune_hyperparameters(X,y,X_train, X_test, y_train, y_test, selected_model):
     print(f'Best model scores of {selected_model}')
@@ -249,21 +269,24 @@ def pysr(X,y,X_train, X_test, y_train, y_test):
     #    verbosity=0,                 # Show more detailed progress
     #    progress=False               # Optionally, suppress per-iteration progress
     #)
-
+    X_train.columns= [''.join(c for c in x if c.isalnum()) for x in X_train.columns]
+    X_test.columns= [''.join(c for c in x if c.isalnum()) for x in X_test.columns]
     model = PySRRegressor(
     niterations=40,
     unary_operators=["sin", "cos", "exp"],
     binary_operators=["+", "*"],
     population_size=100,
-    select_k_features=1,
+    run_id='addAll',
+    #select_k_features=1,
     verbosity=0
     )
 
     model.fit(X_train, y_train)
+    print(model.sympy())
     get_scores(model,X_test,y_test)
     #cross_validate_model(model,X,y)
 
-def plot3D(regressor, X, y):
+def plot3D( X, y):
     # axes instance
     fig = plt.figure(figsize=(8,8))
     ax = Axes3D(fig, auto_add_to_figure=False)
@@ -271,8 +294,11 @@ def plot3D(regressor, X, y):
     # get colormap from seaborn
     cmap = ListedColormap(sns.color_palette("husl", 256).as_hex())
     x = np.log1p(X['Input1'])
+    print(y)
+    z = y#np.log1p(y)
     y = np.log1p(X['Input2'])
-    z = regressor.predict(X)
+    #z = regressor.predict(X)
+    
     # plot
     sc = ax.scatter(x, y, z, s=40, c=x, marker='o', cmap=cmap, alpha=1)
     ax.set_xlabel('Input1')
@@ -284,7 +310,7 @@ def plot3D(regressor, X, y):
 
 #print(df)
 df = clean_data(df)
-df = separate_data(df,'Stack')
+df = separate_data(df,'ArrayList')
 #print(df)
 df = drop_column(df,'Filename')
 

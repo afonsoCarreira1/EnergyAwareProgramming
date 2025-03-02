@@ -42,7 +42,7 @@ public class CreateTemplates {
     static class SizeInfo {
         public int size;
         public int loopSize;
-        public static ArrayList<Integer> sizes = createInputRange(5,2,1);
+        public static ArrayList<Integer> sizes = createInputRange(5,1.5,1);
         public static ArrayList<Integer> loopSizes = createInputRange(1, 1.5, 0);
         /*static int[] sizes = new int[] {
             1,  
@@ -234,8 +234,8 @@ public class CreateTemplates {
 
     public static void main(String[] args) throws IOException, FileNotFoundException {
         createInputRange(typesInfo);
-        System.out.println(SizeInfo.loopSizes);
         System.out.println(SizeInfo.loopSizes.size());
+        System.out.println(SizeInfo.sizes.size());
         try {
             File[] templates = getAllTemplates();
             for (File template : templates) {

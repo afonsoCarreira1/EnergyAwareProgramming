@@ -1,0 +1,70 @@
+package java_progs.progs;
+
+import java.io.IOException;
+import java.util."ImportListCollection";
+import java.util.Arrays;
+import java.util.Collections;
+
+import java_progs.aux.ArrayListAux;
+import java_progs.aux.TemplatesAux;
+
+public class TemplateDefaultSort {
+
+    static int SIZE = "size";
+    static int loopSize = "loopSize";
+
+    private static void defaultSort("ListCollection"<"Type"> list) {
+        Collections.sort(list);
+    }
+
+    private static void computation("ListCollection"<"Type">[] arr, int iter) {
+        int i = 0;
+        while (!TemplatesAux.stop && i < iter) {
+            defaultSort(arr[i]);
+            i++;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void main(String[] args) throws IOException, InterruptedException {
+        try {
+            createNewCollectionLeftSide list createNewCollectionRightSide;
+            createCollectionInitArrayLeftSide arr createCollectionInitArrayRightSide
+            for (int i = 0; i < loopSize; i++) {
+                createNewCollectionLeftSide l createNewCollectionRightSide
+                ArrayListAux.insertRandomNumbers(l, SIZE, ""Type"");
+                arr[i] = l;
+            }
+            ArrayListAux.insertRandomNumbers(list, SIZE, ""Type"");
+            long begin = System.nanoTime();
+            long end = begin;
+            int iter = 0;
+            while (end - begin < 1000000000/* 1s */ && iter < loopSize) {
+                defaultSort(arr[iter]);
+                end = System.nanoTime();
+                iter++;
+            }
+            list.clear();
+            for (int i = 0; i < loopSize; i++) {
+                arr[i].clear();
+            }Arrays.fill(arr, null);
+            for (int i = 0; i < loopSize; i++) {
+                createNewCollectionLeftSide l createNewCollectionRightSide
+                ArrayListAux.insertRandomNumbers(l, SIZE, ""Type"");
+                arr[i] = l;
+            }
+            ArrayListAux.insertRandomNumbers(list, SIZE, ""Type"");
+            TemplatesAux.sendStartSignalToOrchestrator(args[0],iter);
+            TemplatesAux.launchTimerThread();
+            computation(arr, iter);
+        } catch (OutOfMemoryError e) {
+            TemplatesAux.writeErrorInFile("DefaultSort"filename"", "Out of memory error caught by the program.\n" + e.getMessage());
+        } 
+        catch (Exception e) {
+            TemplatesAux.writeErrorInFile("DefaultSort"filename"","Error caught by the program.\n"+e.getMessage());
+        }
+        finally {TemplatesAux.sendStopSignalToOrchestrator(args[0]);}
+
+    }
+
+}

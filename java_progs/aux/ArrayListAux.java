@@ -7,7 +7,7 @@ import java.util.Set;
 public class ArrayListAux {
     public static int min = 0;
     public static int max = 100_000;
-    public static Random rand = new Random();
+    public static Random rand = new Random(42);
 
     @SuppressWarnings("unchecked")
     public static <T> List<T> insertRandomNumbers(List<T> list, int size, String type) {

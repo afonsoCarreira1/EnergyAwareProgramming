@@ -42,7 +42,7 @@ public class CreateTemplates {
     static class SizeInfo {
         public int size;
         public int loopSize;
-        public static ArrayList<Integer> sizes = createInputRange(5,1.5,1);
+        public static ArrayList<Integer> sizes = createInputRange(5,2.5,1);
         public static ArrayList<Integer> loopSizes = createInputRange(1, 1.5, 0);
         /*static int[] sizes = new int[] {
             1,  
@@ -163,7 +163,7 @@ public class CreateTemplates {
 
         private static ArrayList<Integer> createInputRange(int initialvalue, double factor, int exponent){
             Set<Integer> numberSet = new HashSet<>();
-            Random random = new Random();
+            Random random = new Random(42);
             int max_value = initialvalue * 100_000;
             while (initialvalue < max_value) {
                 int min = initialvalue;
@@ -236,6 +236,7 @@ public class CreateTemplates {
         createInputRange(typesInfo);
         System.out.println(SizeInfo.loopSizes.size());
         System.out.println(SizeInfo.sizes.size());
+        //System.out.println(SizeInfo.sizes);
         try {
             File[] templates = getAllTemplates();
             for (File template : templates) {
@@ -389,4 +390,12 @@ public class CreateTemplates {
     private static Boolean skipProgram(String templateName, CollectionInfo collectionInfo) {
         return collectionInfo.isTemplateInvalidForThisCollection(templateName);
     }
+
+
+
+    private static void testSpoonGenerator(){
+        
+    }
+
+
 }

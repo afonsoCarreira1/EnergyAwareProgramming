@@ -18,19 +18,18 @@ import re, seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
 #features/addAll_features/features_4700.csv
-df = pd.read_csv('features/addAll_features/features_4700.csv')
+filename = 'defaultSort_features/features_2900.csv'
+df = pd.read_csv(f'features/{filename}')
 
 def print_full_df(df):
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
         print(df)
 
-def clean_data(df):
-    # remove NaN and infinity
-    last_column = df.columns[-2]
+def clean_data(df,clean_zeros = True):
+    col_name = 'EnergyUsed'
     df = df.replace([np.inf, -np.inf], np.nan)  # Replace infinity with NaN
-    #df = df.replace(0.0, np.nan)
-    #df = df[df[last_column] != 0.0]
-    df = df.dropna(subset=[last_column])
+    if clean_zeros: df[col_name] = df[col_name].replace(0.0, np.nan)
+    df = df.dropna(subset=[col_name])
     return df
 
 def separate_data(df,collection):
@@ -127,7 +126,7 @@ def plot_energy_vs_feature(X, y, column_name):
     df = pd.DataFrame({'x': X_log, 'y': y})
     df_avg = df.groupby('x', as_index=False)['y'].mean()
     plt.scatter(X_log, y, label="Real Energy", alpha=0.6, color="blue", marker="o")
-    plt.scatter(df_avg['x'], df_avg['y'], label="Averaged Energy", alpha=0.6, color="blue", marker="o")
+    #plt.scatter(df_avg['x'], df_avg['y'], label="Averaged Energy", alpha=0.6, color="blue", marker="o")
     plt.xlabel(f"log(1 + {column_name})")
     plt.ylabel("Energy")
     plt.xscale("log")  # Log scale for the X-axis
@@ -147,24 +146,24 @@ def model(df):
     # Initialize and train the DecisionTreeRegressor
     #print('----------------------')
     #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    #decision_tree_regressor(X,y,X_train, X_test, y_train, y_test)
-    #print('----------------------')
-    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    #random_forest_regression(X,y,X_train, X_test, y_train, y_test)
-    #print('----------------------')
-    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    #gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test)
-    #print('----------------------')
-    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    #linear_regression(X,y,X_train, X_test, y_train, y_test)
-    #print('----------------------')
-    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    decision_tree_regressor(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    random_forest_regression(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    linear_regression(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     pysr(X,y,X_train, X_test, y_train, y_test)
 
     #save_figure_pdf(df,regressor)
     #plot_energy_vs_feature(X,y,'Input1')
     #plot_prediction_vs_feature(regressor, X_test, y_test, 'Input2')
-    #plot3D(X,y)
+    plot3D(X,y)
 
 def tune_hyperparameters(X,y,X_train, X_test, y_train, y_test, selected_model):
     print(f'Best model scores of {selected_model}')
@@ -273,16 +272,16 @@ def pysr(X,y,X_train, X_test, y_train, y_test):
     X_test.columns= [''.join(c for c in x if c.isalnum()) for x in X_test.columns]
     model = PySRRegressor(
     niterations=40,
-    unary_operators=["sin", "cos", "exp"],
+    unary_operators=["sin", "cos", "exp","log"],
     binary_operators=["+", "*"],
     population_size=100,
-    run_id='addAll',
+    run_id=filename,
     #select_k_features=1,
     verbosity=0
     )
 
     model.fit(X_train, y_train)
-    print(model.sympy())
+    #print(model.sympy())
     get_scores(model,X_test,y_test)
     #cross_validate_model(model,X,y)
 
@@ -294,7 +293,7 @@ def plot3D( X, y):
     # get colormap from seaborn
     cmap = ListedColormap(sns.color_palette("husl", 256).as_hex())
     x = np.log1p(X['Input1'])
-    print(y)
+    #print(y)
     z = y#np.log1p(y)
     y = np.log1p(X['Input2'])
     #z = regressor.predict(X)
@@ -309,11 +308,23 @@ def plot3D( X, y):
     plt.show()
 
 #print(df)
-df = clean_data(df)
-df = separate_data(df,'ArrayList')
+#print(df.shape[0]) # print number of rows
+print('Size before cleaning',df.shape[0])
+df = clean_data(df,False)
+print('Size after cleaning',df.shape[0])
+df = separate_data(df,'')
 #print(df)
 df = drop_column(df,'Filename')
 
+#lx = df['Input1'].tolist()
+#lx = sorted(set(lx))
+#print(lx)
+#ly = list(range(0,len(lx)))
+#plt.plot(lx, ly)
+#plt.show()
+
+#print(df.isnull().sum())
+#print(df[df.isnull().any(axis=1)])
 
 model(df)
 

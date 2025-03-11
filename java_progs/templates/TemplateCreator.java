@@ -24,7 +24,8 @@ public class TemplateCreator {
             for (CtMethod<?> method : commonMethods) {
                 if (method.getSimpleName().contains("get")) {
                     //getGoodInputs(method,collec);
-                    SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);
+                    new SpoonInjector(launcher, factory, 0, method, collec).injectInTemplate();;
+                    //SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);
                 }
                     
 

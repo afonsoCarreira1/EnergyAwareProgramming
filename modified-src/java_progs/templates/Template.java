@@ -1,5 +1,9 @@
 package java_progs.templates;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java_progs.aux.TemplatesAux;
 // add imports
 public class Template {
@@ -40,7 +44,19 @@ public class Template {
         }
     }
 
-    private static void computation(int arg0) {
-        System.out.println("Injected method executed!");
+    private static void computation(ArrayList var, int arg0) {
+        var.get(arg0);
+    }
+
+    private static void computation(Vector var, int arg0) {
+        var.get(arg0);
+    }
+
+    private static void computation(LinkedList var, int arg0) {
+        var.get(arg0);
+    }
+
+    private static void computation(CopyOnWriteArrayList var, int arg0) {
+        var.get(arg0);
     }
 }

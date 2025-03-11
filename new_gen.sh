@@ -8,7 +8,7 @@ mv java_progs/aux/WritePid.class java_progs/out/java_progs/aux
 output_dir=java_progs/out/
 javac -d "$output_dir" java_progs/templates/Template.java
 
-javac -cp "/home/afonso/Documents/EnergyAwareProgramming/parser/lib/spoon-core-11.1.1-beta-18-jar-with-dependencies.jar" java_progs/templates/TemplateCreator.java java_progs/templates/SpoonInjector.java
+javac -cp "/home/afonso/Documents/EnergyAwareProgramming/parser/lib/spoon-core-11.1.1-beta-18-jar-with-dependencies.jar" java_progs/templates/InputTest.java java_progs/templates/TemplateCreator.java java_progs/templates/SpoonInjector.java
 java -cp ".:/home/afonso/Documents/EnergyAwareProgramming/parser/lib/spoon-core-11.1.1-beta-18-jar-with-dependencies.jar:/home/afonso/Documents/EnergyAwareProgramming/parser/lib/slf4j-simple-2.0.16.jar" java_progs/templates/TemplateCreator.java
 
 

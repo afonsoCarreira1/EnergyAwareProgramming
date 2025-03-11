@@ -22,9 +22,8 @@ import java.util.Set;
 
 public class SpoonInjector {
 
-    public static void injectInTemplate(Launcher launcher, Factory factory) {
+    public static void injectInTemplate(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method) {
 
-        // Get the class by name (replace with your class name)
         String path = "java_progs.templates.Template";
         CtClass<?> myClass = factory.Class().get("java_progs.templates.Template");
         if (myClass == null) {
@@ -33,13 +32,17 @@ public class SpoonInjector {
         }
 
         getCollectionMethods(launcher,"vector");
-
+        
         // Inject a new method
         //injectMethod(factory, myClass);
 
         // Save modified source code
         //launcher.setSourceOutputDirectory("modified-src");
         //launcher.prettyprint();
+    }
+
+    private static void allocateInitialArrayForFunCalls(int numberOfFunCalls) {
+
     }
 
     private static void injectMethod(Factory factory, CtClass<?> myClass) {

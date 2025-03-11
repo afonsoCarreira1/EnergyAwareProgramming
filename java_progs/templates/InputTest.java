@@ -1,0 +1,115 @@
+package java_progs.templates;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import spoon.Launcher;
+import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.declaration.CtConstructor;
+import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtParameter;
+import spoon.reflect.declaration.CtType;
+import spoon.reflect.declaration.ModifierKind;
+import spoon.reflect.factory.Factory;
+import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.visitor.filter.TypeFilter;
+
+public class InputTest {
+
+    public static void getInputs(Launcher launcher, Factory factory ,CtMethod<?> method, CtType<?> collec) {
+        //createFile("java_progs/templates", "Test",".java");
+        String program = getTestFile(factory,method,collec);
+        //writeFile("java_progs/templates/test.java",program);
+    }
+
+    private static String getTestFile(Factory factory, CtMethod<?> method, CtType<?> collec) {
+        
+        StringBuilder program = new StringBuilder();
+        program.append("package java_progs.templates;\n");
+        program.append("public class Test {\n");
+        program.append("    public static void main(String[] args) {\n");
+        System.out.println(collec.getQualifiedName());
+        CtTypeReference<?> typeRef = factory.Type().createReference(collec);
+        CtLocalVariable<?> var = createVar(factory, typeRef);
+        program.append("        "+var+";\n");
+        program.append("    }\n");
+        String args = createMethodCallParameters(factory, method);
+        program.append("    public static void testMethod("+args+"){\n");
+        program.append("        ");
+        initializeConstructors(collec);
+        return program.toString();
+    }
+
+    private static void initializeConstructors(CtType<?> collec) {
+        //new TypeFilter(CtConstructor.class)
+        List<CtConstructor<?>> l = collec.filterChildren(new TypeFilter<>(CtConstructor.class))
+        .map(m -> (CtConstructor<?>) m)
+        .list(); // Ensure that this method preserves generics!
+        CtConstructor<?> shortestConstructor = l.get(0);
+        int shortestConstructorCount = Integer.MAX_VALUE;
+        for (int i = 0; i < l.size(); i++) {
+            if (collec.getQualifiedName().equals(l.get(i).getSignature().split("\\(")[0]) && l.get(i).toString().length() <= shortestConstructorCount) {
+                shortestConstructor = l.get(i);
+                shortestConstructorCount = l.get(i).toString().length();
+                System.out.println(l.get(i) + " " + l.get(i).toString().length());
+            }
+        }
+
+    }
+
+    private static void callMethod(Factory factory,CtMethod<?> method,CtType<?> collec) {
+        String call = "";
+        if (method.hasModifier(ModifierKind.STATIC)) call = collec.getQualifiedName() + "()."+method.getSimpleName();
+    }
+
+    private static CtLocalVariable<?> createVar(Factory factory,CtTypeReference typeRef) {
+        CtLocalVariable<?> variable = factory.Code().createLocalVariable(
+            typeRef,           // var type
+            "myVar",          // Variable name
+            factory.Code().createConstructorCall(typeRef) // Initialization
+        );
+        return variable;
+
+    }
+
+    private static String createMethodCallParameters(Factory factory,CtMethod<?> method) {
+        String args = "";
+        for (int i = 0; i < method.getParameters().size(); i++) {
+            CtParameter<?> parameter = method.getParameters().get(i);
+            args += parameter.getType() +" arg"+i;
+            if (i != method.getParameters().size() - 1) args += ", ";
+            System.out.println(args);
+        }
+        return args;
+    }
+
+    private static void createCallMethod(Factory factory,CtMethod method) {
+        
+    }
+
+    private static void createFile(String dir,String filename, String fileType) {
+        try {
+            File myObj = new File(dir + filename + fileType);
+            myObj.createNewFile();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+    }
+
+    private static void writeFile(String file, String program) {
+        FileWriter fr;
+        try {
+            fr = new FileWriter(file, true);
+            fr.write(program);
+            fr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+}

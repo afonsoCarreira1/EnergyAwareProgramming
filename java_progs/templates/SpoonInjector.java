@@ -97,15 +97,15 @@ public class SpoonInjector {
     }
 
     private String callArgs() {
-        String initialArray = "";
+        String argsString = "";
         List<CtParameter<?>> args = method.getParameters();
+        argsString += "(";
         for (int i = 0; i < args.size(); i++) {
-            initialArray += "(";
-            initialArray += args.get(i).getSimpleName();
-            if(i != args.size()-1) initialArray += ", ";
-            initialArray += ")";
+            argsString += args.get(i).getSimpleName();
+            if(i != args.size()-1) argsString += ", ";
         }
-        return initialArray;
+        argsString += ")";
+        return argsString;
     }
 
     private String getComputationBody() {
@@ -170,7 +170,6 @@ public class SpoonInjector {
     }
 
     private List<CtParameter<?>> getComputationParameters() {
-        ;
         if (isMethodStatic) return method.getParameters();
         CtParameter<?> param = factory.createParameter();
         param.setSimpleName("var");
@@ -178,6 +177,11 @@ public class SpoonInjector {
         List<CtParameter<?>> params = new ArrayList<>();
         params.add(param);
         for (int i = 0; i < method.getParameters().size(); i++) {
+            for (CtTypeReference<?> tr : method.getParameters().get(i).getType().getActualTypeArguments()){
+                if (tr.toString().contains("? extends E")){// change the type from <? extends E> to <?>
+                    method.getParameters().get(i).getType().setActualTypeArguments(List.of(factory.Type().createReference("?")));
+                }
+            }
             params.add(method.getParameters().get(i));
         }
         return params;

@@ -1,11 +1,9 @@
-package java_progs.templates;
-import ?;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java_progs.aux.TemplatesAux;
 // add imports
-public class Template {
+public class TemplateaddAll_int_java_util_Collection_ {
     // static int SIZE = "size";
     // static int loopSize = "loopSize";
     // create fun to benchmark
@@ -45,9 +43,5 @@ public class Template {
 
     private static void computation(ArrayList var, int arg0, Collection<?> arg1) {
         var.addAll(arg0, arg1);
-    }
-
-    private static void computation(ArrayList var, Collection<?> arg0) {
-        var.addAll(arg0);
     }
 }

@@ -52,9 +52,17 @@ public class SpoonInjector {
         // getCollectionMethods(launcher,"vector");
         // Inject a new method
         // injectMethod(factory, myClass);
-        injectComputationMethod(myClass);
-        // Save modified source code
-        launcher.setSourceOutputDirectory("modified-src");
+        CtClass<?> newClass = myClass.clone();
+        injectComputationMethod(newClass);
+        // Save modified source code -> this changes the current class
+        // launcher.setSourceOutputDirectory("modified-src");
+        // launcher.prettyprint();
+        newClass.setSimpleName(myClass.getSimpleName() + method.getSignature().replaceAll("\\.|,|\\(|\\)", "_"));
+        launcher.getFactory().Class().getAll().add(newClass);// Register the new class
+
+        launcher.getModel().getRootPackage().addType(newClass);
+        launcher.setSourceOutputDirectory("generated-src");// Different output folder
+
         launcher.prettyprint();
     }
 

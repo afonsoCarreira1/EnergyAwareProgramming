@@ -20,20 +20,21 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.filter.TypeFilter;
 
 public class InputTest {
+    static StringBuilder program;
 
     public static void getInputs(Launcher launcher, Factory factory ,CtMethod<?> method, CtType<?> collec) {
-        //createFile("java_progs/templates", "Test",".java");
-        String program = getTestFile(factory,method,collec);
-        //writeFile("java_progs/templates/test.java",program);
+        program = new StringBuilder();
+        createFile("java_progs/templates", "Test",".java");
+        getTestFile(factory,method,collec);
+        writeFile("java_progs/templates/Test.java",program.toString());
     }
 
     private static String getTestFile(Factory factory, CtMethod<?> method, CtType<?> collec) {
-        
-        StringBuilder program = new StringBuilder();
         program.append("package java_progs.templates;\n");
+        program.append("import "+ collec.getQualifiedName() +";\n");
         program.append("public class Test {\n");
         program.append("    public static void main(String[] args) {\n");
-        System.out.println(collec.getQualifiedName());
+        //System.out.println(collec.getQualifiedName());
         CtTypeReference<?> typeRef = factory.Type().createReference(collec);
         CtLocalVariable<?> var = createVar(factory, typeRef);
         program.append("        "+var+";\n");
@@ -41,30 +42,41 @@ public class InputTest {
         String args = createMethodCallParameters(factory, method);
         program.append("    public static void testMethod("+args+"){\n");
         program.append("        ");
-        initializeConstructors(collec);
+        callMethod(factory, method, collec);
+        program.append("    }\n");
+        program.append("}\n");
+        //initializeConstructors(collec);
         return program.toString();
     }
 
     private static void initializeConstructors(CtType<?> collec) {
-        //new TypeFilter(CtConstructor.class)
         List<CtConstructor<?>> l = collec.filterChildren(new TypeFilter<>(CtConstructor.class))
         .map(m -> (CtConstructor<?>) m)
-        .list(); // Ensure that this method preserves generics!
+        .list();
         CtConstructor<?> shortestConstructor = l.get(0);
         int shortestConstructorCount = Integer.MAX_VALUE;
         for (int i = 0; i < l.size(); i++) {
             if (collec.getQualifiedName().equals(l.get(i).getSignature().split("\\(")[0]) && l.get(i).toString().length() <= shortestConstructorCount) {
                 shortestConstructor = l.get(i);
                 shortestConstructorCount = l.get(i).toString().length();
-                System.out.println(l.get(i) + " " + l.get(i).toString().length());
+                //System.out.println(l.get(i) + " " + l.get(i).toString().length());
             }
         }
-
+        //TODO for each parameter check if it is needed to start something
+        
     }
 
     private static void callMethod(Factory factory,CtMethod<?> method,CtType<?> collec) {
         String call = "";
         if (method.hasModifier(ModifierKind.STATIC)) call = collec.getQualifiedName() + "()."+method.getSimpleName();
+        else {
+            
+            String s = createVar(factory, factory.Type().createReference(collec))+";\n";
+            program.append(s);
+            program.append("        myVar.get(arg0);\n");
+            System.out.println("aki -> " + s);
+            //initializeConstructors(collec);
+        }
     }
 
     private static CtLocalVariable<?> createVar(Factory factory,CtTypeReference typeRef) {
@@ -74,7 +86,6 @@ public class InputTest {
             factory.Code().createConstructorCall(typeRef) // Initialization
         );
         return variable;
-
     }
 
     private static String createMethodCallParameters(Factory factory,CtMethod<?> method) {
@@ -83,7 +94,6 @@ public class InputTest {
             CtParameter<?> parameter = method.getParameters().get(i);
             args += parameter.getType() +" arg"+i;
             if (i != method.getParameters().size() - 1) args += ", ";
-            System.out.println(args);
         }
         return args;
     }
@@ -92,24 +102,25 @@ public class InputTest {
         
     }
 
-    private static void createFile(String dir,String filename, String fileType) {
+    private static void createFile(String dir, String filename, String fileType) {
+        File myObj = new File(dir + filename + fileType);
+        if (myObj.exists()) {
+            myObj.delete();  // Ensure deletion before creating
+        }
         try {
-            File myObj = new File(dir + filename + fileType);
             myObj.createNewFile();
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-    }
-
-    private static void writeFile(String file, String program) {
-        FileWriter fr;
-        try {
-            fr = new FileWriter(file, true);
-            fr.write(program);
-            fr.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+    
+    private static void writeFile(String file, String program) {
+        try (FileWriter fr = new FileWriter(file, false)) { 
+            fr.write(program);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
 
 }

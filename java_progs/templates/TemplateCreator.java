@@ -22,8 +22,11 @@ public class TemplateCreator {
         int[] funCalls = new int[] { 20_000, 50_000, 75_000, 100_000, 150_000 };
         for (CtType<?> collec : getCollections("list")) {
             for (CtMethod<?> method : commonMethods) {
-                if (method.getSimpleName().contains("get"))
-                    getGoodInputs(method,collec);
+                if (method.getSimpleName().contains("get")) {
+                    //getGoodInputs(method,collec);
+                    SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);
+                }
+                    
 
                 for (int funCall : funCalls) {
                     // SpoonInjector.injectInTemplate(launcher, factory, funCall, method);

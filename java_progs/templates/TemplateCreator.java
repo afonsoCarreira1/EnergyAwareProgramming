@@ -6,6 +6,7 @@ import java.util.List;
 
 import spoon.Launcher;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
@@ -24,7 +25,7 @@ public class TemplateCreator {
             for (CtMethod<?> method : commonMethods) {
                 if (method.getSimpleName().contains("addAll") && collec.getSimpleName().equals("ArrayList")) {
                     //getGoodInputs(method,collec);
-                    new SpoonInjector(launcher, factory, 0, method, collec).injectInTemplate();;
+                    new SpoonInjector(launcher, factory, 0, method, collec,"Integer").injectInTemplate();;
                     //SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);
                 }
                     
@@ -44,12 +45,14 @@ public class TemplateCreator {
     private static void initSpoon() {
         launcher = new Launcher();
         launcher.addInputResource("java_progs/templates/");
+        launcher.addInputResource("java_progs/aux/");
+        launcher.getFactory().getEnvironment().setAutoImports(true);
         launcher.buildModel();
         factory = launcher.getFactory();
+        
     }
 
     private static ArrayList<CtMethod<?>> getCollectionMethods(String collection) {
-        launcher.getFactory().getEnvironment().setAutoImports(true);
         HashMap<String, Integer> methods = new HashMap<String, Integer>();
         HashMap<String, CtMethod<?>> methodsParameters = new HashMap<String, CtMethod<?>>();
         CtType<?>[] collectionTypes = getCollections(collection);

@@ -5,20 +5,33 @@ import spoon.Launcher;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCodeSnippetStatement;
+import spoon.reflect.code.CtConstructorCall;
+import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtStatementList;
+import spoon.reflect.code.CtThisAccess;
+import spoon.reflect.code.CtTry;
 import spoon.reflect.declaration.CtClass;
+import spoon.reflect.declaration.CtCompilationUnit;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.factory.Factory;
+import spoon.reflect.reference.CtExecutableReference;
+import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.support.compiler.FileSystemFolder;
 
+import java.beans.Introspector;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -31,42 +44,55 @@ public class SpoonInjector {
     CtMethod<?> method;
     CtType<?> collec;
     Boolean isMethodStatic;
+    String typeToUse;
+    String newClassName;
+    CtClass<?> newClass;
+    CtMethod<?> mainMethod;
+    CtTry tryBlock;
+    int varIndex = 0;
+    ArrayList<String> imports = new ArrayList<>();
 
-    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec) {
+    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse) {
         this.launcher = launcher;
         this.factory = factory;
         this.numberOfFunCalls = numberOfFunCalls;
         this.method = method;
         this.collec = collec;
         this.isMethodStatic = method.hasModifier(ModifierKind.STATIC);
-    }
-
-    static int varIndex = 0;
-
-    public void injectInTemplate() {
-
+        this.typeToUse = typeToUse;
         String path = "java_progs.templates.Template";
-        CtClass<?> myClass = factory.Class().get("java_progs.templates.Template");
+        CtClass<?> myClass = factory.Class().get(path);
         if (myClass == null) {
             System.out.println(path +" not found");
-            System.exit(0);
+            return;
         }
+        this.newClass = myClass.clone();
+        this.newClassName = myClass.getSimpleName() +"_" + method.getSignature().replaceAll("\\.|,|\\(|\\)", "_");
+        this.mainMethod = newClass.getMethod("main", factory.Type().createArrayReference(factory.Type().stringType()));
+        this.tryBlock = (CtTry) mainMethod.getElements(el -> el instanceof CtTry).get(0);
+    }
 
+    private String getVarName() {
+        return "var"+varIndex++;
+    }
+
+    public void injectInTemplate() {
         //getCollectionMethods(launcher,"vector");
         
         // Inject a new method
         //injectMethod(factory, myClass);
-        CtClass<?> newClass = myClass.clone();
-        injectComputationMethod(newClass);
+        allocateInitialArrayForFunCalls();
+        injectBenchmarkMethod(newClass);
 
         // Save modified source code -> this changes the current class
         //launcher.setSourceOutputDirectory("modified-src");
         //launcher.prettyprint();
 
-        newClass.setSimpleName(myClass.getSimpleName() +"_" + method.getSignature().replaceAll("\\.|,|\\(|\\)", "_"));
+        newClass.setSimpleName(newClassName);
         launcher.getFactory().Class().getAll().add(newClass); // Register the new class
         launcher.getModel().getRootPackage().addType(newClass);
-        launcher.setSourceOutputDirectory("generated-src"); // Different output folder
+        //System.out.println(launcher.getModel().getRootPackage());
+        launcher.setSourceOutputDirectory("generated"); // Different output folder
         launcher.prettyprint();
     }
 
@@ -88,19 +114,46 @@ public class SpoonInjector {
         
     }
 
-    private String allocateInitialArrayForFunCalls() {
+    private void allocateInitialArrayForFunCalls() {
         String initialArray = "";
-        if (method.hasModifier(ModifierKind.STATIC)){
-            initialArray += collec.getQualifiedName();
-        }
+        if (isMethodStatic) initialArray += collec.getQualifiedName()+ "()";//TODO i assume there are no constructors here
         else {
-            initialArray += createVar(factory.Type().createReference(collec),"initialVar");
-            //initializeConstructors(collec);
+            CtBlock<?> tryBody = tryBlock.getBody();
+            String varName = getVarName();
+            CtLocalVariable<?> var = createVar(factory.Type().createReference(collec), varName);
+            CtStatementList statements= factory.Core().createStatementList();
+            statements.addStatement(var);
+            CtStatement initCollection = populateCollection(var,tryBody);
+            if (initCollection != null) statements.addStatement(initCollection);
+            initialArray += varName+"."+method.getSimpleName();
+            tryBody.insertBegin(statements);
         }
         for (CtParameter<?> arg : method.getParameters()){
             initialArray += "("+arg+")";
         }
-        return initialArray;
+        
+        //return initialArray;
+    }
+
+    private CtStatement populateCollection(CtLocalVariable<?> var,CtBlock<?> tryBody) {
+        if (!var.getType().isSubtypeOf(factory.Type().createReference("java.util.Collection"))) return null;
+        if (var.getType().toString().contains("List")) {
+            addImport("java_progs.aux.ArrayListAux");
+            CtClass<?> ctClass = factory.Class().get("java_progs.aux.ArrayListAux");
+            CtMethod<?> insertRandomNumbersMethod = ctClass.getMethodsByName("insertRandomNumbers").get(0);
+            CtInvocation<?> invocation = factory.Core().createInvocation();
+            invocation.setExecutable((CtExecutableReference) insertRandomNumbersMethod.getReference()); //adciciona a fun
+            invocation.setTarget(factory.createLiteral(ctClass.getReference())); //adiciona a Class.
+            invocation.addArgument(factory.Code().createVariableRead(var.getReference(), false));
+            invocation.addArgument(factory.Code().createLiteral(10));
+            invocation.addArgument(factory.Code().createLiteral(typeToUse));
+            return invocation;
+        }//TODo do the same for sets and other collections
+        return null;
+    }
+    
+    private void addImport(String importPath) {
+        imports.add("import "+importPath+";");
     }
 
     private String callArgs() {
@@ -115,7 +168,7 @@ public class SpoonInjector {
         return argsString;
     }
 
-    private String getComputationBody() {
+    private String getBenchmarkFunBody() {
         String body = "";
         if (isMethodStatic) body += collec.getQualifiedName()+ "()";//TODO i assume there are no constructors here
         else body += "var."+method.getSimpleName();
@@ -124,7 +177,7 @@ public class SpoonInjector {
     }
 
     private CtLocalVariable<?> createVar(CtTypeReference typeRef, String varName) {
-        CtLocalVariable<?> variable = factory.Code().createLocalVariable(
+        CtLocalVariable variable = factory.Code().createLocalVariable(
             typeRef,           // var type
             varName,          // Variable name
             factory.Code().createConstructorCall(typeRef) // Initialization
@@ -194,11 +247,9 @@ public class SpoonInjector {
         return params;
     }
 
-    private void injectComputationMethod(CtClass<?> templateClass) {
+    private void injectBenchmarkMethod(CtClass<?> templateClass) {
         // Define the return type (void in this case)
         CtTypeReference<Void> returnType = factory.Type().voidPrimitiveType();
-
-        String methodName = "computation";
 
         Set<ModifierKind> modifiers = new HashSet<>();
         modifiers.add(ModifierKind.PRIVATE);
@@ -208,7 +259,7 @@ public class SpoonInjector {
 
         CtCodeSnippetStatement snippet = factory.Code().createCodeSnippetStatement(
             //"System.out.println(\"methodName\");"
-            getComputationBody()
+            getBenchmarkFunBody()
         );
         methodBody.addStatement(snippet);
 
@@ -217,7 +268,7 @@ public class SpoonInjector {
                 templateClass,            // Target class
                 modifiers,          // Modifiers
                 returnType,         // Return type
-                methodName,         // Method name
+                Introspector.decapitalize(newClassName),         // Method name
                 getComputationParameters(),  // Parameters (empty)
                 Collections.emptySet(),   // Exceptions thrown
                 methodBody          // Method body
@@ -250,4 +301,9 @@ public class SpoonInjector {
             //System.out.println(") -> " + returnType.getSimpleName());
         }
     }
+
+    private void insertImports() {
+
+    }
+
 }

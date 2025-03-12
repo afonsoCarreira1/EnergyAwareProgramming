@@ -1,94 +1,85 @@
 package java_progs.templates;
-
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 import spoon.Launcher;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtTypeReference;
-
 public class TemplateCreator {
-
-    
-
     public static void main(String[] args) {
-        //initSpoon();
+        // initSpoon();
         ArrayList<CtMethod<?>> commonMethods = getCollectionMethods("list");
-        int[] funCalls = new int[] { 20_000, 50_000, 75_000, 100_000, 150_000 };
+        int[] funCalls = new int[]{ 20000, 50000, 75000, 100000, 150000 };
         for (CtType<?> collec : getCollections("list")) {
             for (CtMethod<?> method : commonMethods) {
                 if (method.getSimpleName().contains("addAll") && collec.getSimpleName().equals("ArrayList")) {
-                    //getGoodInputs(method,collec);
+                    // getGoodInputs(method,collec);
                     System.out.println(method.getReference());
                     Launcher launcher = null;
                     Factory factory = null;
                     launcher = new Launcher();
-        launcher.addInputResource("java_progs/templates/");
-        launcher.addInputResource("java_progs/aux/");
-        launcher.getFactory().getEnvironment().setAutoImports(true);
-        launcher.setSourceOutputDirectory("generated"); // Different output folder
-        launcher.buildModel();
-        factory = launcher.getFactory(); 
-                    SpoonInjector spi = new SpoonInjector(launcher, factory, 0, method, collec,"Integer");
+                    launcher.addInputResource("java_progs/templates/");
+                    launcher.addInputResource("java_progs/aux/");
+                    launcher.getFactory().getEnvironment().setAutoImports(true);
+                    launcher.setSourceOutputDirectory("generated");// Different output folder
+
+                    launcher.buildModel();
+                    factory = launcher.getFactory();
+                    SpoonInjector spi = new SpoonInjector(launcher, factory, 0, method, collec, "Integer");
                     spi.injectInTemplate();
                     spi.insertImport();
-                    //SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);
+                    // SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);
                 }
-                    
-
                 for (int funCall : funCalls) {
                     // SpoonInjector.injectInTemplate(launcher, factory, funCall, method);
                 }
             }
         }
-
     }
 
-    //private static void getGoodInputs(CtMethod<?> method, CtType<?> collec) {
-    //    InputTest.getInputs(launcher, factory, method, collec);
-    //}
-
+    // private static void getGoodInputs(CtMethod<?> method, CtType<?> collec) {
+    // InputTest.getInputs(launcher, factory, method, collec);
+    // }
     private static void initSpoon(Launcher launcher, Factory factory) {
         launcher = new Launcher();
         launcher.addInputResource("java_progs/templates/");
         launcher.addInputResource("java_progs/aux/");
         launcher.getFactory().getEnvironment().setAutoImports(true);
-        launcher.setSourceOutputDirectory("generated"); // Different output folder
+        launcher.setSourceOutputDirectory("generated");// Different output folder
+
         launcher.buildModel();
-        factory = launcher.getFactory(); 
+        factory = launcher.getFactory();
     }
 
     private static ArrayList<CtMethod<?>> getCollectionMethods(String collection) {
         HashMap<String, Integer> methods = new HashMap<String, Integer>();
         HashMap<String, CtMethod<?>> methodsParameters = new HashMap<String, CtMethod<?>>();
         CtType<?>[] collectionTypes = getCollections(collection);
-
         for (CtType<?> collectionType : collectionTypes) {
             for (CtMethod<?> method : collectionType.getMethods()) {
                 StringBuilder methodSignature = new StringBuilder();
                 methodSignature.append(method.getSimpleName());
                 CtTypeReference<?> returnType = method.getType();
                 methodSignature.append("(");
-
                 // Get parameters
                 for (int i = 0; i < method.getParameters().size(); i++) {
                     CtParameter<?> param = method.getParameters().get(i);
-                    methodSignature.append(param.getType().getSimpleName() + " " + param.getSimpleName());
-                    if (i != method.getParameters().size() - 1)
+                    methodSignature.append((param.getType().getSimpleName() + " ") + param.getSimpleName());
+                    if (i != (method.getParameters().size() - 1))
                         methodSignature.append(", ");
-                }
 
+                }
                 methodSignature.append(") -> " + returnType.getSimpleName());
                 if (collectionType.getSimpleName().equals("Stack"))
                     System.out.println(methodSignature.toString());
-                methods.put(methodSignature.toString(),
-                        methods.get(methodSignature.toString()) != null ? methods.get(methodSignature.toString()) + 1
-                                : 1);
+
+                methods.put(methodSignature.toString(), methods.get(methodSignature.toString()) != null ? methods.get(methodSignature.toString()) + 1 : 1);
                 methodsParameters.put(methodSignature.toString(), method);
             }
         }
@@ -108,19 +99,19 @@ public class TemplateCreator {
         launcher.addInputResource("java_progs/templates/");
         launcher.addInputResource("java_progs/aux/");
         launcher.getFactory().getEnvironment().setAutoImports(true);
-        launcher.setSourceOutputDirectory("generated"); // Different output folder
-        launcher.buildModel(); 
+        launcher.setSourceOutputDirectory("generated");// Different output folder
+
+        launcher.buildModel();
         CtType<?>[] collectionTypes = null;
         if (collection.toLowerCase().equals("list")) {
             collectionTypes = new CtType<?>[4];
-            collectionTypes[0] = launcher.getFactory().Type().get(java.util.ArrayList.class);
-            collectionTypes[1] = launcher.getFactory().Type().get(java.util.Vector.class);
+            collectionTypes[0] = launcher.getFactory().Type().get(ArrayList.class);
+            collectionTypes[1] = launcher.getFactory().Type().get(Vector.class);
             // collectionTypes[2] = launcher.getFactory().Type().get(java.util.Stack.class);
             // Stack extends Vector
-            collectionTypes[2] = launcher.getFactory().Type().get(java.util.LinkedList.class);
-            collectionTypes[3] = launcher.getFactory().Type().get(java.util.concurrent.CopyOnWriteArrayList.class);
+            collectionTypes[2] = launcher.getFactory().Type().get(LinkedList.class);
+            collectionTypes[3] = launcher.getFactory().Type().get(CopyOnWriteArrayList.class);
         }
         return collectionTypes;
     }
-
 }

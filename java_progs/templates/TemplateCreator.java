@@ -1,8 +1,12 @@
 package java_progs.templates;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import spoon.Launcher;
 import spoon.reflect.declaration.CtMethod;
@@ -15,32 +19,28 @@ import spoon.reflect.reference.CtTypeReference;
 public class TemplateCreator {
 
     
+    
 
     public static void main(String[] args) {
         //initSpoon();
+        //initSpoon();
         ArrayList<CtMethod<?>> commonMethods = getCollectionMethods("list");
+        List<Integer> sizes = Arrays.asList(150);//createInputRange(1, 1.5, 0);
         int[] funCalls = new int[] { 20_000, 50_000, 75_000, 100_000, 150_000 };
         for (CtType<?> collec : getCollections("list")) {
             for (CtMethod<?> method : commonMethods) {
-                if (method.getSimpleName().contains("addAll") && collec.getSimpleName().equals("ArrayList")) {
+                for (int size : sizes) {
+                    if (method.getSimpleName().contains("addAll") && collec.getSimpleName().equals("ArrayList")) {
                     //getGoodInputs(method,collec);
-                    System.out.println(method.getReference());
-                    Launcher launcher = null;
-                    Factory factory = null;
-                    launcher = new Launcher();
-        launcher.addInputResource("java_progs/templates/");
-        launcher.addInputResource("java_progs/aux/");
-        launcher.getFactory().getEnvironment().setAutoImports(true);
-        launcher.setSourceOutputDirectory("generated"); // Different output folder
-        launcher.buildModel();
-        factory = launcher.getFactory(); 
-                    SpoonInjector spi = new SpoonInjector(launcher, factory, 0, method, collec,"Integer");
+                    Launcher launcher = initSpoon();
+                    SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method, collec,"Integer",size);
                     spi.injectInTemplate();
                     spi.insertImport();
                     //SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);
+                    }
                 }
+                
                     
-
                 for (int funCall : funCalls) {
                     // SpoonInjector.injectInTemplate(launcher, factory, funCall, method);
                 }
@@ -49,18 +49,32 @@ public class TemplateCreator {
 
     }
 
-    //private static void getGoodInputs(CtMethod<?> method, CtType<?> collec) {
-    //    InputTest.getInputs(launcher, factory, method, collec);
-    //}
+    private static ArrayList<Integer> createInputRange(int initialvalue, double factor, int exponent){
+            Set<Integer> numberSet = new HashSet<>();
+            Random random = new Random(42);
+            int max_value = initialvalue * 100_000;
+            while (initialvalue < max_value) {
+                int min = initialvalue;
+                int max = initialvalue*10;
+                double nums = Math.pow(factor, exponent);
+                for (int j = 0; j < nums; j++) {
+                    int num = min + random.nextInt(max - min + 1);
+                    numberSet.add(num);
+                }
+                initialvalue = initialvalue*10;
+                exponent++;
+            }
+            return new ArrayList<>(numberSet);
+        }
 
-    private static void initSpoon(Launcher launcher, Factory factory) {
-        launcher = new Launcher();
+    private static Launcher initSpoon() {
+        Launcher launcher = new Launcher();
         launcher.addInputResource("java_progs/templates/");
         launcher.addInputResource("java_progs/aux/");
         launcher.getFactory().getEnvironment().setAutoImports(true);
-        launcher.setSourceOutputDirectory("generated"); // Different output folder
+        launcher.setSourceOutputDirectory("generated");
         launcher.buildModel();
-        factory = launcher.getFactory(); 
+        return launcher; 
     }
 
     private static ArrayList<CtMethod<?>> getCollectionMethods(String collection) {

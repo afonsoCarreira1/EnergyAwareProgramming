@@ -9,11 +9,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
 import spoon.Launcher;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCodeSnippetStatement;
+import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtStatement;
@@ -21,6 +23,7 @@ import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTry;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
+import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
@@ -44,6 +47,8 @@ public class SpoonInjector {
 
     String typeToUse;
 
+    int size;
+
     String newClassName;
 
     CtClass<?> newClass;
@@ -56,7 +61,11 @@ public class SpoonInjector {
 
     ArrayList<String> imports = new ArrayList<>();
 
-    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec, String typeToUse) {
+    int min = 0;
+
+    int max;
+
+    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec, String typeToUse, int size) {
         this.launcher = launcher;
         this.factory = factory;
         this.numberOfFunCalls = numberOfFunCalls;
@@ -64,6 +73,7 @@ public class SpoonInjector {
         this.collec = collec;
         this.isMethodStatic = method.hasModifier(ModifierKind.STATIC);
         this.typeToUse = typeToUse;
+        this.size = size;
         String path = "java_progs.templates.Template";
         CtClass<?> myClass = factory.Class().get(path);
         if (myClass == null) {
@@ -74,6 +84,15 @@ public class SpoonInjector {
         this.newClassName = (myClass.getSimpleName() + "_") + method.getSignature().replaceAll("\\.|,|\\(|\\)", "_");
         this.mainMethod = newClass.getMethod("main", factory.Type().createArrayReference(factory.Type().stringType()));
         this.tryBlock = ((CtTry) (mainMethod.getElements(el -> el instanceof CtTry).get(0)));
+        initMinMax();
+    }
+
+    private void initMinMax() {
+        if (((size - 1) + min) == 0)
+            this.max = 0;
+        else
+            this.max = size - 1;
+
     }
 
     private String getVarName() {
@@ -84,7 +103,10 @@ public class SpoonInjector {
         // getCollectionMethods(launcher,"vector");
         // Inject a new method
         // injectMethod(factory, myClass);
-        allocateInitialArrayForFunCalls();
+        CtStatementList statements = factory.Core().createStatementList();
+        createInitialVar(statements);
+        createMethodArgs(statements);
+        insertInTryBlock(statements);
         injectBenchmarkMethod(newClass);
         // Save modified source code -> this changes the current class
         // launcher.setSourceOutputDirectory("modified-src");
@@ -95,6 +117,7 @@ public class SpoonInjector {
         launcher.getModel().getRootPackage().addType(newClass);
         // System.out.println(launcher.getModel().getRootPackage());
         launcher.prettyprint();
+        // insertImport();
         // insertImport();
     }
 
@@ -113,32 +136,47 @@ public class SpoonInjector {
         // TODO for each parameter check if it is needed to start something
     }
 
-    private void allocateInitialArrayForFunCalls() {
+    private void createMethodArgs(CtStatementList statements) {
+        List<CtParameter<?>> args = method.getParameters();
+        for (CtParameter<?> arg : args) {
+            CtLocalVariable<?> var = createVar(arg.getType(), getVarName());
+            statements.addStatement(var);
+        }
+    }
+
+    private void initVar(CtElement elem) {
+        // if (!isCollection((CtLocalVariable<?>) elem)) {
+        // 
+        // }
+    }
+
+    private void insertInTryBlock(CtStatementList statements) {
+        tryBlock.getBody().insertBegin(statements);
+    }
+
+    private void createInitialVar(CtStatementList statements) {
         String initialArray = "";
         if (isMethodStatic)
-            initialArray += collec.getQualifiedName() + "()";
+            initialArray += ((collec.getQualifiedName() + "()") + ".") + method.getSimpleName();
         else // TODO i assume there are no constructors here
         {
-            CtBlock<?> tryBody = tryBlock.getBody();
             String varName = getVarName();
             CtLocalVariable<?> var = createVar(factory.Type().createReference(collec), varName);
-            CtStatementList statements = factory.Core().createStatementList();
             statements.addStatement(var);
-            CtStatement initCollection = populateCollection(var, tryBody);
+            CtStatement initCollection = populateCollection(var);
             if (initCollection != null)
                 statements.addStatement(initCollection);
 
             initialArray += (varName + ".") + method.getSimpleName();
-            tryBody.insertBegin(statements);
         }
-        for (CtParameter<?> arg : method.getParameters()) {
-            initialArray += ("(" + arg) + ")";
-        }
+        // for (CtParameter<?> arg : method.getParameters()){
+        // initialArray += "("+arg+")";
+        // }
         // return initialArray;
     }
 
-    private CtStatement populateCollection(CtLocalVariable<?> var, CtBlock<?> tryBody) {
-        if (!var.getType().isSubtypeOf(factory.Type().createReference("java.util.Collection")))
+    private CtStatement populateCollection(CtLocalVariable<?> var) {
+        if (!isCollection(var))
             return null;
 
         if (var.getType().toString().contains("List")) {
@@ -161,6 +199,10 @@ public class SpoonInjector {
 
     private void addImport(String importPath) {
         imports.add(("import " + importPath) + ";");
+    }
+
+    private boolean isCollection(CtLocalVariable<?> var) {
+        return var.getType().isSubtypeOf(factory.Type().createReference("java.util.Collection"));
     }
 
     private String callArgs() {
@@ -190,11 +232,72 @@ public class SpoonInjector {
     }
 
     private CtLocalVariable<?> createVar(CtTypeReference typeRef, String varName) {
-        CtLocalVariable variable = // var type
+        CtExpression<?> exp = createVar(typeRef);
+        CtLocalVariable<?> variable = // var type
         // Variable name
         // Initialization
-        factory.Code().createLocalVariable(typeRef, varName, factory.Code().createConstructorCall(typeRef));
+        factory.Code().createLocalVariable(typeRef, varName, exp);
         return variable;
+    }
+
+    private CtExpression<?> createVar(CtTypeReference<?> typeRef) {
+        if (typeRef.isPrimitive())
+            return factory.Code().createLiteral(createRandomLiteral(typeRef));
+
+        return factory.Code().createConstructorCall(typeRef);
+    }
+
+    private Object createRandomLiteral(CtTypeReference<?> typeRef) {
+        if (typeRef.toString().equals("int"))
+            return getRandomValueOfType(typeRef.toString());
+
+        if (typeRef.toString().equals("double"))
+            return getRandomValueOfType(typeRef.toString());
+
+        if (typeRef.toString().equals("float"))
+            return getRandomValueOfType(typeRef.toString());
+
+        if (typeRef.toString().equals("long"))
+            return getRandomValueOfType(typeRef.toString());
+
+        if (typeRef.toString().equals("boolean"))
+            return getRandomValueOfType(typeRef.toString());
+
+        if (typeRef.toString().equals("short"))
+            return getRandomValueOfType(typeRef.toString());
+
+        if (typeRef.toString().equals("integer"))
+            return getRandomValueOfType(typeRef.toString());
+
+        return getRandomValueOfType(typeRef.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T getRandomValueOfType(String type) {
+        Random rand = new Random(42);
+        switch (type.toLowerCase()) {
+            case "int" :
+                return ((T) (Integer.valueOf(rand.nextInt((max - min) + 1) + min)));
+            case "double" :
+                return ((T) (Double.valueOf(min + ((max - min) * rand.nextDouble()))));
+            case "float" :
+                return ((T) (Float.valueOf(min + ((max - min) * rand.nextFloat()))));
+            case "long" :
+                return ((T) (Long.valueOf(rand.nextLong(min, max + 1))));
+            case "boolean" :
+                return ((T) (Boolean.valueOf(rand.nextBoolean())));
+            case "short" :
+                return ((T) (Short.valueOf(((short) (rand.nextInt((max - min) + 1) + min)))));
+            case "integer" :
+                return ((T) (Integer.valueOf(rand.nextInt((max - min) + 1) + min)));
+            case "character" :
+                char minChar = 'a';
+                char maxChar = 'z';
+                char randomChar = ((char) (rand.nextInt((maxChar - minChar) + 1) + minChar));
+                return ((T) (Character.valueOf(randomChar)));
+            default :
+                throw new IllegalArgumentException("Unsupported type: " + type);
+        }
     }
 
     private String createMethodCallParameters() {
@@ -319,16 +422,10 @@ public class SpoonInjector {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 writer.write(newContent.toString());
             }
-            System.out.println("File successfully updated.");
+            // System.out.println("File successfully updated.");
             // System.out.println(newContent);
         } catch (IOException e) {
             System.err.println("Error modifying the file: " + e.getMessage());
-        }
-        try {
-            String originalContent = new String(Files.readAllBytes(Paths.get(filename)));
-            System.out.println(originalContent);
-        } catch (IOException e) {
-            System.out.println(e);
         }
     }
 }

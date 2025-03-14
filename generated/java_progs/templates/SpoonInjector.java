@@ -16,6 +16,7 @@ import spoon.Launcher;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCodeSnippetStatement;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLocalVariable;
@@ -32,6 +33,7 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtExecutableReference;
+import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.filter.TypeFilter;
 public class SpoonInjector {
@@ -108,8 +110,8 @@ public class SpoonInjector {
         CtStatementList statements = factory.Core().createStatementList();
         createInitialVar(statements);
         createMethodArgs(statements);
-        createArrayWithVarAndArgs(statements);
-        createSampleArray(statements);
+        CtLocalVariable<?> arr = createArrayWithVarAndArgs(statements);
+        createSampleArray(statements, arr);
         insertInTryBlock(statements);
         injectBenchmarkMethod(newClass);
         // Save modified source code -> this changes the current class
@@ -140,18 +142,35 @@ public class SpoonInjector {
         // TODO for each parameter check if it is needed to start something
     }
 
-    private void createSampleArray(CtStatementList statements) {
-        Object[] arr = /* numberOfFunCalls */
-        new Object[1];
-        CtNewArray<Object[]> arrayExpr = factory.Code().createLiteralArray(arr);
-        System.out.println(arrayExpr.getType());
-        CtLocalVariable<?> arr2 = factory.Code().createLocalVariable(arrayExpr.getType(), "arr", null);
+    private void createSampleArray(CtStatementList statements, CtLocalVariable<?> arrWithArgs) {
+        CtNewArray<Object> arrayExpr = factory.Core().createNewArray();
+        arrayExpr.setType(factory.Type().createArrayReference(factory.Type().objectType(), 2));
+        arrayExpr.addDimensionExpression(factory.Code().createLiteral(numberOfFunCalls));
+        arrayExpr.addDimensionExpression(((CtExpression<Integer>) (accessVarField(arrWithArgs, "length"))));
+        CtLocalVariable<?> arr2 = factory.Code().createLocalVariable(arrayExpr.getType(), "arr", arrayExpr);
         statements.addStatement(arr2);
+        // System.out.println(arrLength);
         CtFor forLoop = factory.createFor();
+        forLoop.setExpression(null);
         // statements.addStatement(forLoop);
     }
 
-    private <T> void createArrayWithVarAndArgs(CtStatementList statements) {
+    private CtFieldRead<?> accessVarField(CtLocalVariable<?> var, String field) {
+        CtTypeReference<Integer> intType = factory.Type().integerPrimitiveType();
+        CtFieldReference<Integer> lengthRef = factory.Core().createFieldReference();
+        lengthRef.setDeclaringType(var.getType());// Set the array type
+
+        lengthRef.setSimpleName(field);// choose field
+
+        lengthRef.setType(intType);// type of the field
+
+        CtFieldRead<Integer> arrLength = factory.Core().createFieldRead();
+        arrLength.setTarget(factory.Code().createVariableRead(var.getReference(), false));
+        arrLength.setVariable(lengthRef);
+        return arrLength;
+    }
+
+    private CtLocalVariable<?> createArrayWithVarAndArgs(CtStatementList statements) {
         ArrayList<Object> varStatements = new ArrayList<>();
         for (int i = 0; i < statements.getStatements().size(); i++) {
             if (statements.getStatements().get(i) instanceof CtLocalVariable) {
@@ -163,6 +182,7 @@ public class SpoonInjector {
         CtNewArray<Object[]> arrayExpr = factory.Code().createLiteralArray(vars);
         CtLocalVariable<?> arr = factory.Code().createLocalVariable(arrayExpr.getType(), "argsArr", arrayExpr);
         statements.addStatement(arr);
+        return arr;
     }
 
     private void createMethodArgs(CtStatementList statements) {

@@ -17,7 +17,10 @@ public class Template_addAll_int_java_util_Collection_ {
             ArrayList var0 = new ArrayList();
             ArrayListAux.insertRandomNumbers(var0, 10, "Integer");
             int var1 = 80;
-            Collection<?> var2 = new Collection<?>();
+            ArrayList var2 = new ArrayList();
+            ArrayListAux.insertRandomNumbers(var2, 10, "Integer");
+            Object[] argsArr = new Object[]{ var0, var1, var2 };
+            Object[] arr;
             // if fun to test is Static.fun() then just create multiple inputs
             // if fun is var.fun() then start by creating multiple vars and then multiple inputs
             // have a fun to get multiple lists or vars

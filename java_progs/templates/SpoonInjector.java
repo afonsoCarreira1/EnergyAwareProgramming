@@ -5,11 +5,15 @@ import spoon.Launcher;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCodeSnippetStatement;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTry;
+import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -20,6 +24,7 @@ import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.beans.Introspector;
@@ -49,7 +54,7 @@ public class SpoonInjector {
     CtMethod<?> mainMethod;
     CtTry tryBlock;
     int varIndex = 0;
-    ArrayList<String> imports = new ArrayList<>();
+    HashSet<String> imports = new HashSet<>();
     int min = 0 , max;
 
     public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size) {
@@ -91,6 +96,8 @@ public class SpoonInjector {
         CtStatementList statements = factory.Core().createStatementList();
         createInitialVar(statements);
         createMethodArgs(statements);
+        createArrayWithVarAndArgs(statements);
+        createSampleArray(statements);
         insertInTryBlock(statements);
         injectBenchmarkMethod(newClass);
 
@@ -127,11 +134,36 @@ public class SpoonInjector {
         
     }
 
+    private void createSampleArray(CtStatementList statements) {
+        Object[] arr = new Object[/*numberOfFunCalls*/1];
+        CtNewArray<Object[]> arrayExpr = factory.Code().createLiteralArray(arr);
+        //System.out.println(arrayExpr.getType());
+        CtLocalVariable<?> arr2 = factory.Code().createLocalVariable(arrayExpr.getType(), "arr",arrayExpr));
+        statements.addStatement(arr2);
+        CtFor forLoop = factory.createFor();
+        //statements.addStatement(forLoop);
+    }
+
+    private <T> void createArrayWithVarAndArgs(CtStatementList statements) {
+        ArrayList<Object> varStatements = new ArrayList<>();
+        for (int i = 0; i < statements.getStatements().size(); i++) {
+            if (statements.getStatements().get(i) instanceof CtLocalVariable) {
+                CtLocalVariable<?> var = (CtLocalVariable<?>) statements.getStatements().get(i);
+                varStatements.add(factory.Code().createVariableRead(var.getReference(), false));
+            }
+        }
+        Object[] vars = varStatements.toArray();
+        CtNewArray<Object[]> arrayExpr = factory.Code().createLiteralArray(vars);
+        CtLocalVariable<?> arr = factory.Code().createLocalVariable(arrayExpr.getType(), "argsArr", arrayExpr);
+        statements.addStatement(arr);
+    }
+
     private void createMethodArgs(CtStatementList statements) {
         List<CtParameter<?>> args = method.getParameters();
         for (CtParameter<?> arg : args) {
             CtLocalVariable<?> var = createVar(arg.getType(), getVarName());
             statements.addStatement(var);
+            if(isCollection(var)) statements.addStatement(populateCollection(var));
         }
     }
 
@@ -212,8 +244,9 @@ public class SpoonInjector {
 
     private CtLocalVariable<?> createVar(CtTypeReference typeRef, String varName) {
         CtExpression<?> exp = createVar(typeRef);
+        CtTypeReference ref = typeRef.toString().contains("Collection") ?  collec.getReference() : typeRef;
         CtLocalVariable<?> variable = factory.Code().createLocalVariable(
-            typeRef,           // var type
+            ref,           // var type
             varName,          // Variable name
             exp // Initialization
         );
@@ -222,6 +255,7 @@ public class SpoonInjector {
 
     private CtExpression<?> createVar(CtTypeReference<?> typeRef) {
         if (typeRef.isPrimitive()) return factory.Code().createLiteral(createRandomLiteral(typeRef));
+        if (typeRef.toString().contains("Collection")) return factory.Code().createConstructorCall(collec.getReference());//System.out.println(collec.getReference());
         return factory.Code().createConstructorCall(typeRef);
     }
 

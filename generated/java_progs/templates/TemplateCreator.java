@@ -21,21 +21,21 @@ public class TemplateCreator {
         ArrayList<CtMethod<?>> commonMethods = getCollectionMethods("list");
         List<Integer> sizes = Arrays.asList(150);// createInputRange(1, 1.5, 0);
 
-        int[] funCalls = new int[]{ 20000, 50000, 75000, 100000, 150000 };
-        for (CtType<?> collec : getCollections("list")) {
-            for (CtMethod<?> method : commonMethods) {
-                for (int size : sizes) {
-                    if (method.getSimpleName().contains("addAll") && collec.getSimpleName().equals("ArrayList")) {
-                        // getGoodInputs(method,collec);
-                        Launcher launcher = initSpoon();
-                        SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method, collec, "Integer", size);
-                        spi.injectInTemplate();
-                        spi.insertImport();
-                        // SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);
+        int[] funCalls = new int[]{ 20000 };// { 20_000, 50_000, 75_000, 100_000, 150_000 };
+
+        for (int funCall : funCalls) {
+            for (CtType<?> collec : getCollections("list")) {
+                for (CtMethod<?> method : commonMethods) {
+                    for (int size : sizes) {
+                        if (method.getSimpleName().contains("addAll") && collec.getSimpleName().equals("ArrayList")) {
+                            // getGoodInputs(method,collec);
+                            Launcher launcher = initSpoon();
+                            SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), funCall, method, collec, "Integer", size);
+                            spi.injectInTemplate();
+                            spi.insertImport();
+                            // SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);
+                        }
                     }
-                }
-                for (int funCall : funCalls) {
-                    // SpoonInjector.injectInTemplate(launcher, factory, funCall, method);
                 }
             }
         }

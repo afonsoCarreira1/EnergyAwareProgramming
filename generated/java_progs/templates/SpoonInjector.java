@@ -13,6 +13,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
 import spoon.Launcher;
+import spoon.reflect.code.BinaryOperatorKind;
+import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCodeSnippetStatement;
 import spoon.reflect.code.CtExpression;
@@ -24,6 +26,7 @@ import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTry;
+import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -151,8 +154,35 @@ public class SpoonInjector {
         statements.addStatement(arr2);
         // System.out.println(arrLength);
         CtFor forLoop = factory.createFor();
-        forLoop.setExpression(null);
-        // statements.addStatement(forLoop);
+        List<CtStatement> initStatements = new ArrayList<>();
+        CtLocalVariable<?> varI = createVar(factory.Type().integerPrimitiveType(), "i", true);
+        initStatements.add(varI);
+        CtVariableRead<?> var1Read = ((CtVariableRead<?>) (factory.Code().createVariableRead(varI.getReference(), false)));
+        CtExpression<Boolean> condition = createBinOp(var1Read, accessVarField(arrWithArgs, "length"), BinaryOperatorKind.LT);
+        // Create the binary operator (var1 < var2)
+        addImport("java.util.Arrays;");
+        forLoop.setForInit(initStatements);
+        forLoop.setExpression(condition);
+        forLoop.addForUpdate(factory.createCodeSnippetStatement("i++"));
+        String line = ((((("new " + collec.getReference()) + "<>((") + collec.getReference()) + "<") + typeToUse) + ">) argsArr[j]);\n";
+        String statement = ((((((("arr[i] = new Object[argsArr.length];\n"// 
+         + "       for (int j = 0; j < argsArr.length; j++) {\n")// 
+         + "           if (argsArr[j] instanceof Collection) {\n")// 
+         + "               arr[i][j] =") + line)// 
+         + "           } else {\n")// 
+         + "               arr[i][j] = argsArr[j];\n")// 
+         + "           }\n")// 
+         + "       }";
+        System.out.println(line);
+        // "arr[i] = Arrays.copyOf(argsArr, argsArr.length)"
+        forLoop.setBody(factory.createCodeSnippetStatement(statement));
+        statements.addStatement(forLoop);
+    }
+
+    private CtBinaryOperator<Boolean> createBinOp(CtExpression<?> var1, CtExpression<?> var2, BinaryOperatorKind op) {
+        return // Left operand (var1)
+        // Right operand (var2)
+        factory.Code().createBinaryOperator(var1, var2, op);
     }
 
     private CtFieldRead<?> accessVarField(CtLocalVariable<?> var, String field) {
@@ -188,7 +218,7 @@ public class SpoonInjector {
     private void createMethodArgs(CtStatementList statements) {
         List<CtParameter<?>> args = method.getParameters();
         for (CtParameter<?> arg : args) {
-            CtLocalVariable<?> var = createVar(arg.getType(), getVarName());
+            CtLocalVariable<?> var = createVar(arg.getType(), getVarName(), false);
             statements.addStatement(var);
             if (isCollection(var))
                 statements.addStatement(populateCollection(var));
@@ -213,7 +243,7 @@ public class SpoonInjector {
         else // TODO i assume there are no constructors here
         {
             String varName = getVarName();
-            CtLocalVariable<?> var = createVar(factory.Type().createReference(collec), varName);
+            CtLocalVariable<?> var = createVar(factory.Type().createReference(collec), varName, false);
             statements.addStatement(var);
             CtStatement initCollection = populateCollection(var);
             if (initCollection != null)
@@ -283,8 +313,8 @@ public class SpoonInjector {
         return body;
     }
 
-    private CtLocalVariable<?> createVar(CtTypeReference typeRef, String varName) {
-        CtExpression<?> exp = createVar(typeRef);
+    private CtLocalVariable<?> createVar(CtTypeReference typeRef, String varName, boolean getDefaultValue) {
+        CtExpression<?> exp = createVar(typeRef, getDefaultValue);
         CtTypeReference ref = (typeRef.toString().contains("Collection")) ? collec.getReference() : typeRef;
         CtLocalVariable<?> variable = // var type
         // Variable name
@@ -293,9 +323,9 @@ public class SpoonInjector {
         return variable;
     }
 
-    private CtExpression<?> createVar(CtTypeReference<?> typeRef) {
+    private CtExpression<?> createVar(CtTypeReference<?> typeRef, boolean getDefaultValue) {
         if (typeRef.isPrimitive())
-            return factory.Code().createLiteral(createRandomLiteral(typeRef));
+            return factory.Code().createLiteral(createRandomLiteral(typeRef, getDefaultValue));
 
         if (typeRef.toString().contains("Collection"))
             return factory.Code().createConstructorCall(collec.getReference());
@@ -304,28 +334,17 @@ public class SpoonInjector {
         return factory.Code().createConstructorCall(typeRef);
     }
 
-    private Object createRandomLiteral(CtTypeReference<?> typeRef) {
-        if (typeRef.toString().equals("int"))
-            return getRandomValueOfType(typeRef.toString());
+    private Object createRandomLiteral(CtTypeReference<?> typeRef, boolean getDefaultValue) {
+        if (getDefaultValue)
+            return getDefaultValues(typeRef.toString());
 
-        if (typeRef.toString().equals("double"))
-            return getRandomValueOfType(typeRef.toString());
-
-        if (typeRef.toString().equals("float"))
-            return getRandomValueOfType(typeRef.toString());
-
-        if (typeRef.toString().equals("long"))
-            return getRandomValueOfType(typeRef.toString());
-
-        if (typeRef.toString().equals("boolean"))
-            return getRandomValueOfType(typeRef.toString());
-
-        if (typeRef.toString().equals("short"))
-            return getRandomValueOfType(typeRef.toString());
-
-        if (typeRef.toString().equals("integer"))
-            return getRandomValueOfType(typeRef.toString());
-
+        // if (typeRef.toString().equals("int")) return getRandomValueOfType(typeRef.toString());
+        // if (typeRef.toString().equals("double")) return getRandomValueOfType(typeRef.toString());
+        // if (typeRef.toString().equals("float")) return getRandomValueOfType(typeRef.toString());
+        // if (typeRef.toString().equals("long")) return getRandomValueOfType(typeRef.toString());
+        // if (typeRef.toString().equals("boolean")) return getRandomValueOfType(typeRef.toString());
+        // if (typeRef.toString().equals("short")) return getRandomValueOfType(typeRef.toString());
+        // if (typeRef.toString().equals("integer")) return getRandomValueOfType(typeRef.toString());
         return getRandomValueOfType(typeRef.toString());
     }
 
@@ -352,6 +371,30 @@ public class SpoonInjector {
                 char maxChar = 'z';
                 char randomChar = ((char) (rand.nextInt((maxChar - minChar) + 1) + minChar));
                 return ((T) (Character.valueOf(randomChar)));
+            default :
+                throw new IllegalArgumentException("Unsupported type: " + type);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getDefaultValues(String type) {
+        switch (type.toLowerCase()) {
+            case "int" :
+                return ((T) (Integer.valueOf(0)));
+            case "double" :
+                return ((T) (Double.valueOf(0.0)));
+            case "float" :
+                return ((T) (Float.valueOf(0.0F)));
+            case "long" :
+                return ((T) (Long.valueOf(0)));
+            case "boolean" :
+                return ((T) (Boolean.valueOf(false)));
+            case "short" :
+                return ((T) (Short.valueOf("0")));
+            case "integer" :
+                return ((T) (Integer.valueOf(0)));
+            case "character" :
+                return ((T) (Character.valueOf('a')));
             default :
                 throw new IllegalArgumentException("Unsupported type: " + type);
         }

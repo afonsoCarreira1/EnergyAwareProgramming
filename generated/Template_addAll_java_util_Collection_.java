@@ -1,4 +1,5 @@
 package generated;
+import java.util.Arrays;;
 import java_progs.aux.ArrayListAux;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +21,16 @@ public class Template_addAll_java_util_Collection_ {
             ArrayListAux.insertRandomNumbers(var1, 10, "Integer");
             java.lang.Object[] argsArr = new java.lang.Object[]{ var0, var1 };
             Object[][] arr = new Object[20000][argsArr.length];
+            for (int i = 0; i < argsArr.length; i++) {
+                arr[i] = new Object[argsArr.length];
+                       for (int j = 0; j < argsArr.length; j++) {
+                           if (argsArr[j] instanceof Collection) {
+                               arr[i][j] =new ArrayList<>((ArrayList<Integer>) argsArr[j]);
+                           } else {
+                               arr[i][j] = argsArr[j];
+                           }
+                       };
+            }
             // if fun to test is Static.fun() then just create multiple inputs
             // if fun is var.fun() then start by creating multiple vars and then multiple inputs
             // have a fun to get multiple lists or vars

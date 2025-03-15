@@ -14,13 +14,13 @@ public class Template_addAll_java_util_Collection_ {
     // add @SuppressWarnings("unchecked")
     public static void main(String[] args) throws IOException, InterruptedException {
         try {
-            ArrayList var0 = new ArrayList();
-            ArrayListAux.insertRandomNumbers(var0, 10, "Integer");
-            ArrayList var1 = new ArrayList();
-            ArrayListAux.insertRandomNumbers(var1, 10, "Integer");
+            ArrayList<Short> var0 = new ArrayList<Short>();
+            ArrayListAux.insertRandomNumbers(var0, 10, "Short");
+            ArrayList<Short> var1 = new ArrayList<Short>();
+            ArrayListAux.insertRandomNumbers(var1, 10, "Short");
             BenchmarkArgs[] arr = new BenchmarkArgs[20000];
             for (int i = 0;i < 2;i++) {
-               arr[i] = new BenchmarkArgs(var0, var1, var2);
+               arr[i] = new BenchmarkArgs(var0, var1);
             };
             // if fun to test is Static.fun() then just create multiple inputs
             // if fun is var.fun() then start by creating multiple vars and then multiple inputs
@@ -53,11 +53,11 @@ public class Template_addAll_java_util_Collection_ {
     }
 
     static class BenchmarkArgs {
-        public ArrayList var0 = new ArrayList();
+        public ArrayList<Short> var0 = new ArrayList<Short>();
 
-        public ArrayList var1 = new ArrayList();
+        public ArrayList<Short> var1 = new ArrayList<Short>();
 
-        BenchmarkArgs(ArrayList var0, ArrayList var1) {
+        BenchmarkArgs(ArrayList<Short> var0, ArrayList<Short> var1) {
             this.var0 = (ArrayList) var0.clone();
             this.var1 = (ArrayList) var1.clone();
         }

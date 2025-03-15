@@ -182,9 +182,15 @@ public class SpoonInjector {
     }
     
     private void createSampleArray(CtStatementList statements){
+        StringBuilder args = new StringBuilder();
+        for (int i = 0; i < varIndex; i++) {
+            args.append("var"+i);
+            if (i != varIndex-1) args.append(", ");
+        }
         String statement = "for (int i = 0;i < "+varIndex+";i++) {\n" + //
-                            "   arr[i] = new BenchmarkArgs(var0, var1, var2);\n" + //
+                            "   arr[i] = new BenchmarkArgs("+args+");\n" + //
                             "}";
+
         statements.addStatement(factory.Code().createCodeSnippetStatement(statement));
     }
 
@@ -350,8 +356,10 @@ public class SpoonInjector {
     }
 
     private CtLocalVariable<?> createVar(CtTypeReference typeRef, String varName, boolean getDefaultValue) {
-        CtExpression<?> exp = createVar(typeRef,getDefaultValue);
-        CtTypeReference ref = typeRef.toString().contains("Collection") ?  collec.getReference() : typeRef;
+        CtTypeReference ref = typeRef.toString().contains("Collection") ? factory.Type().createReference(collec) : typeRef;
+        CtTypeReference<?> genericType = factory.Type().createReference(typeToUse);
+        ref.addActualTypeArgument(genericType);
+        CtExpression<?> exp = createVar(ref,getDefaultValue);
         CtLocalVariable<?> variable = factory.Code().createLocalVariable(
             ref,           // var type
             varName,          // Variable name
@@ -362,7 +370,7 @@ public class SpoonInjector {
 
     private CtExpression<?> createVar(CtTypeReference<?> typeRef, boolean getDefaultValue) {
         if (typeRef.isPrimitive()) return factory.Code().createLiteral(createRandomLiteral(typeRef,getDefaultValue));
-        if (typeRef.toString().contains("Collection")) return factory.Code().createConstructorCall(collec.getReference());//System.out.println(collec.getReference());
+        if (typeRef.toString().contains("Collection")) return factory.Code().createConstructorCall(typeRef);//System.out.println(collec.getReference());
         return factory.Code().createConstructorCall(typeRef);
     }
 

@@ -30,7 +30,7 @@ public class TemplateCreator {
                         if (method.getSimpleName().contains("addAll") && collec.getSimpleName().equals("ArrayList")) {
                             // getGoodInputs(method,collec);
                             Launcher launcher = initSpoon();
-                            SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), funCall, method, collec, "Integer", size);
+                            SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), funCall, method, collec, "Short", size);
                             spi.injectInTemplate();
                             spi.insertImport();
                             // SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);

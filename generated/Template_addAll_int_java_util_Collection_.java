@@ -12,17 +12,26 @@ public class Template_addAll_int_java_util_Collection_ {
     // create fun to benchmark
     // create computation fun
     // add @SuppressWarnings("unchecked")
+
+    private void computation(BenchmarkArgs args[], int iter) {
+        int i = 0;
+        while (!TemplatesAux.stop && i < iter) {
+            template_addAll_int_java_util_Collection_(args[i].var0, args[i].var1, args[i].var2);
+        }
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
         try {
-            ArrayList var0 = new ArrayList();
+            ArrayList<Integer> var0 = new ArrayList<Integer>();
             ArrayListAux.insertRandomNumbers(var0, 10, "Integer");
             int var1 = 80;
-            ArrayList var2 = new ArrayList();
+            ArrayList<Integer> var2 = new ArrayList<Integer>();
             ArrayListAux.insertRandomNumbers(var2, 10, "Integer");
             BenchmarkArgs[] arr = new BenchmarkArgs[20000];
             for (int i = 0;i < 3;i++) {
                arr[i] = new BenchmarkArgs(var0, var1, var2);
             };
+            template_addAll_int_java_util_Collection_(arr[0].var0, var1, var2);
             // if fun to test is Static.fun() then just create multiple inputs
             // if fun is var.fun() then start by creating multiple vars and then multiple inputs
             // have a fun to get multiple lists or vars
@@ -51,16 +60,17 @@ public class Template_addAll_int_java_util_Collection_ {
         } finally {
             TemplatesAux.sendStopSignalToOrchestrator(args[0]);
         }
+
     }
 
     static class BenchmarkArgs {
-        public ArrayList var0 = new ArrayList();
+        public ArrayList<Integer> var0 = new ArrayList<Integer>();
 
         public int var1 = 80;
 
-        public ArrayList var2 = new ArrayList();
+        public ArrayList<Integer> var2 = new ArrayList<Integer>();
 
-        BenchmarkArgs(ArrayList var0, int var1, ArrayList var2) {
+        BenchmarkArgs(ArrayList<Integer> var0, int var1, ArrayList<Integer> var2) {
             this.var0 = (ArrayList) var0.clone();
             this.var1 = var1;
             this.var2 = (ArrayList) var2.clone();

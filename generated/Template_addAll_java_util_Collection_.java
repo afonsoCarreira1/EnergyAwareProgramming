@@ -14,10 +14,10 @@ public class Template_addAll_java_util_Collection_ {
     // add @SuppressWarnings("unchecked")
     public static void main(String[] args) throws IOException, InterruptedException {
         try {
-            ArrayList<Short> var0 = new ArrayList<Short>();
-            ArrayListAux.insertRandomNumbers(var0, 10, "Short");
-            ArrayList<Short> var1 = new ArrayList<Short>();
-            ArrayListAux.insertRandomNumbers(var1, 10, "Short");
+            ArrayList<Integer> var0 = new ArrayList<Integer>();
+            ArrayListAux.insertRandomNumbers(var0, 10, "Integer");
+            ArrayList<Integer> var1 = new ArrayList<Integer>();
+            ArrayListAux.insertRandomNumbers(var1, 10, "Integer");
             BenchmarkArgs[] arr = new BenchmarkArgs[20000];
             for (int i = 0;i < 2;i++) {
                arr[i] = new BenchmarkArgs(var0, var1);
@@ -53,11 +53,11 @@ public class Template_addAll_java_util_Collection_ {
     }
 
     static class BenchmarkArgs {
-        public ArrayList<Short> var0 = new ArrayList<Short>();
+        public ArrayList<Integer> var0 = new ArrayList<Integer>();
 
-        public ArrayList<Short> var1 = new ArrayList<Short>();
+        public ArrayList<Integer> var1 = new ArrayList<Integer>();
 
-        BenchmarkArgs(ArrayList<Short> var0, ArrayList<Short> var1) {
+        BenchmarkArgs(ArrayList<Integer> var0, ArrayList<Integer> var1) {
             this.var0 = (ArrayList) var0.clone();
             this.var1 = (ArrayList) var1.clone();
         }
@@ -65,5 +65,13 @@ public class Template_addAll_java_util_Collection_ {
 
     private static void template_addAll_java_util_Collection_(ArrayList var, Collection<?> arg0) {
         var.addAll(arg0);
+    }
+
+    private static void computation(BenchmarkArgs[] args, int iter) {
+        int i = 0;
+        while (!TemplatesAux.stop && i < iter) {
+              template_addAll_java_util_Collection_(args[i].var0, args[i].var1);
+               i++;
+        };
     }
 }

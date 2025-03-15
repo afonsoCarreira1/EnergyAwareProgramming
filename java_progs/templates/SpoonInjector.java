@@ -108,6 +108,7 @@ public class SpoonInjector {
         createSampleArray(statements);
         insertInTryBlock(statements);
         injectBenchmarkMethod(newClass);
+        injectComputationMethod();
 
         // Save modified source code -> this changes the current class
         //launcher.setSourceOutputDirectory("modified-src");
@@ -553,6 +554,60 @@ public class SpoonInjector {
             
             //System.out.println(") -> " + returnType.getSimpleName());
         }
+    }
+
+    private void injectComputationMethod() {
+        // Define the return type (void in this case)
+        CtTypeReference<Void> returnType = factory.Type().voidPrimitiveType();
+
+        Set<ModifierKind> modifiers = new HashSet<>();
+        modifiers.add(ModifierKind.PRIVATE);
+        modifiers.add(ModifierKind.STATIC);
+
+        CtBlock<Void> methodBody = factory.Core().createBlock();
+
+        StringBuilder args = new StringBuilder();
+        for (int i = 0; i < varIndex; i++) {
+            args.append("args[i].var"+i);
+            if (i != varIndex-1) args.append(", ");
+        }
+
+        String body ="int i = 0;\n" + //
+        "while (!TemplatesAux.stop && i < iter) {\n      " + //
+            Introspector.decapitalize(newClassName)+"("+ args +");\n" + //
+        "       i++;\n" + //
+        "}";
+
+        CtCodeSnippetStatement snippet = factory.Code().createCodeSnippetStatement(body);
+        methodBody.addStatement(snippet);
+
+        List<CtParameter<?>> params = new ArrayList<>();
+        params.add(createParameter("BenchmarkArgs","args",true));
+        params.add(createParameter("int","iter",false));
+        
+        // Create the method
+        CtMethod<Void> newMethod = factory.Method().create(
+                newClass,            // Target class
+                modifiers,          // Modifiers
+                returnType,         // Return type
+                "computation",         // Method name
+                params,  // Parameters 
+                Collections.emptySet(),   // Exceptions thrown
+                methodBody          // Method body
+        );
+
+        // Add method to class
+        newClass.addMethod(newMethod);
+    }
+
+    public CtParameter<?> createParameter(String paramType, String paramName, boolean isTypeArray) {
+        CtTypeReference<?> type = factory.Type().createReference(paramType);
+        CtArrayTypeReference<?> typeArr = factory.Type().createArrayReference(type);
+        CtParameter<?> param = factory.Core().createParameter();
+        param.setSimpleName(paramName);
+        if (isTypeArray) param.setType(typeArr);
+        else param.setType(type);
+        return param;
     }
 
     public void insertImport() {

@@ -12,14 +12,6 @@ public class Template_addAll_int_java_util_Collection_ {
     // create fun to benchmark
     // create computation fun
     // add @SuppressWarnings("unchecked")
-
-    private void computation(BenchmarkArgs args[], int iter) {
-        int i = 0;
-        while (!TemplatesAux.stop && i < iter) {
-            template_addAll_int_java_util_Collection_(args[i].var0, args[i].var1, args[i].var2);
-        }
-    }
-
     public static void main(String[] args) throws IOException, InterruptedException {
         try {
             ArrayList<Integer> var0 = new ArrayList<Integer>();
@@ -31,7 +23,6 @@ public class Template_addAll_int_java_util_Collection_ {
             for (int i = 0;i < 3;i++) {
                arr[i] = new BenchmarkArgs(var0, var1, var2);
             };
-            template_addAll_int_java_util_Collection_(arr[0].var0, var1, var2);
             // if fun to test is Static.fun() then just create multiple inputs
             // if fun is var.fun() then start by creating multiple vars and then multiple inputs
             // have a fun to get multiple lists or vars
@@ -60,7 +51,6 @@ public class Template_addAll_int_java_util_Collection_ {
         } finally {
             TemplatesAux.sendStopSignalToOrchestrator(args[0]);
         }
-
     }
 
     static class BenchmarkArgs {
@@ -79,5 +69,13 @@ public class Template_addAll_int_java_util_Collection_ {
 
     private static void template_addAll_int_java_util_Collection_(ArrayList var, int arg0, Collection<?> arg1) {
         var.addAll(arg0, arg1);
+    }
+
+    private static void computation(BenchmarkArgs[] args, int iter) {
+        int i = 0;
+        while (!TemplatesAux.stop && i < iter) {
+              template_addAll_int_java_util_Collection_(args[i].var0, args[i].var1, args[i].var2);
+               i++;
+        };
     }
 }

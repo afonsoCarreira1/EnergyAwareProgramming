@@ -30,6 +30,7 @@ import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
@@ -113,8 +114,9 @@ public class SpoonInjector {
         CtStatementList statements = factory.Core().createStatementList();
         createInitialVar(statements);
         createMethodArgs(statements);
-        CtLocalVariable<?> arr = createArrayWithVarAndArgs(statements);
-        createSampleArray(statements, arr);
+        createClassThatHoldsArgs(statements);
+        createArrayWithVarAndArgs(statements);
+        createSampleArray(statements);
         insertInTryBlock(statements);
         injectBenchmarkMethod(newClass);
         // Save modified source code -> this changes the current class
@@ -145,7 +147,60 @@ public class SpoonInjector {
         // TODO for each parameter check if it is needed to start something
     }
 
-    private void createSampleArray(CtStatementList statements, CtLocalVariable<?> arrWithArgs) {
+    private void createClassThatHoldsArgs(CtStatementList statements) {
+        String innerClassName = "BenchmarkArgs";
+        ArrayList<CtLocalVariable<?>> vars = new ArrayList<>();
+        for (int i = 0; i < statements.getStatements().size(); i++) {
+            if (statements.getStatements().get(i) instanceof CtLocalVariable) {
+                CtLocalVariable<?> var = ((CtLocalVariable<?>) (statements.getStatements().get(i)));
+                vars.add(var);
+            }
+        }
+        CtClass<?> innerClass = factory.Class().create(innerClassName);
+        CtConstructor constructor = factory.createConstructor();
+        constructor.setSimpleName(innerClassName);
+        ArrayList<CtParameter<?>> params = new ArrayList<>();
+        CtBlock<?> bodyStatements = factory.createBlock();
+        for (CtLocalVariable<?> var : vars) {
+            innerClass.addField(createBenchmarkClassFields(var));
+            params.add(factory.createParameter(constructor, var.getType(), var.getSimpleName()));
+            if (isPrimitive(var.getType().toString()))
+                bodyStatements.addStatement(factory.Code().createCodeSnippetStatement((("this." + var.getSimpleName()) + " = ") + var.getSimpleName()));
+            else
+                bodyStatements.addStatement(factory.Code().createCodeSnippetStatement(((((("this." + var.getSimpleName()) + " = (") + collec.getSimpleName()) + ") ") + var.getSimpleName()) + ".clone()"));
+
+        }
+        constructor.setParameters(params);
+        constructor.setBody(bodyStatements);
+        innerClass.addConstructor(constructor);
+        innerClass.addModifier(ModifierKind.STATIC);
+        newClass.addNestedType(innerClass);
+    }
+
+    private boolean isPrimitive(String type) {
+        if ((((((((type.equals("int") || type.equals("boolean")) || type.equals("char")) || type.equals("byte")) || type.equals("short")) || type.equals("float")) || type.equals("double")) || type.equals("long")) || type.equals("void"))
+            return true;
+
+        if (((((((type.equals("Integer") || type.equals("Boolean")) || type.equals("Character")) || type.equals("Byte")) || type.equals("Short")) || type.equals("Float")) || type.equals("Double")) || type.equals("Long"))
+            return true;
+
+        return false;
+    }
+
+    private CtField<?> createBenchmarkClassFields(CtLocalVariable var) {
+        CtField<?> field = factory.createCtField(var.getSimpleName(), var.getType(), var.getDefaultExpression().toString());
+        field.addModifier(ModifierKind.PUBLIC);
+        return field;
+    }
+
+    private void createSampleArray(CtStatementList statements) {
+        String statement = ((("for (int i = 0;i < " + varIndex) + ";i++) {\n")// 
+         + "   arr[i] = new BenchmarkArgs(var0, var1, var2);\n")// 
+         + "}";
+        statements.addStatement(factory.Code().createCodeSnippetStatement(statement));
+    }
+
+    private void createSampleArray2(CtStatementList statements, CtLocalVariable<?> arrWithArgs) {
         CtNewArray<Object> arrayExpr = factory.Core().createNewArray();
         arrayExpr.setType(factory.Type().createArrayReference(factory.Type().objectType(), 2));
         arrayExpr.addDimensionExpression(factory.Code().createLiteral(numberOfFunCalls));
@@ -160,11 +215,11 @@ public class SpoonInjector {
         CtVariableRead<?> var1Read = ((CtVariableRead<?>) (factory.Code().createVariableRead(varI.getReference(), false)));
         CtExpression<Boolean> condition = createBinOp(var1Read, accessVarField(arrWithArgs, "length"), BinaryOperatorKind.LT);
         // Create the binary operator (var1 < var2)
-        addImport("java.util.Arrays;");
+        addImport("java.util.Arrays");
         forLoop.setForInit(initStatements);
         forLoop.setExpression(condition);
         forLoop.addForUpdate(factory.createCodeSnippetStatement("i++"));
-        String line = ((((("new " + collec.getReference()) + "<>((") + collec.getReference()) + "<") + typeToUse) + ">) argsArr[j]);\n";
+        String line = (((((" new " + collec.getReference()) + "<>((") + collec.getReference()) + "<") + typeToUse) + ">) argsArr[j]);\n";
         String statement = ((((((("arr[i] = new Object[argsArr.length];\n"// 
          + "       for (int j = 0; j < argsArr.length; j++) {\n")// 
          + "           if (argsArr[j] instanceof Collection) {\n")// 
@@ -173,7 +228,6 @@ public class SpoonInjector {
          + "               arr[i][j] = argsArr[j];\n")// 
          + "           }\n")// 
          + "       }";
-        System.out.println(line);
         // "arr[i] = Arrays.copyOf(argsArr, argsArr.length)"
         forLoop.setBody(factory.createCodeSnippetStatement(statement));
         statements.addStatement(forLoop);
@@ -200,7 +254,12 @@ public class SpoonInjector {
         return arrLength;
     }
 
-    private CtLocalVariable<?> createArrayWithVarAndArgs(CtStatementList statements) {
+    private void createArrayWithVarAndArgs(CtStatementList statements) {
+        String statement = ("BenchmarkArgs[] arr = new BenchmarkArgs[" + numberOfFunCalls) + "]";
+        statements.addStatement(factory.createCodeSnippetStatement(statement));
+    }
+
+    private CtLocalVariable<?> createArrayWithVarAndArgs2(CtStatementList statements) {
         ArrayList<Object> varStatements = new ArrayList<>();
         for (int i = 0; i < statements.getStatements().size(); i++) {
             if (statements.getStatements().get(i) instanceof CtLocalVariable) {

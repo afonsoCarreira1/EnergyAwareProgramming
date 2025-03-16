@@ -30,6 +30,7 @@ public class Template_addAll_java_util_Collection_ {
             int iter = 0;
             /* 1s */
             while ((end - begin) < 1000000000) {
+                template_addAll_java_util_Collection_(var0, var1);
                 // add the && iter < loopSize
                 // call fun to benchmark
                 end = System.nanoTime();

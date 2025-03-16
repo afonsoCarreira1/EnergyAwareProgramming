@@ -18,6 +18,7 @@ import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTry;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
+import spoon.reflect.code.CtWhile;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -99,33 +100,26 @@ public class SpoonInjector {
     }
 
     public void injectInTemplate() {
-        //getCollectionMethods(launcher,"vector");
         
         // Inject a new method
-        //injectMethod(factory, myClass);
         createInitialVar();
         createMethodArgs();
         createClassThatHoldsArgs();
         createArrayWithVarAndArgs();
         createSampleArray();
+        callBenchmarkMethod();
+
+        //inject methods
         injectBenchmarkMethod();
         injectComputationMethod();
         injectPopulateArrayMethod();
         insertInTryBlock();
 
-        // Save modified source code -> this changes the current class
-        //launcher.setSourceOutputDirectory("modified-src");
-        //launcher.prettyprint();
 
         newClass.setSimpleName(newClassName);
-        launcher.getFactory().Class().getAll().add(newClass); // Register the new class
+        launcher.getFactory().Class().getAll().add(newClass);
         launcher.getModel().getRootPackage().addType(newClass);
-        //System.out.println(launcher.getModel().getRootPackage());
-        
-        
         launcher.prettyprint();
-        //insertImport();
-        //insertImport();
     }
 
     private CtConstructor<?> getConstructors() {
@@ -144,6 +138,17 @@ public class SpoonInjector {
         return shortestConstructor;
         //TODO for each parameter check if it is needed to start something
         
+    }
+
+    private void callBenchmarkMethod() {
+        String vars = getAllVarsAsString();
+        CtBlock<?> tryBlockBody = tryBlock.getBody();
+        for (CtStatement st : tryBlockBody){
+            if (st instanceof CtWhile) {
+                String methodCall = Introspector.decapitalize(newClassName)+"("+vars+")";
+                ((CtWhile) st).getBody().insertBefore(factory.Code().createCodeSnippetStatement(methodCall));
+            }
+        }
     }
 
     private void createClassThatHoldsArgs() {
@@ -191,7 +196,7 @@ public class SpoonInjector {
         String arr = "arr";
         if (args.length() != 0) arr+=", ";
         String statement ="populateArray("+arr+args+")";
-        statements.addStatement(factory.Code().createCodeSnippetStatement(s));
+        statements.addStatement(factory.Code().createCodeSnippetStatement(statement));
     }
 
     private void createSampleArray2(CtLocalVariable<?> arrWithArgs) {

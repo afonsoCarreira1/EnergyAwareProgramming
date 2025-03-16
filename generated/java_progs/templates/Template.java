@@ -27,8 +27,6 @@ public class Template {
             } 
             // clear and restart the vars for real measurement
             // send start signal for measurement
-            TemplatesAux.sendStartSignalToOrchestrator(args[0], iter);
-            TemplatesAux.launchTimerThread();
             // call computation fun
         } catch (OutOfMemoryError e) {
             // catch errors

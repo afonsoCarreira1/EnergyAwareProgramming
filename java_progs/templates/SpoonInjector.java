@@ -5,7 +5,9 @@ import spoon.Launcher;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtCatch;
 import spoon.reflect.code.CtCodeSnippetStatement;
+import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtFor;
@@ -106,13 +108,14 @@ public class SpoonInjector {
         createMethodArgs();
         createClassThatHoldsArgs();
         createArrayWithVarAndArgs();
-        createSampleArray();
-        callBenchmarkMethod();
+        statements.addStatement(callPopulateMethod());
+        callMethods();
 
         //inject methods
         injectBenchmarkMethod();
         injectComputationMethod();
         injectPopulateArrayMethod();
+        injectClearMethod();
         insertInTryBlock();
 
 
@@ -140,26 +143,40 @@ public class SpoonInjector {
         
     }
 
-    private void callBenchmarkMethod() {
+    private void callMethods() {
+        CtStatementList methodCalls = factory.createStatementList();
         String vars = getAllVarsAsString();
         CtBlock<?> tryBlockBody = tryBlock.getBody();
+        CtWhile whileBlock = null;
+        String methodCall = Introspector.decapitalize(newClassName)+"("+vars+")";
         for (CtStatement st : tryBlockBody){
             if (st instanceof CtWhile) {
-                String methodCall = Introspector.decapitalize(newClassName)+"("+vars+")";
-                ((CtWhile) st).getBody().insertBefore(factory.Code().createCodeSnippetStatement(methodCall));
+                whileBlock = (CtWhile) st;
+                break; 
             }
         }
+        whileBlock.getBody().insertBefore(factory.Code().createCodeSnippetStatement(methodCall));
+        methodCalls.addStatement(factory.Code().createCodeSnippetStatement("clearArr(arr)"));
+        methodCalls.addStatement(callPopulateMethod());
+        methodCalls.addStatement(factory.Code().createCodeSnippetStatement("TemplatesAux.sendStartSignalToOrchestrator(args[0],iter)"));
+        methodCalls.addStatement(factory.Code().createCodeSnippetStatement("TemplatesAux.launchTimerThread()"));
+        methodCalls.addStatement(factory.Code().createCodeSnippetStatement("computation(arr, iter)"));
+        whileBlock.insertAfter(methodCalls);
+        callExceptions();
+        //System.out.println(tryBlock.getCatchers());
+    }
+
+    private void callExceptions() {
+        List<CtCatch> catchers = tryBlock.getCatchers();
+        //TemplatesAux.writeErrorInFile("BubbleSort"filename"", "Out of memory error caught by the program.\n" + e.getMessage());
+        //TemplatesAux.writeErrorInFile("newClassName", "Out of memory error caught by the program.\n)
+        String call1 = "TemplatesAux.writeErrorInFile(\""+newClassName+"\", ";
+        call1 += "\"Out of memory error caught by the program.\n\" + e.getMessage()";
+        catchers.get(0).getBody().insertAfter(factory.Code().createCodeSnippetStatement(call1));
     }
 
     private void createClassThatHoldsArgs() {
         String innerClassName = "BenchmarkArgs";
-        //ArrayList<CtLocalVariable<?>> vars = new ArrayList<>();
-        //for (int i = 0; i < statements.getStatements().size(); i++) {
-        //    if (statements.getStatements().get(i) instanceof CtLocalVariable) {
-        //        CtLocalVariable<?> var = (CtLocalVariable<?>) statements.getStatements().get(i);
-        //        vars.add(var);
-        //    }
-        //}
         ArrayList<CtLocalVariable<?>> vars = getAllVars();
         CtClass<?> innerClass = factory.Class().create(innerClassName);
         CtConstructor constructor = factory.createConstructor();
@@ -191,12 +208,12 @@ public class SpoonInjector {
         return field;
     }
     
-    private void createSampleArray(){
+    private CtStatement callPopulateMethod(){
         String args = getAllVarsAsString();
         String arr = "arr";
         if (args.length() != 0) arr+=", ";
         String statement ="populateArray("+arr+args+")";
-        statements.addStatement(factory.Code().createCodeSnippetStatement(statement));
+        return factory.Code().createCodeSnippetStatement(statement);
     }
 
     private void createSampleArray2(CtLocalVariable<?> arrWithArgs) {
@@ -308,11 +325,6 @@ public class SpoonInjector {
             initialArray += varName+"."+method.getSimpleName();
             
         }
-        //for (CtParameter<?> arg : method.getParameters()){
-        //    initialArray += "("+arg+")";
-        //}
-        
-        //return initialArray;
     }
 
     private CtStatement populateCollection(CtLocalVariable<?> var) {
@@ -648,6 +660,37 @@ public class SpoonInjector {
                 modifiers,          // Modifiers
                 returnType,         // Return type
                 "computation",         // Method name
+                params,  // Parameters 
+                Collections.emptySet(),   // Exceptions thrown
+                methodBody          // Method body
+        );
+        newClass.addMethod(newMethod);
+    }
+
+    private void injectClearMethod(){
+        CtTypeReference<Void> returnType = factory.Type().voidPrimitiveType();
+
+        Set<ModifierKind> modifiers = new HashSet<>();
+        modifiers.add(ModifierKind.PRIVATE);
+        modifiers.add(ModifierKind.STATIC);
+        
+        CtBlock<Void> methodBody = factory.Core().createBlock();
+        String body ="for (int i = 0; i < arr.length; i++) {\n" + //
+                     "  arr[i] = null;\n" + //
+                     "}\n" + //
+                     "System.gc();";
+
+        CtCodeSnippetStatement snippet = factory.Code().createCodeSnippetStatement(body);
+        methodBody.addStatement(snippet);
+
+        List<CtParameter<?>> params = new ArrayList<>();
+        params.add(createParameter("BenchmarkArgs","arr",true));
+        
+        CtMethod<Void> newMethod = factory.Method().create(
+                newClass,            // Target class
+                modifiers,          // Modifiers
+                returnType,         // Return type
+                "clearArr",         // Method name
                 params,  // Parameters 
                 Collections.emptySet(),   // Exceptions thrown
                 methodBody          // Method body

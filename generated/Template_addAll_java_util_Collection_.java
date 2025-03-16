@@ -36,10 +36,13 @@ public class Template_addAll_java_util_Collection_ {
                 end = System.nanoTime();
                 iter++;
             } 
+            clearArr(arr);
+            populateArray(arr, var0, var1);
+            TemplatesAux.sendStartSignalToOrchestrator(args[0],iter);
+            TemplatesAux.launchTimerThread();
+            computation(arr, iter);
             // clear and restart the vars for real measurement
             // send start signal for measurement
-            TemplatesAux.sendStartSignalToOrchestrator(args[0], iter);
-            TemplatesAux.launchTimerThread();
             // call computation fun
         } catch (OutOfMemoryError e) {
             // catch errors
@@ -78,5 +81,12 @@ public class Template_addAll_java_util_Collection_ {
         for (int i = 0;i < 2;i++) {
           arr[i] = new BenchmarkArgs(var0, var1);
         };
+    }
+
+    private static void clearArr(BenchmarkArgs[] arr) {
+        for (int i = 0; i < arr.length; i++) {
+          arr[i] = null;
+        }
+        System.gc();;
     }
 }

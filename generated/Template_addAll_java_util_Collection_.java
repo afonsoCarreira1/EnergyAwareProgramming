@@ -47,8 +47,10 @@ public class Template_addAll_java_util_Collection_ {
         } catch (OutOfMemoryError e) {
             // catch errors
             // TemplatesAux.writeErrorInFile("BubbleSort"filename"", "Out of memory error caught by the program.\n" + e.getMessage());
+            TemplatesAux.writeErrorInFile("Template_addAll_java_util_Collection_", "Out of memory error caught by the program.\n" + e.getMessage());
         } catch (Exception e) {
             // TemplatesAux.writeErrorInFile("BubbleSort"filename"","Error caught by the program.\n"+e.getMessage());
+            TemplatesAux.writeErrorInFile("Template_addAll_java_util_Collection_", "Error caught by the program.\n" + e.getMessage());
         } finally {
             TemplatesAux.sendStopSignalToOrchestrator(args[0]);
         }

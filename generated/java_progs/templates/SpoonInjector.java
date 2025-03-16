@@ -178,8 +178,11 @@ public class SpoonInjector {
         // TemplatesAux.writeErrorInFile("BubbleSort"filename"", "Out of memory error caught by the program.\n" + e.getMessage());
         // TemplatesAux.writeErrorInFile("newClassName", "Out of memory error caught by the program.\n)
         String call1 = ("TemplatesAux.writeErrorInFile(\"" + newClassName) + "\", ";
-        call1 += "\"Out of memory error caught by the program.\n\" + e.getMessage()";
-        catchers.get(0).getBody().insertAfter(factory.Code().createCodeSnippetStatement(call1));
+        call1 += "\"Out of memory error caught by the program.\\n\" + e.getMessage())";
+        catchers.get(0).getBody().addStatement(factory.Code().createCodeSnippetStatement(call1));
+        String call2 = ("TemplatesAux.writeErrorInFile(\"" + newClassName) + "\", ";
+        call2 += "\"Error caught by the program.\\n\" + e.getMessage())";
+        catchers.get(1).getBody().addStatement(factory.Code().createCodeSnippetStatement(call2));
     }
 
     private void createClassThatHoldsArgs() {

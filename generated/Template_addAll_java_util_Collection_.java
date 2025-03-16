@@ -19,9 +19,7 @@ public class Template_addAll_java_util_Collection_ {
             ArrayList<Integer> var1 = new ArrayList<Integer>();
             ArrayListAux.insertRandomNumbers(var1, 10, "Integer");
             BenchmarkArgs[] arr = new BenchmarkArgs[20000];
-            for (int i = 0;i < 2;i++) {
-               arr[i] = new BenchmarkArgs(var0, var1);
-            };
+            populateArray(arr, var0, var1);
             // if fun to test is Static.fun() then just create multiple inputs
             // if fun is var.fun() then start by creating multiple vars and then multiple inputs
             // have a fun to get multiple lists or vars
@@ -72,6 +70,12 @@ public class Template_addAll_java_util_Collection_ {
         while (!TemplatesAux.stop && i < iter) {
               template_addAll_java_util_Collection_(args[i].var0, args[i].var1);
                i++;
+        };
+    }
+
+    private static void populateArray(BenchmarkArgs[] arr, ArrayList<Integer> var0, ArrayList<Integer> var1) {
+        for (int i = 0;i < 2;i++) {
+          arr[i] = new BenchmarkArgs(var0, var1);
         };
     }
 }

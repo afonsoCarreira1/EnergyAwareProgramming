@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
+import java.util.function.IntFunction;
 import spoon.Launcher;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -74,6 +76,8 @@ public class SpoonInjector {
 
     int max;
 
+    CtStatementList statements = null;
+
     public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec, String typeToUse, int size) {
         this.launcher = launcher;
         this.factory = factory;
@@ -93,6 +97,7 @@ public class SpoonInjector {
         this.newClassName = (myClass.getSimpleName() + "_") + method.getSignature().replaceAll("\\.|,|\\(|\\)", "_");
         this.mainMethod = newClass.getMethod("main", factory.Type().createArrayReference(factory.Type().stringType()));
         this.tryBlock = ((CtTry) (mainMethod.getElements(el -> el instanceof CtTry).get(0)));
+        this.statements = factory.Core().createStatementList();
         initMinMax();
     }
 
@@ -112,15 +117,15 @@ public class SpoonInjector {
         // getCollectionMethods(launcher,"vector");
         // Inject a new method
         // injectMethod(factory, myClass);
-        CtStatementList statements = factory.Core().createStatementList();
-        createInitialVar(statements);
-        createMethodArgs(statements);
-        createClassThatHoldsArgs(statements);
-        createArrayWithVarAndArgs(statements);
-        createSampleArray(statements);
-        insertInTryBlock(statements);
-        injectBenchmarkMethod(newClass);
+        createInitialVar();
+        createMethodArgs();
+        createClassThatHoldsArgs();
+        createArrayWithVarAndArgs();
+        createSampleArray();
+        injectBenchmarkMethod();
         injectComputationMethod();
+        injectPopulateArrayMethod();
+        insertInTryBlock();
         // Save modified source code -> this changes the current class
         // launcher.setSourceOutputDirectory("modified-src");
         // launcher.prettyprint();
@@ -149,15 +154,16 @@ public class SpoonInjector {
         // TODO for each parameter check if it is needed to start something
     }
 
-    private void createClassThatHoldsArgs(CtStatementList statements) {
+    private void createClassThatHoldsArgs() {
         String innerClassName = "BenchmarkArgs";
-        ArrayList<CtLocalVariable<?>> vars = new ArrayList<>();
-        for (int i = 0; i < statements.getStatements().size(); i++) {
-            if (statements.getStatements().get(i) instanceof CtLocalVariable) {
-                CtLocalVariable<?> var = ((CtLocalVariable<?>) (statements.getStatements().get(i)));
-                vars.add(var);
-            }
-        }
+        // ArrayList<CtLocalVariable<?>> vars = new ArrayList<>();
+        // for (int i = 0; i < statements.getStatements().size(); i++) {
+        // if (statements.getStatements().get(i) instanceof CtLocalVariable) {
+        // CtLocalVariable<?> var = (CtLocalVariable<?>) statements.getStatements().get(i);
+        // vars.add(var);
+        // }
+        // }
+        ArrayList<CtLocalVariable<?>> vars = getAllVars();
         CtClass<?> innerClass = factory.Class().create(innerClassName);
         CtConstructor constructor = factory.createConstructor();
         constructor.setSimpleName(innerClassName);
@@ -195,21 +201,20 @@ public class SpoonInjector {
         return field;
     }
 
-    private void createSampleArray(CtStatementList statements) {
-        StringBuilder args = new StringBuilder();
-        for (int i = 0; i < varIndex; i++) {
-            args.append("var" + i);
-            if (i != (varIndex - 1))
-                args.append(", ");
+    private void createSampleArray() {
+        String args = getAllVarsAsString();
+        String arr = "arr";
+        if (args.length() != 0)
+            arr += ", ";
 
-        }
+        String s = (("populateArray(" + arr) + args) + ")";
         String statement = ((((("for (int i = 0;i < " + varIndex) + ";i++) {\n")// 
          + "   arr[i] = new BenchmarkArgs(") + args) + ");\n")// 
          + "}";
-        statements.addStatement(factory.Code().createCodeSnippetStatement(statement));
+        statements.addStatement(factory.Code().createCodeSnippetStatement(s));
     }
 
-    private void createSampleArray2(CtStatementList statements, CtLocalVariable<?> arrWithArgs) {
+    private void createSampleArray2(CtLocalVariable<?> arrWithArgs) {
         CtNewArray<Object> arrayExpr = factory.Core().createNewArray();
         arrayExpr.setType(factory.Type().createArrayReference(factory.Type().objectType(), 2));
         arrayExpr.addDimensionExpression(factory.Code().createLiteral(numberOfFunCalls));
@@ -263,7 +268,7 @@ public class SpoonInjector {
         return arrLength;
     }
 
-    private void createArrayWithVarAndArgs(CtStatementList statements) {
+    private void createArrayWithVarAndArgs() {
         String statement = ("BenchmarkArgs[] arr = new BenchmarkArgs[" + numberOfFunCalls) + "]";
         statements.addStatement(factory.createCodeSnippetStatement(statement));
     }
@@ -283,7 +288,7 @@ public class SpoonInjector {
         return arr;
     }
 
-    private void createMethodArgs(CtStatementList statements) {
+    private void createMethodArgs() {
         List<CtParameter<?>> args = method.getParameters();
         for (CtParameter<?> arg : args) {
             CtLocalVariable<?> var = createVar(arg.getType(), getVarName(), false);
@@ -300,11 +305,11 @@ public class SpoonInjector {
         // }
     }
 
-    private void insertInTryBlock(CtStatementList statements) {
+    private void insertInTryBlock() {
         tryBlock.getBody().insertBegin(statements);
     }
 
-    private void createInitialVar(CtStatementList statements) {
+    private void createInitialVar() {
         String initialArray = "";
         if (isMethodStatic)
             initialArray += ((collec.getQualifiedName() + "()") + ".") + method.getSimpleName();
@@ -528,7 +533,7 @@ public class SpoonInjector {
         return params;
     }
 
-    private void injectBenchmarkMethod(CtClass<?> templateClass) {
+    private void injectBenchmarkMethod() {
         // Define the return type (void in this case)
         CtTypeReference<Void> returnType = factory.Type().voidPrimitiveType();
         Set<ModifierKind> modifiers = new HashSet<>();
@@ -546,9 +551,9 @@ public class SpoonInjector {
         // Parameters (empty)
         // Exceptions thrown
         // Method body
-        factory.Method().create(templateClass, modifiers, returnType, Introspector.decapitalize(newClassName), getComputationParameters(), Collections.emptySet(), methodBody);
+        factory.Method().create(newClass, modifiers, returnType, Introspector.decapitalize(newClassName), getComputationParameters(), Collections.emptySet(), methodBody);
         // Add method to class
-        templateClass.addMethod(newMethod);
+        newClass.addMethod(newMethod);
     }
 
     private void getCollectionMethods(Launcher launcher, String collection) {
@@ -573,20 +578,64 @@ public class SpoonInjector {
         }
     }
 
-    private void injectComputationMethod() {
-        // Define the return type (void in this case)
+    private String getAllVarsAsString() {
+        StringBuilder args = new StringBuilder();
+        for (int i = 0; i < varIndex; i++) {
+            args.append("var" + i);
+            if (i != (varIndex - 1))
+                args.append(", ");
+
+        }
+        return args.toString();
+    }
+
+    private ArrayList<CtLocalVariable<?>> getAllVars() {
+        ArrayList<CtLocalVariable<?>> vars = new ArrayList<>();
+        for (int i = 0; i < statements.getStatements().size(); i++) {
+            if (statements.getStatements().get(i) instanceof CtLocalVariable) {
+                CtLocalVariable<?> var = ((CtLocalVariable<?>) (statements.getStatements().get(i)));
+                vars.add(var);
+            }
+        }
+        return vars;
+    }
+
+    private void injectPopulateArrayMethod() {
+        ArrayList<CtLocalVariable<?>> vars = getAllVars();
         CtTypeReference<Void> returnType = factory.Type().voidPrimitiveType();
         Set<ModifierKind> modifiers = new HashSet<>();
         modifiers.add(ModifierKind.PRIVATE);
         modifiers.add(ModifierKind.STATIC);
         CtBlock<Void> methodBody = factory.Core().createBlock();
-        StringBuilder args = new StringBuilder();
-        for (int i = 0; i < varIndex; i++) {
-            args.append("args[i].var" + i);
-            if (i != (varIndex - 1))
-                args.append(", ");
-
+        String args = getAllVarsAsString();
+        String body = ((((("for (int i = 0;i < " + vars.size()) + ";i++) {\n")// 
+         + "  arr[i] = new BenchmarkArgs(") + args) + ");\n")// 
+         + "}";
+        CtCodeSnippetStatement snippet = factory.Code().createCodeSnippetStatement(body);
+        methodBody.addStatement(snippet);
+        List<CtParameter<?>> params = new ArrayList<>();
+        params.add(createParameter("BenchmarkArgs", "arr", true));
+        for (CtLocalVariable<?> var : vars) {
+            params.add(createParameter(var.getType().toString(), var.getSimpleName(), var.getType().isArray()));
         }
+        CtMethod<Void> newMethod = // Target class
+        // Modifiers
+        // Return type
+        // Method name
+        // Parameters
+        // Exceptions thrown
+        // Method body
+        factory.Method().create(newClass, modifiers, returnType, "populateArray", params, Collections.emptySet(), methodBody);
+        newClass.addMethod(newMethod);
+    }
+
+    private void injectComputationMethod() {
+        CtTypeReference<Void> returnType = factory.Type().voidPrimitiveType();
+        Set<ModifierKind> modifiers = new HashSet<>();
+        modifiers.add(ModifierKind.PRIVATE);
+        modifiers.add(ModifierKind.STATIC);
+        CtBlock<Void> methodBody = factory.Core().createBlock();
+        String args = String.join(", ", Arrays.stream(getAllVarsAsString().split(", ")).map(s -> "args[i]." + s).toArray(String[]::new));
         String body = (((((("int i = 0;\n"// 
          + "while (!TemplatesAux.stop && i < iter) {\n      ")// 
          + Introspector.decapitalize(newClassName)) + "(") + args) + ");\n")// 
@@ -597,7 +646,6 @@ public class SpoonInjector {
         List<CtParameter<?>> params = new ArrayList<>();
         params.add(createParameter("BenchmarkArgs", "args", true));
         params.add(createParameter("int", "iter", false));
-        // Create the method
         CtMethod<Void> newMethod = // Target class
         // Modifiers
         // Return type
@@ -606,7 +654,6 @@ public class SpoonInjector {
         // Exceptions thrown
         // Method body
         factory.Method().create(newClass, modifiers, returnType, "computation", params, Collections.emptySet(), methodBody);
-        // Add method to class
         newClass.addMethod(newMethod);
     }
 

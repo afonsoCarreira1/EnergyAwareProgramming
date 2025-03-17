@@ -2,24 +2,15 @@ package java_progs.templates;
 
 
 import spoon.Launcher;
-import spoon.reflect.code.BinaryOperatorKind;
-import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCatch;
 import spoon.reflect.code.CtCodeSnippetStatement;
-import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtFieldRead;
-import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTry;
-import spoon.reflect.code.CtVariableAccess;
-import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtWhile;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
@@ -32,13 +23,15 @@ import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtExecutableReference;
-import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.reference.CtVariableReference;
+import spoon.reflect.visitor.DefaultJavaPrettyPrinter;
+import spoon.reflect.visitor.ImportCleaner;
 import spoon.reflect.visitor.filter.TypeFilter;
+import spoon.support.JavaOutputProcessor;
 
 import java.beans.Introspector;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,6 +53,7 @@ public class SpoonInjector {
     Boolean isMethodStatic;
     String typeToUse;
     int size;
+    String outputDir = "";
     String newClassName;
     CtClass<?> newClass;
     CtMethod<?> mainMethod;
@@ -70,7 +64,7 @@ public class SpoonInjector {
     CtStatementList statements = null;
     List<CtField<?>> inputs = null;
 
-    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size) {
+    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size, String outputDir, int id) {
         this.launcher = launcher;
         this.factory = factory;
         this.numberOfFunCalls = numberOfFunCalls;
@@ -79,6 +73,7 @@ public class SpoonInjector {
         this.isMethodStatic = method.hasModifier(ModifierKind.STATIC);
         this.typeToUse = typeToUse;
         this.size = size;
+        this.outputDir = outputDir;
         String path = "java_progs.templates.Template";
         CtClass<?> myClass = factory.Class().get(path);
         if (myClass == null) {
@@ -86,7 +81,7 @@ public class SpoonInjector {
             return;
         }
         this.newClass = myClass.clone();
-        this.newClassName = myClass.getSimpleName() +"_" + method.getSignature().replaceAll("\\.|,|\\(|\\)", "_");
+        this.newClassName = /*myClass.getSimpleName() +"_" +*/ method.getSignature().replaceAll("\\.|,|\\(|\\)", "_")+id;
         this.mainMethod = newClass.getMethod("main", factory.Type().createArrayReference(factory.Type().stringType()));
         this.tryBlock = (CtTry) mainMethod.getElements(el -> el instanceof CtTry).get(0);
         this.statements = factory.Core().createStatementList();
@@ -125,7 +120,27 @@ public class SpoonInjector {
         newClass.setSimpleName(newClassName);
         launcher.getFactory().Class().getAll().add(newClass);
         launcher.getModel().getRootPackage().addType(newClass);
-        launcher.prettyprint();
+        //launcher.prettyprint();
+        //saveClassToFile(newClass,"generated_classes");
+
+        // 3. Remove unused imports
+        ImportCleaner importCleaner = new ImportCleaner();
+        importCleaner.process(newClass);
+
+        saveClassToFile(newClass);
+    }
+
+    private void saveClassToFile(CtType<?> ctClass) {
+        // Ensure output directory exists
+        File outputFolder = new File(outputDir);
+        if (!outputFolder.exists()) {
+            outputFolder.mkdirs();
+        }
+
+        // Use JavaOutputProcessor to generate correct imports
+        JavaOutputProcessor processor = new JavaOutputProcessor();
+        processor.setFactory(factory);
+        processor.createJavaFile(ctClass);
     }
 
     private CtConstructor<?> getConstructors() {
@@ -224,7 +239,6 @@ public class SpoonInjector {
         String statement ="populateArray("+arr+args+")";
         return factory.Code().createCodeSnippetStatement(statement);
     }
-
 
     private void createArrayWithVarAndArgs() {
         String statement = "BenchmarkArgs[] arr = new BenchmarkArgs["+numberOfFunCalls+"]";
@@ -621,7 +635,7 @@ public class SpoonInjector {
         String body ="for (int i = 0; i < arr.length; i++) {\n" + //
                      "  arr[i] = null;\n" + //
                      "}\n" + //
-                     "System.gc();";
+                     "System.gc()";
 
         CtCodeSnippetStatement snippet = factory.Code().createCodeSnippetStatement(body);
         methodBody.addStatement(snippet);
@@ -652,7 +666,7 @@ public class SpoonInjector {
     }
 
     public void insertImport() {
-        String filename = "generated/"+newClassName+".java";
+        String filename = outputDir+"/"+newClassName+".java";
         try {
             // Read the original file content while preserving format
             String originalContent = new String(Files.readAllBytes(Paths.get(filename)));
@@ -661,7 +675,7 @@ public class SpoonInjector {
             StringBuilder newContent = new StringBuilder();
 
             // Add the new lines
-            newContent.append("package generated;\n");
+            newContent.append("package "+outputDir+";\n");
             for (String line : imports) {
                 newContent.append(line).append(System.lineSeparator());
             }

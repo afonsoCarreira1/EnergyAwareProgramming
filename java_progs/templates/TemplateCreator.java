@@ -10,23 +10,21 @@ import java.util.Set;
 
 import spoon.Launcher;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtTypeReference;
 
 public class TemplateCreator {
 
-    
-    
+    static String outputDir = "generated_progs";
+    static int id = 0;
 
     public static void main(String[] args) {
         //initSpoon();
         //initSpoon();
         ArrayList<CtMethod<?>> commonMethods = getCollectionMethods("list");
-        List<Integer> sizes = Arrays.asList(150);//createInputRange(1, 1.5, 0);
-        int[] funCalls = new int[] {20_000};//{ 20_000, 50_000, 75_000, 100_000, 150_000 };
+        List<Integer> sizes = createInputRange(1, 1.5, 0);//Arrays.asList(150);//
+        int[] funCalls = { 20_000, 50_000, 75_000, 100_000, 150_000 };//new int[] {20_000};//
         for (int funCall : funCalls){
             for (CtType<?> collec : getCollections("list")) {
                 for (CtMethod<?> method : commonMethods) {
@@ -34,11 +32,12 @@ public class TemplateCreator {
                         if (method.getSimpleName().contains("addAll") && collec.getSimpleName().equals("ArrayList")) {
                         //getGoodInputs(method,collec);
                         Launcher launcher = initSpoon();
-                        SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), funCall, method, collec,"Integer",size);
+                        SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), funCall, method, collec,"Integer",size,outputDir,id);
                         spi.injectInTemplate();
                         spi.insertImport();
                         //SpoonInjector.injectInTemplate(launcher, factory, 0/*funCall*/, method,collec);
                         }
+                        id++;
                     }
                 }
             }
@@ -69,7 +68,7 @@ public class TemplateCreator {
         launcher.addInputResource("java_progs/templates/");
         launcher.addInputResource("java_progs/aux/");
         launcher.getFactory().getEnvironment().setAutoImports(true);
-        launcher.setSourceOutputDirectory("generated");
+        launcher.setSourceOutputDirectory(outputDir);
         launcher.buildModel();
         return launcher; 
     }

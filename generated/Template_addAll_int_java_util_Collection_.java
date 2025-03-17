@@ -15,10 +15,10 @@ public class Template_addAll_int_java_util_Collection_ {
     public static void main(String[] args) throws IOException, InterruptedException {
         try {
             ArrayList<Integer> var0 = new ArrayList<Integer>();
-            ArrayListAux.insertRandomNumbers(var0, 10, "Integer");
-            int var1 = 80;
+            ArrayListAux.insertRandomNumbers(var0, 150, "Integer");
+            int var1 = 146;
             ArrayList<Integer> var2 = new ArrayList<Integer>();
-            ArrayListAux.insertRandomNumbers(var2, 10, "Integer");
+            ArrayListAux.insertRandomNumbers(var2, 56, "Integer");
             BenchmarkArgs[] arr = new BenchmarkArgs[20000];
             populateArray(arr, var0, var1, var2);
             // if fun to test is Static.fun() then just create multiple inputs
@@ -60,7 +60,7 @@ public class Template_addAll_int_java_util_Collection_ {
     static class BenchmarkArgs {
         public ArrayList<Integer> var0 = new ArrayList<Integer>();
 
-        public int var1 = 80;
+        public int var1 = 146;
 
         public ArrayList<Integer> var2 = new ArrayList<Integer>();
 

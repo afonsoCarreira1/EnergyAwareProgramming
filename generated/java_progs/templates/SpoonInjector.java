@@ -15,21 +15,15 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.function.IntFunction;
 import spoon.Launcher;
-import spoon.reflect.code.BinaryOperatorKind;
-import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCatch;
 import spoon.reflect.code.CtCodeSnippetStatement;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtFieldRead;
-import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTry;
-import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtWhile;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
@@ -42,7 +36,6 @@ import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtExecutableReference;
-import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.filter.TypeFilter;
 public class SpoonInjector {
@@ -80,6 +73,8 @@ public class SpoonInjector {
 
     CtStatementList statements = null;
 
+    CtStatementList inputs = null;
+
     public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec, String typeToUse, int size) {
         this.launcher = launcher;
         this.factory = factory;
@@ -100,6 +95,7 @@ public class SpoonInjector {
         this.mainMethod = newClass.getMethod("main", factory.Type().createArrayReference(factory.Type().stringType()));
         this.tryBlock = ((CtTry) (mainMethod.getElements(el -> el instanceof CtTry).get(0)));
         this.statements = factory.Core().createStatementList();
+        this.inputs = factory.Core().createStatementList();
         initMinMax();
     }
 
@@ -117,7 +113,7 @@ public class SpoonInjector {
 
     public void injectInTemplate() {
         // Inject a new method
-        createInitialVar();
+        createInitialVar(true);
         createMethodArgs();
         createClassThatHoldsArgs();
         createArrayWithVarAndArgs();
@@ -129,6 +125,8 @@ public class SpoonInjector {
         injectPopulateArrayMethod();
         injectClearMethod();
         insertInTryBlock();
+        System.out.println(inputs);
+        newClass.insertAfter(inputs);
         newClass.setSimpleName(newClassName);
         launcher.getFactory().Class().getAll().add(newClass);
         launcher.getModel().getRootPackage().addType(newClass);
@@ -170,13 +168,10 @@ public class SpoonInjector {
         methodCalls.addStatement(factory.Code().createCodeSnippetStatement("computation(arr, iter)"));
         whileBlock.insertAfter(methodCalls);
         callExceptions();
-        // System.out.println(tryBlock.getCatchers());
     }
 
     private void callExceptions() {
         List<CtCatch> catchers = tryBlock.getCatchers();
-        // TemplatesAux.writeErrorInFile("BubbleSort"filename"", "Out of memory error caught by the program.\n" + e.getMessage());
-        // TemplatesAux.writeErrorInFile("newClassName", "Out of memory error caught by the program.\n)
         String call1 = ("TemplatesAux.writeErrorInFile(\"" + newClassName) + "\", ";
         call1 += "\"Out of memory error caught by the program.\\n\" + e.getMessage())";
         catchers.get(0).getBody().addStatement(factory.Code().createCodeSnippetStatement(call1));
@@ -235,78 +230,9 @@ public class SpoonInjector {
         return factory.Code().createCodeSnippetStatement(statement);
     }
 
-    private void createSampleArray2(CtLocalVariable<?> arrWithArgs) {
-        CtNewArray<Object> arrayExpr = factory.Core().createNewArray();
-        arrayExpr.setType(factory.Type().createArrayReference(factory.Type().objectType(), 2));
-        arrayExpr.addDimensionExpression(factory.Code().createLiteral(numberOfFunCalls));
-        arrayExpr.addDimensionExpression(((CtExpression<Integer>) (accessVarField(arrWithArgs, "length"))));
-        CtLocalVariable<?> arr2 = factory.Code().createLocalVariable(arrayExpr.getType(), "arr", arrayExpr);
-        statements.addStatement(arr2);
-        // System.out.println(arrLength);
-        CtFor forLoop = factory.createFor();
-        List<CtStatement> initStatements = new ArrayList<>();
-        CtLocalVariable<?> varI = createVar(factory.Type().integerPrimitiveType(), "i", true);
-        initStatements.add(varI);
-        CtVariableRead<?> var1Read = ((CtVariableRead<?>) (factory.Code().createVariableRead(varI.getReference(), false)));
-        CtExpression<Boolean> condition = createBinOp(var1Read, accessVarField(arrWithArgs, "length"), BinaryOperatorKind.LT);
-        // Create the binary operator (var1 < var2)
-        addImport("java.util.Arrays");
-        forLoop.setForInit(initStatements);
-        forLoop.setExpression(condition);
-        forLoop.addForUpdate(factory.createCodeSnippetStatement("i++"));
-        String line = (((((" new " + collec.getReference()) + "<>((") + collec.getReference()) + "<") + typeToUse) + ">) argsArr[j]);\n";
-        String statement = ((((((("arr[i] = new Object[argsArr.length];\n"// 
-         + "       for (int j = 0; j < argsArr.length; j++) {\n")// 
-         + "           if (argsArr[j] instanceof Collection) {\n")// 
-         + "               arr[i][j] =") + line)// 
-         + "           } else {\n")// 
-         + "               arr[i][j] = argsArr[j];\n")// 
-         + "           }\n")// 
-         + "       }";
-        // "arr[i] = Arrays.copyOf(argsArr, argsArr.length)"
-        forLoop.setBody(factory.createCodeSnippetStatement(statement));
-        statements.addStatement(forLoop);
-    }
-
-    private CtBinaryOperator<Boolean> createBinOp(CtExpression<?> var1, CtExpression<?> var2, BinaryOperatorKind op) {
-        return // Left operand (var1)
-        // Right operand (var2)
-        factory.Code().createBinaryOperator(var1, var2, op);
-    }
-
-    private CtFieldRead<?> accessVarField(CtLocalVariable<?> var, String field) {
-        CtTypeReference<Integer> intType = factory.Type().integerPrimitiveType();
-        CtFieldReference<Integer> lengthRef = factory.Core().createFieldReference();
-        lengthRef.setDeclaringType(var.getType());// Set the array type
-
-        lengthRef.setSimpleName(field);// choose field
-
-        lengthRef.setType(intType);// type of the field
-
-        CtFieldRead<Integer> arrLength = factory.Core().createFieldRead();
-        arrLength.setTarget(factory.Code().createVariableRead(var.getReference(), false));
-        arrLength.setVariable(lengthRef);
-        return arrLength;
-    }
-
     private void createArrayWithVarAndArgs() {
         String statement = ("BenchmarkArgs[] arr = new BenchmarkArgs[" + numberOfFunCalls) + "]";
         statements.addStatement(factory.createCodeSnippetStatement(statement));
-    }
-
-    private CtLocalVariable<?> createArrayWithVarAndArgs2(CtStatementList statements) {
-        ArrayList<Object> varStatements = new ArrayList<>();
-        for (int i = 0; i < statements.getStatements().size(); i++) {
-            if (statements.getStatements().get(i) instanceof CtLocalVariable) {
-                CtLocalVariable<?> var = ((CtLocalVariable<?>) (statements.getStatements().get(i)));
-                varStatements.add(factory.Code().createVariableRead(var.getReference(), false));
-            }
-        }
-        Object[] vars = varStatements.toArray();
-        CtNewArray<Object[]> arrayExpr = factory.Code().createLiteralArray(vars);
-        CtLocalVariable<?> arr = factory.Code().createLocalVariable(arrayExpr.getType(), "argsArr", arrayExpr);
-        statements.addStatement(arr);
-        return arr;
     }
 
     private void createMethodArgs() {
@@ -315,7 +241,7 @@ public class SpoonInjector {
             CtLocalVariable<?> var = createVar(arg.getType(), getVarName(), false);
             statements.addStatement(var);
             if (isCollection(var))
-                statements.addStatement(populateCollection(var));
+                statements.addStatement(populateCollection(var, false));
 
         }
     }
@@ -330,7 +256,7 @@ public class SpoonInjector {
         tryBlock.getBody().insertBegin(statements);
     }
 
-    private void createInitialVar() {
+    private void createInitialVar(boolean useConstructorSize) {
         String initialArray = "";
         if (isMethodStatic)
             initialArray += ((collec.getQualifiedName() + "()") + ".") + method.getSimpleName();
@@ -339,7 +265,7 @@ public class SpoonInjector {
             String varName = getVarName();
             CtLocalVariable<?> var = createVar(factory.Type().createReference(collec), varName, false);
             statements.addStatement(var);
-            CtStatement initCollection = populateCollection(var);
+            CtStatement initCollection = populateCollection(var, useConstructorSize);
             if (initCollection != null)
                 statements.addStatement(initCollection);
 
@@ -347,7 +273,7 @@ public class SpoonInjector {
         }
     }
 
-    private CtStatement populateCollection(CtLocalVariable<?> var) {
+    private CtStatement populateCollection(CtLocalVariable<?> var, boolean useConstructorSize) {
         if (!isCollection(var))
             return null;
 
@@ -361,7 +287,11 @@ public class SpoonInjector {
             invocation.setTarget(factory.createLiteral(ctClass.getReference()));// adiciona a Class.
 
             invocation.addArgument(factory.Code().createVariableRead(var.getReference(), false));
-            invocation.addArgument(factory.Code().createLiteral(10));
+            if (useConstructorSize)
+                invocation.addArgument(factory.Code().createLiteral(createRandomLiteral(null, false, true)));
+            else
+                invocation.addArgument(factory.Code().createLiteral(createRandomLiteral(factory.createReference(typeToUse), false, false)));
+
             invocation.addArgument(factory.Code().createLiteral(typeToUse));
             return invocation;
         }// TODo do the same for sets and other collections
@@ -417,7 +347,7 @@ public class SpoonInjector {
 
     private CtExpression<?> createVar(CtTypeReference<?> typeRef, boolean getDefaultValue) {
         if (typeRef.isPrimitive())
-            return factory.Code().createLiteral(createRandomLiteral(typeRef, getDefaultValue));
+            return factory.Code().createLiteral(createRandomLiteral(typeRef, getDefaultValue, false));
 
         if (typeRef.toString().contains("Collection"))
             return factory.Code().createConstructorCall(typeRef);
@@ -426,23 +356,33 @@ public class SpoonInjector {
         return factory.Code().createConstructorCall(typeRef);
     }
 
-    private Object createRandomLiteral(CtTypeReference<?> typeRef, boolean getDefaultValue) {
+    private Object createRandomLiteral(CtTypeReference<?> typeRef, boolean getDefaultValue, boolean useConstructorSize) {
+        Object value = null;
         if (getDefaultValue)
-            return getDefaultValues(typeRef.toString());
+            value = getDefaultValues(typeRef.toString());
+        else if (useConstructorSize)
+            value = size;
+        else
+            value = getRandomValueOfType(typeRef.toString());
 
-        // if (typeRef.toString().equals("int")) return getRandomValueOfType(typeRef.toString());
-        // if (typeRef.toString().equals("double")) return getRandomValueOfType(typeRef.toString());
-        // if (typeRef.toString().equals("float")) return getRandomValueOfType(typeRef.toString());
-        // if (typeRef.toString().equals("long")) return getRandomValueOfType(typeRef.toString());
-        // if (typeRef.toString().equals("boolean")) return getRandomValueOfType(typeRef.toString());
-        // if (typeRef.toString().equals("short")) return getRandomValueOfType(typeRef.toString());
-        // if (typeRef.toString().equals("integer")) return getRandomValueOfType(typeRef.toString());
-        return getRandomValueOfType(typeRef.toString());
+        saveInput(value);
+        return value;
+    }
+
+    private void saveInput(Object value) {
+        String statement = ("static String input" + varIndex) + " = ";
+        if (value instanceof String)
+            statement += ((String) (value)).length();
+        else
+            statement += value;
+
+        inputs.addStatement(factory.createCodeSnippetStatement(statement + "\n"));
     }
 
     @SuppressWarnings("unchecked")
     private <T> T getRandomValueOfType(String type) {
-        Random rand = new Random(42);
+        Random rand = new Random();// new Random(42);
+
         switch (type.toLowerCase()) {
             case "int" :
                 return ((T) (Integer.valueOf(rand.nextInt((max - min) + 1) + min)));

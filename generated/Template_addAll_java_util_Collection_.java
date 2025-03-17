@@ -17,7 +17,7 @@ public class Template_addAll_java_util_Collection_ {
             ArrayList<Integer> var0 = new ArrayList<Integer>();
             ArrayListAux.insertRandomNumbers(var0, 150, "Integer");
             ArrayList<Integer> var1 = new ArrayList<Integer>();
-            ArrayListAux.insertRandomNumbers(var1, 122, "Integer");
+            ArrayListAux.insertRandomNumbers(var1, 138, "Integer");
             BenchmarkArgs[] arr = new BenchmarkArgs[20000];
             populateArray(arr, var0, var1);
             // if fun to test is Static.fun() then just create multiple inputs
@@ -91,4 +91,8 @@ public class Template_addAll_java_util_Collection_ {
         }
         System.gc();;
     }
+
+    private String input1 = "150";
+
+    private String input2 = "138";
 }

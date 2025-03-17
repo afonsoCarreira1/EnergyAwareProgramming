@@ -16,9 +16,9 @@ public class Template_addAll_int_java_util_Collection_ {
         try {
             ArrayList<Integer> var0 = new ArrayList<Integer>();
             ArrayListAux.insertRandomNumbers(var0, 150, "Integer");
-            int var1 = 146;
+            int var1 = 41;
             ArrayList<Integer> var2 = new ArrayList<Integer>();
-            ArrayListAux.insertRandomNumbers(var2, 56, "Integer");
+            ArrayListAux.insertRandomNumbers(var2, 25, "Integer");
             BenchmarkArgs[] arr = new BenchmarkArgs[20000];
             populateArray(arr, var0, var1, var2);
             // if fun to test is Static.fun() then just create multiple inputs
@@ -60,7 +60,7 @@ public class Template_addAll_int_java_util_Collection_ {
     static class BenchmarkArgs {
         public ArrayList<Integer> var0 = new ArrayList<Integer>();
 
-        public int var1 = 146;
+        public int var1 = 41;
 
         public ArrayList<Integer> var2 = new ArrayList<Integer>();
 
@@ -95,4 +95,10 @@ public class Template_addAll_int_java_util_Collection_ {
         }
         System.gc();;
     }
+
+    private String input1 = "150";
+
+    private String input2 = "41";
+
+    private String input3 = "25";
 }

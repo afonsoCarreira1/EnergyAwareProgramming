@@ -68,7 +68,7 @@ public class SpoonInjector {
     HashSet<String> imports = new HashSet<>();
     int min = 0 , max;
     CtStatementList statements = null;
-    CtStatementList inputs = null;
+    List<CtField<?>> inputs = null;
 
     public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size) {
         this.launcher = launcher;
@@ -90,7 +90,7 @@ public class SpoonInjector {
         this.mainMethod = newClass.getMethod("main", factory.Type().createArrayReference(factory.Type().stringType()));
         this.tryBlock = (CtTry) mainMethod.getElements(el -> el instanceof CtTry).get(0);
         this.statements = factory.Core().createStatementList();
-        this.inputs = factory.Core().createStatementList();
+        this.inputs = new ArrayList<>();
         initMinMax();
     }
 
@@ -120,8 +120,7 @@ public class SpoonInjector {
         injectClearMethod();
         insertInTryBlock();
 
-        System.out.println(inputs);
-        newClass.insertAfter(inputs);
+        injectInputFieldsInClass();
 
         newClass.setSimpleName(newClassName);
         launcher.getFactory().Class().getAll().add(newClass);
@@ -147,6 +146,12 @@ public class SpoonInjector {
         
     }
 
+    private void injectInputFieldsInClass() {
+        for (CtField<?> inputField : inputs) {
+            newClass.addField(inputField);
+        }   
+    }
+    
     private void callMethods() {
         CtStatementList methodCalls = factory.createStatementList();
         String vars = getAllVarsAsString();
@@ -335,10 +340,10 @@ public class SpoonInjector {
     }
 
     private void saveInput(Object value) {
-        String statement = "static String input"+varIndex+" = ";
-        if (value instanceof String) statement += ((String)value).length();
-        else statement += value;
-        inputs.addStatement(factory.createCodeSnippetStatement(statement+"\n"));
+        String expression = (value instanceof String) ? "\""+((String)value).length()+"\"" : "\""+value+"\"";
+        CtField<?> inputField = factory.createCtField("input"+varIndex, factory.Type().stringType(),expression);
+        inputField.addModifier(ModifierKind.PRIVATE);
+        inputs.add(inputField);
     }
 
     @SuppressWarnings("unchecked")

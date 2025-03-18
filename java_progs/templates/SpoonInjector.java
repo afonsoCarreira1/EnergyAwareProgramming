@@ -53,6 +53,7 @@ public class SpoonInjector {
     String typeToUse;
     int size;
     String outputDir = "";
+    boolean requiresTypesInClass;
     String newClassName;
     CtClass<?> newClass;
     CtMethod<?> mainMethod;
@@ -63,7 +64,7 @@ public class SpoonInjector {
     CtStatementList statements = null;
     List<CtField<?>> inputs = null;
 
-    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size, String outputDir) {
+    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size, String outputDir,boolean requiresTypesInClass) {
         this.launcher = launcher;
         this.factory = factory;
         this.numberOfFunCalls = numberOfFunCalls;
@@ -74,6 +75,7 @@ public class SpoonInjector {
         this.size = size;
         this.outputDir = outputDir;
         String path = "java_progs.templates.Template";
+        this.requiresTypesInClass = requiresTypesInClass;
         CtClass<?> myClass = factory.Class().get(path);
         if (myClass == null) {
             System.out.println(path +" not found");
@@ -325,7 +327,7 @@ public class SpoonInjector {
     private CtLocalVariable<?> createVar(CtTypeReference typeRef, String varName, boolean getDefaultValue) {
         CtTypeReference ref = typeRef.toString().contains("Collection") ? factory.Type().createReference(collec) : typeRef;
         CtTypeReference<?> genericType = factory.Type().createReference(typeToUse);
-        ref.addActualTypeArgument(genericType);
+        if (requiresTypesInClass) ref.addActualTypeArgument(genericType);
         CtExpression<?> exp = createVar(ref,getDefaultValue);
         CtLocalVariable<?> variable = factory.Code().createLocalVariable(
             ref,           // var type

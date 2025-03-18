@@ -30,6 +30,7 @@ public class TemplateCreator {
     static String outputDir = "generated_templates";
     static int id = 0;
     static CtTypeReference<?> ref;
+    static boolean requiresTypesInClass;
     // public static void main(String[] args) {
     // //initSpoon();
     // //initSpoon();
@@ -81,7 +82,7 @@ public class TemplateCreator {
                                 //if (collec.getSimpleName().equals("ArrayList") /*&& type.equals("Integer")*/){
                                 Launcher launcher = initSpoon();
                                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0/*funCall*/, method,
-                                        collec, ""/*type*/, 0/*size*/, outputDir);
+                                        collec, ""/*type*/, 0/*size*/, outputDir,false);
                                 spi.injectInTemplate();
                                 spi.insertImport();
                                 //}
@@ -99,23 +100,14 @@ public class TemplateCreator {
 
     private static String runCustomProgram(String programName) throws Exception {
         String path = "java_progs/templates/programsToBenchmark";
-        File[] files = getFiles(path);
-        String program = "";
-        for (File file : files) {
-            if (programName.toLowerCase().equals(file.getName().toLowerCase().split("\\.")[0])){
-                System.out.println("here");
-                program = readFile(file.getAbsolutePath());
-            }
-        }
         Launcher launcher = initSpoon();
         //launcher.addInputResource(path);
         //launcher.buildModel();
 
-        CtModel model = launcher.getModel();
-        List<CtMethod<?>> methods = getPublicMethodsInClass(model,programName);
+        List<CtMethod<?>> methods = getPublicMethodsInClass(launcher,programName);
         for (CtMethod<?> method : methods) {
             SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0/*funCall*/, method,
-            ref.getTypeDeclaration(), ""/*type*/, 0/*size*/, outputDir);
+            ref.getTypeDeclaration(), ""/*type*/, 0/*size*/, outputDir,requiresTypesInClass);
             spi.injectInTemplate();
             spi.insertImport();
         }
@@ -123,12 +115,17 @@ public class TemplateCreator {
         return "";
     }
 
-    private static List<CtMethod<?>> getPublicMethodsInClass(CtModel model,String programName) {
+    private static List<CtMethod<?>> getPublicMethodsInClass(Launcher launcher,String programName) {
         List<CtMethod<?>> publicMethods = new ArrayList<>();
-        for (CtType<?> ctType : model.getAllTypes()) {
+        for (CtType<?> ctType : launcher.getModel().getAllTypes()) {
             if (ctType instanceof CtClass<?>) { 
                 CtClass<?> ctClass = (CtClass<?>) ctType;
                 if (!ctClass.getSimpleName().toLowerCase().equals(programName.toLowerCase())) continue;
+                // check if i need to do Class<Type>() or just Class()
+                if (ctClass instanceof CtClass<?>) {
+                    if (!ctClass.getFormalCtTypeParameters().isEmpty()) requiresTypesInClass = true;
+                    else requiresTypesInClass = false;
+                }
                 ref = ctClass.getReference();
                 Set<CtMethod<?>> methods = ctClass.getMethods();
                 for (CtMethod<?> method : methods) {
@@ -199,7 +196,6 @@ public class TemplateCreator {
 
         return finalProgram;
     }
-
 
     @SuppressWarnings("unchecked")
     private static <T> String getRandomValueOfType(String type, int min, int max){

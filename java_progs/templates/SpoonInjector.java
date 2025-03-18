@@ -24,7 +24,6 @@ import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.visitor.DefaultJavaPrettyPrinter;
 import spoon.reflect.visitor.ImportCleaner;
 import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.support.JavaOutputProcessor;
@@ -71,7 +70,7 @@ public class SpoonInjector {
         this.method = method;
         this.collec = collec;
         this.isMethodStatic = method.hasModifier(ModifierKind.STATIC);
-        this.typeToUse = typeToUse;
+        this.typeToUse = "changetypehere";
         this.size = size;
         this.outputDir = outputDir;
         String path = "java_progs.templates.Template";
@@ -81,7 +80,7 @@ public class SpoonInjector {
             return;
         }
         this.newClass = myClass.clone();
-        this.newClassName = /*myClass.getSimpleName() +"_" +*/ method.getSignature().replaceAll("\\.|,|\\(|\\)", "_")+id;
+        this.newClassName = "_"+id+method.getSignature().replaceAll("\\.|,|\\(|\\)", "_");//+id;
         this.mainMethod = newClass.getMethod("main", factory.Type().createArrayReference(factory.Type().stringType()));
         this.tryBlock = (CtTry) mainMethod.getElements(el -> el instanceof CtTry).get(0);
         this.statements = factory.Core().createStatementList();
@@ -100,7 +99,6 @@ public class SpoonInjector {
 
     public void injectInTemplate() {
         
-        // Inject a new method
         createInitialVar(true);
         createMethodArgs();
         createClassThatHoldsArgs();
@@ -123,7 +121,6 @@ public class SpoonInjector {
         //launcher.prettyprint();
         //saveClassToFile(newClass,"generated_classes");
 
-        // 3. Remove unused imports
         ImportCleaner importCleaner = new ImportCleaner();
         importCleaner.process(newClass);
 
@@ -153,7 +150,6 @@ public class SpoonInjector {
             if (collec.getQualifiedName().equals(l.get(i).getSignature().split("\\(")[0]) && l.get(i).toString().length() <= shortestConstructorCount) {
                 shortestConstructor = l.get(i);
                 shortestConstructorCount = l.get(i).toString().length();
-                //System.out.println(l.get(i) + " " + l.get(i).toString().length());
             }
         }
         return shortestConstructor;
@@ -241,7 +237,7 @@ public class SpoonInjector {
     }
 
     private void createArrayWithVarAndArgs() {
-        String statement = "BenchmarkArgs[] arr = new BenchmarkArgs["+numberOfFunCalls+"]";
+        String statement = "BenchmarkArgs[] arr = new BenchmarkArgs["+"\"numberOfFunCalls\""/*numberOfFunCalls*/+"]";
         statements.addStatement(factory.createCodeSnippetStatement(statement));
     }
 
@@ -302,6 +298,7 @@ public class SpoonInjector {
     }
 
     private boolean isCollection(CtLocalVariable<?> var) {
+        //System.out.println(var);
         return var.getType().isSubtypeOf(factory.Type().createReference("java.util.Collection"));
     }
 
@@ -340,14 +337,14 @@ public class SpoonInjector {
 
     private CtExpression<?> createVar(CtTypeReference<?> typeRef, boolean getDefaultValue) {
         if (typeRef.isPrimitive()) return factory.Code().createLiteral(createRandomLiteral(typeRef,getDefaultValue,false));
-        if (typeRef.toString().contains("Collection")) return factory.Code().createConstructorCall(typeRef);//System.out.println(collec.getReference());
+        if (typeRef.toString().contains("Collection")) return factory.Code().createConstructorCall(typeRef);
         return factory.Code().createConstructorCall(typeRef);
     }
 
     private Object createRandomLiteral(CtTypeReference<?> typeRef, boolean getDefaultValue, boolean useConstructorSize) {
         Object value = null;
         if (getDefaultValue) value = getDefaultValues(typeRef.toString());
-        else if (useConstructorSize) value = size;
+        else if (useConstructorSize) value = "ChangeValueHere"+(varIndex-1)+"_useConstructorSize";//value = "useConstructorSize";//size;
         else value = getRandomValueOfType(typeRef.toString());
         saveInput(value);
         return value;
@@ -355,6 +352,7 @@ public class SpoonInjector {
 
     private void saveInput(Object value) {
         String expression = (value instanceof String) ? "\""+((String)value).length()+"\"" : "\""+value+"\"";
+        if (typeToUse.equals("changetypehere")) expression = (String) "\"ChangeValueHere"+(varIndex-1)+"\"";
         CtField<?> inputField = factory.createCtField("input"+varIndex, factory.Type().stringType(),expression);
         inputField.addModifier(ModifierKind.PRIVATE);
         inputs.add(inputField);
@@ -362,6 +360,7 @@ public class SpoonInjector {
 
     @SuppressWarnings("unchecked")
     private <T> T getRandomValueOfType(String type){
+        if (typeToUse.equals("changetypehere")) return (T) ("ChangeValueHere"+(varIndex-1)+"_"+type);
         Random rand = new Random();//new Random(42);
         switch (type.toLowerCase()) {
             case "int":
@@ -383,6 +382,7 @@ public class SpoonInjector {
                 char maxChar = 'z';
                 char randomChar = (char) (rand.nextInt((maxChar - minChar) + 1) + minChar);
                 return (T) Character.valueOf(randomChar);
+            
             default:
                 throw new IllegalArgumentException("Unsupported type: " + type);
         }
@@ -485,7 +485,6 @@ public class SpoonInjector {
         CtBlock<Void> methodBody = factory.Core().createBlock();
 
         CtCodeSnippetStatement snippet = factory.Code().createCodeSnippetStatement(
-            //"System.out.println(\"methodName\");"
             getBenchmarkFunBody()
         );
         methodBody.addStatement(snippet);
@@ -525,7 +524,6 @@ public class SpoonInjector {
                 System.out.print(param.getType().getSimpleName() + " " + param.getSimpleName() + ", ");
             }
             
-            //System.out.println(") -> " + returnType.getSimpleName());
         }
     }
 
@@ -675,11 +673,10 @@ public class SpoonInjector {
             StringBuilder newContent = new StringBuilder();
 
             // Add the new lines
-            newContent.append("package "+outputDir+";\n");
+            newContent.append("package "+"generated_progs"/*outputDir*/+";\n");
             for (String line : imports) {
                 newContent.append(line).append(System.lineSeparator());
             }
-            //System.out.println(filename + " original content -> \n"+originalContent);
             // Append the original file content
             newContent.append(originalContent);
 
@@ -687,9 +684,6 @@ public class SpoonInjector {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                     writer.write(newContent.toString());
                 }
-
-            //System.out.println("File successfully updated.");
-            //System.out.println(newContent);
         } catch (IOException e) {
             System.err.println("Error modifying the file: " + e.getMessage());
         }

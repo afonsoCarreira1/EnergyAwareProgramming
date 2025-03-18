@@ -2,9 +2,11 @@ package java_progs.templates;
 
 
 import spoon.Launcher;
+import spoon.reflect.CtModel;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCatch;
 import spoon.reflect.code.CtCodeSnippetStatement;
+import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLocalVariable;
@@ -38,6 +40,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -117,6 +120,8 @@ public class SpoonInjector {
 
         injectInputFieldsInClass();
 
+        System.out.println(getDefaultValueForType(collec));
+
         newClass.setSimpleName(newClassName);
         launcher.getFactory().Class().getAll().add(newClass);
         launcher.getModel().getRootPackage().addType(newClass);
@@ -135,28 +140,64 @@ public class SpoonInjector {
         if (!outputFolder.exists()) {
             outputFolder.mkdirs();
         }
-
         // Use JavaOutputProcessor to generate correct imports
         JavaOutputProcessor processor = new JavaOutputProcessor();
         processor.setFactory(factory);
         processor.createJavaFile(ctClass);
     }
 
-    private CtConstructor<?> getConstructors() {
-        List<CtConstructor<?>> l = collec.filterChildren(new TypeFilter<>(CtConstructor.class))
+    private CtConstructor<?> getConstructors(CtType<?> t) {
+        List<CtConstructor<?>> l = t.filterChildren(new TypeFilter<>(CtConstructor.class))
         .map(m -> (CtConstructor<?>) m)
         .list();
         CtConstructor<?> shortestConstructor = l.get(0);
-        int shortestConstructorCount = Integer.MAX_VALUE;
-        for (int i = 0; i < l.size(); i++) {
-            if (collec.getQualifiedName().equals(l.get(i).getSignature().split("\\(")[0]) && l.get(i).toString().length() <= shortestConstructorCount) {
-                shortestConstructor = l.get(i);
-                shortestConstructorCount = l.get(i).toString().length();
+        return shortestConstructor;
+    }
+
+    private CtExpression<?> getDefaultValueForType(CtType<?> paramType) {
+        String typeName = paramType.getSimpleName();
+
+        // 1️⃣ Handle primitive types
+        if (typeName.equals("int") || typeName.equals("short") || typeName.equals("byte") ||
+            typeName.equals("long") || typeName.equals("double") || typeName.equals("float")) {
+            return factory.Code().createLiteral(createRandomLiteral(paramType.getReference(),false,false)); // Default number
+        } else if (typeName.equals("Integer") || typeName.equals("Short") || typeName.equals("Byte") ||
+            typeName.equals("Long") || typeName.equals("Double") || typeName.equals("Float")) {
+            return factory.Code().createLiteral(getRandomValueOfType(typeName)); // Default number
+        } else if (typeName.equals("boolean")) {
+            return factory.Code().createLiteral(getRandomValueOfType(typeName)); // Default boolean
+        } else if (typeName.equals("char")) {
+            return factory.Code().createLiteral(getRandomValueOfType(typeName)); // Default char
+        }
+
+        // 2️⃣ Handle known Java classes
+        if (typeName.equals("String")) {
+            return factory.Code().createLiteral(""); // Default empty string
+        }
+
+        // 3️⃣ Check if it's a user-defined class (needs a constructor call)
+        CtType<?> paramClass = factory.getModel().getAllTypes().stream()
+                .filter(type -> type.getQualifiedName().equals(paramType.getQualifiedName()))
+                .findFirst()
+                .orElse(null);
+
+        if (paramClass != null) {
+            // Get the simplest constructor (fewest parameters)
+            CtConstructor<?> paramConstructor = getConstructors(paramClass);
+
+            if (paramConstructor != null) {
+                CtConstructorCall<?> nestedConstructorCall = factory.Code().createConstructorCall(paramClass.getReference());
+
+                // Recursively resolve parameters for this constructor
+                paramConstructor.getParameters().forEach(nestedParam -> {
+                    CtExpression<?> nestedArg = getDefaultValueForType(nestedParam.getType().getTypeDeclaration());
+                    nestedConstructorCall.addArgument(nestedArg);
+                });
+
+                return nestedConstructorCall;
             }
         }
-        return shortestConstructor;
-        //TODO for each parameter check if it is needed to start something
-        
+        return factory.Code().createLiteral(null);
     }
 
     private void injectInputFieldsInClass() {
@@ -340,7 +381,8 @@ public class SpoonInjector {
     private CtExpression<?> createVar(CtTypeReference<?> typeRef, boolean getDefaultValue) {
         if (typeRef.isPrimitive()) return factory.Code().createLiteral(createRandomLiteral(typeRef,getDefaultValue,false));
         if (typeRef.toString().contains("Collection")) return factory.Code().createConstructorCall(typeRef);
-        return factory.Code().createConstructorCall(typeRef);
+        return getDefaultValueForType(typeRef.getTypeDeclaration());
+        //return factory.Code().createConstructorCall(typeRef);
     }
 
     private Object createRandomLiteral(CtTypeReference<?> typeRef, boolean getDefaultValue, boolean useConstructorSize) {
@@ -414,49 +456,6 @@ public class SpoonInjector {
         }
     }
 
-    private String createMethodCallParameters() {
-        String args = "";
-        for (int i = 0; i < method.getParameters().size(); i++) {
-            CtParameter<?> parameter = method.getParameters().get(i);
-            args += parameter.getType() +" arg"+i;
-            if (i != method.getParameters().size() - 1) args += ", ";
-        }
-        return args;
-    }
-
-    private void injectMethod(CtClass<?> myClass) {
-        // Define the return type (void in this case)
-        CtTypeReference<Void> returnType = factory.Type().voidPrimitiveType();
-
-        // Define the method name
-        String methodName = "injectedMethod";
-
-        // Define the method modifiers (public)
-        Set<ModifierKind> modifiers = new HashSet<>();
-        modifiers.add(ModifierKind.PUBLIC);
-
-        // Define the body of the method
-        CtBlock<Void> methodBody = factory.Core().createBlock();
-
-        CtCodeSnippetStatement snippet = factory.Code().createCodeSnippetStatement(
-                "System.out.println(\"Injected method executed!\")"
-        );
-        methodBody.addStatement(snippet);
-
-        // Create the method
-        CtMethod<Void> newMethod = factory.Method().create(
-                myClass,            // Target class
-                modifiers,          // Modifiers
-                returnType,         // Return type
-                methodName,         // Method name
-                Collections.emptyList(),  // Parameters (empty)
-                Collections.emptySet(),   // Exceptions thrown
-                methodBody          // Method body
-        );
-
-        // Add method to class
-        myClass.addMethod(newMethod);
-    }
 
     private List<CtParameter<?>> getComputationParameters() {
         if (isMethodStatic) return method.getParameters();

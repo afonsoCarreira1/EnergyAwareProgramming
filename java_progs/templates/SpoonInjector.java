@@ -320,7 +320,7 @@ public class SpoonInjector {
     }
 
     private boolean isCollection(CtLocalVariable<?> var) {
-        //System.out.println(var);
+        System.out.println(var);
         return var.getType().isSubtypeOf(factory.Type().createReference("java.util.Collection"));
     }
 

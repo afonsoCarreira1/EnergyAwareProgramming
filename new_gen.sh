@@ -23,4 +23,4 @@ SLF4J_JAR="./parser/lib/slf4j-simple-2.0.16.jar"
 javac -cp "$SPOON_JAR" java_progs/templates/TemplateCreator.java java_progs/templates/SpoonInjector.java
 
 # Run Java program
-java -cp ".:$SPOON_JAR:$SLF4J_JAR" java_progs/templates/TemplateCreator Fibonacci
+java -cp ".:$SPOON_JAR:$SLF4J_JAR" java_progs/templates/TemplateCreator

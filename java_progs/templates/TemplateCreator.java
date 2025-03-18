@@ -30,7 +30,7 @@ public class TemplateCreator {
     static String outputDir = "generated_templates";
     static int id = 0;
     static CtTypeReference<?> ref;
-    static boolean requiresTypesInClass;
+    static boolean requiresTypesInClass = true;
     // public static void main(String[] args) {
     // //initSpoon();
     // //initSpoon();
@@ -65,55 +65,47 @@ public class TemplateCreator {
 
     public static void main(String[] args) throws Exception {
         String programToRun;
+        List<CtMethod<?>> methods;
+        List<CtType<?>> collections;
         if (args.length != 0) {
             programToRun = args[0];
-            runCustomProgram(programToRun);
-            System.exit(0);
+            Launcher launcher = initSpoon();
+            methods = getPublicMethodsInClass(launcher,programToRun);
+            collections = Arrays.asList(ref.getTypeDeclaration());
+        }else {
+            collections = Arrays.asList(getCollections("list"));
+            methods = getCollectionMethods("list");
         }
-        ArrayList<CtMethod<?>> commonMethods = getCollectionMethods("list");
-        List<Integer> sizes = Arrays.asList(150);//createInputRange(1, 1.5, 0);
-        int[] funCalls =  new int[] {20_000};//{ 20_000, 50_000, 75_000, 100_000, 150_000 };
-        for (CtType<?> collec : getCollections("list")) {
-            for (CtMethod<?> method : commonMethods) {
-                //for (String type : getTypes()) {
-                    //for (int funCall : funCalls) {
-                        //for (int size : sizes) {
-                            //if (method.getSimpleName().contains("addAll")) {
-                                //if (collec.getSimpleName().equals("ArrayList") /*&& type.equals("Integer")*/){
-                                Launcher launcher = initSpoon();
-                                SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0/*funCall*/, method,
-                                        collec, ""/*type*/, 0/*size*/, outputDir,false);
-                                spi.injectInTemplate();
-                                spi.insertImport();
-                                //}
-                           //}
-                            id++;
-                        //}
-                    //}
-
-                //}
-
-            }
-        }
+        createTemplates(collections,methods);
         createProgramsFromTemplates();
     }
 
-    private static String runCustomProgram(String programName) throws Exception {
-        String path = "java_progs/templates/programsToBenchmark";
+    private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods) {
+        for (CtType<?> collec : collections) {
+            for (CtMethod<?> method : methods) {
+                System.out.println("method -> "+method);
+                Launcher launcher = initSpoon();
+                SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method,
+                collec, "", 0, outputDir,requiresTypesInClass);
+                spi.injectInTemplate();
+                spi.insertImport();
+            }
+        }
+    }
+
+    /*private static String runCustomProgram(String programName) throws Exception {
         Launcher launcher = initSpoon();
-        //launcher.addInputResource(path);
-        //launcher.buildModel();
 
         List<CtMethod<?>> methods = getPublicMethodsInClass(launcher,programName);
-        for (CtMethod<?> method : methods) {
-            SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0/*funCall*/, method,
-            ref.getTypeDeclaration(), ""/*type*/, 0/*size*/, outputDir,requiresTypesInClass);
+        //for (CtMethod<?> method : methods) {
+            SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method,
+            ref.getTypeDeclaration(), "", 0, outputDir,requiresTypesInClass);
             spi.injectInTemplate();
             spi.insertImport();
         }
         
         return "";
-    }
+    }*/
 
     private static List<CtMethod<?>> getPublicMethodsInClass(Launcher launcher,String programName) {
         List<CtMethod<?>> publicMethods = new ArrayList<>();
@@ -293,6 +285,7 @@ public class TemplateCreator {
         Launcher launcher = new Launcher();
         launcher.addInputResource("java_progs/templates/");
         launcher.addInputResource("java_progs/aux/");
+        launcher.addInputResource("java_progs/templates/programsToBenchmark");
         launcher.getFactory().getEnvironment().setAutoImports(true);
         launcher.setSourceOutputDirectory(outputDir);
         launcher.buildModel();

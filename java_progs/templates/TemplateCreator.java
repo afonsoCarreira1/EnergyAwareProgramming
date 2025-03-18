@@ -73,7 +73,7 @@ public class TemplateCreator {
                                 if (collec.getSimpleName().equals("ArrayList") /*&& type.equals("Integer")*/){
                                 Launcher launcher = initSpoon();
                                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0/*funCall*/, method,
-                                        collec, ""/*type*/, 0/*size*/, outputDir, id);
+                                        collec, ""/*type*/, 0/*size*/, outputDir);
                                 spi.injectInTemplate();
                                 spi.insertImport();
                                 }
@@ -106,13 +106,12 @@ public class TemplateCreator {
                 for (int funCall : funCalls) {
                     program = program.replace("\"numberOfFunCalls\"", funCall+"");
                     for (int size : sizes) {
-                        //program = program.replace("\"useConstructorSize\"", size+"");
                         String finalProg = replaceValues(program,size);
                         String className = template.toString().replace(outputDir+"/","").split("\\.java")[0];
-                        finalProg = finalProg.replace(className,"_"+(id)+className);
                         //System.out.println(className);
                         //System.exit(0);
-                        createJavaProgramFile("generated_progs/"+"_"+(id)+className+".java",finalProg);
+                        finalProg = finalProg.replace(className,className+id);
+                        createJavaProgramFile("generated_progs/"+className+id+".java",finalProg);
                         id++;
                     }
                 }

@@ -63,7 +63,7 @@ public class SpoonInjector {
     CtStatementList statements = null;
     List<CtField<?>> inputs = null;
 
-    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size, String outputDir, int id) {
+    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size, String outputDir) {
         this.launcher = launcher;
         this.factory = factory;
         this.numberOfFunCalls = numberOfFunCalls;
@@ -80,7 +80,7 @@ public class SpoonInjector {
             return;
         }
         this.newClass = myClass.clone();
-        this.newClassName = "_"+id+method.getSignature().replaceAll("\\.|,|\\(|\\)", "_");//+id;
+        this.newClassName = collec.getSimpleName()+"_"+method.getSignature().replaceAll("\\.|,|\\(|\\)", "_");//+id;
         this.mainMethod = newClass.getMethod("main", factory.Type().createArrayReference(factory.Type().stringType()));
         this.tryBlock = (CtTry) mainMethod.getElements(el -> el instanceof CtTry).get(0);
         this.statements = factory.Core().createStatementList();

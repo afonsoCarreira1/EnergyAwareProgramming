@@ -18,6 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import spoon.Launcher;
+import spoon.reflect.CtModel;
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
@@ -27,7 +29,7 @@ public class TemplateCreator {
 
     static String outputDir = "generated_templates";
     static int id = 0;
-
+    static CtTypeReference<?> ref;
     // public static void main(String[] args) {
     // //initSpoon();
     // //initSpoon();
@@ -60,7 +62,13 @@ public class TemplateCreator {
     // }
     // }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        String programToRun;
+        if (args.length != 0) {
+            programToRun = args[0];
+            runCustomProgram(programToRun);
+            System.exit(0);
+        }
         ArrayList<CtMethod<?>> commonMethods = getCollectionMethods("list");
         List<Integer> sizes = Arrays.asList(150);//createInputRange(1, 1.5, 0);
         int[] funCalls =  new int[] {20_000};//{ 20_000, 50_000, 75_000, 100_000, 150_000 };
@@ -69,15 +77,15 @@ public class TemplateCreator {
                 //for (String type : getTypes()) {
                     //for (int funCall : funCalls) {
                         //for (int size : sizes) {
-                            if (method.getSimpleName().contains("addAll")) {
-                                if (collec.getSimpleName().equals("ArrayList") /*&& type.equals("Integer")*/){
+                            //if (method.getSimpleName().contains("addAll")) {
+                                //if (collec.getSimpleName().equals("ArrayList") /*&& type.equals("Integer")*/){
                                 Launcher launcher = initSpoon();
                                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0/*funCall*/, method,
                                         collec, ""/*type*/, 0/*size*/, outputDir);
                                 spi.injectInTemplate();
                                 spi.insertImport();
-                                }
-                            }
+                                //}
+                           //}
                             id++;
                         //}
                     //}
@@ -86,12 +94,51 @@ public class TemplateCreator {
 
             }
         }
-        try {
-            createProgramsFromTemplates();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        createProgramsFromTemplates();
+    }
+
+    private static String runCustomProgram(String programName) throws Exception {
+        String path = "java_progs/templates/programsToBenchmark";
+        File[] files = getFiles(path);
+        String program = "";
+        for (File file : files) {
+            if (programName.toLowerCase().equals(file.getName().toLowerCase().split("\\.")[0])){
+                System.out.println("here");
+                program = readFile(file.getAbsolutePath());
+            }
         }
+        Launcher launcher = initSpoon();
+        //launcher.addInputResource(path);
+        //launcher.buildModel();
+
+        CtModel model = launcher.getModel();
+        List<CtMethod<?>> methods = getPublicMethodsInClass(model,programName);
+        for (CtMethod<?> method : methods) {
+            SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0/*funCall*/, method,
+            ref.getTypeDeclaration(), ""/*type*/, 0/*size*/, outputDir);
+            spi.injectInTemplate();
+            spi.insertImport();
+        }
+        
+        return "";
+    }
+
+    private static List<CtMethod<?>> getPublicMethodsInClass(CtModel model,String programName) {
+        List<CtMethod<?>> publicMethods = new ArrayList<>();
+        for (CtType<?> ctType : model.getAllTypes()) {
+            if (ctType instanceof CtClass<?>) { 
+                CtClass<?> ctClass = (CtClass<?>) ctType;
+                if (!ctClass.getSimpleName().toLowerCase().equals(programName.toLowerCase())) continue;
+                ref = ctClass.getReference();
+                Set<CtMethod<?>> methods = ctClass.getMethods();
+                for (CtMethod<?> method : methods) {
+                    if (method.isPrivate()) continue; //so quero os public
+                    if (method.getSimpleName().toLowerCase().equals("clone")) continue; //nao quero o metodo clone
+                    publicMethods.add(method);
+                }
+            }
+        }
+        return publicMethods;
     }
 
     private static void createProgramsFromTemplates() throws IOException {
@@ -108,8 +155,6 @@ public class TemplateCreator {
                     for (int size : sizes) {
                         String finalProg = replaceValues(program,size);
                         String className = template.toString().replace(outputDir+"/","").split("\\.java")[0];
-                        //System.out.println(className);
-                        //System.exit(0);
                         finalProg = finalProg.replace(className,className+id);
                         createJavaProgramFile("generated_progs/"+className+id+".java",finalProg);
                         id++;
@@ -219,7 +264,11 @@ public class TemplateCreator {
     }
 
     private static File[] getAllTemplates() {
-        return new File(outputDir+"/").listFiles();
+        return getFiles(outputDir+"/");
+    }
+
+    private static File[] getFiles(String dir){
+        return new File(dir).listFiles();
     }
 
     private static String[] getTypes() {

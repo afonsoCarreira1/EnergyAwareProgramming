@@ -155,27 +155,7 @@ public class SpoonInjector {
     }
 
     private CtExpression<?> getDefaultValueForType(CtType<?> paramType) {
-        String typeName = paramType.getSimpleName();
 
-        // 1️⃣ Handle primitive types
-        if (typeName.equals("int") || typeName.equals("short") || typeName.equals("byte") ||
-            typeName.equals("long") || typeName.equals("double") || typeName.equals("float")) {
-            return factory.Code().createLiteral(createRandomLiteral(paramType.getReference(),false,false)); // Default number
-        } else if (typeName.equals("Integer") || typeName.equals("Short") || typeName.equals("Byte") ||
-            typeName.equals("Long") || typeName.equals("Double") || typeName.equals("Float")) {
-            return factory.Code().createLiteral(getRandomValueOfType(typeName)); // Default number
-        } else if (typeName.equals("boolean")) {
-            return factory.Code().createLiteral(getRandomValueOfType(typeName)); // Default boolean
-        } else if (typeName.equals("char")) {
-            return factory.Code().createLiteral(getRandomValueOfType(typeName)); // Default char
-        }
-
-        // 2️⃣ Handle known Java classes
-        if (typeName.equals("String")) {
-            return factory.Code().createLiteral(""); // Default empty string
-        }
-
-        // 3️⃣ Check if it's a user-defined class (needs a constructor call)
         CtType<?> paramClass = factory.getModel().getAllTypes().stream()
                 .filter(type -> type.getQualifiedName().equals(paramType.getQualifiedName()))
                 .findFirst()
@@ -197,7 +177,7 @@ public class SpoonInjector {
                 return nestedConstructorCall;
             }
         }
-        return factory.Code().createLiteral(null);
+        return factory.Code().createLiteral(createRandomLiteral(paramType.getReference(),false,false));
     }
 
     private void injectInputFieldsInClass() {

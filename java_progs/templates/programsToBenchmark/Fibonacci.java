@@ -8,10 +8,11 @@ public class Fibonacci {
     //    else return fibonacci(n-1)+fibonacci(n+1);
     //}
 
-    int n;
-    public Fibonacci(int n){this.n=n;}
+    //int n;
+    Test t;
+public Fibonacci(Test t){this.t = t;}
 
-    public int fibonacci() {return fibonacci(n);}
+    public int fibonacci() {return fibonacci(t.n);}
     
     private int fibonacci(int n) {
         if (n == 0)

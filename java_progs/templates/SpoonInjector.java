@@ -120,7 +120,6 @@ public class SpoonInjector {
 
         injectInputFieldsInClass();
 
-        System.out.println(getDefaultValueForType(collec));
 
         newClass.setSimpleName(newClassName);
         launcher.getFactory().Class().getAll().add(newClass);
@@ -339,7 +338,7 @@ public class SpoonInjector {
 
     private String getBenchmarkFunBody() {
         String body = "";
-        if (isMethodStatic) body += collec.getQualifiedName()+ "()";//TODO i assume there are no constructors here
+        if (isMethodStatic) body += collec.getQualifiedName()+"."+method.getSimpleName();//TODO i assume there are no constructors here
         else body += "var."+method.getSimpleName();
         body += callArgs();
         return body;

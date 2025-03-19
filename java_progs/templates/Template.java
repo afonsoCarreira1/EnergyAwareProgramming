@@ -15,7 +15,7 @@ public class Template {
     //create computation fun
 
     // add @SuppressWarnings("unchecked")
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
         try {
             //if fun to test is Static.fun() then just create multiple inputs
             //if fun is var.fun() then start by creating multiple vars and then multiple inputs

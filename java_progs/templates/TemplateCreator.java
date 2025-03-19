@@ -30,7 +30,7 @@ public class TemplateCreator {
     static String outputDir = "generated_templates";
     static int id = 0;
     static CtTypeReference<?> ref;
-    static boolean requiresTypesInClass = true;
+    static boolean isGeneric = true;
     // public static void main(String[] args) {
     // //initSpoon();
     // //initSpoon();
@@ -83,29 +83,16 @@ public class TemplateCreator {
     private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods) {
         for (CtType<?> collec : collections) {
             for (CtMethod<?> method : methods) {
-                System.out.println("method -> "+method);
+                if (!collec.getSimpleName().equals("ArrayList")) continue;
+                if (!method.getSimpleName().contains("toArray")) continue;
                 Launcher launcher = initSpoon();
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method,
-                collec, "", 0, outputDir,requiresTypesInClass);
+                collec, "", 0, outputDir,isGeneric);
                 spi.injectInTemplate();
                 spi.insertImport();
             }
         }
     }
-
-    /*private static String runCustomProgram(String programName) throws Exception {
-        Launcher launcher = initSpoon();
-
-        List<CtMethod<?>> methods = getPublicMethodsInClass(launcher,programName);
-        //for (CtMethod<?> method : methods) {
-            SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method,
-            ref.getTypeDeclaration(), "", 0, outputDir,requiresTypesInClass);
-            spi.injectInTemplate();
-            spi.insertImport();
-        }
-        
-        return "";
-    }*/
 
     private static List<CtMethod<?>> getPublicMethodsInClass(Launcher launcher,String programName) {
         List<CtMethod<?>> publicMethods = new ArrayList<>();
@@ -115,13 +102,14 @@ public class TemplateCreator {
                 if (!ctClass.getSimpleName().toLowerCase().equals(programName.toLowerCase())) continue;
                 // check if i need to do Class<Type>() or just Class()
                 if (ctClass instanceof CtClass<?>) {
-                    if (!ctClass.getFormalCtTypeParameters().isEmpty()) requiresTypesInClass = true;
-                    else requiresTypesInClass = false;
+                    if (!ctClass.getFormalCtTypeParameters().isEmpty()) isGeneric = true;
+                    else isGeneric = false;
                 }
                 ref = ctClass.getReference();
                 Set<CtMethod<?>> methods = ctClass.getMethods();
                 for (CtMethod<?> method : methods) {
                     if (method.isPrivate()) continue; //so quero os public
+                    if (method.isProtected()) continue; //nao quero metodos private
                     if (method.getSimpleName().toLowerCase().equals("clone")) continue; //nao quero o metodo clone
                     publicMethods.add(method);
                 }
@@ -286,7 +274,9 @@ public class TemplateCreator {
         launcher.addInputResource("java_progs/templates/");
         launcher.addInputResource("java_progs/aux/");
         launcher.addInputResource("java_progs/templates/programsToBenchmark");
+        launcher.addInputResource("java_progs/templates/ChangeTypeHere");
         launcher.getFactory().getEnvironment().setAutoImports(true);
+        launcher.getEnvironment().setNoClasspath(false);
         launcher.setSourceOutputDirectory(outputDir);
         launcher.buildModel();
         return launcher;
@@ -299,6 +289,8 @@ public class TemplateCreator {
 
         for (CtType<?> collectionType : collectionTypes) {
             for (CtMethod<?> method : collectionType.getMethods()) {
+                if (method.isPrivate()) continue; //nao quero metodos private
+                if (method.isProtected()) continue; //nao quero metodos private
                 StringBuilder methodSignature = new StringBuilder();
                 methodSignature.append(method.getSimpleName());
                 CtTypeReference<?> returnType = method.getType();
@@ -313,8 +305,8 @@ public class TemplateCreator {
                 }
 
                 methodSignature.append(") -> " + returnType.getSimpleName());
-                if (collectionType.getSimpleName().equals("Stack"))
-                    System.out.println(methodSignature.toString());
+                //if (collectionType.getSimpleName().equals("Stack"))
+                    //System.out.println(methodSignature.toString());
                 methods.put(methodSignature.toString(),
                         methods.get(methodSignature.toString()) != null ? methods.get(methodSignature.toString()) + 1
                                 : 1);

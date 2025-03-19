@@ -1,7 +1,7 @@
 #!/bin/bash
 
-sudo find generated_progs/ -type f -delete #remove java programs
-sudo find generated_templates/ -type f -delete #remove java programs
+find generated_progs/ -type f -delete #remove java programs
+find generated_templates/ -type f -delete #remove java programs
 
 javac java_progs/aux/ArrayListAux.java java_progs/aux/WritePid.java java_progs/aux/TemplatesAux.java
 mv java_progs/aux/ArrayListAux.class java_progs/out/java_progs/aux

@@ -68,6 +68,7 @@ public class SpoonInjector {
     int min = 0 , max;
     CtStatementList statements = null;
     List<CtField<?>> inputs = null;
+    final String changeValueHere = "ChangeValueHere";
 
     public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size, String outputDir,boolean requiresTypesInClass) {
         this.launcher = launcher;
@@ -173,7 +174,7 @@ public class SpoonInjector {
     }
 
     private CtExpression<?> getDefaultValueForType(CtType<?> paramType) {
-        System.out.println(paramType.getSimpleName());
+        
         CtType<?> finalParamType = paramType.getQualifiedName().equals("java.util.Collection") ? (CtType<?>) collec : paramType;
         CtType<?> paramClass = factory.getModel().getAllTypes().stream()
                 .filter(type -> type.getQualifiedName().equals(finalParamType.getQualifiedName()))
@@ -388,12 +389,13 @@ public class SpoonInjector {
     }
 
     private CtLocalVariable<?> createVar(CtTypeReference typeRef, String varName, boolean getDefaultValue) {
+        System.out.println("ref ->"+typeRef);
         CtTypeReference ref = typeRef.toString().contains("Collection") ? factory.Type().createReference(collec) : typeRef;
         CtTypeReference<?> genericType = factory.Type().createReference(typeToUse);
         //if (requiresTypesInClass) ref.addActualTypeArgument(genericType);
         if (isGeneric(ref)) ref.addActualTypeArgument(genericType);
+        if (isArray(ref.getSimpleName()) && isPlaceHolderType(ref.getSimpleName().split("\\[")[0])) ref = changeTAndEArray(ref.getSimpleName());
         CtExpression<?> exp = createVar(ref,getDefaultValue);
-        if (isArray(ref.getSimpleName())) if (isPlaceHolderType(ref.getSimpleName().split("\\[")[0])) System.out.println("ya");//ref =factory.createReference("changetypehere");
         if (isPlaceHolderType(ref.getSimpleName())) ref =factory.createReference("changetypehere");
         CtLocalVariable<?> variable = factory.Code().createLocalVariable(
             ref,           // var type
@@ -403,11 +405,42 @@ public class SpoonInjector {
         return variable;
     }
 
+    private CtTypeReference<?> changeTAndEArray(String type) {
+        int numberOfArrays = countOccurrences(type, "[]");
+        StringBuilder newType = new StringBuilder(typeToUse);
+        for (int i = 0; i < numberOfArrays; i++) {
+            newType.append("[]");
+        }
+        return factory.Type().createReference(newType.toString());
+    }
+
     private CtExpression<?> createVar(CtTypeReference<?> typeRef, boolean getDefaultValue) {        
         if (typeRef.isPrimitive() || isPlaceHolderType(typeRef.toString())) return factory.Code().createLiteral(createRandomLiteral(typeRef,getDefaultValue,false));
         if (typeRef.toString().contains("Collection")) return factory.Code().createConstructorCall(typeRef);
+        if (isArray(typeRef.toString())) return handleArrayCreationExpression(typeRef.toString());
         return getDefaultValueForType(typeRef.getTypeDeclaration());
         //return factory.Code().createConstructorCall(typeRef);
+    }
+
+    private CtExpression<?> handleArrayCreationExpression(String type) {
+        int arrayDepth = countOccurrences(type, "[]");
+        StringBuilder exp = new StringBuilder("new "+type.split("\\[")[0]);
+        for (int i = 0; i < arrayDepth; i++) {
+            exp.append("[\""+changeValueHere+"_int"+"\"]");
+        }
+        return factory.Code().createCodeSnippetExpression(exp.toString());
+    }
+
+    public static int countOccurrences(String str, String sub) {
+        int count = 0;
+        int index = 0;
+
+        while ((index = str.indexOf(sub, index)) != -1) {
+            count++;
+            index += sub.length();
+        }
+
+        return count;
     }
 
     private Object createRandomLiteral(CtTypeReference<?> typeRef, boolean getDefaultValue, boolean useConstructorSize) {

@@ -1,8 +1,10 @@
 package java_progs.aux;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class ArrayListAux {
     public static int min = 0;
@@ -69,6 +71,18 @@ public class ArrayListAux {
                 }
             }
         return set;
+    }
+
+    //public static <T> void populateArrayObject(T[] arr, Supplier<T> sup) {
+    //    for (int i = 0; i < arr.length; i++) {
+    //        arr[i] = sup.get();
+    //    }
+    //}
+
+    public static <T> void populateArrayPrimitive(T[] arr, Supplier<T> valueSupplier) {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = valueSupplier.get();
+        }
     }
 
     public static int getRandomIndex(int listSize) {

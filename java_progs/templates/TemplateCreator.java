@@ -84,7 +84,7 @@ public class TemplateCreator {
         for (CtType<?> collec : collections) {
             for (CtMethod<?> method : methods) {
                 if (!collec.getSimpleName().equals("ArrayList")) continue;
-                if (!method.getSimpleName().contains("toArray")) continue;
+                if (!method.getSimpleName().contains("add")) continue;
                 Launcher launcher = initSpoon();
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method,
                 collec, "", 0, outputDir,isGeneric);

@@ -108,7 +108,7 @@ public class SpoonInjector {
     }
 
     public void injectInTemplate() {
-        
+        addImport("java_progs.aux.DeepCopyUtil");
         createInitialVar(true);
         createMethodArgs();
         createClassThatHoldsArgs();
@@ -252,9 +252,11 @@ public class SpoonInjector {
         for (CtLocalVariable<?> var : vars){
             innerClass.addField(createBenchmarkClassFields(var));
             params.add(factory.createParameter(constructor, var.getType(), var.getSimpleName()));
-            if (isPrimitive(var.getType().toString())) bodyStatements.addStatement(factory.Code().createCodeSnippetStatement("this."+var.getSimpleName()+" = "+var.getSimpleName()));
-            else if (var.getType().toString().equals("changetypehere")) bodyStatements.addStatement(factory.Code().createCodeSnippetStatement("this."+var.getSimpleName()+" = "+var.getSimpleName()));
-            else bodyStatements.addStatement(factory.Code().createCodeSnippetStatement("this."+var.getSimpleName()+" = ("+collec.getSimpleName()+") "+var.getSimpleName()+".clone()"));
+            String exp = "this."+var.getSimpleName() +" = DeepCopyUtil.deepCopy("+var.getSimpleName()+")";
+            bodyStatements.addStatement(factory.Code().createCodeSnippetStatement(exp));
+            //if (isPrimitive(var.getType().toString())) bodyStatements.addStatement(factory.Code().createCodeSnippetStatement("this."+var.getSimpleName()+" = "+var.getSimpleName()));
+            //else if (var.getType().toString().equals("changetypehere")) bodyStatements.addStatement(factory.Code().createCodeSnippetStatement("this."+var.getSimpleName()+" = "+var.getSimpleName()));
+            //else bodyStatements.addStatement(factory.Code().createCodeSnippetStatement("this."+var.getSimpleName()+" = ("+collec.getSimpleName()+") "+var.getSimpleName()+".clone()"));
         }
         constructor.setParameters(params);
         constructor.setBody(bodyStatements);

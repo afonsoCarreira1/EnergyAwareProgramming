@@ -177,7 +177,6 @@ public class SpoonInjector {
 
     private CtExpression<?> getDefaultValueForType(CtType<?> paramType) {
         if (paramType.isArray()) return handleArrayCreationExpression(paramType);
-        
         CtType<?> finalParamType = paramType.getQualifiedName().equals("java.util.Collection") ? (CtType<?>) collec : paramType;
         CtType<?> paramClass = factory.getModel().getAllTypes().stream()
                 .filter(type -> type.getQualifiedName().equals(finalParamType.getQualifiedName()))
@@ -506,7 +505,7 @@ public class SpoonInjector {
 
 
     private boolean isPlaceHolderType(String ref) {
-        if (ref.equals("E") || ref.equals("T")) return true;
+        if (ref.equals("E") || ref.equals("T") || ref.equals("Object")) return true;
         return false;
     }
 

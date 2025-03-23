@@ -64,6 +64,7 @@ public class SpoonInjector {
     CtMethod<?> mainMethod;
     CtTry tryBlock;
     int varIndex = 0;
+    int valueIndex = 0;
     HashSet<String> imports = new HashSet<>();
     int min = 0 , max;
     CtStatementList statements = null;
@@ -71,8 +72,9 @@ public class SpoonInjector {
     List<CtField<?>> inputs = null;
     final String changeValueHere = "ChangeValueHere";
     CtClass<?> myClass = null;
+    boolean getCustomImports;
 
-    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size, String outputDir,boolean requiresTypesInClass) {
+    public SpoonInjector(Launcher launcher, Factory factory, int numberOfFunCalls, CtMethod<?> method, CtType<?> collec,String typeToUse,int size, String outputDir,boolean requiresTypesInClass,boolean getCustomImports) {
         this.launcher = launcher;
         this.factory = factory;
         this.numberOfFunCalls = numberOfFunCalls;
@@ -84,6 +86,9 @@ public class SpoonInjector {
         this.outputDir = outputDir;
         String path = "java_progs.templates.Template";
         this.requiresTypesInClass = requiresTypesInClass;
+        if (getCustomImports) {
+            addImport("java_progs.templates.programsToBenchmark.*");
+        }
         myClass = factory.Class().get(path);
         if (myClass == null) {
             System.out.println(path +" not found");
@@ -105,7 +110,11 @@ public class SpoonInjector {
     }
 
     private String getVarName() {
-        return "var"+varIndex++;
+        String var = "var"+varIndex;
+        varIndex++;
+        valueIndex++;
+        return var;
+        //return "var"+varIndex++;
     }
 
     public void injectInTemplate() {
@@ -177,8 +186,8 @@ public class SpoonInjector {
         return type.contains("[]");
     }
 
-    private CtExpression<?> getDefaultValueForType(CtType<?> paramType) {
-        if (paramType.isArray()) return handleArrayCreationExpression(paramType);
+    private CtExpression<?> getDefaultValueForType(CtType<?> paramType, boolean isArray) {
+        if (/*paramType.isArray()*/isArray) return handleArrayCreationExpression(paramType);
         CtType<?> finalParamType = paramType.getQualifiedName().equals("java.util.Collection") ? (CtType<?>) collec : paramType;
         CtType<?> paramClass = factory.getModel().getAllTypes().stream()
                 .filter(type -> type.getQualifiedName().equals(finalParamType.getQualifiedName()))
@@ -194,7 +203,8 @@ public class SpoonInjector {
                 CtConstructorCall<?> nestedConstructorCall = factory.Code().createConstructorCall(paramClass.getReference());
 
                 paramConstructor.getParameters().forEach(nestedParam -> {
-                    CtExpression<?> nestedArg = getDefaultValueForType(nestedParam.getType().getTypeDeclaration());
+                    CtType<?> newTypeToCheck = nestedParam.getType().getTypeDeclaration();
+                    CtExpression<?> nestedArg = getDefaultValueForType(newTypeToCheck,newTypeToCheck.isArray());
                     nestedConstructorCall.addArgument(nestedArg);
                 });
 
@@ -383,9 +393,18 @@ public class SpoonInjector {
     private boolean isGeneric(CtTypeReference<?> type) {
         if (isArray(type.toString())) {
             if(isPlaceHolderType(type.toString().split("\\[")[0])) return false;
+            type = factory.Type().createReference(type.toString().split("\\[")[0]);
         }
         if (isPlaceHolderType(type.toString()) || type.toString().equals(typeToUse)) return false;
         CtClass<?> ctClass = (CtClass<?>) type.getTypeDeclaration();
+        if (ctClass == null) {
+            for (CtType<?> t : launcher.getFactory().Class().getAll()) {
+                if (t.getSimpleName().equals(type.toString())) {
+                    CtClass<?> ctClass2 = (CtClass<?>) t.getReference().getTypeDeclaration();
+                    return !ctClass2.getFormalCtTypeParameters().isEmpty();
+                } 
+            }
+        }
         return !ctClass.getFormalCtTypeParameters().isEmpty();
     }
 
@@ -418,26 +437,31 @@ public class SpoonInjector {
     private CtExpression<?> createVar(CtTypeReference<?> typeRef, boolean getDefaultValue) {       
         if (typeRef.isPrimitive() || isPlaceHolderType(typeRef.toString())) return factory.Code().createLiteral(createRandomLiteral(typeRef,getDefaultValue,false));
         if (typeRef.toString().contains("Collection")) return factory.Code().createConstructorCall(typeRef);
-        return getDefaultValueForType(typeRef.getTypeDeclaration());
+        if (typeRef.isArray()) return getDefaultValueForType((((CtArrayTypeReference<?>) typeRef).getComponentType().getTypeDeclaration()),true);
+        return getDefaultValueForType(typeRef.getTypeDeclaration(),false);
     }
 
     private CtExpression<?> handleArrayCreationExpression(CtType<?> type) {
+        //TODO handle multiple dimension arrays
+        //CtTypeReference<?> t = type.getTypeErasure();
+        //int arrayDepth = countOccurrences(t.toString(), "[]");
+        //StringBuilder exp = new StringBuilder("new "+t.toString().split("\\[")[0]);
+        //for (int i = 0; i < arrayDepth; i++) {
+        //    exp.append("[\""+createRandomLiteral(t.getTypeErasure(), false, false)+"\"]");
+        //}
         CtTypeReference<?> t = type.getTypeErasure();
-        int arrayDepth = countOccurrences(t.toString(), "[]");
-        StringBuilder exp = new StringBuilder("new "+t.toString().split("\\[")[0]);
-        for (int i = 0; i < arrayDepth; i++) {
-            exp.append("[\""+createRandomLiteral(t.getTypeErasure(), false, false)+"\"]");
-        }
+        String exp = "new "+t+"[\""+createRandomLiteral(factory.Type().integerType(), false, false)+"\"]";
         populateArray(t);
         return factory.Code().createCodeSnippetExpression(exp.toString());
     }
 
     private void populateArray(CtTypeReference<?> typeArr) {
+        addImport("java_progs.aux.ArrayListAux");
         CtTypeReference<?> type = factory.Type().createReference(typeArr.toString().split("\\[")[0]);
+        String populateArrayCall = "ArrayListAux.populateArrayPrimitive("+getLastVarName()+", () ->"; 
         //TODO esta linha de baixo
-        if (!type.toString().equals("Object")) getConstructors(type.getTypeDeclaration());// se nao for do tipo object, vou buscar a sua expressao
-        //se for object mudo para o tipo changetypehere que vai ser depois o (Integer,Boolean,etc...)
-        String populateArrayCall = "ArrayListAux.populateArrayPrimitive("+getLastVarName()+", () ->"+"ArrayListAux.getRandomValueOfType(\""+typeToUse+"\")"+")"; 
+        if (!type.toString().equals("Object")) populateArrayCall+=getDefaultValueForType(typeArr.getTypeDeclaration(),false)+")";// se nao for do tipo object, vou buscar a sua expressao
+        else populateArrayCall += "ArrayListAux.getRandomValueOfType(\""+typeToUse+"\"))";//se for object mudo para o tipo changetypehere que vai ser depois o (Integer,Boolean,etc...)
         CtStatement statement = factory.Code().createCodeSnippetStatement(populateArrayCall);
         statementsLast.addStatement(statement);
     }
@@ -461,7 +485,7 @@ public class SpoonInjector {
     private Object createRandomLiteral(CtTypeReference<?> typeRef, boolean getDefaultValue, boolean useConstructorSize) {
         Object value = null;
         if (getDefaultValue) value = getDefaultValues(typeRef.toString());
-        else if (useConstructorSize) value = "ChangeValueHere"+(varIndex-1)+"_useConstructorSize";
+        else if (useConstructorSize) value = "ChangeValueHere"+valueIndex+"_useConstructorSize";//"ChangeValueHere"+(varIndex-1)+"_useConstructorSize";
         else value = getPlaceHolderValue(typeRef.toString());
         saveInput(value);
         return value;
@@ -469,8 +493,8 @@ public class SpoonInjector {
 
     private void saveInput(Object value) {
         String expression = (value instanceof String) ? "\""+((String)value).length()+"\"" : "\""+value+"\"";
-        if (typeToUse.equals("changetypehere")) expression = (String) "\"ChangeValueHere"+(varIndex-1)+"\"";
-        CtField<?> inputField = factory.createCtField("input"+varIndex, factory.Type().stringType(),expression);
+        if (typeToUse.equals("changetypehere")) expression = (String) "\"ChangeValueHere"+valueIndex+"\"";//(String) "\"ChangeValueHere"+(varIndex-1)+"\"";
+        CtField<?> inputField = factory.createCtField("input"+valueIndex, factory.Type().stringType(),expression);//factory.createCtField("input"+varIndex, factory.Type().stringType(),expression);
         inputField.addModifier(ModifierKind.PRIVATE);
         inputs.add(inputField);
     }
@@ -478,6 +502,7 @@ public class SpoonInjector {
     @SuppressWarnings("unchecked")
     private <T> T getPlaceHolderValue(String type){
         //if (type.equals(typeToUse)) return (T) typeToUse;
+        valueIndex++;
         if (isArray(type)) type = "int";
         //if(isArray(type)) {
         //    //CtNewArray<Object[]> objectArray = factory.Code().createLiteralArray(factory.Code().createCodeSnippetStatement("type"));
@@ -488,11 +513,10 @@ public class SpoonInjector {
         //    if (isPlaceHolderType(type)) return (T) factory.Code().createCodeSnippetStatement("new "+typeWithoutArray+"[\"ChangeValueHere"+(varIndex-1)+"_"+typeWithoutArray+"\"]");
         //    if (typeToUse.equals("changetypehere")) return (T) factory.Code().createCodeSnippetStatement("new "+typeWithoutArray+"[\"ChangeValueHere"+(varIndex-1)+"_"+typeWithoutArray+"\"]");
         //}
-        if (isPlaceHolderType(type)) return (T) ("ChangeValueHere"+(varIndex-1)+"_"+"changetypehere");
-        if (typeToUse.equals("changetypehere")) return (T) ("ChangeValueHere"+(varIndex-1)+"_"+type);
+        if (isPlaceHolderType(type)) return (T) ("ChangeValueHere"+valueIndex+"_"+"changetypehere");//("ChangeValueHere"+(varIndex-1)+"_"+"changetypehere");
+        if (typeToUse.equals("changetypehere")) return (T) ("ChangeValueHere"+valueIndex+"_"+type);//("ChangeValueHere"+(varIndex-1)+"_"+type);
         throw new IllegalArgumentException("Unsupported type: " + type);
     }
-
 
 
     private boolean isPlaceHolderType(String ref) {
@@ -574,28 +598,6 @@ public class SpoonInjector {
 
         // Add method to class
         newClass.addMethod(newMethod);
-    }
-    
-    private void getCollectionMethods(Launcher launcher, String collection) {
-        launcher.getFactory().getEnvironment().setAutoImports(true);
-        
-        CtType<?> collectionType = null;
-        if (collection.toLowerCase().equals("arraylist")) collectionType = launcher.getFactory().Type().get(java.util.ArrayList.class);
-        if (collection.toLowerCase().equals("vector")) collectionType = launcher.getFactory().Type().get(java.util.Vector.class);
-        
-        
-        // Iterate through all methods
-        for (CtMethod<?> method : collectionType.getMethods()) {
-            String methodName = method.getSimpleName();
-            CtTypeReference<?> returnType = method.getType();
-            
-            
-            // Get parameters
-            for (CtParameter<?> param : method.getParameters()) {
-                System.out.print(param.getType().getSimpleName() + " " + param.getSimpleName() + ", ");
-            }
-            
-        }
     }
 
     private String getAllVarsAsString() {

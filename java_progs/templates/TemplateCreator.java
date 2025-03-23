@@ -67,20 +67,22 @@ public class TemplateCreator {
         String programToRun;
         List<CtMethod<?>> methods;
         List<CtType<?>> collections;
+        boolean getCustomImports = false;
         if (args.length != 0) {
             programToRun = args[0];
             Launcher launcher = initSpoon();
             methods = getPublicMethodsInClass(launcher,programToRun);
             collections = Arrays.asList(ref.getTypeDeclaration());
+            getCustomImports = true;
         }else {
             collections = Arrays.asList(getCollections("list"));
             methods = getCollectionMethods("list");
         }
-        createTemplates(collections,methods);
+        createTemplates(collections,methods,getCustomImports);
         createProgramsFromTemplates();
     }
 
-    private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods) {
+    private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods,boolean getCustomImports) {
         for (CtType<?> collec : collections) {
             for (CtMethod<?> method : methods) {
                 //if (!collec.getSimpleName().equals("CopyOnWriteArrayList")) continue;
@@ -88,7 +90,7 @@ public class TemplateCreator {
                 //System.out.println("Collec -> "+ collec.getSimpleName()+" method -> "+method.getSimpleName());
                 Launcher launcher = initSpoon();
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),
-                collec, "", 0, outputDir,isGeneric);
+                collec, "", 0, outputDir,isGeneric,getCustomImports);
                 spi.injectInTemplate();
                 spi.insertImport();
             }

@@ -26,4 +26,4 @@ javac -d "$output_dir" java_progs/templates/Template.java
 javac -cp "$SPOON_JAR" java_progs/templates/TemplateCreator.java java_progs/templates/SpoonInjector.java
 
 # Run Java program
-java -cp ".:$SPOON_JAR:$SLF4J_JAR" java_progs/templates/TemplateCreator
+java -cp ".:$SPOON_JAR:$SLF4J_JAR" java_progs/templates/TemplateCreator TestClass

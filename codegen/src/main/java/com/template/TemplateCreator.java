@@ -245,22 +245,10 @@ public class TemplateCreator {
     private static Launcher initSpoon() {
         Launcher launcher = new Launcher();
         launcher.addInputResource("src/main/java/com/template/");
-        //launcher.addInputResource("aux/");
-        //launcher.addInputResource("templates/programsToBenchmark");
-        //launcher.addInputResource("templates/ChangeTypeHere");
         launcher.getFactory().getEnvironment().setAutoImports(true);
         launcher.getEnvironment().setNoClasspath(false);
         launcher.setSourceOutputDirectory(outputDir);
         launcher.buildModel();
-        //List<CtClass<?>> classes = launcher.getFactory().getModel().getElements(new spoon.reflect.visitor.filter.TypeFilter<>(CtClass.class));
-//
-        //// Print the names of all the classes
-        //System.out.println("Classes Spoon has access to:");
-        //for (CtClass<?> ctClass : classes) {
-        //    System.out.println(ctClass.getQualifiedName());
-        //}
-        //System.out.println("Working Directory: " + System.getProperty("user.dir"));
-        //System.out.println("Classpath: " + System.getProperty("java.class.path"));
         return launcher;
     }
 

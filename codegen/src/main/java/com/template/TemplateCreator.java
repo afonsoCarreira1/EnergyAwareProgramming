@@ -49,6 +49,7 @@ public class TemplateCreator {
         }
         createTemplates(collections,methods,getCustomImports);
         createProgramsFromTemplates();
+        //Programs.compileJavaFiles();
     }
 
     private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods,boolean getCustomImports) {

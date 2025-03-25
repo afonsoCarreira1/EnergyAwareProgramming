@@ -9,6 +9,7 @@ com/generated_progs/ArrayList_add_java_lang_Object_8$BenchmarkArgs.class
 com/generated_progs/ArrayList_add_int_java_lang_Object_4$BenchmarkArgs.class
 com/template/aux/DeepCopyUtil$1.class
 com/generated_progs/ArrayList_add_int_java_lang_Object_5.class
+com/template/Programs.class
 com/template/aux/ArrayListAux.class
 com/generated_progs/ArrayList_add_int_java_lang_Object_3$BenchmarkArgs.class
 com/template/TemplateCreator.class

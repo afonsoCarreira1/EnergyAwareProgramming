@@ -4,12 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.parse.ASTFeatureExtractor;
-import com.template.Programs;
-import com.template.TemplateCreator;
+import java.util.ArrayList;
 
 /**
  * Hello world!
@@ -19,7 +14,7 @@ public class App
 {
     public static void main( String[] args ) throws Exception
     {
-        run();
+        //run();
         //File[] files = getAllFilesInDir("codegen/target/classes/com/generated_progs/");
         //System.out.println(files);
         //for (File f : files) {
@@ -31,11 +26,7 @@ public class App
         //System.out.println(methodfeatures);
     }
 
-    private static File[] getAllFilesInDir(String dir) {
-        return new File(dir).listFiles();
-    }
-
-    private static void run() {
+    private static void reviewBeforeRunning() {
         try {
             // Step 1: Get the current working directory
             File currentDir = new File(".").getCanonicalFile();
@@ -55,7 +46,7 @@ public class App
             }
 
             // Step 4: Check if compiled classes exist
-            File targetClasses = new File(codegenDir, "target/classes");
+            File targetClasses = new File(codegenDir, "target/classes/com/generated_progs");
             if (!targetClasses.exists()) {
                 System.out.println("Error: Compiled classes not found! Run 'mvn clean compile' first.");
                 return;
@@ -67,21 +58,44 @@ public class App
                 System.out.println("Error: cp.txt not found! Run 'mvn dependency:build-classpath' first.");
                 return;
             }
-            String dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
-
-            // Step 6: Construct the Java command with the correct classpath
-            String javaCmd = "java";
-            String classpath = targetClasses.getAbsolutePath() + File.pathSeparator + dependencies;
-            String mainClass = "com.generated_progs.ArrayList_add_java_lang_Object_10";//"com.template.t";
+            
+            //runCommand(targetClasses);
+            ArrayList<File> files = getAllTargetedFilesInDir(targetClasses.getAbsolutePath());
+            for(File f : files) {
+                System.out.println(f.getName());
+            }
             
 
-            ProcessBuilder processBuilder = new ProcessBuilder(javaCmd, "-cp", classpath, mainClass);
-            processBuilder.inheritIO(); // Show output in the console
-            Process process = processBuilder.start();
-            process.waitFor();
-
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static void runCommand(File targetClasses) throws IOException, InterruptedException {
+        String dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
+
+        // Step 6: Construct the Java command with the correct classpath
+        String javaCmd = "java";
+        String classpath = targetClasses.getAbsolutePath() + File.pathSeparator + dependencies;
+        String mainClass = "com.generated_progs.ArrayList_add_java_lang_Object_10";//"com.template.t";
+        
+
+        ProcessBuilder processBuilder = new ProcessBuilder(javaCmd, "-cp", classpath, mainClass);
+        processBuilder.inheritIO(); // Show output in the console
+        Process process = processBuilder.start();
+        process.waitFor();
+    }
+
+    private static ArrayList<File> getAllTargetedFilesInDir(String dir) {
+        File[] files = getAllFilesInDir(dir);
+        ArrayList<File> filesFiltered = new ArrayList<>();
+        for (File f : files) {
+            if (!f.getName().contains("BenchmarkArgs")) filesFiltered.add(f);
+        }
+        return filesFiltered;
+    }
+
+    private static File[] getAllFilesInDir(String dir) {
+        return new File(dir).listFiles();
     }
 }

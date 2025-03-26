@@ -146,24 +146,41 @@ def model(df):
     # Initialize and train the DecisionTreeRegressor
     #print('----------------------')
     #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    decision_tree_regressor(X,y,X_train, X_test, y_train, y_test)
-    print('----------------------')
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    random_forest_regression(X,y,X_train, X_test, y_train, y_test)
-    print('----------------------')
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test)
-    print('----------------------')
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    linear_regression(X,y,X_train, X_test, y_train, y_test)
-    print('----------------------')
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    pysr(X,y,X_train, X_test, y_train, y_test)
+    #decision_tree_regressor(X,y,X_train, X_test, y_train, y_test)
+    #print('----------------------')
+    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #random_forest_regression(X,y,X_train, X_test, y_train, y_test)
+    #print('----------------------')
+    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test)
+    #print('----------------------')
+    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #linear_regression(X,y,X_train, X_test, y_train, y_test)
+    #print('----------------------')
+    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #pysr(X,y,X_train, X_test, y_train, y_test)
 
+
+    checkStrangeValuesOfBubbleSort()
     #save_figure_pdf(df,regressor)
     #plot_energy_vs_feature(X,y,'Input1')
     #plot_prediction_vs_feature(regressor, X_test, y_test, 'Input2')
-    plot3D(X,y)
+    #plot3D(X,y)
+    
+    
+
+def checkStrangeValuesOfBubbleSort():
+    filtered_df = df.loc[(df['Input1'] > 2743)]#.loc[(df['Input1'] >= 1e3) & (df['Input1'] <= 1e4)  ]#& (df['EnergyUsed'] >= 50)
+    filtered_df = filtered_df.sort_values(by='EnergyUsed')
+    # Find columns where all values are the same
+    constant_columns = filtered_df.nunique() == 1
+    # Drop those columns
+    filtered_df_cleaned = filtered_df.loc[:, ~constant_columns]
+    save_df_to_csv(filtered_df_cleaned)
+
+def save_df_to_csv(df, filename="output.csv"):
+    df.to_csv(filename, index=False)
+    print(f"DataFrame saved to {filename}")
 
 def tune_hyperparameters(X,y,X_train, X_test, y_train, y_test, selected_model):
     print(f'Best model scores of {selected_model}')

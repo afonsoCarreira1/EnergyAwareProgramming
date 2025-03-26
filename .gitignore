@@ -26,3 +26,4 @@ ml/outputs/
 ml/ml_env/
 generated_progs/
 generated_templates/
+**/cp.txt

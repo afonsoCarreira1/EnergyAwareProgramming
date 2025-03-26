@@ -223,16 +223,23 @@ public class SpoonInjector {
     
     private void callMethods() {
         CtStatementList methodCalls = factory.createStatementList();
-        String vars = getAllVarsAsString();
+        StringBuilder args = new StringBuilder();
+        for (int i = 0; i < varIndex; i++) {
+            args.append("arr[iter].var"+i);
+            if (i != varIndex-1) args.append(", ");
+        }
         CtBlock<?> tryBlockBody = tryBlock.getBody();
         CtWhile whileBlock = null;
-        String methodCall = Introspector.decapitalize(newClassName)+"("+vars+")";
+        String methodCall = Introspector.decapitalize(newClassName)+"("+args+")";
         for (CtStatement st : tryBlockBody){
             if (st instanceof CtWhile) {
                 whileBlock = (CtWhile) st;
                 break; 
             }
         }
+        CtExpression<Boolean> condition = factory.Code().createCodeSnippetExpression("end - begin < 1000000000 && iter < arr.length");
+        condition.setType(factory.Type().booleanPrimitiveType());
+        whileBlock.setLoopingExpression(condition);
         whileBlock.getBody().insertBefore(factory.Code().createCodeSnippetStatement(methodCall));
         methodCalls.addStatement(factory.Code().createCodeSnippetStatement("clearArr(arr)"));
         methodCalls.addStatement(callPopulateMethod());
@@ -636,7 +643,7 @@ public class SpoonInjector {
 
         String args = getAllVarsAsString();
 
-        String body ="for (int i = 0;i < "+vars.size()+";i++) {\n" + //
+        String body ="for (int i = 0;i < \"numberOfFunCalls\";i++) {\n" + //
                      "  arr[i] = new BenchmarkArgs("+args+");\n" + //
                      "}";
 

@@ -6,20 +6,18 @@ import java.util.ArrayList;
 import spoon.support.reflect.reference.CtTypeReferenceImpl;
 // add imports
 public class t {
-    static int size =20000;
     // static int SIZE = "size";
     // static int loopSize = "loopSize";
     // create fun to benchmark
     // create computation fun
     // add @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
-        
+        try {
             ArrayList<Integer> var0 = new ArrayList();
             ArrayListAux.insertRandomNumbers(var0, 150, "Integer");
-            Integer var1 = 147;
-            BenchmarkArgs[] arr = new BenchmarkArgs[size];
+            Integer var1 = 112;
+            BenchmarkArgs[] arr = new BenchmarkArgs[20000];
             populateArray(arr, var0, var1);
-            System.out.println("aki1");
             // if fun to test is Static.fun() then just create multiple inputs
             // if fun is var.fun() then start by creating multiple vars and then multiple inputs
             // have a fun to get multiple lists or vars
@@ -29,31 +27,37 @@ public class t {
             long end = begin;
             int iter = 0;
             /* 1s */
-            while ((end - begin) < 1000000000 && iter< size) {
+            while (end - begin < 1000000000 && iter < arr.length) {
                 arrayList_add_java_lang_Object_(arr[iter].var0, arr[iter].var1);
                 // add the && iter < loopSize
                 // call fun to benchmark
                 end = System.nanoTime();
                 iter++;
             } 
-            System.out.println("aki2");
             clearArr(arr);
-            System.out.println("aki3");
             populateArray(arr, var0, var1);
-            System.out.println("aki4");
+            TemplatesAux.sendStartSignalToOrchestrator(args[0],iter);
             TemplatesAux.launchTimerThread();
             computation(arr, iter);
-            System.out.println("aki5");
             // clear and restart the vars for real measurement
             // send start signal for measurement
             // call computation fun
-        
+        } catch (OutOfMemoryError e) {
+            // catch errors
+            // TemplatesAux.writeErrorInFile("BubbleSort"filename"", "Out of memory error caught by the program.\n" + e.getMessage());
+            TemplatesAux.writeErrorInFile("ArrayList_add_java_lang_Object_6", "Out of memory error caught by the program:\n" + e.getMessage());
+        } catch (Exception e) {
+            // TemplatesAux.writeErrorInFile("BubbleSort"filename"","Error caught by the program.\n"+e.getMessage());
+            TemplatesAux.writeErrorInFile("ArrayList_add_java_lang_Object_6", "Error caught by the program:\n" + e.getMessage());
+        } finally {
+            //TemplatesAux.sendStopSignalToOrchestrator(args[0]);
+        }
     }
 
     static class BenchmarkArgs {
         public ArrayList<Integer> var0 = new ArrayList();
 
-        public Integer var1 = 147;
+        public Integer var1 = 112;
 
         BenchmarkArgs(ArrayList<Integer> var0, Integer var1) {
             this.var0 = DeepCopyUtil.deepCopy(var0);
@@ -74,7 +78,7 @@ public class t {
     }
 
     private static void populateArray(BenchmarkArgs[] arr, ArrayList<Integer> var0, Integer var1) {
-        for (int i = 0;i < size;i++) {
+        for (int i = 0;i < 20000;i++) {
           arr[i] = new BenchmarkArgs(var0, var1);
         };
     }
@@ -88,5 +92,5 @@ public class t {
 
     private String input1 = "150";
 
-    private String input3 = "147";
+    private String input3 = "112";
 }

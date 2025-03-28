@@ -1,0 +1,2 @@
+Error caught by the program.
+Index 0 out of bounds for length 0

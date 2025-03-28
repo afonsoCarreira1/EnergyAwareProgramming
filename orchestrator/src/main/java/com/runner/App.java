@@ -14,26 +14,16 @@ public class App
 {
     public static void main( String[] args ) throws Exception
     {
-        Runner.main(new String[]{"test","f","1"});
-        //run();
-        //File[] files = getAllFilesInDir("codegen/target/classes/com/generated_progs/");
-        //System.out.println(files);
-        //for (File f : files) {
-        //    System.out.println(f.getName());
-        //}
-        //System.out.println(Programs.getGeneratedFiles());
-        //HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures("src/main/java/com/parse/","TestFile",false);
-        //Map<String, Object> methodfeatures = methods.get("TestFile.t()");
-        //System.out.println(methodfeatures);
+        //Runner.main(new String[]{"test","f","1"});
+        runCommand();
     }
 
     private static void reviewBeforeRunning() {
         try {
             // Step 1: Get the current working directory
-            File currentDir = new File(".").getCanonicalFile();
 
             // Step 2: Go up one level (parent directory)
-            File parentDir = currentDir.getParentFile();
+            File parentDir = new File(".").getCanonicalFile().getParentFile();
             if (parentDir == null) {
                 System.out.println("Error: Cannot find parent directory!");
                 return;
@@ -47,7 +37,7 @@ public class App
             }
 
             // Step 4: Check if compiled classes exist
-            File targetClasses = new File(codegenDir, "target/classes/com/generated_progs");
+            File targetClasses = new File(codegenDir, "target/classes/com/generated_progs/ArrayList_add_java_lang_Object_");
             if (!targetClasses.exists()) {
                 System.out.println("Error: Compiled classes not found! Run 'mvn clean compile' first.");
                 return;
@@ -62,9 +52,6 @@ public class App
             
             //runCommand(targetClasses);
             ArrayList<File> files = getAllTargetedFilesInDir(targetClasses.getAbsolutePath());
-            for(File f : files) {
-                System.out.println(f.getName());
-            }
             
 
         } catch (Exception e) {
@@ -72,17 +59,20 @@ public class App
         }
     }
 
-    private static void runCommand(File targetClasses) throws IOException, InterruptedException {
+    private static void runCommand() throws IOException, InterruptedException {
         String dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
+        File parentDir = new File(".").getCanonicalFile().getParentFile();
+        File codegenDir = new File(parentDir, "codegen");
 
-        // Step 6: Construct the Java command with the correct classpath
+        File targetClasses = new File(codegenDir, "target/classes");
+    
         String javaCmd = "java";
         String classpath = targetClasses.getAbsolutePath() + File.pathSeparator + dependencies;
-        String mainClass = "com.generated_progs.ArrayList_add_java_lang_Object_10";//"com.template.t";
-        
 
-        ProcessBuilder processBuilder = new ProcessBuilder(javaCmd, "-cp", classpath, mainClass);
-        processBuilder.inheritIO(); // Show output in the console
+        String mainClass = "com.generated_progs.ArrayList_add_java_lang_Object_.ArrayList_add_java_lang_Object_10";
+    
+        ProcessBuilder processBuilder = new ProcessBuilder(javaCmd, "-cp", classpath, mainClass,"1");
+        processBuilder.inheritIO();
         Process process = processBuilder.start();
         process.waitFor();
     }

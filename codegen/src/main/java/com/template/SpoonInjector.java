@@ -253,10 +253,10 @@ public class SpoonInjector {
     private void callExceptions() {
         List<CtCatch> catchers = tryBlock.getCatchers();
         String call1 = "TemplatesAux.writeErrorInFile(\""+newClassName+"\", ";
-        call1 += "\"Out of memory error caught by the program.\\n\" + e.getMessage())";
+        call1 += "\"Out of memory error caught by the program:\\n\" + e.getMessage())";
         catchers.get(0).getBody().addStatement(factory.Code().createCodeSnippetStatement(call1));
         String call2 = "TemplatesAux.writeErrorInFile(\""+newClassName+"\", ";
-        call2 += "\"Error caught by the program.\\n\" + e.getMessage())";
+        call2 += "\"Error caught by the program:\\n\" + e.getMessage())";
         catchers.get(1).getBody().addStatement(factory.Code().createCodeSnippetStatement(call2));
     }
 

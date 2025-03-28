@@ -8,10 +8,6 @@ public class TemplatesAux {
 
     public static boolean stop = false;
 
-    //public static void writeProgramInfo(int i) {
-    //    WritePid.writeTargetProgInfo("timeStamp", i);
-    //}
-
     public static void sendStopSignalToOrchestrator(String pid) throws IOException {
         Runtime.getRuntime().exec(new String[] { "kill", "-USR2", pid });
     }
@@ -23,14 +19,15 @@ public class TemplatesAux {
     }
 
     public static void writeErrorInFile(String filename, String errorMessage) {
-        System.out.println("this happened -> "+errorMessage);
+        String path = "src/main/java/com/aux_runtime/error_files/";
+        //System.out.println("this happened -> "+errorMessage);
         try {
-            File myObj = new File("errorFiles/" +filename+".txt");
+            File myObj = new File(path +filename+".txt");
             myObj.createNewFile();
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        try (FileWriter writer = new FileWriter("errorFiles/" + filename+".txt")) {
+        try (FileWriter writer = new FileWriter(path + filename+".txt")) {
             writer.write(errorMessage);
         } catch (IOException e) {System.out.println(e.getMessage());}
     }

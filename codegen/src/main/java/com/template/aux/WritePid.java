@@ -10,11 +10,9 @@ import java.util.Arrays;
 
 
 public class WritePid {
-    static String filename = "java_progs/pid.txt";
+    static String filename = "src/main/java/com/aux_runtime/info.txt";
 
-    // Function to write an integer to a file, overwriting the file if it exists
     public static void writeTargetProgInfo(String pid,int loopSize) {
-        
         try (FileWriter writer = new FileWriter(filename)) {
             writer.write(pid+"\n"+loopSize);
             //System.out.println("Successfully wrote " + pid + " to " + filename);

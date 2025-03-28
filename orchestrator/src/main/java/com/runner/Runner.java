@@ -30,9 +30,10 @@ import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
 public class Runner {
+
     final static String CSV_FILE_NAME = "features.csv";
     final static String frequency = ".1";
-    final static short timeOutTime = 10;//seconds
+    final static short timeOutTime = 5;//seconds
     static String targetClassesPath = "";
     static String powerjoularPid = "";
     static String childPid = "";
@@ -50,64 +51,68 @@ public class Runner {
     static volatile boolean notifiedRunnerClass = false;
 
     public static void main(String[] args) throws IOException, InterruptedException  {
-        File targetClasses = reviewBeforeRunning();
-        targetClassesPath = targetClasses.getAbsolutePath();
-        String[] programs = getAllFilenamesInDir(targetClasses.getAbsolutePath());
-        Arrays.sort(programs, Comparator.comparing(Runner::extractFilename).thenComparingInt(Runner::extractNumber));
-        String logFilename = createLogFile();
-        for (int i = 0; i < programs.length; i++) {
-            //Thread.sleep(100);
-            if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
-                String fileName = programs[i].toString().replace(".class", "");//programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
-                if (!(args[0].equals("test") && fileName.equals("ArrayList_add_int_java_lang_Object_0"))) continue;//just to test one prog file
-                log.append("---------------------------------------\n");
-                log.append("Program number -> " + i + "\n");
-                //System.out.println("Program number -> " + i);
-                if (skipProgram(fileName)) continue;
-                log.append("Starting profile for " + fileName + " program\n");
-                Boolean readCFile = args[1].equals("t");
-                int runs = Integer.parseInt(args[2]);
-                log.append("Running " + (runs == 1 ? "1 time.\n" : runs + " times.\n"));
-                for (int j = 0; j < runs; j++) {
-                    timeOutThread = handleTimeOutThread(fileName);
-                    timeOutThread.start();
-                    run(fileName,readCFile);
+        File[] dirsToRun = reviewBeforeRunning();
+        for (File dirToRun : dirsToRun) {
+            List<String> programs = getAllFilenamesInDir(dirToRun);//getAllFilenamesInDir(targetClassesPath);
+            String currentDirBeingTested = dirToRun.getAbsolutePath();
+            //Arrays.sort(programs, Comparator.comparing(Runner::extractFilename).thenComparingInt(Runner::extractNumber));
+            String logFilename = createLogFile();
+            for (int i = 0; i < programs.size(); i++) {
+                //Thread.sleep(100);
+                if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
+                    String fileName = programs.get(i).toString().replace(".class", "");//programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
+                    if (!(args[0].equals("test") && fileName.equals("ArrayList_add_int_java_lang_Object_0"))) continue;//just to test one prog file
+                    log.append("---------------------------------------\n");
+                    log.append("Program number -> " + i + "\n");
+                    //System.out.println("Program number -> " + i);
+                    if (skipProgram(fileName,currentDirBeingTested)) continue;
+                    log.append("Starting profile for " + fileName + " program\n");
+                    Boolean readCFile = args[1].equals("t");
+                    int runs = Integer.parseInt(args[2]);
+                    log.append("Running " + (runs == 1 ? "1 time.\n" : runs + " times.\n"));
+                    for (int j = 0; j < runs; j++) {
+                        timeOutThread = handleTimeOutThread(fileName,currentDirBeingTested);
+                        timeOutThread.start();
+                        run(fileName,readCFile,currentDirBeingTested);
+                    }
+                    if (programThrowedError(fileName)) {
+                        log.append("Error in "+fileName+". Check logs for more info.\n");
+                        continue;
+                    }
+                    averageJoules /= runs;
+                    averageTime /= runs;
+                    log.append("In " + runs + " runs the average power was " + averageJoules + "J\n");
+                    log.append("Average time was " + averageTime / 1000 / 1 + "s\n");
+                    averageJoules = 0.0;
+                    averageTime = 0.0;
+                    saveLog(logFilename);
+                } else {
+                    System.out.println("Invalid args");
                 }
-                if (programThrowedError(fileName)) {
-                    log.append("Error in "+fileName+". Check logs for more info.\n");
-                    continue;
-                }
-                averageJoules /= runs;
-                averageTime /= runs;
-                log.append("In " + runs + " runs the average power was " + averageJoules + "J\n");
-                log.append("Average time was " + averageTime / 1000 / 1 + "s\n");
-                averageJoules = 0.0;
-                averageTime = 0.0;
-                saveLog(logFilename);
-            } else {
-                System.out.println("Invalid args");
             }
+            createFeaturesCSV();
         }
-        createFeaturesCSV();
     }
 
-    private static void runProgramCommand(String filename) throws IOException{
+    private static void runProgramCommand(String filename,String currentDirBeingTested) throws IOException{
         String dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
 
         String classpath = targetClassesPath + File.pathSeparator + dependencies;
+        //System.out.println(classpath);
+        //System.out.println("com.generated_progs."+currentDirBeingTested.split("/")[currentDirBeingTested.split("/").length-1]+"." + filename);
         String[] command = {
             "java", 
             "-Xmx4056M",
             "-Xms4056M",
             "-cp", 
             classpath, 
-            "com.generated_progs." + filename, 
+            "com.generated_progs."+currentDirBeingTested.split("/")[currentDirBeingTested.split("/").length-1] +"." + filename, 
             Long.toString(ProcessHandle.current().pid())
         };
         Runtime.getRuntime().exec(command);
     }
 
-    public static void run(String filename, Boolean readCFile) throws IOException, InterruptedException {
+    public static void run(String filename, Boolean readCFile, String currentDirBeingTested) throws IOException, InterruptedException {
         //if (readCFile) {
         //    String[] command = { "pkexec", "./c_progs/" + filename, Long.toString(ProcessHandle.current().pid()) };
         //    Runtime.getRuntime().exec(command);
@@ -123,9 +128,9 @@ public class Runner {
         //    };
         //    Runtime.getRuntime().exec(command);
         //}
-        runProgramCommand(filename);
+        runProgramCommand(filename,currentDirBeingTested);
         handleStartSignal(readCFile);
-        handleStopSignal(filename);
+        handleStopSignal(filename,currentDirBeingTested);
         synchronized (Runner.class) {
             Runner.class.wait();
         }
@@ -139,6 +144,7 @@ public class Runner {
     private static void handleStartSignal(Boolean readCFile) {
         Signal.handle(new Signal("USR1"), new SignalHandler() {
             public void handle(Signal sig) {
+                System.out.println("vou ligar");
                 log.append("Received START signal, starting powerjoular at " + LocalDateTime.now() + "\n");
                 if (readCFile) {
                     childPid = WritePid.captureCommandOutput();
@@ -160,7 +166,7 @@ public class Runner {
         });
     }
 
-    private static void handleStopSignal(String filename) {
+    private static void handleStopSignal(String filename,String currentDirBeingTested) {
         Signal.handle(new Signal("USR2"), new SignalHandler() {
             public void handle(Signal sig) {
                 log.append("Received STOP signal at " + LocalDateTime.now() + "\n");
@@ -191,7 +197,7 @@ public class Runner {
                 averageJoules += Double.parseDouble(cpuUsage);
                 averageTime += endTime - startTime;
                 try {
-                    saveFeature(filename, cpuUsage);
+                    saveFeature(filename, cpuUsage,currentDirBeingTested);
                 } catch (IOException e) {
                     log.append("Error saving feature\n");
                 }
@@ -212,25 +218,26 @@ public class Runner {
         return false;
     }
 
-    private static boolean skipProgram(String fileName) throws IOException {
+    private static boolean skipProgram(String fileName,String currentDirBeingTested) throws IOException {
         if (programToSkip == null || avoidSize == null) return false;
         if (!fileName.split("\\d")[0].contains(programToSkip)) {
             programToSkip = null;
             avoidSize = null;
             return false;
         }
-        if (getCurrentInputSize(fileName) < avoidSize) return false;
+        if (getCurrentInputSize(fileName,currentDirBeingTested) < avoidSize) return false;
         log.append("Skipping "+fileName+", input size too large. It would take a lot of time.\n");
-        log.append("Current program size: "+getCurrentInputSize(fileName) + " avoidSize: "+avoidSize+"\n");
+        log.append("Current program size: "+getCurrentInputSize(fileName,currentDirBeingTested) + " avoidSize: "+avoidSize+"\n");
         return true;
     }
 
-    private static String readFile(String file) throws IOException {
+    private static String readFile(String file,String currentDirBeingTested) throws IOException {
         String program = "";
         
             
         File codegenDir = new File(new File(".").getCanonicalFile().getParentFile(),"codegen");
-        File myObj = new File(codegenDir.getAbsolutePath()+"/src/main/java/com/generated_progs/"+file+".java");
+        String dir = currentDirBeingTested.split("/")[currentDirBeingTested.split("/").length-1];
+        File myObj = new File(codegenDir.getAbsolutePath()+"/src/main/java/com/generated_progs/"+dir+"/"+file+".java");
         try (Scanner myReader = new Scanner(myObj)) {
             StringBuilder f = new StringBuilder();
             while (myReader.hasNextLine()) {
@@ -241,12 +248,11 @@ public class Runner {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        
         return program;
     }
 
-    private static Long getCurrentInputSize(String fileName) throws IOException {
-        ArrayList<String> inputs = getInputValues(fileName);
+    private static Long getCurrentInputSize(String fileName, String currentDirBeingTested) throws IOException {
+        ArrayList<String> inputs = getInputValues(fileName, currentDirBeingTested);
         String size = inputs.get(0);
         String loopSize = inputs.get(1);
         //long totalValue = size != null ? Long.parseLong(size) : 0;
@@ -259,8 +265,8 @@ public class Runner {
         return size != null && loopSize != null ? Long.parseLong(size) + Long.parseLong(loopSize): size != null ? Long.parseLong(size) : 0;
     }
 
-    private static ArrayList<String> getInputValues(String fileName) throws IOException {
-        String program = readFile(fileName);
+    private static ArrayList<String> getInputValues(String fileName, String currentDirBeingTested) throws IOException {
+        String program = readFile(fileName,currentDirBeingTested);
         String size = findMatchInPattern(program,"static int SIZE = " + "(\\d+)" + ";");
         String loopSize = findMatchInPattern(program,"static int loopSize = " + "(\\d+)" + ";");
         return new ArrayList<>(Arrays.asList(size,loopSize));
@@ -273,7 +279,7 @@ public class Runner {
         return matcher.group(1);
     }
 
-    private static Thread handleTimeOutThread(String filename) {
+    private static Thread handleTimeOutThread(String filename,String currentDirBeingTested) {
         return new Thread() {
             public void run() {
                 try {
@@ -286,8 +292,8 @@ public class Runner {
                         killPowerjoular.waitFor();
                         Process killTargetProgram = Runtime.getRuntime().exec(new String[]{"sudo", "kill", childPid});
                         killTargetProgram.waitFor();
-                        avoidSize = getCurrentInputSize(filename);
-                        ArrayList<String> inputs = getInputValues(filename);
+                        avoidSize = getCurrentInputSize(filename,currentDirBeingTested);
+                        ArrayList<String> inputs = getInputValues(filename,currentDirBeingTested);
                         String s = inputs.get(0) != null ? inputs.get(0) : "0";
                         String ls = inputs.get(1) != null ? inputs.get(1) : "0";
                         log.append("SIZE = "+s+" listSize = "+ls +"\navoidSize = "+avoidSize+"\n");
@@ -350,14 +356,15 @@ public class Runner {
         return "" + cpuPower;// String.format("%.5f", cpuPower);
     }
 
-    private static void saveFeature(String file, String cpuUsage) throws IOException  {
-        getFeaturesFromParser(file, cpuUsage);
+    private static void saveFeature(String file, String cpuUsage, String currentDirBeingTested) throws IOException  {
+        getFeaturesFromParser(file, cpuUsage,currentDirBeingTested);
     }
 
     private static void createFeaturesTempFile(String fileName,Map<String, Object> methodfeatures) throws IOException{
         try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter("tmp/tmp_"+fileName+".csv"))) {
             // Write the header row
             List<String> featureList = new ArrayList<>(methodfeatures.keySet());
+            System.out.println("features -> "+featureList);
             csvWriter.write(String.join(",", featureList));
             csvWriter.newLine();
                 List<String> row = new ArrayList<>();
@@ -375,13 +382,13 @@ public class Runner {
         //tmpFileNumber++;
     }
 
-    private static void getFeaturesFromParser(String file, String cpuUsage) throws IOException {
+    private static void getFeaturesFromParser(String file, String cpuUsage,String currentDirBeingTested) throws IOException {
         String path = "TODO";//TODO
         HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(path,file,true);
-        String methodName = getFunMapName(file);
+        String methodName = getFunMapName(file,currentDirBeingTested);
         Map<String, Object> methodfeatures = methods.get(methodName);
         //System.out.println(methodfeatures);
-        ArrayList<String> inputs = getInputValues(file);
+        ArrayList<String> inputs = getInputValues(file,currentDirBeingTested);
         featuresName.addAll(methodfeatures.keySet());
         methodfeatures.put("Input1", inputs.get(0));
         if(inputs.get(1) != null) methodfeatures.put("Input2", inputs.get(1));
@@ -390,9 +397,9 @@ public class Runner {
         createFeaturesTempFile(file,methodfeatures);
     }
 
-    private static String getFunMapName(String filename) throws IOException{
+    private static String getFunMapName(String filename,String currentDirBeingTested) throws IOException{
         String mapName = "";
-        String program = readFile(filename);
+        String program = readFile(filename,currentDirBeingTested);
         String regex = Introspector.decapitalize(filename)+"\\s*\\((.*)\\)\\s*\\{";
         String match = findMatchInPattern(program,regex);
         String[] params = match.split(",");
@@ -467,8 +474,8 @@ public class Runner {
         return programFeatures;
     }
 
-    private static File reviewBeforeRunning() {
-        File targetClasses = null;
+    private static File[] reviewBeforeRunning() {
+        File[] subDirs = null;
         try {
             // Step 1: Get the current working directory
             File currentDir = new File(".").getCanonicalFile();
@@ -486,10 +493,12 @@ public class Runner {
             }
 
             // Step 4: Check if compiled classes exist
-            targetClasses = new File(codegenDir, "target/classes/com/generated_progs");
+            File targetClasses = new File(codegenDir, "target/classes/com/generated_progs");
             if (!targetClasses.exists()) {
                 throw(new Exception("Error: Compiled classes not found! Run 'mvn clean compile' first."));
             }
+
+            subDirs = targetClasses.listFiles(File::isDirectory);
 
             // Step 5: Read the classpath from cp.txt
             File cpFile = new File("cp.txt");
@@ -500,7 +509,7 @@ public class Runner {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return targetClasses;
+        return subDirs;
     }
 
     private static String[] getAllFilenamesInDir(String dir) {
@@ -510,6 +519,15 @@ public class Runner {
             filenames[i] = files.get(i).getName();
         }
         return filenames;
+    }
+
+    private static List<String> getAllFilenamesInDir(File dir) {
+        File[] files =  dir.listFiles(File::isFile);
+        List<String> fileNames = new ArrayList<>();
+        for (int i = 0; i < files.length; i++) {
+            if(!files[i].getName().contains("BenchmarkArgs")) fileNames.add(files[i].getName());
+        }
+        return fileNames;
     }
 
     

@@ -757,7 +757,7 @@ public class SpoonInjector {
             StringBuilder newContent = new StringBuilder();
 
             // Add the new lines
-            newContent.append("package "+"com.generated_progs"/*outputDir*/+";\n");
+            newContent.append("package "+"com.generated_progs."+newClassName+";\n");
             for (String line : imports) {
                 newContent.append(line).append(System.lineSeparator());
             }

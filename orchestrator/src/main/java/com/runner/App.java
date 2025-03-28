@@ -14,6 +14,7 @@ public class App
 {
     public static void main( String[] args ) throws Exception
     {
+        Runner.main(new String[]{"test","f","1"});
         //run();
         //File[] files = getAllFilesInDir("codegen/target/classes/com/generated_progs/");
         //System.out.println(files);

@@ -97,6 +97,9 @@ public class TemplateCreator {
         File[] templates = getAllTemplates();
         int id = 0;
         for (File template : templates) {
+            String className = template.toString().replace(outputDir+"/","").split("\\.java")[0];
+            String dirName = initialPath+"generated_progs/"+className;
+            new File(dirName).mkdirs();
             String program = readFile(template.toString());
             for (String type : getTypes()) {
                 program = program.replace("changetypehere", type);
@@ -104,9 +107,9 @@ public class TemplateCreator {
                     program = program.replace("\"numberOfFunCalls\"", funCall+"");
                     for (int size : sizes) {
                         String finalProg = replaceValues(program,size);
-                        String className = template.toString().replace(outputDir+"/","").split("\\.java")[0];
-                        finalProg = finalProg.replace(className,className+id);
-                        createJavaProgramFile(initialPath+"generated_progs/"+className+id+".java",finalProg);
+                        finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+className+"",className+id);
+                        //finalProg = finalProg.replace(className,className+id);
+                        createJavaProgramFile(dirName+"/"+className+id+".java",finalProg);
                         id++;
                     }
                 }

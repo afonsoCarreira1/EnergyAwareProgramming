@@ -34,7 +34,8 @@ public class Runner {
     final static String CSV_FILE_NAME = "features.csv";
     final static String frequency = ".1";
     final static short timeOutTime = 5;//seconds
-    static String targetClassesPath = "";
+    static String classpath = "";
+    static String dependencies = "";
     static String powerjoularPid = "";
     static String childPid = "";
     static Double averageJoules = 0.0;
@@ -51,6 +52,11 @@ public class Runner {
     static volatile boolean notifiedRunnerClass = false;
 
     public static void main(String[] args) throws IOException, InterruptedException  {
+        dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
+        File parentDir = new File(".").getCanonicalFile().getParentFile();
+        File codegenDir = new File(parentDir, "codegen");
+        File targetClasses = new File(codegenDir, "target/classes");
+        classpath = targetClasses.getAbsolutePath() + File.pathSeparator + dependencies;
         File[] dirsToRun = reviewBeforeRunning();
         for (File dirToRun : dirsToRun) {
             List<String> programs = getAllFilenamesInDir(dirToRun);//getAllFilenamesInDir(targetClassesPath);
@@ -95,9 +101,7 @@ public class Runner {
     }
 
     private static void runProgramCommand(String filename,String currentDirBeingTested) throws IOException{
-        String dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
-
-        String classpath = targetClassesPath + File.pathSeparator + dependencies;
+        
         //System.out.println(classpath);
         //System.out.println("com.generated_progs."+currentDirBeingTested.split("/")[currentDirBeingTested.split("/").length-1]+"." + filename);
         String[] command = {
@@ -110,6 +114,24 @@ public class Runner {
             Long.toString(ProcessHandle.current().pid())
         };
         Runtime.getRuntime().exec(command);
+
+        /*
+         * String dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
+        File parentDir = new File(".").getCanonicalFile().getParentFile();
+        File codegenDir = new File(parentDir, "codegen");
+
+        File targetClasses = new File(codegenDir, "target/classes");
+    
+        String javaCmd = "java";
+        String classpath = targetClasses.getAbsolutePath() + File.pathSeparator + dependencies;
+
+        String mainClass = "com.generated_progs.ArrayList_add_java_lang_Object_.ArrayList_add_java_lang_Object_10";
+    
+        ProcessBuilder processBuilder = new ProcessBuilder(javaCmd, "-cp", classpath, mainClass,"1");
+        processBuilder.inheritIO();
+        Process process = processBuilder.start();
+        process.waitFor();
+        */
     }
 
     public static void run(String filename, Boolean readCFile, String currentDirBeingTested) throws IOException, InterruptedException {
@@ -493,7 +515,8 @@ public class Runner {
             }
 
             // Step 4: Check if compiled classes exist
-            File targetClasses = new File(codegenDir, "target/classes/com/generated_progs");
+            File targetClasses = new File(codegenDir, "target/classes/com/generated_progs/");
+            //File targetClasses = new File(codegenDir, "target/classes/");
             if (!targetClasses.exists()) {
                 throw(new Exception("Error: Compiled classes not found! Run 'mvn clean compile' first."));
             }

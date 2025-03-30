@@ -1,0 +1,2 @@
+LoopCount,VariableCountDepth_0,EnergyUsed,ThreadUsage,CyclomaticComplexity,MethodInvocationsDepth_0,Filename,LiteralCountDepth_0,ReassignmentsDepth_0,java.lang.Integer,int,ReturnType_void,java.util.ArrayList,ImportsUsed,java.util.ArrayList.add(int | java.lang.Object),AssignmentsDepth_0,BinaryOperatorsDepth_0,BranchCount,Input1,VariableDeclarationsDepth_0
+0,0,0.0,0,1,1,ArrayList_add_int_java_lang_Object_0,0,0,1,1,1,1,1,1,0,0,0,0,0

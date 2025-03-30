@@ -37,6 +37,7 @@ public class Runner {
     static String classpath = "";
     static String dependencies = "";
     static String powerjoularPid = "";
+    static String targetProgramFiles = "";
     static String childPid = "";
     static Double averageJoules = 0.0;
     static Double averageTime = 0.0;
@@ -55,6 +56,7 @@ public class Runner {
         dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
         File parentDir = new File(".").getCanonicalFile().getParentFile();
         File codegenDir = new File(parentDir, "codegen");
+        targetProgramFiles = new File(codegenDir, "src/main/java/com/generated_progs").getAbsolutePath();
         File targetClasses = new File(codegenDir, "target/classes");
         classpath = targetClasses.getAbsolutePath() + File.pathSeparator + dependencies;
         File[] dirsToRun = reviewBeforeRunning();
@@ -405,7 +407,8 @@ public class Runner {
     }
 
     private static void getFeaturesFromParser(String file, String cpuUsage,String currentDirBeingTested) throws IOException {
-        String path = "TODO";//TODO
+        String path = targetProgramFiles+"/"+file.replaceAll("\\d+", "")+"/";//TODO
+        System.out.println(file);
         HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(path,file,true);
         String methodName = getFunMapName(file,currentDirBeingTested);
         Map<String, Object> methodfeatures = methods.get(methodName);
@@ -421,7 +424,7 @@ public class Runner {
 
     private static String getFunMapName(String filename,String currentDirBeingTested) throws IOException{
         String mapName = "";
-        String program = readFile(filename,currentDirBeingTested);
+        String program = readFile(filename,currentDirBeingTested);  
         String regex = Introspector.decapitalize(filename)+"\\s*\\((.*)\\)\\s*\\{";
         String match = findMatchInPattern(program,regex);
         String[] params = match.split(",");

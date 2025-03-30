@@ -1,5 +1,6 @@
 package com.template;
 
+import java.beans.Introspector;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -107,7 +108,9 @@ public class TemplateCreator {
                     program = program.replace("\"numberOfFunCalls\"", funCall+"");
                     for (int size : sizes) {
                         String finalProg = replaceValues(program,size);
+                        String methodNameForClass = Introspector.decapitalize(className);
                         finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+className+"",className+id);
+                        finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+methodNameForClass+"",methodNameForClass+id);
                         //finalProg = finalProg.replace(className,className+id);
                         createJavaProgramFile(dirName+"/"+className+id+".java",finalProg);
                         id++;

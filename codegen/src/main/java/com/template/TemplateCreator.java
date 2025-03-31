@@ -55,8 +55,8 @@ public class TemplateCreator {
     private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods,boolean getCustomImports) {
         for (CtType<?> collec : collections) {
             for (CtMethod<?> method : methods) {
-                if (!collec.getSimpleName().equals("ArrayList")) continue;
-                if (!method.getSimpleName().equals("add")) continue;
+                //if (!collec.getSimpleName().equals("ArrayList")) continue;
+                //if (!method.getSimpleName().equals("add")) continue;
                 //System.out.println("Collec -> "+ collec.getSimpleName()+" method -> "+method.getSimpleName());
                 Launcher launcher = initSpoon();
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),

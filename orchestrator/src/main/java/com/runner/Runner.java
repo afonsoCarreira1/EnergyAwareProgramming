@@ -10,9 +10,11 @@ import java.io.IOException;
 import java.lang.ProcessBuilder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +28,7 @@ import com.template.aux.WritePid;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -105,9 +108,6 @@ public class Runner {
     }
 
     private static void runProgramCommand(String filename,String currentDirBeingTested) throws IOException{
-        
-        //System.out.println(classpath);
-        //System.out.println("com.generated_progs."+currentDirBeingTested.split("/")[currentDirBeingTested.split("/").length-1]+"." + filename);
         String[] command = {
             "java", 
             "-Xmx4056M",
@@ -118,59 +118,21 @@ public class Runner {
             Long.toString(ProcessHandle.current().pid())
         };
         Runtime.getRuntime().exec(command);
-
-        /*
-         * String dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
-        File parentDir = new File(".").getCanonicalFile().getParentFile();
-        File codegenDir = new File(parentDir, "codegen");
-
-        File targetClasses = new File(codegenDir, "target/classes");
-    
-        String javaCmd = "java";
-        String classpath = targetClasses.getAbsolutePath() + File.pathSeparator + dependencies;
-
-        String mainClass = "com.generated_progs.ArrayList_add_java_lang_Object_.ArrayList_add_java_lang_Object_10";
-    
-        ProcessBuilder processBuilder = new ProcessBuilder(javaCmd, "-cp", classpath, mainClass,"1");
-        processBuilder.inheritIO();
-        Process process = processBuilder.start();
-        process.waitFor();
-        */
     }
 
     public static void run(String filename, Boolean readCFile, String currentDirBeingTested) throws IOException, InterruptedException {
-        //if (readCFile) {
-        //    String[] command = { "pkexec", "./c_progs/" + filename, Long.toString(ProcessHandle.current().pid()) };
-        //    Runtime.getRuntime().exec(command);
-        //} else {
-        //    String[] command = {
-        //        "java", 
-        //        "-Xmx4056M",
-        //        "-Xms4056M",
-        //        "-cp", 
-        //        "java_progs/out", 
-        //        "java_progs.progs." + filename, 
-        //        Long.toString(ProcessHandle.current().pid())
-        //    };
-        //    Runtime.getRuntime().exec(command);
-        //}
         runProgramCommand(filename,currentDirBeingTested);
         handleStartSignal(readCFile);
         handleStopSignal(filename,currentDirBeingTested);
         synchronized (Runner.class) {
             Runner.class.wait();
         }
-        //while (!notifiedRunnerClass) {
-            //Thread.sleep(1000);
-            //System.out.println("mim sta spera");
-        //}
         notifiedRunnerClass = false;
     }
 
     private static void handleStartSignal(Boolean readCFile) {
         Signal.handle(new Signal("USR1"), new SignalHandler() {
             public void handle(Signal sig) {
-                System.out.println("vou ligar");
                 log.append("Received START signal, starting powerjoular at " + LocalDateTime.now() + "\n");
                 if (readCFile) {
                     childPid = WritePid.captureCommandOutput();
@@ -390,7 +352,6 @@ public class Runner {
         try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter("tmp/tmp_"+fileName+".csv"))) {
             // Write the header row
             List<String> featureList = new ArrayList<>(methodfeatures.keySet());
-            System.out.println("features -> "+featureList);
             csvWriter.write(String.join(",", featureList));
             csvWriter.newLine();
                 List<String> row = new ArrayList<>();
@@ -410,11 +371,9 @@ public class Runner {
 
     private static void getFeaturesFromParser(String file, String cpuUsage,String currentDirBeingTested) throws IOException {
         String path = targetProgramFiles+"/"+file.replaceAll("\\d+", "")+"/";//TODO
-        System.out.println(file);
         HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(path,file,true);
         String methodName = getFunMapName(file,currentDirBeingTested);
         Map<String, Object> methodfeatures = methods.get(methodName);
-        //System.out.println(methodfeatures);
         ArrayList<String> inputs = getInputValues(file,currentDirBeingTested);
         featuresName.addAll(methodfeatures.keySet());
         methodfeatures.put("Input1", inputs.get(0));
@@ -599,36 +558,6 @@ public class Runner {
 
     private static File[] getAllFilesInDir(String dir) {
         return new File(dir).listFiles();
-    }
-
-    private static void saveOutput() throws IOException {
-        LocalTime time = LocalTime.now();
-        String dirName = "logs/run_"+time;
-        String powerjoularDir = dirName+"/powerjoular_files";
-        String tmpDir = dirName+"/tmp_files";
-        String errorDir = dirName+"/error_files";
-        runBashCommand(new String[]{"mkdir",dirName});
-        runBashCommand(new String[]{"mkdir",powerjoularDir});
-        runBashCommand(new String[]{"mkdir",tmpDir});
-        runBashCommand(new String[]{"mkdir",errorDir});
-        runBashCommand(new String[]{"mv","powerjoular.*",powerjoularDir});
-        runBashCommand(new String[]{"mv","tmp/*",tmpDir});
-        runBashCommand(new String[]{"mv","errorFiles/*",errorDir});
-        runBashCommand(new String[]{"mv","logs/runner_logs/*",dirName});
-        runBashCommand(new String[]{"mv","features.csv",dirName});
-    }
-
-    private static void runBashCommand(String[] command) throws IOException {
-        Process process = new ProcessBuilder(command).start();
-        try {
-            int exitCode = process.waitFor();  // ✅ Wait for command to complete
-            if (exitCode != 0) {
-                System.err.println("Command failed: " + String.join(" ", command));
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Command execution interrupted", e);
-        }
     }
 
 }

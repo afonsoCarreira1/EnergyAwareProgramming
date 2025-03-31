@@ -1,5 +1,6 @@
 package com.template;
 import com.template.aux.DeepCopyUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.template.aux.ArrayListAux;
 import com.template.aux.TemplatesAux;
 import java.util.ArrayList;
@@ -60,8 +61,8 @@ public class t {
         public Integer var1 = 112;
 
         BenchmarkArgs(ArrayList<Integer> var0, Integer var1) {
-            this.var0 = DeepCopyUtil.deepCopy(var0);
-            this.var1 = DeepCopyUtil.deepCopy(var1);
+            this.var0 = DeepCopyUtil.deepCopy(var0,new TypeReference<ArrayList<Integer>>() {});
+            this.var1 = DeepCopyUtil.deepCopy(var1,new TypeReference<Integer>() {});
         }
     }
 

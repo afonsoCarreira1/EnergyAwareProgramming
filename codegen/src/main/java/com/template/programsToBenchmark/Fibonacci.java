@@ -1,5 +1,10 @@
 package com.template.programsToBenchmark;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Fibonacci {
 
     //public static int fibonacci(int n) {
@@ -10,8 +15,9 @@ public class Fibonacci {
 
     //int n;
     Test t;
-public Fibonacci(Test t){this.t = t;}
-
+    @JsonCreator
+    public Fibonacci(@JsonProperty("t")Test t){this.t = t;}
+    
     public int fibonacci() {return fibonacci(t.n);}
     
     private int fibonacci(int n) {

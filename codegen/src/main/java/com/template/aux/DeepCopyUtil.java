@@ -1,18 +1,20 @@
 package com.template.aux;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DeepCopyUtil {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    // Generic deep copy function that works for objects, lists, arrays, and primitives
-    public static <T> T deepCopy(T object) {
+    public static <T> T deepCopy(T object, TypeReference<T> typeReference) {
         try {
             String json = objectMapper.writeValueAsString(object);
-            return objectMapper.readValue(json, new TypeReference<T>() {});
+            T result = objectMapper.readValue(json, typeReference);
+            return result;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Deep copy failed", e);
         }
     }
+    
 }

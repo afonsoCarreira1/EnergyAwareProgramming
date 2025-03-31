@@ -38,9 +38,11 @@
 
 
 cd codegen/
+sudo find src/main/java/com/generated_progs/ -type d -exec rm -r {} +
+sudo find src/main/java/com/generated_templates/ -type f -delete #remove java templates
 mvn install
 mvn clean compile assembly:single
-java -jar target/codegen-1.0-SNAPSHOT-jar-with-dependencies.jar
+java -jar target/codegen-1.0-SNAPSHOT-jar-with-dependencies.jar #Fibonacci
 
 #java -cp "$(cat classpath.txt):target/classes" com.template.TemplateCreator 2>&1 | tee error.log
 

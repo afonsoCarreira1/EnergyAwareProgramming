@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -120,6 +121,7 @@ public class SpoonInjector {
 
     public void injectInTemplate() {
         addImport(packageToUse+"aux.DeepCopyUtil");
+        addImport("com.fasterxml.jackson.core.type.TypeReference");
         createInitialVar(true);
         createMethodArgs();
         createClassThatHoldsArgs();
@@ -271,7 +273,7 @@ public class SpoonInjector {
         for (CtLocalVariable<?> var : vars){
             innerClass.addField(createBenchmarkClassFields(var));
             params.add(factory.createParameter(constructor, var.getType(), var.getSimpleName()));
-            String exp = "this."+var.getSimpleName() +" = DeepCopyUtil.deepCopy("+var.getSimpleName()+")";
+            String exp = "this."+var.getSimpleName() +" = DeepCopyUtil.deepCopy("+var.getSimpleName()+", new TypeReference<"+changePrimitiveTypeToWrapperType(var.getType())+">(){})";
             bodyStatements.addStatement(factory.Code().createCodeSnippetStatement(exp));
             //if (isPrimitive(var.getType().toString())) bodyStatements.addStatement(factory.Code().createCodeSnippetStatement("this."+var.getSimpleName()+" = "+var.getSimpleName()));
             //else if (var.getType().toString().equals("changetypehere")) bodyStatements.addStatement(factory.Code().createCodeSnippetStatement("this."+var.getSimpleName()+" = "+var.getSimpleName()));
@@ -288,6 +290,19 @@ public class SpoonInjector {
         if (type.equals("int") || type.equals("boolean") || type.equals("char") || type.equals("byte") || type.equals("short") || type.equals("float") || type.equals("double") || type.equals("long")|| type.equals("void")) return true;
         if (type.equals("Integer") || type.equals("Boolean") || type.equals("Character") || type.equals("Byte") || type.equals("Short") || type.equals("Float") || type.equals("Double") || type.equals("Long")) return true;
         return false;
+    }
+
+    private String changePrimitiveTypeToWrapperType(CtTypeReference<?> type) {
+        Map<String, String> primitive_to_wrapper = Map.of(
+            "int", "Integer",
+            "short", "Short",
+            "long", "Long",
+            "byte", "Byte",
+            "float", "Float",
+            "double", "Double",
+            "boolean", "Boolean",
+            "char", "Character");
+            return primitive_to_wrapper.getOrDefault(type.toString(), type.toString());
     }
 
     private CtField<?> createBenchmarkClassFields(CtLocalVariable var) {

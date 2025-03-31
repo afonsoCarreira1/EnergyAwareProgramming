@@ -25,6 +25,7 @@ import com.parse.ASTFeatureExtractor;
 import com.template.aux.WritePid;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -33,7 +34,7 @@ public class Runner {
 
     final static String CSV_FILE_NAME = "features.csv";
     final static String frequency = ".1";
-    final static short timeOutTime = 5;//seconds
+    final static short timeOutTime = 30;//seconds
     static String classpath = "";
     static String dependencies = "";
     static String powerjoularPid = "";
@@ -69,7 +70,8 @@ public class Runner {
                 //Thread.sleep(100);
                 if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                     String fileName = programs.get(i).toString().replace(".class", "");//programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
-                    if (!(args[0].equals("test") && fileName.equals("ArrayList_add_int_java_lang_Object_0"))) continue;//just to test one prog file
+                    //if (!(args[0].equals("test") && fileName.equals("ArrayList_add_int_java_lang_Object_0"))) continue;//just to test one prog file
+                    if (!(args[0].equals("test") && fileName.equals("Fibonacci_fibonacci__5"))) continue;//just to test one prog file
                     log.append("---------------------------------------\n");
                     log.append("Program number -> " + i + "\n");
                     //System.out.println("Program number -> " + i);
@@ -597,6 +599,36 @@ public class Runner {
 
     private static File[] getAllFilesInDir(String dir) {
         return new File(dir).listFiles();
+    }
+
+    private static void saveOutput() throws IOException {
+        LocalTime time = LocalTime.now();
+        String dirName = "logs/run_"+time;
+        String powerjoularDir = dirName+"/powerjoular_files";
+        String tmpDir = dirName+"/tmp_files";
+        String errorDir = dirName+"/error_files";
+        runBashCommand(new String[]{"mkdir",dirName});
+        runBashCommand(new String[]{"mkdir",powerjoularDir});
+        runBashCommand(new String[]{"mkdir",tmpDir});
+        runBashCommand(new String[]{"mkdir",errorDir});
+        runBashCommand(new String[]{"mv","powerjoular.*",powerjoularDir});
+        runBashCommand(new String[]{"mv","tmp/*",tmpDir});
+        runBashCommand(new String[]{"mv","errorFiles/*",errorDir});
+        runBashCommand(new String[]{"mv","logs/runner_logs/*",dirName});
+        runBashCommand(new String[]{"mv","features.csv",dirName});
+    }
+
+    private static void runBashCommand(String[] command) throws IOException {
+        Process process = new ProcessBuilder(command).start();
+        try {
+            int exitCode = process.waitFor();  // ✅ Wait for command to complete
+            if (exitCode != 0) {
+                System.err.println("Command failed: " + String.join(" ", command));
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Command execution interrupted", e);
+        }
     }
 
 }

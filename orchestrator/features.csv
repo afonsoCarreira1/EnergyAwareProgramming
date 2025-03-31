@@ -1,2 +1,4 @@
-LoopCount,VariableCountDepth_0,ThreadUsage,CyclomaticComplexity,MethodInvocationsDepth_0,LiteralCountDepth_0,ReassignmentsDepth_0,java.lang.Integer,int,ReturnType_void,java.util.ArrayList,ImportsUsed,java.util.ArrayList.add(int | java.lang.Object),AssignmentsDepth_0,BinaryOperatorsDepth_0,BranchCount,VariableDeclarationsDepth_0,Input1,Input2,EnergyUsed,Filename
-0,0,0,1,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0.0,ArrayList_add_int_java_lang_Object_0
+LoopCount,VariableCountDepth_0,ThreadUsage,CyclomaticComplexity,CustomObject,MethodInvocationsDepth_0,LiteralCountDepth_0,ReassignmentsDepth_0,CustomObjectWithCustomMethod,ReturnType_void,ImportsUsed,AssignmentsDepth_0,BinaryOperatorsDepth_0,BranchCount,VariableDeclarationsDepth_0,Input1,Input2,EnergyUsed,Filename
+0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,0.0,Fibonacci_fibonacci__6
+0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,14.437467454988838,Fibonacci_fibonacci__5
+0,0,0,1,0,1,0,0,0,1,1,0,0,0,0,0,0,0.0,ArrayList_add_int_java_lang_Object_0

@@ -74,11 +74,11 @@ public class Runner {
                 if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                     String fileName = programs.get(i).toString().replace(".class", "");//programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
                     //if (!(args[0].equals("test") && fileName.equals("ArrayList_add_int_java_lang_Object_0"))) continue;//just to test one prog file
-                    if (!(args[0].equals("test") && fileName.equals("Fibonacci_fibonacci__5"))) continue;//just to test one prog file
+                    if (!(args[0].equals("test") && fileName.equals("CopyOnWriteArrayList_add_int_java_lang_Object_2401"))) continue;//just to test one prog file
                     log.append("---------------------------------------\n");
                     log.append("Program number -> " + i + "\n");
                     //System.out.println("Program number -> " + i);
-                    if (skipProgram(fileName,currentDirBeingTested)) continue;
+                    //if (skipProgram(fileName,currentDirBeingTested)) continue;
                     log.append("Starting profile for " + fileName + " program\n");
                     Boolean readCFile = args[1].equals("t");
                     int runs = Integer.parseInt(args[2]);
@@ -370,14 +370,21 @@ public class Runner {
     }
 
     private static void getFeaturesFromParser(String file, String cpuUsage,String currentDirBeingTested) throws IOException {
-        String path = targetProgramFiles+"/"+file.replaceAll("\\d+", "")+"/";//TODO
-        HashMap<String, Map<String, Object>> methods = ASTFeatureExtractor.getFeatures(path,file,true);
+        String path = targetProgramFiles+"/"+file.replaceAll("\\d+", "")+"/";
+        ASTFeatureExtractor parser = new ASTFeatureExtractor(path,file,true);
+        HashMap<String, Map<String, Object>> methods = parser.getFeatures();
+        List<String> inputValues = parser.getNumberOfInputs();
+        
         String methodName = getFunMapName(file,currentDirBeingTested);
         Map<String, Object> methodfeatures = methods.get(methodName);
-        ArrayList<String> inputs = getInputValues(file,currentDirBeingTested);
+        for (int i = 0; i < inputValues.size(); i++) {
+            System.out.println(inputValues);
+            methodfeatures.put("input"+i, inputValues.get(i));
+        }
+        //ArrayList<String> inputs = getInputValues(file,currentDirBeingTested);
         featuresName.addAll(methodfeatures.keySet());
-        methodfeatures.put("Input1", inputs.get(0));
-        if(inputs.get(1) != null) methodfeatures.put("Input2", inputs.get(1));
+        //methodfeatures.put("Input1", inputs.get(0));
+        //if(inputs.get(1) != null) methodfeatures.put("Input2", inputs.get(1));
         methodfeatures.put("EnergyUsed", cpuUsage);
         methodfeatures.put("Filename", file);
         createFeaturesTempFile(file,methodfeatures);
@@ -402,8 +409,8 @@ public class Runner {
         try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter(CSV_FILE_NAME))) {
             // Write the header row
             List<String> featureList = new ArrayList<>(featuresName);
-            featureList.add("Input1");
-            featureList.add("Input2");
+            //featureList.add("Input1");
+            //featureList.add("Input2");
             featureList.add("EnergyUsed");
             featureList.add("Filename");
             csvWriter.write(String.join(",", featureList));

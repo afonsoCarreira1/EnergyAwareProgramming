@@ -34,29 +34,31 @@ public class TemplateCreator {
     static CtTypeReference<?> ref;
     static boolean isGeneric = true;
     public static void main(String[] args) throws Exception {
+        if (args == null || args.length == 0) return;
+        String targetMethod = args.length > 1 ? args[1] : "";
         String programToRun;
         List<CtMethod<?>> methods;
         List<CtType<?>> collections;
         boolean getCustomImports = false;
-        if (args.length != 0) {
+        if (args[0].equals("lists") || args[0].equals("sets")|| args[0].equals("maps")){
+            collections = Arrays.asList(getCollections(args[0]));
+            methods = getCollectionMethods(args[0]);
+        } else {
             programToRun = args[0];
             Launcher launcher = initSpoon();
             methods = getPublicMethodsInClass(launcher,programToRun);
             collections = Arrays.asList(ref.getTypeDeclaration());
             getCustomImports = true;
-        }else {
-            collections = Arrays.asList(getCollections("list"));
-            methods = getCollectionMethods("list");
         }
-        createTemplates(collections,methods,getCustomImports);
+        createTemplates(collections,methods,getCustomImports,targetMethod);
         createProgramsFromTemplates();
     }
 
-    private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods,boolean getCustomImports) {
+    private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods,boolean getCustomImports,String targetedMethod) {
         for (CtType<?> collec : collections) {
             for (CtMethod<?> method : methods) {
                 //if (!collec.getSimpleName().equals("ArrayList")) continue;
-                //if (!method.getSimpleName().equals("add")) continue;
+                if (!method.getSimpleName().equals(targetedMethod) && !targetedMethod.isEmpty()) continue;
                 //System.out.println("Collec -> "+ collec.getSimpleName()+" method -> "+method.getSimpleName());
                 Launcher launcher = initSpoon();
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),
@@ -92,8 +94,8 @@ public class TemplateCreator {
     }
 
     private static void createProgramsFromTemplates() throws IOException {
-        List<Integer> sizes = Arrays.asList(150);//createInputRange(1, 1.5, 0);
-        int[] funCalls =  new int[] {20_000};//{ 20_000, 50_000, 75_000, 100_000, 150_000 };
+        List<Integer> sizes = createInputRange(1, 1.5, 0);//Arrays.asList(150);
+        int[] funCalls =  new int[] { 20_000, 50_000, 75_000, 100_000, 150_000 };//{20_000};
         File[] templates = getAllTemplates();
         int id = 0;
         for (File template : templates) {
@@ -308,7 +310,7 @@ public class TemplateCreator {
         launcher.setSourceOutputDirectory("generated"); // Different output folder
         launcher.buildModel();
         CtType<?>[] collectionTypes = null;
-        if (collection.toLowerCase().equals("list")) {
+        if (collection.toLowerCase().equals("lists")) {
             collectionTypes = new CtType<?>[4];
             collectionTypes[0] = launcher.getFactory().Type().get(java.util.ArrayList.class);
             collectionTypes[1] = launcher.getFactory().Type().get(java.util.Vector.class);

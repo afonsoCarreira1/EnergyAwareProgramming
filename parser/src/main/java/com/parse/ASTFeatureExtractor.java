@@ -4,6 +4,7 @@ import spoon.Launcher;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.*;
+import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtPackageReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -33,8 +34,17 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 @SuppressWarnings("unchecked")
 public class ASTFeatureExtractor {
+    Launcher launcher;
+    CtModel model;
+    String path, file;
+    Boolean readOnlyFile;
+    Set<String> importSet;
 
-    public static HashMap<String, Map<String, Object>> getFeatures(String path, String file,Boolean readOnlyFile) {
+
+    public ASTFeatureExtractor(String path, String file,Boolean readOnlyFile) {
+        this.path = path;
+        this.file = file;
+        this.readOnlyFile = readOnlyFile;
         //String inputPath = "java_progs/progs/"+file+".java";
         String inputPath = path+file+".java";
         Path currentDir = Paths.get("").toAbsolutePath(); // Get the current directory
@@ -46,14 +56,18 @@ public class ASTFeatureExtractor {
         //launcher.addInputResource("src");
         //  ("example_dir");
         launcher.getEnvironment().setNoClasspath(true);
-        CtModel model = launcher.buildModel();
-        HashMap<String, Map<String, Object>> methodsFeatures = new HashMap<>();
-        HashMap<String, CtMethod<?>> methodsBody = new HashMap<>();
+        model = launcher.buildModel();
         //Map<String, Object> featuresExtractedFromMethod = new HashMap<>();
 
-        Set<String> importSet = new HashSet<>();
+        importSet = new HashSet<>();
         readImportFromFile(resolvedPath.toString(), importSet);
+    }
 
+    public HashMap<String, Map<String, Object>> getFeatures() {
+        
+        
+        HashMap<String, Map<String, Object>> methodsFeatures = new HashMap<>();
+        HashMap<String, CtMethod<?>> methodsBody = new HashMap<>();
         Map<String,CtMethod<?>> allMethodsImplementations = new HashMap<>();
         for (CtMethod<?> method : model.getElements(new TypeFilter<>(CtMethod.class))){
             String mapName = getMethodMapName(method);
@@ -97,12 +111,11 @@ public class ASTFeatureExtractor {
             methodsFullChecked.put(mapName,methodFeatures);
         }
         //removeExtraFeaturesCounted(featuresExtractedFromMethod);
-        
 
         return methodsFullChecked;
     }
 
-    public static Map<String, Object> extractFeatures(CtMethod<?> method, String path, Set<String> importSet) {
+    private  Map<String, Object> extractFeatures(CtMethod<?> method, String path, Set<String> importSet) {
         Map<String, Object> features = new HashMap<>();
 
         // 1. Node Types Count
@@ -170,7 +183,7 @@ public class ASTFeatureExtractor {
         return features;
     }
 
-    private static void getOperators(CtBlock<?> body, Map<String, Object> features,String complementFeatureName) {
+    private  void getOperators(CtBlock<?> body, Map<String, Object> features,String complementFeatureName) {
         Map<String, Integer> operatorCounts = new HashMap<>();
         ArrayList<String> operators = OperatorExtractor.extractOperators(body,complementFeatureName);
         for (int i = 0; i < operators.size(); i++) {
@@ -181,7 +194,7 @@ public class ASTFeatureExtractor {
         }
     }
 
-    private static int accountFeaturesInsideLoops(Map<String, Object> features,CtElement element, Map<String,CtMethod<?>> allMethodsImplementations,HashSet<String> visited,int maxDepthSoFar) {
+    private  int accountFeaturesInsideLoops(Map<String, Object> features,CtElement element, Map<String,CtMethod<?>> allMethodsImplementations,HashSet<String> visited,int maxDepthSoFar) {
         if(visited.contains(element.toString())) return maxDepthSoFar;
         visited.add(element.toString());
         getFeaturesWithDepth(element,maxDepthSoFar,features);
@@ -210,11 +223,11 @@ public class ASTFeatureExtractor {
         return maxDepth;
     }
 
-    public static void insertOrSumFeature(Map<String, Object> features,String key) {
+    private  void insertOrSumFeature(Map<String, Object> features,String key) {
         features.put(key, features.containsKey(key) ? (Integer) features.get(key) + 1 : 1);
     }
 
-    public static void getFeaturesWithDepth(CtElement element, int maxDepthSoFar, Map<String, Object> features) {
+    private  void getFeaturesWithDepth(CtElement element, int maxDepthSoFar, Map<String, Object> features) {
         if(element instanceof CtBlock) {
             getOperators((CtBlock<?>)element,features,"Depth_"+maxDepthSoFar);
             HashMap<String,Integer> featuresToAdd = new HashMap<>();
@@ -233,7 +246,7 @@ public class ASTFeatureExtractor {
     }
 
     //TODO change this so i dont have to write every new feature that accounts for depth
-    public static void removeExtraFeaturesCounted(Map<String, Object> features) {
+    private  void removeExtraFeaturesCounted(Map<String, Object> features) {
         //ArrayList<String> featuresToClean = new ArrayList<> ();
         ArrayList<String> featuresToClean = new ArrayList<>(
             Arrays.asList("VariableDeclarationsDepth",
@@ -267,12 +280,12 @@ public class ASTFeatureExtractor {
         }
     }
 
-    public static String getMethodMapName(CtMethod<?> method) {
+    private  String getMethodMapName(CtMethod<?> method) {
         return method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
         + getMethodParamsType(method) + ")";
     }
 
-    public static void addRelevantPackages(Launcher launcher) {
+    private  void addRelevantPackages(Launcher launcher) {
         Path currentDir = Paths.get(System.getProperty("user.dir"));
         String[] pathSplit = currentDir.toString().split("/");
         String parentDir = pathSplit[pathSplit.length-1];
@@ -280,7 +293,7 @@ public class ASTFeatureExtractor {
             try {
                 Files.walkFileTree(currentDir, new SimpleFileVisitor<Path>() {
                     //@Override
-                    //public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    //private FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     //    System.out.println("File: " + file);
                     //    return FileVisitResult.CONTINUE;
                     //}
@@ -298,7 +311,7 @@ public class ASTFeatureExtractor {
             }
     }
 
-    public static String getMethodParamsType(CtMethod<?> method) {
+    private  String getMethodParamsType(CtMethod<?> method) {
         StringBuilder paramString = new StringBuilder();
         List<CtParameter<?>> l = method.getParameters();
         for (CtParameter<?> parameter : l) {
@@ -310,7 +323,7 @@ public class ASTFeatureExtractor {
         return paramString.toString();
     }
 
-    public static void readImportFromFile(String file, Set<String> importSet) {
+    private  void readImportFromFile(String file, Set<String> importSet) {
         File myObj = new File(file);
         try (Scanner myReader = new Scanner(myObj)) {
             StringBuilder f = new StringBuilder();
@@ -327,7 +340,7 @@ public class ASTFeatureExtractor {
         }
     }
 
-    private static void getUsedImportsInMethod(CtMethod<?> method, Set<String> importSet,
+    private  void getUsedImportsInMethod(CtMethod<?> method, Set<String> importSet,
             Map<String, Object> features) {
         Set<String> usedImports = new HashSet<>();
 
@@ -346,7 +359,7 @@ public class ASTFeatureExtractor {
         features.put("ImportsUsed", usedImports.size());
     }
     
-    private static void countMethodsOrigin(CtMethod<?> method, String path, Map<String, Object> features) {
+    private  void countMethodsOrigin(CtMethod<?> method, String path, Map<String, Object> features) {
         Map<String, Integer> methodsUsed = new HashMap<>();
         for (CtInvocation<?> op : method.getElements(new TypeFilter<>(CtInvocation.class))) {
             CtExpression<?> target = op.getTarget();
@@ -369,7 +382,7 @@ public class ASTFeatureExtractor {
         }
     }
 
-    private static void getVariablesType(CtMethod<?> method, Map<String, Object> features) {
+    private  void getVariablesType(CtMethod<?> method, Map<String, Object> features) {
         Map<String, Integer> typeCounts = new HashMap<>();
         List<CtVariable<?>> variables = method.getElements(new TypeFilter<>(CtVariable.class));
         for (CtVariable<?> variable : variables) {
@@ -386,7 +399,7 @@ public class ASTFeatureExtractor {
         }
     }
 
-    private static String getFullTypeName(CtTypeReference<?> typeRef) {
+    private  String getFullTypeName(CtTypeReference<?> typeRef) {
         if (isCustomObject(typeRef)) {
             return "CustomObject";
         }
@@ -408,14 +421,14 @@ public class ASTFeatureExtractor {
         return typeName.toString();
     }
 
-    private static boolean isCustomObject(CtTypeReference<?> typeRef) {
+    private  boolean isCustomObject(CtTypeReference<?> typeRef) {
         if (typeRef.getPackage() == null)
             return false;
         String packageName = typeRef.getPackage().getQualifiedName();
         return !(packageName.startsWith("java.") || packageName.startsWith("javax.") || packageName.startsWith("org.") || packageName.startsWith("sun."));
     }
 
-    private static int countReassignments(CtBlock<?> body) {
+    private  int countReassignments(CtBlock<?> body) {
         int count = 0;
         List<CtAssignment<?, ?>> assignments = body.getElements(new TypeFilter<>(CtAssignment.class));
         for (CtAssignment<?, ?> assignment : assignments) {
@@ -426,7 +439,7 @@ public class ASTFeatureExtractor {
         return count;
     }
 
-    private static int calculateCyclomaticComplexity(CtMethod<?> method) {
+    private  int calculateCyclomaticComplexity(CtMethod<?> method) {
         int complexity = 1; // Start with 1 for the method itself
         complexity += method.getElements(new TypeFilter<>(CtIf.class)).size();
         complexity += method.getElements(new TypeFilter<>(CtLoop.class)).size();
@@ -437,7 +450,7 @@ public class ASTFeatureExtractor {
         return complexity;
     }
 
-    private static int calculateMaxLoopDepth(CtElement element, Map<String,CtMethod<?>> allMethodsImplementations,HashSet<String> visited,int maxDepthSoFar) {
+    private  int calculateMaxLoopDepth(CtElement element, Map<String,CtMethod<?>> allMethodsImplementations,HashSet<String> visited,int maxDepthSoFar) {
         if(visited.contains(element.toString())) return maxDepthSoFar;
         visited.add(element.toString());
         int maxDepth = maxDepthSoFar;
@@ -466,7 +479,7 @@ public class ASTFeatureExtractor {
         return maxDepth;
     }
 
-    private static void checkThreadUsage(CtMethod<?> method, Map<String, Object> features) {
+    private  void checkThreadUsage(CtMethod<?> method, Map<String, Object> features) {
         CtClass<?> declaringClass = (CtClass<?>) method.getDeclaringType();
 
         int threadUsageCount = 0;
@@ -528,19 +541,19 @@ public class ASTFeatureExtractor {
         
     }
 
-    private static boolean isSubclassOf(CtClass<?> clazz, String superclass) {
+    private  boolean isSubclassOf(CtClass<?> clazz, String superclass) {
         if (clazz == null) return false;
         CtTypeReference<?> superClassRef = clazz.getSuperclass();
         return superClassRef != null && superClassRef.getQualifiedName().equals(superclass);
     }
 
-    private static boolean implementsInterface(CtClass<?> clazz, String interfaceName) {
+    private  boolean implementsInterface(CtClass<?> clazz, String interfaceName) {
         if (clazz == null) return false;
         return clazz.getSuperInterfaces().stream()
             .anyMatch(iface -> iface.getQualifiedName().equals(interfaceName));
     }
 
-    private static Map<String, Object> mergeFeatures(CtMethod<?> method,
+    private  Map<String, Object> mergeFeatures(CtMethod<?> method,
             HashMap<String, Map<String, Object>> allFeatures,
             HashMap<String, CtMethod<?>> methodsBody, HashSet<String> methodsAnalyzed) {
         String methodParams = getMethodParamsType(method);
@@ -568,7 +581,7 @@ public class ASTFeatureExtractor {
         return methodfeatures;
     }
 
-    public static String getParamTypesFromMethodBody(List<CtTypeReference<?>> parameterTypes) {
+    private  String getParamTypesFromMethodBody(List<CtTypeReference<?>> parameterTypes) {
         StringBuilder paramTypesString = new StringBuilder();
         for (int i = 0; i < parameterTypes.size(); i++) {
             if (i > 0) {
@@ -580,7 +593,7 @@ public class ASTFeatureExtractor {
         return paramTypesString.toString();
     }
 
-    public static Map<String, Object> sumMaps(Map<String, Object> map1, Map<String, Object> map2) {
+    private  Map<String, Object> sumMaps(Map<String, Object> map1, Map<String, Object> map2) {
         Map<String, Object> result = new HashMap<>();
 
         // Add all keys from map1
@@ -614,5 +627,16 @@ public class ASTFeatureExtractor {
         }
 
         return result;
+    }
+
+    public List<String> getNumberOfInputs(){
+        List<String> inputValues = new ArrayList<>();
+        String regex = "^input\\d+$";
+        for (CtVariable<?> inputVar : model.getElements(new TypeFilter<>(CtVariable.class))){
+            if (inputVar.getSimpleName().matches(regex)) {
+                inputValues.add(inputVar.getDefaultExpression().toString().replace("\"", ""));
+            } 
+        }
+        return inputValues;
     }
 }

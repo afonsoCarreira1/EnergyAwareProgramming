@@ -33,9 +33,13 @@ public class TemplateCreator {
     static int id = 0;
     static CtTypeReference<?> ref;
     static boolean isGeneric = true;
+
+    private static HashSet<String> getTargetMethodSet(String[] args) {
+        return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
+    }
     public static void main(String[] args) throws Exception {
         if (args == null || args.length == 0) return;
-        String targetMethod = args.length > 1 ? args[1] : "";
+        HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;
         List<CtMethod<?>> methods;
         List<CtType<?>> collections;
@@ -50,15 +54,15 @@ public class TemplateCreator {
             collections = Arrays.asList(ref.getTypeDeclaration());
             getCustomImports = true;
         }
-        createTemplates(collections,methods,getCustomImports,targetMethod);
+        createTemplates(collections,methods,getCustomImports,targetMethods);
         createProgramsFromTemplates();
     }
 
-    private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods,boolean getCustomImports,String targetedMethod) {
+    private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods,boolean getCustomImports,HashSet<String> targetMethods) {
         for (CtType<?> collec : collections) {
             for (CtMethod<?> method : methods) {
                 //if (!collec.getSimpleName().equals("ArrayList")) continue;
-                if (!method.getSimpleName().equals(targetedMethod) && !targetedMethod.isEmpty()) continue;
+                if (!targetMethods.contains(method.getSimpleName()) && !targetMethods.isEmpty()) continue;
                 //System.out.println("Collec -> "+ collec.getSimpleName()+" method -> "+method.getSimpleName());
                 Launcher launcher = initSpoon();
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),
@@ -104,11 +108,11 @@ public class TemplateCreator {
             new File(dirName).mkdirs();
             String program = readFile(template.toString());
             for (String type : getTypes()) {
-                program = program.replace("changetypehere", type);
+                String programChangedType = program.replace("changetypehere", type);
                 for (int funCall : funCalls) {
-                    program = program.replace("\"numberOfFunCalls\"", funCall+"");
+                    String programChangedFunCall = programChangedType.replace("\"numberOfFunCalls\"", funCall+"");
                     for (int size : sizes) {
-                        String finalProg = replaceValues(program,size);
+                        String finalProg = replaceValues(programChangedFunCall,size);
                         String methodNameForClass = Introspector.decapitalize(className);
                         finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+className+"",className+id);
                         finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+methodNameForClass+"",methodNameForClass+id);

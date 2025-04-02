@@ -26,6 +26,21 @@ This module **automatically generates Java programs** using methods from **Lists
 ./run_codegen.sh
 ```
 
+**Run for the lists collections**  
+```sh
+./run_codegen.sh lists
+```
+
+**Run for the lists collections add, get, size methods**  
+```sh
+./run_codegen.sh lists add,get,size
+```
+
+**Run for some Class**  
+```sh
+./run_codegen.sh Fibonacci
+```
+
 ---
 
 ### 2️⃣ Parser (Feature Extractor)  

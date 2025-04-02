@@ -365,7 +365,7 @@ public class SpoonInjector {
     private CtStatement populateCollection(CtLocalVariable<?> var, boolean useConstructorSize) {
         if (!isCollection(var)) return null;
         String p = packageToUse+"aux.ArrayListAux";
-        if (var.getType().toString().contains("List")) {
+        if (var.getType().toString().contains("List") || var.getType().toString().contains("Vector")) {
             addImport(p);
             CtClass<?> ctClass = factory.Class().get(p);
             CtMethod<?> insertRandomNumbersMethod = ctClass.getMethodsByName("insertRandomNumbers").get(0);
@@ -377,7 +377,7 @@ public class SpoonInjector {
             else invocation.addArgument(factory.Code().createLiteral(createRandomLiteral(factory.createReference(typeToUse),false,false)));
             invocation.addArgument(factory.Code().createLiteral(typeToUse));
             return invocation;
-        }//TODo do the same for sets and other collections
+        }//TODO do the same for sets and other collections
         return null;
     }
     

@@ -74,7 +74,7 @@ public class Runner {
                 if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                     String fileName = programs.get(i).toString().replace(".class", "");//programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
                     //if (!(args[0].equals("test") && fileName.equals("ArrayList_add_int_java_lang_Object_0"))) continue;//just to test one prog file
-                    if (!(args[0].equals("test") && fileName.equals("CopyOnWriteArrayList_add_int_java_lang_Object_2401"))) continue;//just to test one prog file
+                    //if (!(args[0].equals("test") && fileName.equals("CopyOnWriteArrayList_add_int_java_lang_Object_2401"))) continue;//just to test one prog file
                     log.append("---------------------------------------\n");
                     log.append("Program number -> " + i + "\n");
                     //System.out.println("Program number -> " + i);
@@ -378,7 +378,7 @@ public class Runner {
         String methodName = getFunMapName(file,currentDirBeingTested);
         Map<String, Object> methodfeatures = methods.get(methodName);
         for (int i = 0; i < inputValues.size(); i++) {
-            System.out.println(inputValues);
+            //System.out.println(inputValues);
             methodfeatures.put("input"+i, inputValues.get(i));
         }
         //ArrayList<String> inputs = getInputValues(file,currentDirBeingTested);

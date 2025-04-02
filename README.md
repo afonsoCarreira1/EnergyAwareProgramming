@@ -1,20 +1,85 @@
-## GraphDisplay.py (OUTDATED)
-This file runs the powerjoular files stored in 4orch_fib or matrixMulFiles.
+# 🔋 Java Energy Consumption Prediction
 
-To run:
+This repository contains a set of Java Maven projects designed to **train machine learning models** to predict the **energy consumption** of Java programs—without executing them.
 
+The workflow involves:
+1. **Generating Java programs** based on collection methods.
+2. **Extracting code features** (e.g., cyclomatic complexity, loop depth).
+3. **Running the programs** and **logging their energy consumption**.
+4. **Training a machine learning model** to predict energy usage.
 
-    python3 GraphDisplay.py dir programName j|c
-    
-- dir is the directory where the files are stored
-- programName is the name of the program, for the moment only 2 options exist (Fib/MatrixMult)
-- j|c is to choose the language of the program
+🔧 **Built for Linux** |  **Uses PowerJoular for energy measurement** |  **ML-based prediction**
 
+---
 
-Example:
+## 📂 Project Structure
 
-    python3 GraphDisplay.py 4orch_fib Fib j
+### 1️⃣ Codegen (Code Generator)  
+This module **automatically generates Java programs** using methods from **Lists, Sets, and Maps**, or even **custom classes**.
 
-Plots the files from the 4orch_fib dir which are power values of the Fibonacci program writen in java
+- **Uses** [Spoon](https://spoon.gforge.inria.fr/) to create program variations  
+- **Generates random inputs** to enrich the dataset  
+- **Supports custom classes** (place them in `codegen/src/main/java/com/template/programsToBenchmark/`)  
 
-<img src="https://i.ibb.co/RYPgrLQ/Screenshot-from-2024-11-08-14-09-14.png" alt="Screenshot-from-2024-11-08-14-09-14" border="0" width="60%">
+**Run CodeGen:**  
+```sh
+./run_codegen.sh
+```
+
+---
+
+### 2️⃣ Parser (Feature Extractor)  
+This module analyzes Java programs and extracts **key features** that influence energy consumption, such as:
+
+🔹 Number of `if` statements  
+🔹 Loop depth  
+🔹 Cyclomatic complexity  
+🔹 Other structural characteristics  
+
+**Run Parser:**  
+```sh
+./run_parser.sh
+```
+
+---
+
+### 3️⃣ Orchestrator (Execution Manager)  
+This module **coordinates the entire process**, calling CodeGen to generate programs, executing them, and collecting feature data. It:
+
+- **Runs each generated program** and logs its energy usage  
+- **Calls the Parser** to extract relevant features  
+- **Saves all data** into a structured CSV file (`features.csv`)  
+- **Logs execution details, errors, and temp files** in `orchestrator/logs/run_<date>/`  
+
+**Run Orchestrator (must be run last):**  
+```sh
+./run_orchestrator.sh
+```
+
+---
+
+## 📊 Machine Learning Training 🚧 (In Progress)
+After data collection, you can train a model using the provided Python script:
+
+**Run ML Training:**  
+```sh
+python3 ml/train.py
+```
+
+---
+
+## ⚙️ Dependencies 🚧 (In Progress)
+- **PowerJoular** (for energy measurement)  
+- **Spoon** (for Java code analysis and transformation)  
+- **Python** (for model training)  
+
+**Install dependencies**  
+```sh
+./setup.sh
+```
+
+---
+
+## 📜 License
+This project is licensed under the MIT License. See the LICENSE file for details.
+

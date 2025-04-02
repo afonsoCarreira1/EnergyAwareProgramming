@@ -28,3 +28,4 @@ generated_progs/
 generated_templates/
 **/cp.txt
 old_files/
+./vscode

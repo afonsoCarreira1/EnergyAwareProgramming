@@ -1,5 +1,6 @@
 com/template/SpoonInjector.class
 com/template/aux/TemplatesAux.class
+com/template/TemplateReplace.class
 com/template/t$BenchmarkArgs.class
 com/template/programsToBenchmark/Fibonacci.class
 com/template/Template.class

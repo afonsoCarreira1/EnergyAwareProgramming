@@ -31,8 +31,8 @@ public class t {
             //long et = System.currentTimeMillis();
             //long dif = et-st;
             //System.out.println("time dif -> "+dif+"ms");
-            CopyOnWriteArrayList<Character> l = new CopyOnWriteArrayList();
-            ArrayListAux.insertRandomNumbers(l, 245, "Character");
+            CopyOnWriteArrayList<Integer> l = new CopyOnWriteArrayList();
+            ArrayListAux.insertRandomNumbers(l, 245, "Integer");
             TemplatesAux.launchTimerThread();
             long st = System.currentTimeMillis();
             int i = 0;

@@ -37,7 +37,7 @@ public class Runner {
 
     final static String CSV_FILE_NAME = "features.csv";
     final static String frequency = ".1";
-    final static short timeOutTime = 30;//seconds
+    final static short timeOutTime = 60;//seconds
     static String classpath = "";
     static String dependencies = "";
     static String powerjoularPid = "";

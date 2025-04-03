@@ -14,7 +14,8 @@ public class App
 {
     public static void main( String[] args ) throws Exception
     {
-        Runner.main(new String[]{"test","f","1"});
+        System.out.println("aki");
+        //Runner.main(new String[]{"test","f","1"});
         //runCommand();
         //reviewBeforeRunning();
     }

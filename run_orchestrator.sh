@@ -2,8 +2,9 @@
 
 export MAVEN_OPTS="-Xmx512m -Xms128m -Xss2m"
 cd orchestrator/
+mvn versions:update-parent versions:update-properties versions:use-latest-releases -DgenerateBackupPoms=false #update pom
 mvn dependency:build-classpath -Dmdep.outputFile=cp.txt
-mvn clean compile assembly:single -U -Dorg.slf4j.simpleLogger.defaultLogLevel=ERROR
+mvn clean compile assembly:single -U #-Dorg.slf4j.simpleLogger.defaultLogLevel=ERROR
 sudo java -jar target/orchestrator-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 

@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,6 +21,12 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 
 import spoon.Launcher;
 import spoon.reflect.CtModel;
@@ -38,6 +48,7 @@ public class TemplateCreator {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
     public static void main(String[] args) throws Exception {
+        args = new String[]{"Fibonacci"};
         if (args == null || args.length == 0) return;
         HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;
@@ -49,11 +60,12 @@ public class TemplateCreator {
             methods = getCollectionMethods(args[0]);
         } else {
             programToRun = args[0];
-            Launcher launcher = initSpoon();
+            Launcher launcher = initSpoon("src/main/java/com/template/");
             methods = getPublicMethodsInClass(launcher,programToRun);
             collections = Arrays.asList(ref.getTypeDeclaration());
             getCustomImports = true;
         }
+        new File(initialPath+"generated_InputTestTemplate").mkdirs();
         createTemplates(collections,methods,getCustomImports,targetMethods);
         createProgramsFromTemplates();
     }
@@ -64,7 +76,7 @@ public class TemplateCreator {
                 //if (!collec.getSimpleName().equals("ArrayList")) continue;
                 if (!targetMethods.contains(method.getSimpleName()) && !targetMethods.isEmpty()) continue;
                 //System.out.println("Collec -> "+ collec.getSimpleName()+" method -> "+method.getSimpleName());
-                Launcher launcher = initSpoon();
+                Launcher launcher = initSpoon("src/main/java/com/template/");
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),
                 collec, "", 0, outputDir,isGeneric,getCustomImports);
                 spi.injectInTemplate();
@@ -99,7 +111,7 @@ public class TemplateCreator {
 
     private static void createProgramsFromTemplates() throws IOException {
         List<Integer> sizes = createInputRange(1, 1.5, 0);//Arrays.asList(150);
-        int[] funCalls =  new int[] { 20_000, 50_000, 75_000, 100_000, 150_000 };//{20_000};
+        int[] funCalls =  new int[] { /*20_000, 50_000,*/ 75_000, 100_000, 150_000 };//{20_000};
         File[] templates = getAllTemplates();
         int id = 0;
         for (File template : templates) {
@@ -111,23 +123,55 @@ public class TemplateCreator {
                 String programChangedType = program.replace("changetypehere", type);
                 for (int funCall : funCalls) {
                     String programChangedFunCall = programChangedType.replace("\"numberOfFunCalls\"", funCall+"");
-                    for (int size : sizes) {
-                        String finalProg = replaceValues(programChangedFunCall,size);
-                        String methodNameForClass = Introspector.decapitalize(className);
-                        finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+className+"",className+id);
-                        finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+methodNameForClass+"",methodNameForClass+id);
-                        //finalProg = finalProg.replace(className,className+id);
-                        createJavaProgramFile(dirName+"/"+className+id+".java",finalProg);
-                        id++;
-                    }
+                    findMaxInput(programChangedFunCall,type);
+                    //for (int size : sizes) {
+                    //    findMaxInput(programChangedFunCall);
+                    //    String finalProg = replaceValues(programChangedFunCall,size);
+                    //    String methodNameForClass = Introspector.decapitalize(className);
+                    //    finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+className+"",className+id);
+                    //    finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+methodNameForClass+"",methodNameForClass+id);
+                    //    //finalProg = finalProg.replace(className,className+id);
+                    //    createJavaProgramFile(dirName+"/"+className+id+".java",finalProg);
+                    //    id++;
+                    //}
                 }
             }  
         }
     }
 
+    private static int findNumberOfInputs(String program){
+        String keyword = "input\\d+";
+        Matcher matcher = Pattern.compile(keyword).matcher(program);
+        HashSet<String> results = new HashSet<>();
+        while (matcher.find()) {
+            results.add(matcher.group());
+        }    
+        return results.size();
+    } 
 
-    private static List<String> findStringsToReplace(String input){
-        String keyword = "ChangeValueHere\\d+_[^\",;\\s]+";
+    private static void findMaxInput(String program, String type) throws IOException{
+        int numberOfInputs = findNumberOfInputs(program);
+        StringBuilder inputBuild = new StringBuilder();
+        for (int i = 0; i < numberOfInputs; i++) {
+            inputBuild.append("        "+type+" in"+i+" = "+type+".valueOf(args["+i+"]);\n");
+        }
+        List<String> valuesToReplace = findStringsToReplace(program,"ChangeValueHere\\d+_[^\",;\\s]+");
+        String finalProgram = program.replaceAll("public class .* \\{", "public class Prog {");
+        finalProgram = finalProgram.replace("int iter = 0;", "int iter = 0;\n"+inputBuild.toString());
+        //System.out.println(finalProgram);
+        //for (int i = 0; i < valuesToReplace.size(); i++) {
+        //    String valueToReplace = valuesToReplace.get(i);
+        //    String[] valueSplitted = valueToReplace.split("_");
+        //    String replaceInput = "\""+valueSplitted[0]+"\"";
+        //    String type2 = valueSplitted[1];
+        //    finalProgram = finalProgram.replace("\""+valueToReplace+"\"", "in"+i);
+        //    //finalProgram = finalProgram.replace(replaceInput, "\""+size+"\"");
+        //}
+        
+    }
+
+
+    private static List<String> findStringsToReplace(String input,String keyword){
         Matcher matcher = Pattern.compile(keyword).matcher(input);
         HashSet<String> results = new HashSet<>();
         while (matcher.find()) {
@@ -137,12 +181,11 @@ public class TemplateCreator {
     }
 
     private static String replaceValues(String program,int size) {
-        //System.out.println(program);
         int min = 0, max;
         if (size-1+min==0) max = 0;
         else max = size-1;
 
-        List<String> valuesToReplace = findStringsToReplace(program);
+        List<String> valuesToReplace = findStringsToReplace(program,"ChangeValueHere\\d+_[^\",;\\s]+");
         String finalProgram = program;
         for (String valueToReplace : valuesToReplace) {
             String[] valueSplitted = valueToReplace.split("_");
@@ -151,8 +194,7 @@ public class TemplateCreator {
             if (type.equals("useConstructorSize")) {
                 finalProgram = finalProgram.replace("\""+valueToReplace+"\"", size+"");
                 finalProgram = finalProgram.replace(replaceInput, "\""+size+"\"");
-            }
-            else {
+            } else {
                 String value = getRandomValueOfType(type,min,max);
                 finalProgram = finalProgram.replace("\""+valueToReplace+"\"", value);
                 finalProgram = finalProgram.replace(replaceInput, "\""+value+"\"");
@@ -254,9 +296,9 @@ public class TemplateCreator {
         return new ArrayList<>(numberSet);
     }
 
-    private static Launcher initSpoon() {
+    private static Launcher initSpoon(String path) {
         Launcher launcher = new Launcher();
-        launcher.addInputResource("src/main/java/com/template/");
+        launcher.addInputResource(path);
         launcher.getFactory().getEnvironment().setAutoImports(true);
         launcher.getEnvironment().setNoClasspath(false);
         launcher.setSourceOutputDirectory(outputDir);

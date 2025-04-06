@@ -123,7 +123,7 @@ public class TemplateCreator {
                 String programChangedType = program.replace("changetypehere", type);
                 for (int funCall : funCalls) {
                     String programChangedFunCall = programChangedType.replace("\"numberOfFunCalls\"", funCall+"");
-                    findMaxInput(programChangedFunCall,type);
+                    findMaxInput(programChangedFunCall);
                     //for (int size : sizes) {
                     //    findMaxInput(programChangedFunCall);
                     //    String finalProg = replaceValues(programChangedFunCall,size);
@@ -149,26 +149,45 @@ public class TemplateCreator {
         return results.size();
     } 
 
-    private static void findMaxInput(String program, String type) throws IOException{
+    private static void findMaxInput(String program) throws IOException{
         int numberOfInputs = findNumberOfInputs(program);
         StringBuilder inputBuild = new StringBuilder();
-        for (int i = 0; i < numberOfInputs; i++) {
-            inputBuild.append("        "+type+" in"+i+" = "+type+".valueOf(args["+i+"]);\n");
-        }
-        List<String> valuesToReplace = findStringsToReplace(program,"ChangeValueHere\\d+_[^\",;\\s]+");
-        String finalProgram = program.replaceAll("public class .* \\{", "public class Prog {");
-        finalProgram = finalProgram.replace("int iter = 0;", "int iter = 0;\n"+inputBuild.toString());
-        //System.out.println(finalProgram);
-        //for (int i = 0; i < valuesToReplace.size(); i++) {
-        //    String valueToReplace = valuesToReplace.get(i);
-        //    String[] valueSplitted = valueToReplace.split("_");
-        //    String replaceInput = "\""+valueSplitted[0]+"\"";
-        //    String type2 = valueSplitted[1];
-        //    finalProgram = finalProgram.replace("\""+valueToReplace+"\"", "in"+i);
-        //    //finalProgram = finalProgram.replace(replaceInput, "\""+size+"\"");
-        //}
         
+        List<String> valuesToReplace = findStringsToReplace(program,"ChangeValueHere\\d+_[^\",;\\s]+");
+        String finalProgram = program.replaceAll("public class .* \\{", "public class Prog {").replaceAll("package .*;", "package com.generated_InputTestTemplate;");
+        Map<String,String> inputType = new HashMap<>();
+        for (int i = 0; i < valuesToReplace.size(); i++) {
+            String valueToReplace = valuesToReplace.get(i);
+            String[] valueSplitted = valueToReplace.split("_");
+            String replaceInput = "\""+valueSplitted[0]+"\"";
+            String type = valueSplitted[1];
+            finalProgram = finalProgram.replace("\""+valueToReplace+"\"", "in"+i);
+            inputType.put("in"+i, type);
+            //finalProgram = finalProgram.replace(replaceInput, "\""+size+"\"");
+        }
+        for (int i = 0; i < numberOfInputs; i++) {
+            inputBuild.append("        "+inputType.get("in"+i)+" in"+i+" = "+getPrimitiveTypeToWrapper(inputType.get("in"+i))+".valueOf(args["+i+"]);\n");
+        }
+        
+        finalProgram = finalProgram.replace("int iter = 0;", "int iter = 0;\n"+inputBuild.toString());
+        createJavaProgramFile(initialPath+"generated_InputTestTemplate/Prog.java", finalProgram);
     }
+
+    private static String getPrimitiveTypeToWrapper(String type) {
+        switch (type) {
+            case "int": return "Integer";
+            case "boolean": return "Boolean";
+            case "char": return "Character";
+            case "byte": return "Byte";
+            case "short": return "Short";
+            case "long": return "Long";
+            case "float": return "Float";
+            case "double": return "Double";
+            case "void": return "Void";
+            default: return type; // not a primitive, return as is
+        }
+    }
+    
 
 
     private static List<String> findStringsToReplace(String input,String keyword){

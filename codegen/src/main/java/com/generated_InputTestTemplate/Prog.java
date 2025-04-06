@@ -1,4 +1,4 @@
-package com.generated_progs.Fibonacci_fibonacci__;
+package com.generated_InputTestTemplate;
 import com.template.aux.DeepCopyUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.template.programsToBenchmark.*;
@@ -14,11 +14,11 @@ public class Prog {
     // add @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         int iter = 0;
-        Double in0 = Double.valueOf(args[0]);
+        int in0 = Integer.valueOf(args[0]);
 
         try {
             Fibonacci var0 = new Fibonacci(new Test(in0));
-            BenchmarkArgs[] arr = new BenchmarkArgs[75000];
+            BenchmarkArgs[] arr = new BenchmarkArgs[150000];
             populateArray(arr, var0);
             TemplatesAux.sendStartSignalToOrchestrator(args[0]);
             TemplatesAux.launchTimerThread();
@@ -73,7 +73,7 @@ public class Prog {
     }
 
     private static void populateArray(BenchmarkArgs[] arr, Fibonacci var0) {
-        for (int i = 0;i < 75000;i++) {
+        for (int i = 0;i < 150000;i++) {
           arr[i] = new BenchmarkArgs(var0);
         };
     }

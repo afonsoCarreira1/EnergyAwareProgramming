@@ -18,7 +18,7 @@ public class T {
         ArrayListAux.insertRandomNumbers(var2, 1, "Integer");
         BenchmarkArgs[] arr = new BenchmarkArgs[20000];
         populateArray(arr, var0, var1, var2);
-        TemplatesAux.launchTimerThread();
+        TemplatesAux.launchTimerThread(1100);
         iter = computation(arr, arr.length);
     }
 

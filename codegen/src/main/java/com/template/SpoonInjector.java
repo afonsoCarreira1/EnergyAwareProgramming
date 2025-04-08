@@ -247,7 +247,7 @@ public class SpoonInjector {
         //methodCalls.addStatement(callPopulateMethod());
 
         statements.addStatement(factory.Code().createCodeSnippetStatement("TemplatesAux.sendStartSignalToOrchestrator(args[0])"));
-        statements.addStatement(factory.Code().createCodeSnippetStatement("TemplatesAux.launchTimerThread()"));
+        statements.addStatement(factory.Code().createCodeSnippetStatement("TemplatesAux.launchTimerThread(1100)"));
         statements.addStatement(factory.Code().createCodeSnippetStatement("iter = computation(arr, arr.length)"));
         //whileBlock.insertAfter(methodCalls);
         callExceptions();

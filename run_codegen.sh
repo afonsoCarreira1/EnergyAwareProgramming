@@ -10,6 +10,7 @@ cd codegen/
 sudo find src/main/java/com/generated_progs/ -type d -exec rm -r {} +
 sudo find src/main/java/com/generated_templates/ -type d -exec rm -r {} +
 mvn install
+mvn dependency:build-classpath -Dmdep.outputFile=cp.txt
 mvn clean compile assembly:single
 mvn install:install-file -Dfile=target/codegen-1.0-SNAPSHOT-jar-with-dependencies.jar \
     -DgroupId=com.template -DartifactId=codegen -Dversion=1.0-SNAPSHOT -Dpackaging=jar

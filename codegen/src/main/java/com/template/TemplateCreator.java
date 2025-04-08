@@ -60,7 +60,7 @@ public class TemplateCreator {
             methods = getCollectionMethods(args[0]);
         } else {
             programToRun = args[0];
-            Launcher launcher = initSpoon("src/main/java/com/template/");
+            Launcher launcher = initSpoon(new ArrayList<>(Arrays.asList("src/main/java/com/template/")));
             methods = getPublicMethodsInClass(launcher,programToRun);
             collections = Arrays.asList(ref.getTypeDeclaration());
             getCustomImports = true;
@@ -76,7 +76,7 @@ public class TemplateCreator {
                 //if (!collec.getSimpleName().equals("ArrayList")) continue;
                 if (!targetMethods.contains(method.getSimpleName()) && !targetMethods.isEmpty()) continue;
                 //System.out.println("Collec -> "+ collec.getSimpleName()+" method -> "+method.getSimpleName());
-                Launcher launcher = initSpoon("src/main/java/com/template/");
+                Launcher launcher = initSpoon(new ArrayList<>(Arrays.asList("src/main/java/com/template/")));
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),
                 collec, "", 0, outputDir,isGeneric,getCustomImports);
                 spi.injectInTemplate();
@@ -109,7 +109,7 @@ public class TemplateCreator {
         return publicMethods;
     }
 
-    private static void createProgramsFromTemplates() throws IOException {
+    private static void createProgramsFromTemplates() throws IOException, InterruptedException {
         List<Integer> sizes = createInputRange(1, 1.5, 0);//Arrays.asList(150);
         int[] funCalls =  new int[] { /*20_000, 50_000,*/ 75_000, 100_000, 150_000 };//{20_000};
         File[] templates = getAllTemplates();
@@ -123,7 +123,7 @@ public class TemplateCreator {
                 String programChangedType = program.replace("changetypehere", type);
                 for (int funCall : funCalls) {
                     String programChangedFunCall = programChangedType.replace("\"numberOfFunCalls\"", funCall+"");
-                    findMaxInput(programChangedFunCall);
+                    InputTest.findMaxInput(programChangedFunCall);
                     //for (int size : sizes) {
                     //    findMaxInput(programChangedFunCall);
                     //    String finalProg = replaceValues(programChangedFunCall,size);
@@ -139,7 +139,7 @@ public class TemplateCreator {
         }
     }
 
-    private static int findNumberOfInputs(String program){
+    static int findNumberOfInputs(String program){
         String keyword = "input\\d+";
         Matcher matcher = Pattern.compile(keyword).matcher(program);
         HashSet<String> results = new HashSet<>();
@@ -149,31 +149,9 @@ public class TemplateCreator {
         return results.size();
     } 
 
-    private static void findMaxInput(String program) throws IOException{
-        int numberOfInputs = findNumberOfInputs(program);
-        StringBuilder inputBuild = new StringBuilder();
-        
-        List<String> valuesToReplace = findStringsToReplace(program,"ChangeValueHere\\d+_[^\",;\\s]+");
-        String finalProgram = program.replaceAll("public class .* \\{", "public class Prog {").replaceAll("package .*;", "package com.generated_InputTestTemplate;");
-        Map<String,String> inputType = new HashMap<>();
-        for (int i = 0; i < valuesToReplace.size(); i++) {
-            String valueToReplace = valuesToReplace.get(i);
-            String[] valueSplitted = valueToReplace.split("_");
-            String replaceInput = "\""+valueSplitted[0]+"\"";
-            String type = valueSplitted[1];
-            finalProgram = finalProgram.replace("\""+valueToReplace+"\"", "in"+i);
-            inputType.put("in"+i, type);
-            //finalProgram = finalProgram.replace(replaceInput, "\""+size+"\"");
-        }
-        for (int i = 0; i < numberOfInputs; i++) {
-            inputBuild.append("        "+inputType.get("in"+i)+" in"+i+" = "+getPrimitiveTypeToWrapper(inputType.get("in"+i))+".valueOf(args["+i+"]);\n");
-        }
-        
-        finalProgram = finalProgram.replace("int iter = 0;", "int iter = 0;\n"+inputBuild.toString());
-        createJavaProgramFile(initialPath+"generated_InputTestTemplate/Prog.java", finalProgram);
-    }
+    
 
-    private static String getPrimitiveTypeToWrapper(String type) {
+    public static String getPrimitiveTypeToWrapper(String type) {
         switch (type) {
             case "int": return "Integer";
             case "boolean": return "Boolean";
@@ -190,7 +168,7 @@ public class TemplateCreator {
     
 
 
-    private static List<String> findStringsToReplace(String input,String keyword){
+    public static List<String> findStringsToReplace(String input,String keyword){
         Matcher matcher = Pattern.compile(keyword).matcher(input);
         HashSet<String> results = new HashSet<>();
         while (matcher.find()) {
@@ -268,7 +246,7 @@ public class TemplateCreator {
         return sb.toString();
     }
 
-    private static void createJavaProgramFile(String filename, String program) throws IOException {
+    public static void createJavaProgramFile(String filename, String program) throws IOException {
         BufferedWriter myWriter = new BufferedWriter(new FileWriter(filename));
         myWriter.write(program);
         myWriter.close();
@@ -315,9 +293,12 @@ public class TemplateCreator {
         return new ArrayList<>(numberSet);
     }
 
-    private static Launcher initSpoon(String path) {
+    public static Launcher initSpoon(List<String> paths) {
         Launcher launcher = new Launcher();
-        launcher.addInputResource(path);
+        for (int i = 0; i < paths.size(); i++) {
+            launcher.addInputResource(paths.get(i));
+        }
+        
         launcher.getFactory().getEnvironment().setAutoImports(true);
         launcher.getEnvironment().setNoClasspath(false);
         launcher.setSourceOutputDirectory(outputDir);

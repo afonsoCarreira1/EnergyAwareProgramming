@@ -33,10 +33,10 @@ public class TemplatesAux {
         } catch (IOException e) {System.out.println(e.getMessage());}
     }
 
-    public static void launchTimerThread() {
+    public static void launchTimerThread(int timeSeconds) {
         Thread timerThread = new Thread(() -> {
             try {
-                Thread.sleep(1100);
+                Thread.sleep(timeSeconds);
                 stop = true;
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

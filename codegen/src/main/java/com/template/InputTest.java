@@ -1,10 +1,6 @@
 package com.template;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,17 +12,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.codehaus.plexus.util.cli.Arg;
-
-import com.template.aux.TemplatesAux;
 
 import spoon.Launcher;
-import spoon.reflect.CtModel;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtTry;
 import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
 
 public class InputTest {
@@ -85,15 +76,6 @@ public class InputTest {
     }
 
     private static Process runProgram(String[] args) throws IOException {
-        //
-        //String[] command = {
-        //    "java",
-        //    "-Xmx4056M",
-        //    "-Xms4056M",
-        //    "-cp", cp,
-        //    "com.generated_InputTestTemplate.Prog",
-        //    args
-        //};
         ProcessBuilder pb = new ProcessBuilder(createCommandArray(args));
         pb.redirectErrorStream(true);
         return pb.start();      
@@ -117,19 +99,8 @@ public class InputTest {
         for (int i = 0; i < types.size(); i++) {
             String[] args = new String[types.size()];
             Arrays.fill(args, "1");
-            //MutableBoolean timeoutError = new MutableBoolean(false);
-            //MutableBoolean programError = new MutableBoolean(false);
-            //int inputNumber = 1;
             int maxInput = findMaxAcceptableInput(maxInputToTest,args,i);
-
-            
-            //while (!programError.booleanValue() && !timeoutError.booleanValue()) {
-            //    args[i] = inputNumber+"";
-            //    Process process = runProgram(argsToString(args));
-            //    waitForProgramToFinish(process,timeoutError,programError);
-            //    inputNumber++;
-            //}
-            System.out.println("max input -> "+maxInput +", for type -> "+types.get(i));
+            //System.out.println("In"+i+": max input -> "+maxInput +", for type -> "+types.get(i));
             maxInputs.add(maxInput);
         }
         return maxInputs;
@@ -159,11 +130,11 @@ public class InputTest {
             if (!finished) {
                 timeoutError.setTrue();  // Process did not finish in x seconds
                 process.destroy();       // Optionally kill it
-                System.out.println("Process timed out in "+timeoutMilliseconds/1000.0+"s for input: "+args);
+                //System.out.println("Process timed out in "+timeoutMilliseconds/1000.0+"s for input: "+args);
             } else {
                 timeoutError.setFalse(); // Process finished in time
                 if (process.exitValue() != 0) programError.setTrue();
-                System.out.println("Process finished with exit code: " + process.exitValue() + " for input: "+args);
+                //System.out.println("Process finished with exit code: " + process.exitValue() + " for input: "+args);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

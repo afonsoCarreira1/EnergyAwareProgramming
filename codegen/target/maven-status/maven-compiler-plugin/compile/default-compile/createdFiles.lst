@@ -1,6 +1,7 @@
 com/template/SpoonInjector.class
+com/generated_InputTestTemplate/Prog$BenchmarkArgs$3.class
 com/template/aux/TemplatesAux.class
-com/template/SharedFlag.class
+com/generated_InputTestTemplate/Prog$BenchmarkArgs$2.class
 com/template/InputTest.class
 com/template/programsToBenchmark/Fibonacci.class
 com/template/Template.class
@@ -12,4 +13,5 @@ com/generated_InputTestTemplate/Prog$BenchmarkArgs.class
 com/template/aux/ArrayListAux.class
 com/template/aux/WritePid.class
 com/template/TemplateCreator.class
+com/template/programsToBenchmark/TestTwoInputs.class
 com/template/aux/DeepCopyUtil.class

@@ -100,7 +100,7 @@ public class InputTest {
             String[] args = new String[types.size()];
             Arrays.fill(args, "1");
             int maxInput = findMaxAcceptableInput(maxInputToTest,args,i);
-            //System.out.println("In"+i+": max input -> "+maxInput +", for type -> "+types.get(i));
+            System.out.println("In"+i+": max input -> "+maxInput +", for type -> "+types.get(i));
             maxInputs.add(maxInput);
         }
         return maxInputs;
@@ -130,11 +130,11 @@ public class InputTest {
             if (!finished) {
                 timeoutError.setTrue();  // Process did not finish in x seconds
                 process.destroy();       // Optionally kill it
-                //System.out.println("Process timed out in "+timeoutMilliseconds/1000.0+"s for input: "+args);
+                System.out.println("Process timed out in "+timeoutMilliseconds/1000.0+"s for input: "+args);
             } else {
                 timeoutError.setFalse(); // Process finished in time
                 if (process.exitValue() != 0) programError.setTrue();
-                //System.out.println("Process finished with exit code: " + process.exitValue() + " for input: "+args);
+                System.out.println("Process finished with exit code: " + process.exitValue() + " for input: "+args);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

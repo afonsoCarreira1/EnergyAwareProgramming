@@ -122,7 +122,7 @@ public class SpoonInjector {
     public void injectInTemplate() {
         addImport(packageToUse+"aux.DeepCopyUtil");
         addImport("com.fasterxml.jackson.core.type.TypeReference");
-        createInitialVar(true);
+        createInitialVar(false);
         createMethodArgs();
         createClassThatHoldsArgs();
         createArrayWithVarAndArgs();

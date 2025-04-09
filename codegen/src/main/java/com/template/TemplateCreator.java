@@ -48,7 +48,7 @@ public class TemplateCreator {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
     public static void main(String[] args) throws Exception {
-        args = new String[]{"Fibonacci"};
+        args = new String[]{"TestTwoInputs"};//Fibonacci //TestTwoInputs
         if (args == null || args.length == 0) return;
         HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;
@@ -123,17 +123,18 @@ public class TemplateCreator {
                 String programChangedType = program.replace("changetypehere", type);
                 for (int funCall : funCalls) {
                     String programChangedFunCall = programChangedType.replace("\"numberOfFunCalls\"", funCall+"");
-                    InputTest.findMaxInput(programChangedFunCall);
-                    //for (int size : sizes) {
-                    //    findMaxInput(programChangedFunCall);
-                    //    String finalProg = replaceValues(programChangedFunCall,size);
-                    //    String methodNameForClass = Introspector.decapitalize(className);
-                    //    finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+className+"",className+id);
-                    //    finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+methodNameForClass+"",methodNameForClass+id);
-                    //    //finalProg = finalProg.replace(className,className+id);
-                    //    createJavaProgramFile(dirName+"/"+className+id+".java",finalProg);
-                    //    id++;
-                    //}
+                    List<Integer> maxInputs = InputTest.findMaxInput(programChangedFunCall,program);
+                    System.out.println(maxInputs);
+                    
+                    for (int size : sizes) {
+                        String finalProg = replaceValues(programChangedFunCall,size,maxInputs);
+                        String methodNameForClass = Introspector.decapitalize(className);
+                        finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+className+"",className+id);
+                        finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+methodNameForClass+"",methodNameForClass+id);
+                        //finalProg = finalProg.replace(className,className+id);
+                        createJavaProgramFile(dirName+"/"+className+id+".java",finalProg);
+                        id++;
+                    }
                 }
             }  
         }
@@ -177,27 +178,31 @@ public class TemplateCreator {
         return new ArrayList<>(results);
     }
 
-    private static String replaceValues(String program,int size) {
-        int min = 0, max;
-        if (size-1+min==0) max = 0;
-        else max = size-1;
+    private static String replaceValues(String program,int size, List<Integer> maxInputs) {
+        int min = 1;//, max;
+        //if (size-1+min==0) max = 0;
+        //else max = size-1;
 
         List<String> valuesToReplace = findStringsToReplace(program,"ChangeValueHere\\d+_[^\",;\\s]+");
         String finalProgram = program;
-        for (String valueToReplace : valuesToReplace) {
+        for (int i = 0; i < valuesToReplace.size(); i++) {
+            String valueToReplace = valuesToReplace.get(i);
             String[] valueSplitted = valueToReplace.split("_");
             String replaceInput = "\""+valueSplitted[0]+"\"";
             String type = valueSplitted[1];
-            if (type.equals("useConstructorSize")) {
-                finalProgram = finalProgram.replace("\""+valueToReplace+"\"", size+"");
-                finalProgram = finalProgram.replace(replaceInput, "\""+size+"\"");
-            } else {
-                String value = getRandomValueOfType(type,min,max);
-                finalProgram = finalProgram.replace("\""+valueToReplace+"\"", value);
-                finalProgram = finalProgram.replace(replaceInput, "\""+value+"\"");
-            }
+            String value = getRandomValueOfType(type,min,maxInputs.get(i));
+            finalProgram = finalProgram.replace("\""+valueToReplace+"\"", value);
+            finalProgram = finalProgram.replace(replaceInput, "\""+value+"\"");
+            //if (type.equals("useConstructorSize")) {
+            //    finalProgram = finalProgram.replace("\""+valueToReplace+"\"", size+"");
+            //    finalProgram = finalProgram.replace(replaceInput, "\""+size+"\"");
+            //} else {
+            //    String value = getRandomValueOfType(type,min,max);
+            //    finalProgram = finalProgram.replace("\""+valueToReplace+"\"", value);
+            //    finalProgram = finalProgram.replace(replaceInput, "\""+value+"\"");
+            //}
         }
-
+        
         return finalProgram;
     }
 

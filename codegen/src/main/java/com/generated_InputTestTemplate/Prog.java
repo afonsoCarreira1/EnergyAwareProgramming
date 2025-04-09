@@ -1,10 +1,9 @@
 package com.generated_InputTestTemplate;
-import com.template.SharedFlag;
 import com.template.aux.DeepCopyUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.template.programsToBenchmark.*;
 import com.template.aux.TemplatesAux;
-import com.template.programsToBenchmark.Fibonacci;
-import com.template.programsToBenchmark.Test;
+import com.template.programsToBenchmark.TestTwoInputs;
 // add imports
 public class Prog {
     // static int SIZE = "size";
@@ -15,9 +14,10 @@ public class Prog {
     public static void main(String[] args) throws Exception {
         int iter = 0;
         int in0 = Integer.valueOf(args[0]);
+        int in1 = Integer.valueOf(args[1]);
         try {
-            Fibonacci var0 = new Fibonacci(new Test(in0));
-            BenchmarkArgs[] arr = new BenchmarkArgs[75000];
+            TestTwoInputs var0 = new TestTwoInputs(in1, in0);
+            BenchmarkArgs[] arr = new BenchmarkArgs[150000];
             populateArray(arr, var0);
             TemplatesAux.launchTimerThread(1100);
             iter = computation(arr, arr.length);
@@ -38,40 +38,44 @@ public class Prog {
             // send start signal for measurement
             // call computation fun
         } catch (OutOfMemoryError e) {
-            SharedFlag.stop = true;
-            SharedFlag.error = true;
+            System.out.println(e.getMessage());
+            System.exit(1);
         } catch (Exception e) {
-            SharedFlag.stop = true;
-            SharedFlag.error = true;
+            System.out.println(e.getMessage());
+            System.exit(2);
         }
+        System.out.println("aki");
+        System.exit(0);
     }
 
     static class BenchmarkArgs {
-        public Fibonacci var0;
+        public TestTwoInputs var0;
 
-        BenchmarkArgs(Fibonacci var0) {
-            this.var0 = DeepCopyUtil.deepCopy(var0, new TypeReference<Fibonacci>() {});
+        BenchmarkArgs(TestTwoInputs var0) {
+            this.var0 = DeepCopyUtil.deepCopy(var0, new TypeReference<TestTwoInputs>() {});
         }
     }
 
-    private static void fibonacci_fibonacci__(Fibonacci var) {
-        var.fibonacci();
+    private static void testTwoInputs_doNothing__(TestTwoInputs var) {
+        var.doNothing();
     }
 
     private static int computation(BenchmarkArgs[] args, int iter) {
         int i = 0;
         while ((!TemplatesAux.stop) && (i < iter)) {
-            fibonacci_fibonacci__(args[i].var0);
+            testTwoInputs_doNothing__(args[i].var0);
             i++;
         } 
         return iter;
     }
 
-    private static void populateArray(BenchmarkArgs[] arr, Fibonacci var0) {
-        for (int i = 0; i < 75000; i++) {
+    private static void populateArray(BenchmarkArgs[] arr, TestTwoInputs var0) {
+        for (int i = 0; i < 150000; i++) {
             arr[i] = new BenchmarkArgs(var0);
         }
     }
 
     private String input1 = "ChangeValueHere1";
+
+    private String input2 = "ChangeValueHere2";
 }

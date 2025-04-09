@@ -33,6 +33,32 @@ public class TemplatesAux {
         } catch (IOException e) {System.out.println(e.getMessage());}
     }
 
+    public static void writeInFile(String filename, String message) {
+        String path = "src/main/java/com/aux_runtime/";
+        String fullPath = path +filename+".txt";
+        File myObj = new File(fullPath);
+        try {
+            createFileIfNotExists(fullPath);
+            myObj = new File(path +filename+".txt");
+            myObj.createNewFile();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        try (FileWriter writer = new FileWriter(path + filename+".txt")) {
+            writer.write(message);
+        } catch (IOException e) {System.out.println(e.getMessage());}
+    }
+
+    public static void createFileIfNotExists(String filePath) throws IOException {
+        File file = new File(filePath);
+        if (!file.exists()) file.createNewFile(); 
+    }
+
+    public static void deleteFileIfExists(String filePath) {
+        File file = new File(filePath);
+        if (file.exists()) if (file.delete());
+    }
+
     public static void launchTimerThread(int timeSeconds) {
         Thread timerThread = new Thread(() -> {
             try {

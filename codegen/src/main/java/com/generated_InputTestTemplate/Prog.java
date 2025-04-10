@@ -24,7 +24,7 @@ public class Prog {
             int var1 = in0;
             CopyOnWriteArrayList<Integer> var2 = new CopyOnWriteArrayList();
             ArrayListAux.insertRandomNumbers(var2, in1, "Integer");
-            BenchmarkArgs[] arr = new BenchmarkArgs[75000];
+            BenchmarkArgs[] arr = new BenchmarkArgs[100000];
             populateArray(arr, var0, var1, var2);
             TemplatesAux.launchTimerThread(1100);
             iter = computation(arr, arr.length);
@@ -83,7 +83,7 @@ public class Prog {
     }
 
     private static void populateArray(BenchmarkArgs[] arr, CopyOnWriteArrayList<Integer> var0, int var1, CopyOnWriteArrayList<Integer> var2) {
-        for (int i = 0; i < 75000; i++) {
+        for (int i = 0; i < 100000; i++) {
             arr[i] = new BenchmarkArgs(var0, var1, var2);
         }
     }

@@ -110,8 +110,8 @@ public class Runner {
     private static void runProgramCommand(String filename,String currentDirBeingTested) throws IOException{
         String[] command = {
             "java", 
-            "-Xmx4056M",
-            "-Xms4056M",
+            "-Xmx1024M",
+            "-Xms1024M",
             "-cp", 
             classpath, 
             "com.generated_progs."+currentDirBeingTested.split("/")[currentDirBeingTested.split("/").length-1] +"." + filename, 

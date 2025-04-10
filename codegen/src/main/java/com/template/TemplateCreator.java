@@ -266,7 +266,7 @@ public class TemplateCreator {
     }
 
     private static String[] getTypes() {
-        return new String[] { "Integer", "Double", "Long", "Float", "Short", "Character" };
+        return new String[] { "Integer", "Double", "Long", "Float", "Short" };//, "Character"
     }
 
     private static ArrayList<Integer> createInputRange(int initialvalue, double factor, int exponent) {

@@ -1,0 +1,5 @@
+in0 | arrSize: 75000 | type: int -> maxInput: 1
+in0 | arrSize: 100000 | type: int -> maxInput: 1
+in0 | arrSize: 150000 | type: int -> maxInput: 1
+in0 | arrSize: 75000 | type: int -> maxInput: 1
+in0 | arrSize: 75000 | type: int -> maxInput: 1

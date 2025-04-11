@@ -1,11 +1,10 @@
 package com.generated_InputTestTemplate;
 import com.template.aux.DeepCopyUtil;
-import com.template.aux.ArrayListAux;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.template.programsToBenchmark.*;
 import com.template.aux.TemplatesAux;
-import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
-import spoon.support.reflect.reference.CtTypeReferenceImpl;
+import com.template.programsToBenchmark.Fibonacci;
+import com.template.programsToBenchmark.Test;
 // add imports
 public class Prog {
     // static int SIZE = "size";
@@ -16,16 +15,10 @@ public class Prog {
     public static void main(String[] args) throws Exception {
         int iter = 0;
         int in0 = Integer.valueOf(args[0]);
-        Integer in1 = Integer.valueOf(args[1]);
-        Integer in2 = Integer.valueOf(args[2]);
         try {
-            CopyOnWriteArrayList<Integer> var0 = new CopyOnWriteArrayList();
-            ArrayListAux.insertRandomNumbers(var0, in2, "Integer");
-            int var1 = in0;
-            CopyOnWriteArrayList<Integer> var2 = new CopyOnWriteArrayList();
-            ArrayListAux.insertRandomNumbers(var2, in1, "Integer");
+            Fibonacci var0 = new Fibonacci(new Test(in0));
             BenchmarkArgs[] arr = new BenchmarkArgs[100000];
-            populateArray(arr, var0, var1, var2);
+            populateArray(arr, var0);
             TemplatesAux.launchTimerThread(1100);
             iter = computation(arr, arr.length);
             // if fun to test is Static.fun() then just create multiple inputs
@@ -56,41 +49,31 @@ public class Prog {
     }
 
     static class BenchmarkArgs {
-        public CopyOnWriteArrayList<Integer> var0;
+        public Fibonacci var0;
 
-        public int var1;
-
-        public CopyOnWriteArrayList<Integer> var2;
-
-        BenchmarkArgs(CopyOnWriteArrayList<Integer> var0, int var1, CopyOnWriteArrayList<Integer> var2) {
-            this.var0 = DeepCopyUtil.deepCopy(var0, new TypeReference<CopyOnWriteArrayList<Integer>>() {});
-            this.var1 = DeepCopyUtil.deepCopy(var1, new TypeReference<Integer>() {});
-            this.var2 = DeepCopyUtil.deepCopy(var2, new TypeReference<CopyOnWriteArrayList<Integer>>() {});
+        BenchmarkArgs(Fibonacci var0) {
+            this.var0 = DeepCopyUtil.deepCopy(var0, new TypeReference<Fibonacci>() {});
         }
     }
 
-    private static void copyOnWriteArrayList_addAll_int_java_util_Collection_(CopyOnWriteArrayList var, int arg0, Collection<?> arg1) {
-        var.addAll(arg0, arg1);
+    private static void fibonacci_fibonacci__(Fibonacci var) {
+        var.fibonacci();
     }
 
     private static int computation(BenchmarkArgs[] args, int iter) {
         int i = 0;
         while ((!TemplatesAux.stop) && (i < iter)) {
-            copyOnWriteArrayList_addAll_int_java_util_Collection_(args[i].var0, args[i].var1, args[i].var2);
+            fibonacci_fibonacci__(args[i].var0);
             i++;
         } 
         return iter;
     }
 
-    private static void populateArray(BenchmarkArgs[] arr, CopyOnWriteArrayList<Integer> var0, int var1, CopyOnWriteArrayList<Integer> var2) {
+    private static void populateArray(BenchmarkArgs[] arr, Fibonacci var0) {
         for (int i = 0; i < 100000; i++) {
-            arr[i] = new BenchmarkArgs(var0, var1, var2);
+            arr[i] = new BenchmarkArgs(var0);
         }
     }
 
     private String input1 = "ChangeValueHere1";
-
-    private String input2 = "ChangeValueHere2";
-
-    private String input3 = "ChangeValueHere3";
 }

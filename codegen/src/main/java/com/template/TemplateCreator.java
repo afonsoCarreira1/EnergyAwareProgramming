@@ -37,7 +37,7 @@ public class TemplateCreator {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
     public static void main(String[] args) throws Exception {
-        //args = new String[]{"TestTwoInputs"};//Fibonacci //TestTwoInputs
+        args = new String[]{"Fibonacci"};//Fibonacci //TestTwoInputs
         if (args == null || args.length == 0) return;
         HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;
@@ -103,16 +103,17 @@ public class TemplateCreator {
         int[] funCalls =  new int[] { /*20_000, 50_000,*/ 75_000, 100_000, 150_000 };//{20_000};
         File[] templates = getAllTemplates();
         int id = 0;
-        for (File template : templates) {
-            String className = template.toString().replace(outputDir+"/","").split("\\.java")[0];
+        for (File templateFile : templates) {
+            String className = templateFile.toString().replace(outputDir+"/","").split("\\.java")[0];
             String dirName = initialPath+"generated_progs/"+className;
             new File(dirName).mkdirs();
-            String program = readFile(template.toString());
+            String template = readFile(templateFile.toString());
             for (String type : getTypes()) {
-                String programChangedType = program.replace("changetypehere", type);
+                String programChangedType = template.replace("changetypehere", type);
                 for (int funCall : funCalls) {
                     String programChangedFunCall = programChangedType.replace("\"numberOfFunCalls\"", funCall+"");
-                    List<Integer> maxInputs = InputTest.findMaxInput(programChangedFunCall,program);
+                    InputTest inputTest = new InputTest(className,programChangedFunCall,template,funCall);
+                    List<Integer> maxInputs = inputTest.findMaxInput();
                     System.out.println(maxInputs);
                     
                     for (int size : sizes) {
@@ -121,7 +122,7 @@ public class TemplateCreator {
                         finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+className+"",className+id);
                         finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+methodNameForClass+"",methodNameForClass+id);
                         //finalProg = finalProg.replace(className,className+id);
-                        createJavaProgramFile(dirName+"/"+className+id+".java",finalProg);
+                        createFile(dirName+"/"+className+id+".java",finalProg,false);
                         id++;
                     }
                 }
@@ -195,7 +196,7 @@ public class TemplateCreator {
         return finalProgram;
     }
 
-    @SuppressWarnings("unchecked")
+    
     private static <T> String getRandomValueOfType(String type, int min, int max){
         Random rand = new Random();//new Random(42);
         switch (type.toLowerCase()) {
@@ -240,9 +241,9 @@ public class TemplateCreator {
         return sb.toString();
     }
 
-    public static void createJavaProgramFile(String filename, String program) throws IOException {
-        BufferedWriter myWriter = new BufferedWriter(new FileWriter(filename));
-        myWriter.write(program);
+    public static void createFile(String filename, String input, boolean append) throws IOException {
+        BufferedWriter myWriter = new BufferedWriter(new FileWriter(filename,append));
+        myWriter.write(input);
         myWriter.close();
     }
 

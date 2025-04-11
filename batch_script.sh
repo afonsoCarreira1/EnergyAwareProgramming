@@ -10,4 +10,4 @@ ARGS=(
     "fibonacci"
 )
 
-echo ./run_codegen ${ARGS[$SLURM_ARRAY_TASK_ID]}
+./run_codegen.sh ${ARGS[$SLURM_ARRAY_TASK_ID]}

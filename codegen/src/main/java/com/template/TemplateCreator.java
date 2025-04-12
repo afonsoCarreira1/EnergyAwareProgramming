@@ -169,9 +169,7 @@ public class TemplateCreator {
     }
 
     private static String replaceValues(String program,int size, List<Integer> maxInputs) {
-        int min = 1;//, max;
-        //if (size-1+min==0) max = 0;
-        //else max = size-1;
+        int min = 1;
 
         List<String> valuesToReplace = findStringsToReplace(program,"ChangeValueHere\\d+_[^\",;\\s]+");
         String finalProgram = program;
@@ -180,17 +178,9 @@ public class TemplateCreator {
             String[] valueSplitted = valueToReplace.split("_");
             String replaceInput = "\""+valueSplitted[0]+"\"";
             String type = valueSplitted[1];
-            String value = getRandomValueOfType(type,min,maxInputs.get(i));
+            String value = getRandomValueOfType(type, maxInputs.get(i)-min >= 0 ? min : 0/*passo o min se of max-min for maior q 0, se nao mando 0, pq o max vai ser 0 e assim nao rebenta*/ , maxInputs.get(i));
             finalProgram = finalProgram.replace("\""+valueToReplace+"\"", value);
             finalProgram = finalProgram.replace(replaceInput, "\""+value+"\"");
-            //if (type.equals("useConstructorSize")) {
-            //    finalProgram = finalProgram.replace("\""+valueToReplace+"\"", size+"");
-            //    finalProgram = finalProgram.replace(replaceInput, "\""+size+"\"");
-            //} else {
-            //    String value = getRandomValueOfType(type,min,max);
-            //    finalProgram = finalProgram.replace("\""+valueToReplace+"\"", value);
-            //    finalProgram = finalProgram.replace(replaceInput, "\""+value+"\"");
-            //}
         }
         
         return finalProgram;

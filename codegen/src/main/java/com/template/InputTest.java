@@ -9,10 +9,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +34,7 @@ public class InputTest {
     String inputsDir = TemplateCreator.initialPath+"generated_InputTestTemplateData";
     List<InputData> inputData;
     Map<String,String> alreadyStoredInputData = new HashMap<>();
+    String progFName;
 
     public InputTest(String filename, String program, String template, int funCallNum) {
         this.filename = filename;
@@ -43,6 +42,7 @@ public class InputTest {
         this.template = template;
         this.funCallNum = funCallNum;
         this.inputData = new ArrayList<>();
+        this.progFName = "Prog_"+filename;
     }
     
 
@@ -51,7 +51,7 @@ public class InputTest {
         StringBuilder inputBuild = new StringBuilder();
         
         List<String> valuesToReplace = TemplateCreator.findStringsToReplace(program,"ChangeValueHere\\d+_[^\",;\\s]+");
-        String finalProgram = program.replaceAll("public class .* \\{", "public class Prog {").replaceAll("package .*;", "package com.generated_InputTestTemplate;");
+        String finalProgram = program.replaceAll("public class .* \\{", "public class "+progFName+" {").replaceAll("package .*;", "package com.generated_InputTestTemplate;");
         Map<String,String> inputType = new HashMap<>();
         for (int i = 0; i < valuesToReplace.size(); i++) {
             String valueToReplace = valuesToReplace.get(i);
@@ -66,12 +66,10 @@ public class InputTest {
 
         List<String> types = new ArrayList<String>(inputType.values());
         List<Integer> maxInputsFromData = getInputDataIfItExists(types);
-        System.out.println(maxInputsFromData);
-        System.exit(0);
 
         if (maxInputsFromData != null) return maxInputsFromData;
         finalProgram = finalProgram.replace("int iter = 0;", "int iter = 0;\n"+inputBuild.toString());
-        TemplateCreator.createFile(TemplateCreator.initialPath+"generated_InputTestTemplate/Prog.java", finalProgram,false);
+        TemplateCreator.createFile(TemplateCreator.initialPath+"generated_InputTestTemplate/"+progFName+".java", finalProgram,false);
         modifyProgramCode();
         compileProgram();
         return runProgramToGetMaxInputs(types); 
@@ -88,7 +86,7 @@ public class InputTest {
                 String match = "in" + i + " | " +"arrSize: "+funCallNum+" | "+ "type: "+types.get(i);
                 if (alreadyStoredInputData.containsKey(match)) maxInputs.add(Integer.parseInt(alreadyStoredInputData.get(match))); 
             }
-        } else System.out.println(path+" does not exist");
+        }
         return maxInputs.isEmpty() ? null : maxInputs;
     }
 
@@ -119,7 +117,7 @@ public class InputTest {
             "-Xmx4056M",
             "-Xms4056M",
             "-cp", cp,
-            "com.generated_InputTestTemplate.Prog"};
+            "com.generated_InputTestTemplate."+progFName};
         String[] command = new String[defaultCommand.length + args.length];
         System.arraycopy(defaultCommand, 0, command, 0, defaultCommand.length);
         System.arraycopy(args, 0, command, defaultCommand.length, args.length);
@@ -138,7 +136,7 @@ public class InputTest {
                 "javac",
                 "-cp", cp,
                 "-d", "target/classes",
-                "src/main/java/com/generated_InputTestTemplate/Prog.java"
+                "src/main/java/com/generated_InputTestTemplate/"+progFName+".java"
         );
         pb.inheritIO();
         pb.start().waitFor();
@@ -197,14 +195,14 @@ public class InputTest {
     private void modifyProgramCode() throws IOException {
         Launcher launcher = TemplateCreator.initSpoon(new ArrayList<>(Arrays.asList("src/main/java/com/template/","src/main/java/com/generated_InputTestTemplate/")));
         Factory factory = launcher.getFactory();
-        CtClass<?> targetClass = factory.Class().get("com.generated_InputTestTemplate.Prog");
+        CtClass<?> targetClass = factory.Class().get("com.generated_InputTestTemplate."+progFName);
         List<CtTry> tryBlocks = targetClass.getElements(e -> e instanceof CtTry);
         clearAndInsertCatchStatement(factory,tryBlocks,0);
         clearAndInsertCatchStatement(factory,tryBlocks,1);
         tryBlocks.get(0).getFinalizer().delete(); //remove finally
         tryBlocks.get(0).insertAfter(factory.Code().createCodeSnippetStatement("System.out.println(\"aki\");\nSystem.exit(0)"));// // "System.out.println(\"stop\")"
         removeSpecificStatement(tryBlocks.get(0).getBody().getStatements(), "TemplatesAux.sendStartSignalToOrchestrator(args[0])");
-        TemplateCreator.createFile(TemplateCreator.initialPath+"generated_InputTestTemplate/Prog.java", getImportsToAdd(template)+targetClass.toString(),false);
+        TemplateCreator.createFile(TemplateCreator.initialPath+"generated_InputTestTemplate/"+progFName+".java", getImportsToAdd(template)+targetClass.toString(),false);
 
     }
 

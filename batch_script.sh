@@ -7,7 +7,7 @@
 
 #test args
 ARGS=(
-    "fibonacci"
+    "lists addAll,containsAll"
 )
 
 ./run_codegen.sh ${ARGS[$SLURM_ARRAY_TASK_ID]}

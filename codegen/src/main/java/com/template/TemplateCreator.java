@@ -37,7 +37,7 @@ public class TemplateCreator {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
     public static void main(String[] args) throws Exception {
-        args = new String[]{"Fibonacci"};//Fibonacci //TestTwoInputs
+       // args = new String[]{"Fibonacci"};//Fibonacci //TestTwoInputs
         if (args == null || args.length == 0) return;
         HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;
@@ -64,7 +64,6 @@ public class TemplateCreator {
             for (CtMethod<?> method : methods) {
                 //if (!collec.getSimpleName().equals("ArrayList")) continue;
                 if (!targetMethods.contains(method.getSimpleName()) && !targetMethods.isEmpty()) continue;
-                //System.out.println("Collec -> "+ collec.getSimpleName()+" method -> "+method.getSimpleName());
                 Launcher launcher = initSpoon(new ArrayList<>(Arrays.asList("src/main/java/com/template/")));
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),
                 collec, "", 0, outputDir,isGeneric,getCustomImports);
@@ -98,7 +97,7 @@ public class TemplateCreator {
         return publicMethods;
     }
 
-    private static void createProgramsFromTemplates() throws IOException, InterruptedException {
+    public static void createProgramsFromTemplates() throws IOException, InterruptedException {
         List<Integer> sizes = createInputRange(1, 1.5, 0);//Arrays.asList(150);
         int[] funCalls =  new int[] { /*20_000, 50_000,*/ 75_000, 100_000, 150_000 };//{20_000};
         File[] templates = getAllTemplates();
@@ -114,7 +113,7 @@ public class TemplateCreator {
                     String programChangedFunCall = programChangedType.replace("\"numberOfFunCalls\"", funCall+"");
                     InputTest inputTest = new InputTest(className,programChangedFunCall,template,funCall);
                     List<Integer> maxInputs = inputTest.findMaxInput();
-                    System.out.println(maxInputs);
+                    System.out.println("maxInputs -> "+maxInputs);
                     
                     for (int size : sizes) {
                         String finalProg = replaceValues(programChangedFunCall,size,maxInputs);
@@ -314,8 +313,6 @@ public class TemplateCreator {
                 }
 
                 methodSignature.append(") -> " + returnType.getSimpleName());
-                //if (collectionType.getSimpleName().equals("Stack"))
-                    //System.out.println(methodSignature.toString());
                 methods.put(methodSignature.toString(),
                         methods.get(methodSignature.toString()) != null ? methods.get(methodSignature.toString()) + 1
                                 : 1);

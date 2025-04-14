@@ -17,6 +17,11 @@ public class ArrayListAux {
                 int randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
                 list.add((T) Integer.valueOf(randomNum));
             }
+        }else if (type.equals("Short")) {
+            for (int i = 0; i < (Short) size; i++) {
+                short randomNum = (short) (rand.nextInt((Short.MAX_VALUE - min) + 1) + min);
+                list.add((T) Short.valueOf(randomNum));
+            }
         } else if (type.equals("Double")) {
             for (int i = 0; i < (Double) size; i++) {
                 double randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;

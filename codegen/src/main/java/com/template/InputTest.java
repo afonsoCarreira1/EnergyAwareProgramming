@@ -25,7 +25,7 @@ import spoon.reflect.factory.Factory;
 
 public class InputTest {
 
-    int timeoutMilliseconds = 500;//5_000;
+    int timeoutMilliseconds = 1800;//5_000;
     int maxInputToTest = 100_000;
     String filename;
     String program;
@@ -81,10 +81,15 @@ public class InputTest {
         String path = inputsDir+"/"+filename+".txt";
         if (new File(path).exists()) {
             getInputDataFromFile(path);
-            System.out.println(alreadyStoredInputData);
+            //System.out.println("alreadyStoredInputData → "+alreadyStoredInputData);
             for (int i = 0; i < types.size(); i++) {
                 String match = "in" + i + " | " +"arrSize: "+funCallNum+" | "+ "type: "+types.get(i);
                 if (alreadyStoredInputData.containsKey(match)) maxInputs.add(Integer.parseInt(alreadyStoredInputData.get(match))); 
+                else return null; //se nao encontrar nem que seja um match entao quero ir buscar novos resultados
+                // ex: 
+                //match -> in0 | arrSize: 75000 | type: int
+                //match -> in1 | arrSize: 75000 | type: Double
+                // 1st tem match e o 2nd nao, logo preciso de fazer nova procura
             }
         }
         return maxInputs.isEmpty() ? null : maxInputs;
@@ -102,10 +107,10 @@ public class InputTest {
         }
     }
 
-    private void saveMaxInputsInFile() throws IOException{
+    private void saveMaxInputsInFile(List<InputData> inputData) throws IOException{
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < inputData.size(); i++) {
-            sb.append(inputData.toString());
+            sb.append(inputData.get(i).toString());
         }
         TemplateCreator.createFile(inputsDir+"/"+filename+".txt", sb.toString().replace("[","").replace("]", ""),true);
     }
@@ -144,6 +149,7 @@ public class InputTest {
 
     private  List<Integer> runProgramToGetMaxInputs(List<String> types) throws IOException {
         List<Integer> maxInputs = new ArrayList<>();
+        List<InputData> inputData = new ArrayList<>();
         for (int i = 0; i < types.size(); i++) {
             String[] args = new String[types.size()];
             Arrays.fill(args, "1");
@@ -152,7 +158,7 @@ public class InputTest {
             maxInputs.add(maxInput);
             inputData.add(new InputData(i,funCallNum, types.get(i), maxInput));
         }
-        saveMaxInputsInFile();
+        saveMaxInputsInFile(inputData);
         return maxInputs;
     }
 
@@ -165,7 +171,7 @@ public class InputTest {
         return true;
     }
 
-    private  String argsToString(String[] args) {
+    private String argsToString(String[] args) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < args.length; i++) {
             sb.append(args[i]);
@@ -215,7 +221,7 @@ public class InputTest {
     private  void clearAndInsertCatchStatement(Factory factory, List<CtTry> tryBlocks, int index) {
         CtBlock<?> catchBody = tryBlocks.get(0).getCatchers().get(index).getBody();
         catchBody.getStatements().clear(); //delete catch statements
-        catchBody.insertBegin(factory.Code().createCodeSnippetStatement("System.out.println(e.getMessage());\nSystem.exit("+(index+1)+")"));// // System.out.println(\"error\") //TemplatesAux.writeInFile(\"progFile\", \"error,stop\")
+        catchBody.insertBegin(factory.Code().createCodeSnippetStatement("System.out.println(e.getMessage());\nSystem.exit("+(index+50)+")"));// // System.out.println(\"error\") //TemplatesAux.writeInFile(\"progFile\", \"error,stop\")
     }
 
     public  String readFileToString(String filePath) throws IOException {
@@ -227,13 +233,6 @@ public class InputTest {
         List<String> imports = extractFromString(template, "(import .*;)");
         for(String imp : imports) sb.append(imp+"\n");
         return sb.toString();
-        //return "package com.generated_InputTestTemplate;\n"+
-        //        "import com.template.SharedFlag;\n"+
-        //        "import com.template.aux.DeepCopyUtil;\n"+
-        //        "import com.fasterxml.jackson.core.type.TypeReference;\n"+
-        //        "import com.template.aux.TemplatesAux;\n"+
-        //        "import com.template.programsToBenchmark.Fibonacci;\n"+
-        //        "import com.template.programsToBenchmark.Test;\n";
     }
 
     private  List<String> extractFromString(String input, String regex) {
@@ -249,7 +248,7 @@ public class InputTest {
     public  int findMaxAcceptableInput(int max, String args[], int argsPos) throws IOException {
         int low = 0;
         int high = max;
-        int result = 1;
+        int result = 0;
     
         while (low <= high) {
             int mid = low + (high - low) / 2;

@@ -374,16 +374,19 @@ public class SpoonInjector {
         String p = packageToUse+"aux.ArrayListAux";
         if (var.getType().toString().contains("List") || var.getType().toString().contains("Vector")) {
             addImport(p);
-            CtClass<?> ctClass = factory.Class().get(p);
-            CtMethod<?> insertRandomNumbersMethod = ctClass.getMethodsByName("insertRandomNumbers").get(0);
-            CtInvocation<?> invocation = factory.Core().createInvocation();
-            invocation.setExecutable((CtExecutableReference) insertRandomNumbersMethod.getReference()); //adciciona a fun
-            invocation.setTarget(factory.createLiteral(ctClass.getReference())); //adiciona a Class.
-            invocation.addArgument(factory.Code().createVariableRead(var.getReference(), false));
-            if (useConstructorSize) invocation.addArgument(factory.Code().createLiteral(createRandomLiteral(null,false,true)));
-            else invocation.addArgument(factory.Code().createLiteral(createRandomLiteral(factory.createReference(typeToUse),false,false)));
-            invocation.addArgument(factory.Code().createLiteral(typeToUse));
-            return invocation;
+            //CtClass<?> ctClass = factory.Class().get(p);
+            //CtMethod<?> insertRandomNumbersMethod = ctClass.getMethodsByName("insertRandomNumbers").get(0);
+            //CtInvocation<?> invocation = factory.Core().createInvocation();
+            //invocation.setExecutable((CtExecutableReference) insertRandomNumbersMethod.getReference()); //adciciona a fun
+            //invocation.setTarget(factory.createLiteral(ctClass.getReference())); //adiciona a Class.
+            //invocation.addArgument(factory.Code().createVariableRead(var.getReference(), false));
+            //if (useConstructorSize) invocation.addArgument(factory.Code().createLiteral(createRandomLiteral(null,false,true)));
+            //else invocation.addArgument(factory.Code().createLiteral(createRandomLiteral(factory.createReference(typeToUse),false,false)));
+            //invocation.addArgument(factory.Code().createLiteral(typeToUse));
+            //return invocation;
+            Object size = createRandomLiteral(factory.createReference(typeToUse),false,false);
+            CtStatement st = factory.Code().createCodeSnippetStatement("ArrayListAux.insertRandomNumbers("+var.getSimpleName()+", (int) \""+size+"\", \""+typeToUse +"\")");
+            return st;
         }//TODO do the same for sets and other collections
         return null;
     }

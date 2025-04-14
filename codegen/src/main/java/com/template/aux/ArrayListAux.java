@@ -11,29 +11,29 @@ public class ArrayListAux {
     public static Random rand = new Random(42);
 
     @SuppressWarnings("unchecked")
-    public static <T> List<T> insertRandomNumbers(List<T> list, T size, String type) {
+    public static <T> List<T> insertRandomNumbers(List<T> list, int size, String type) {
         if (type.equals("Integer")) {
             for (int i = 0; i < (Integer) size; i++) {
                 int randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
                 list.add((T) Integer.valueOf(randomNum));
             }
         }else if (type.equals("Short")) {
-            for (int i = 0; i < (Short) size; i++) {
+            for (int i = 0; i < size; i++) {
                 short randomNum = (short) (rand.nextInt((Short.MAX_VALUE - min) + 1) + min);
                 list.add((T) Short.valueOf(randomNum));
             }
         } else if (type.equals("Double")) {
-            for (int i = 0; i < (Double) size; i++) {
+            for (int i = 0; i < size; i++) {
                 double randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
                 list.add((T) Double.valueOf(randomNum));
             }
         } else if (type.equals("Float")) {
-            for (int i = 0; i < (Float) size; i++) {
+            for (int i = 0; i < size; i++) {
                 float randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
                 list.add((T) Float.valueOf(randomNum));
             }
         } else if (type.equals("Long")) {
-            for (int i = 0; i < (Long) size; i++) {
+            for (int i = 0; i < size; i++) {
                 long randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
                 list.add((T) Long.valueOf(randomNum));
             }

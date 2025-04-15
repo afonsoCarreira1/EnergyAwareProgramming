@@ -20,18 +20,18 @@ sudo apt install python3-venv
 echo installed python3 alias as py
 
 
+#dependencies for powerjoular
+sudo apt install gprbuild
+sudo apt install gnat
 
 #install powerjoular
-TMP_DIR=$(mktemp -d)
-trap "rm -rf $TMP_DIR" EXIT
-echo "Cloning PowerJoular repository..."
-git clone https://github.com/joular/powerjoular.git "$TMP_DIR/powerjoular"
-cd "$TMP_DIR/powerjoular"
-chmod +x install.sh
+echo "Cloning edited PowerJoular repository..."
+git clone https://github.com/afonsoCarreira1/powerjoular_edited.git
+cd powerjoular_edited/powerjoular/installer/bash-installer
 echo "Running installer..."
-./install.sh
+bash build-install.sh
 echo "Installation complete."
-
+sudo chmod +x /usr/bin/powerjoular #make powerjoular executable if needed
 
 
 #compile codegen

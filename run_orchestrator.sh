@@ -1,4 +1,4 @@
-##!/bin/bash
+#!/bin/bash
 
 export MAVEN_OPTS="-Xmx512m -Xms128m -Xss2m"
 cd orchestrator/

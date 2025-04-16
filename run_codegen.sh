@@ -1,4 +1,4 @@
-##!/bin/bash
+#!/bin/bash
 
 targetProgram="${1:-"lists"}"
 targetMethods="${2:-}"

@@ -15,7 +15,7 @@ public class App
     public static void main( String[] args ) throws Exception
     {
         //System.out.println("aki");
-        T.main(null);
-        //Runner.main(new String[]{"test","f","1"});
+        //T.main(null);
+        Runner.main(new String[]{"test","f","1"});
     }
 }

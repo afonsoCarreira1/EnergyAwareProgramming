@@ -57,8 +57,6 @@ public class Runner {
     static volatile boolean notifiedRunnerClass = false;
 
     public static void main(String[] args) throws IOException, InterruptedException  {
-        createLogDirAndFile();
-        System.exit(0);
         dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
         File parentDir = new File(".").getCanonicalFile().getParentFile();
         File codegenDir = new File(parentDir, "codegen");

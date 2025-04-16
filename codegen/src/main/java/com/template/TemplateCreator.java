@@ -56,17 +56,16 @@ public class TemplateCreator {
         }
         new File(initialPath+"generated_InputTestTemplate").mkdirs();
         createTemplates(collections,methods,getCustomImports,targetMethods);
-        createProgramsFromTemplates();
+        createProgramsFromTemplates(collections.toString());
     }
 
     private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods,boolean getCustomImports,HashSet<String> targetMethods) {
         for (CtType<?> collec : collections) {
             for (CtMethod<?> method : methods) {
-                //if (!collec.getSimpleName().equals("ArrayList")) continue;
                 if (!targetMethods.contains(method.getSimpleName()) && !targetMethods.isEmpty()) continue;
                 Launcher launcher = initSpoon(new ArrayList<>(Arrays.asList("src/main/java/com/template/")));
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),
-                collec, "", 0, outputDir,isGeneric,getCustomImports);
+                collec, "", 0, outputDir+"/"+collections.toString(),isGeneric,getCustomImports);
                 spi.injectInTemplate();
                 spi.insertImport();
             }
@@ -97,10 +96,10 @@ public class TemplateCreator {
         return publicMethods;
     }
 
-    public static void createProgramsFromTemplates() throws IOException, InterruptedException {
+    public static void createProgramsFromTemplates(String collections) throws IOException, InterruptedException {
         List<Integer> sizes = createInputRange(1, 1.5, 0);//Arrays.asList(150);
         int[] funCalls =  new int[] { /*20_000, 50_000,*/ 75_000, 100_000, 150_000 };//{20_000};
-        File[] templates = getAllTemplates();
+        File[] templates = getTemplates(collections);//getAllTemplates();
         int id = 0;
         for (File templateFile : templates) {
             String className = templateFile.toString().replace(outputDir+"/","").split("\\.java")[0];
@@ -245,6 +244,10 @@ public class TemplateCreator {
         }
         myReader.close();
         return f.toString();
+    }
+
+    private static File[] getTemplates(String dir){
+        return getFiles(outputDir+"/"+dir+"/");
     }
 
     private static File[] getAllTemplates() {

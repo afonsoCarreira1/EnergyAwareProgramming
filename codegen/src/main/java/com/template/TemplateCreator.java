@@ -65,7 +65,7 @@ public class TemplateCreator {
                 if (!targetMethods.contains(method.getSimpleName()) && !targetMethods.isEmpty()) continue;
                 Launcher launcher = initSpoon(new ArrayList<>(Arrays.asList("src/main/java/com/template/")));
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),
-                collec, "", 0, outputDir+"/"+collections.toString(),isGeneric,getCustomImports);
+                collec, "", 0, outputDir/*+"/"+collections.toString()*/,isGeneric,getCustomImports);
                 spi.injectInTemplate();
                 spi.insertImport();
             }
@@ -99,7 +99,7 @@ public class TemplateCreator {
     public static void createProgramsFromTemplates(String collections) throws IOException, InterruptedException {
         List<Integer> sizes = createInputRange(1, 1.5, 0);//Arrays.asList(150);
         int[] funCalls =  new int[] { /*20_000, 50_000,*/ 75_000, 100_000, 150_000 };//{20_000};
-        File[] templates = getTemplates(collections);//getAllTemplates();
+        File[] templates = getAllTemplates();//getTemplates(collections);
         int id = 0;
         for (File templateFile : templates) {
             String className = templateFile.toString().replace(outputDir+"/","").split("\\.java")[0];

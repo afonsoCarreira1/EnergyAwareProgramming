@@ -17,6 +17,8 @@ mvn install:install-file -Dfile=target/codegen-1.0-SNAPSHOT-jar-with-dependencie
     -DgroupId=com.template -DartifactId=codegen -Dversion=1.0-SNAPSHOT -Dpackaging=jar
 java -jar target/codegen-1.0-SNAPSHOT-jar-with-dependencies.jar $targetProgram $targetMethods
 
+mvn install #compiles the generated progs
+
 
 
 

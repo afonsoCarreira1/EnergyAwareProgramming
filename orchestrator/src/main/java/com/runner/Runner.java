@@ -57,6 +57,8 @@ public class Runner {
     static volatile boolean notifiedRunnerClass = false;
 
     public static void main(String[] args) throws IOException, InterruptedException  {
+        createLogDirAndFile();
+        System.exit(0);
         dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
         File parentDir = new File(".").getCanonicalFile().getParentFile();
         File codegenDir = new File(parentDir, "codegen");
@@ -565,6 +567,25 @@ public class Runner {
 
     private static File[] getAllFilesInDir(String dir) {
         return new File(dir).listFiles();
+    }
+
+    private static void createLogDirAndFile() {
+        String dirPath = "logs";
+        String runnerLogDirPath = "logs/runner_logs";
+        String fileName = "log.txt";
+        File dir = new File(dirPath);
+        if (!dir.exists()) dir.mkdirs();
+        File dir2 = new File(runnerLogDirPath);
+        if (!dir2.exists()) dir2.mkdirs();
+
+        File file = new File(runnerLogDirPath, fileName);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

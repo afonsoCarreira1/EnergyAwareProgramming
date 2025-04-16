@@ -762,6 +762,7 @@ public class SpoonInjector {
                 }
         } catch (IOException e) {
             System.err.println("Error modifying the file: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

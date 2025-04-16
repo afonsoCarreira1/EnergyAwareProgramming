@@ -37,7 +37,7 @@ public class TemplateCreator {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
     public static void main(String[] args) throws Exception {
-        args = new String[]{"lists","addAll,containsAll"};//Fibonacci //TestTwoInputs
+        //args = new String[]{"lists","addAll,containsAll"};//Fibonacci //TestTwoInputs
         if (args == null || args.length == 0) return;
         HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;
@@ -54,18 +54,19 @@ public class TemplateCreator {
             collections = Arrays.asList(ref.getTypeDeclaration());
             getCustomImports = true;
         }
+        outputDir += "/"+args[0];
         new File(initialPath+"generated_InputTestTemplate").mkdirs();
         createTemplates(collections,methods,getCustomImports,targetMethods);
-        createProgramsFromTemplates(collections.toString());
+        createProgramsFromTemplates();
     }
 
-    private static void createTemplates(List<CtType<?>> collections, List<CtMethod<?>> methods,boolean getCustomImports,HashSet<String> targetMethods) {
+    private static void createTemplates( List<CtType<?>> collections, List<CtMethod<?>> methods,boolean getCustomImports,HashSet<String> targetMethods) {
         for (CtType<?> collec : collections) {
             for (CtMethod<?> method : methods) {
                 if (!targetMethods.contains(method.getSimpleName()) && !targetMethods.isEmpty()) continue;
                 Launcher launcher = initSpoon(new ArrayList<>(Arrays.asList("src/main/java/com/template/")));
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),
-                collec, "", 0, outputDir/*+"/"+collections.toString()*/,isGeneric,getCustomImports);
+                collec, "", 0, outputDir,isGeneric,getCustomImports);
                 spi.injectInTemplate();
                 spi.insertImport();
             }
@@ -96,10 +97,10 @@ public class TemplateCreator {
         return publicMethods;
     }
 
-    public static void createProgramsFromTemplates(String collections) throws IOException, InterruptedException {
+    public static void createProgramsFromTemplates() throws IOException, InterruptedException {
         List<Integer> sizes = createInputRange(1, 1.5, 0);//Arrays.asList(150);
         int[] funCalls =  new int[] { /*20_000, 50_000,*/ 75_000, 100_000, 150_000 };//{20_000};
-        File[] templates = getAllTemplates();//getTemplates(collections);
+        File[] templates = getTemplates(outputDir);//getAllTemplates();
         int id = 0;
         for (File templateFile : templates) {
             String className = templateFile.toString().replace(outputDir+"/","").split("\\.java")[0];
@@ -247,10 +248,6 @@ public class TemplateCreator {
     }
 
     private static File[] getTemplates(String dir){
-        return getFiles(outputDir+"/"+dir+"/");
-    }
-
-    private static File[] getAllTemplates() {
         return getFiles(outputDir+"/");
     }
 

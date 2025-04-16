@@ -77,7 +77,7 @@ public class Runner {
                     String fileName = program.toString().replace(".class", "");
                     //if (!(args[0].equals("test") && fileName.equals("ArrayList_addAll_int_java_util_Collection_1200"))) continue;//just to test one prog file
                     log.append("---------------------------------------\n");
-                    log.append("Program number -> " + progNum + "\n");
+                    log.append("Program number -> " + (progNum++) + "\n");
                     //System.out.println("Program number -> " + i);
                     //if (skipProgram(fileName,currentDirBeingTested)) continue;
                     log.append("Starting profile for " + fileName + " program\n");

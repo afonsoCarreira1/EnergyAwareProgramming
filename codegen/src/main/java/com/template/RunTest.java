@@ -7,7 +7,7 @@ public class RunTest {
     public static void main(String[] args) throws IOException, InterruptedException {
         String initialPath = "src/main/java/com/";
         new File(initialPath+"generated_InputTestTemplate").mkdirs();
-        TemplateCreator.createProgramsFromTemplates();
+        //TemplateCreator.createProgramsFromTemplates();
     }
     
 }

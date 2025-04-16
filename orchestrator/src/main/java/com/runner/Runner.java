@@ -57,6 +57,8 @@ public class Runner {
     static volatile boolean notifiedRunnerClass = false;
 
     public static void main(String[] args) throws IOException, InterruptedException  {
+        new File("tmp").mkdirs();
+        createLogDirAndFile();
         dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
         File parentDir = new File(".").getCanonicalFile().getParentFile();
         File codegenDir = new File(parentDir, "codegen");
@@ -64,19 +66,18 @@ public class Runner {
         File targetClasses = new File(codegenDir, "target/classes");
         classpath = targetClasses.getAbsolutePath() + File.pathSeparator + dependencies;
         File[] dirsToRun = reviewBeforeRunning();
+        int progNum = 0;
         for (File dirToRun : dirsToRun) {
-            List<String> programs = getAllFilenamesInDir(dirToRun);//getAllFilenamesInDir(targetClassesPath);
+            List<String> programs = getAllFilenamesInDir(dirToRun);
             String currentDirBeingTested = dirToRun.getAbsolutePath();
-            //Arrays.sort(programs, Comparator.comparing(Runner::extractFilename).thenComparingInt(Runner::extractNumber));
             String logFilename = createLogFile();
-            for (int i = 0; i < programs.size(); i++) {
+            for (String program : programs) {
                 //Thread.sleep(100);
                 if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
-                    String fileName = programs.get(i).toString().replace(".class", "");//programs[i].toString().replace("java_progs/out/java_progs/progs/", "").replace(".class", "");//.replace("java_progs/progs/", "").replace(".java", "");
-                    //if (!(args[0].equals("test") && fileName.equals("ArrayList_add_int_java_lang_Object_0"))) continue;//just to test one prog file
-                    //if (!(args[0].equals("test") && fileName.equals("ArrayList_addAll_int_java_util_Collection_2400"))) continue;//just to test one prog file
+                    String fileName = program.toString().replace(".class", "");
+                    //if (!(args[0].equals("test") && fileName.equals("ArrayList_addAll_int_java_util_Collection_1200"))) continue;//just to test one prog file
                     log.append("---------------------------------------\n");
-                    log.append("Program number -> " + i + "\n");
+                    log.append("Program number -> " + progNum + "\n");
                     //System.out.println("Program number -> " + i);
                     //if (skipProgram(fileName,currentDirBeingTested)) continue;
                     log.append("Starting profile for " + fileName + " program\n");
@@ -102,16 +103,15 @@ public class Runner {
                 } else {
                     System.out.println("Invalid args");
                 }
-            }
-            createFeaturesCSV();
+            } 
         }
+        createFeaturesCSV();
     }
 
     private static void runProgramCommand(String filename,String currentDirBeingTested) throws IOException{
         String[] command = {
             "java", 
-            "-Xmx1024M",
-            "-Xms1024M",
+
             "-cp", 
             classpath, 
             "com.generated_progs."+currentDirBeingTested.split("/")[currentDirBeingTested.split("/").length-1] +"." + filename, 

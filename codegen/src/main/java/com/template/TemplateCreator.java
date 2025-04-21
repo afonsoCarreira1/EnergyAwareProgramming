@@ -55,6 +55,7 @@ public class TemplateCreator {
             getCustomImports = true;
         }
         outputDir += "/"+args[0];
+        if (args.length>=1) outputDir+="_"+args[1].replace(",", "_");
         new File(initialPath+"generated_InputTestTemplate").mkdirs();
         createTemplates(collections,methods,getCustomImports,targetMethods);
         createProgramsFromTemplates();
@@ -186,7 +187,7 @@ public class TemplateCreator {
     }
 
     
-    private static <T> String getRandomValueOfType(String type, int min, int max){
+    private static String getRandomValueOfType(String type, int min, int max){
         Random rand = new Random();//new Random(42);
         switch (type.toLowerCase()) {
             case "int":
@@ -322,7 +323,8 @@ public class TemplateCreator {
         ArrayList<CtMethod<?>> commonMethods = new ArrayList<>();
         List<String> keys = new ArrayList<>(methods.keySet());
         for (int i = 0; i < keys.size(); i++) {
-            if (methods.get(keys.get(i)) == collectionTypes.length) {
+            //if(methods.get(keys.get(i)) == collectionTypes.length-1) System.out.println(keys.get(i) + " -> " + methods.get(keys.get(i)));
+            if (methods.get(keys.get(i)) == collectionTypes.length || methods.get(keys.get(i)) == collectionTypes.length-1) {
                 commonMethods.add(methodsParameters.get(keys.get(i)));
             }
         }

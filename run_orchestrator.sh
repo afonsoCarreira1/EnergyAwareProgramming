@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#compile generated progs
+cd codegen
+mvn install
+cd ..
+
+
 export MAVEN_OPTS="-Xmx512m -Xms128m -Xss2m"
 cd orchestrator/
 mvn versions:update-parent versions:update-properties versions:use-latest-releases -DgenerateBackupPoms=false #update pom

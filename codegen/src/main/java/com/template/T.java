@@ -5,6 +5,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.template.aux.TemplatesAux;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Stack;
+import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class T {
 
@@ -31,6 +35,16 @@ public class T {
         } finally {
             System.out.println("stop -> "+iter);
             System.out.println("time taken "+(et-st) +"ms");
+            LinkedList ll = new LinkedList<>();
+            CopyOnWriteArrayList cpl = new CopyOnWriteArrayList<>();
+            ArrayList l = new ArrayList<>();
+            Vector v = new Vector<>();
+            Stack s = new Stack<>();
+            ll.removeIf(null);
+            cpl.removeIf(null);
+            l.removeIf(null);
+            v.removeIf(null);
+            s.removeIf(null);
         }
     }
 

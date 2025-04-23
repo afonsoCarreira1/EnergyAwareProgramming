@@ -19,9 +19,9 @@ public class tt {
 
         try {
             CopyOnWriteArrayList<Double> var0 = new CopyOnWriteArrayList();
-            ArrayListAux.insertRandomNumbers(var0, in1.intValue(), "Double");
+            ArrayListAux.insertRandomNumbers(var0, in1, "Double");
             CopyOnWriteArrayList<Double> var1 = new CopyOnWriteArrayList();
-            ArrayListAux.insertRandomNumbers(var1, in0.intValue(), "Double");
+            ArrayListAux.insertRandomNumbers(var1, in0, "Double");
             BenchmarkArgs[] arr = new BenchmarkArgs[75000];
             populateArray(arr, var0, var1);
             TemplatesAux.sendStartSignalToOrchestrator(args[0]);

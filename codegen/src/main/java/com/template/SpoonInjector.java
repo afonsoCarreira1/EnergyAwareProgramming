@@ -385,7 +385,7 @@ public class SpoonInjector {
             //invocation.addArgument(factory.Code().createLiteral(typeToUse));
             //return invocation;
             Object size = createRandomLiteral(factory.createReference(typeToUse),false,false);
-            CtStatement st = factory.Code().createCodeSnippetStatement("ArrayListAux.insertRandomNumbers("+var.getSimpleName()+", (int) \""+size+"\", \""+typeToUse +"\")");
+            CtStatement st = factory.Code().createCodeSnippetStatement("ArrayListAux.insertRandomNumbers("+var.getSimpleName()+", \""+size+"\", \""+typeToUse +"\")");
             return st;
         }//TODO do the same for sets and other collections
         return null;

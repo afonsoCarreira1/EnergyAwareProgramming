@@ -10,8 +10,29 @@ public class ArrayListAux {
     public static int max = 100_000;
     public static Random rand = new Random(42);
 
+    private static int getSize(Object size) {
+        if (size instanceof Integer) {
+            return (Integer) size;
+        } else if (size instanceof Double) {
+            return ((Double) size).intValue();
+        } else if (size instanceof Float) {
+            return ((Float) size).intValue();
+        } else if (size instanceof Long) {
+            return ((Long) size).intValue();
+        } else if (size instanceof Short) {
+            return ((Short) size).intValue();
+        } else if (size instanceof Byte) {
+            return ((Byte) size).intValue();
+        } else {
+            if (size == null) throw new IllegalArgumentException("Unsupported type for getSize null");
+            return (int) size;
+        }
+    }
+    
+
     @SuppressWarnings("unchecked")
-    public static <T> List<T> insertRandomNumbers(List<T> list, int size, String type) {
+    public static <T> List<T> insertRandomNumbers(List<T> list, T sizeT, String type) {
+        int size = getSize(sizeT);
         if (type.equals("Integer")) {
             for (int i = 0; i < (Integer) size; i++) {
                 int randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;

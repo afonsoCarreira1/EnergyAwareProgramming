@@ -37,7 +37,7 @@ public class TemplateCreator {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
     public static void main(String[] args) throws Exception {
-        //args = new String[]{"lists","addAll,containsAll"};//Fibonacci //TestTwoInputs
+        //args = new String[]{"lists","containsAll"};//Fibonacci //TestTwoInputs
         if (args == null || args.length == 0) return;
         HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;
@@ -324,9 +324,9 @@ public class TemplateCreator {
         List<String> keys = new ArrayList<>(methods.keySet());
         for (int i = 0; i < keys.size(); i++) {
             //if(methods.get(keys.get(i)) == collectionTypes.length-1) System.out.println(keys.get(i) + " -> " + methods.get(keys.get(i)));
-            if (methods.get(keys.get(i)) == collectionTypes.length || methods.get(keys.get(i)) == collectionTypes.length-1) {
+            //if (methods.get(keys.get(i)) == collectionTypes.length || methods.get(keys.get(i)) == collectionTypes.length-1) {
                 commonMethods.add(methodsParameters.get(keys.get(i)));
-            }
+            //}
         }
         return commonMethods;
     }

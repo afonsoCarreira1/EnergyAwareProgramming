@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_sc
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from pysr import PySRRegressor
+from joblib import dump, load
 
 
 
@@ -18,8 +19,9 @@ import re, seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
 #features/addAll_features/features_4700.csv
-filename = 'defaultSort_features/features_2900.csv'
+filename = 'new_gen_feat/features_1900.csv'
 df = pd.read_csv(f'features/{filename}')
+modelOutDir = 'models/'
 
 def print_full_df(df):
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
@@ -90,8 +92,8 @@ def plot_prediction_vs_feature(model, X, y, column_name):
         return
 
     y_pred = model.predict(X)  # Predict using full feature set
-    feature_values_input1 = set(X['Input1'])
-    print(f"Input1 (Size of each List) - Unique Values: {feature_values_input1}")
+    feature_values_input1 = set(X['input1'])
+    print(f"input1 (Size of each List) - Unique Values: {feature_values_input1}")
     comparison(y,y_pred)
     plt.figure(figsize=(8, 6))
     X_log = np.log1p(X[column_name])
@@ -120,7 +122,7 @@ def plot_energy_vs_feature(X, y, column_name):
         return
     
     #feature_values_input1 = set(X[column_name])
-    #print(f"Input1 (Size of each List) - Unique Values: {feature_values_input1}")
+    #print(f"input1 (Size of each List) - Unique Values: {feature_values_input1}")
     plt.figure(figsize=(8, 6))
     X_log = X[column_name]#np.log1p(X[column_name])
     df = pd.DataFrame({'x': X_log, 'y': y})
@@ -161,16 +163,16 @@ def model(df):
     #pysr(X,y,X_train, X_test, y_train, y_test)
 
 
-    checkStrangeValuesOfBubbleSort()
+    #checkStrangeValuesOfBubbleSort()
     #save_figure_pdf(df,regressor)
-    #plot_energy_vs_feature(X,y,'Input1')
-    #plot_prediction_vs_feature(regressor, X_test, y_test, 'Input2')
-    #plot3D(X,y)
+    #plot_energy_vs_feature(X,y,'input1')
+    #plot_prediction_vs_feature(regressor, X_test, y_test, 'input2')
+    plot3D(X,y)
     
     
 
 def checkStrangeValuesOfBubbleSort():
-    filtered_df = df.loc[(df['Input1'] > 2743)]#.loc[(df['Input1'] >= 1e3) & (df['Input1'] <= 1e4)  ]#& (df['EnergyUsed'] >= 50)
+    filtered_df = df.loc[(df['input1'] > 2743)]#.loc[(df['input1'] >= 1e3) & (df['input1'] <= 1e4)  ]#& (df['EnergyUsed'] >= 50)
     filtered_df = filtered_df.sort_values(by='EnergyUsed')
     # Find columns where all values are the same
     constant_columns = filtered_df.nunique() == 1
@@ -237,6 +239,7 @@ def decision_tree_regressor(X,y,X_train, X_test, y_train, y_test):
     print('decision tree regression')
     regressor = DecisionTreeRegressor(random_state=42)
     regressor.fit(X_train, y_train)
+    dump(regressor, modelOutDir+'decisionTree_model.joblib')
     get_scores(regressor,X_test,y_test)
     cross_validate_model(regressor,X,y)
     tune_hyperparameters(X,y,X_train, X_test, y_train, y_test,'decision_tree_regressor')
@@ -245,6 +248,7 @@ def random_forest_regression(X,y,X_train, X_test, y_train, y_test):
     print('random forest')
     rf_regressor = RandomForestRegressor(random_state=42)
     rf_regressor.fit(X_train, y_train)
+    dump(rf_regressor, modelOutDir+'randomForest_model.joblib')
     rf_r2 = rf_regressor.score(X_test, y_test)
     rf_mse = mean_squared_error(y_test, rf_regressor.predict(X_test))
     print(f"Random Forest R²: {rf_r2}")
@@ -257,6 +261,7 @@ def gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test):
     print('gradient boosting')
     gb_regressor = GradientBoostingRegressor(random_state=42)
     gb_regressor.fit(X_train, y_train)
+    dump(gb_regressor, modelOutDir+'gardientBoosting_model.joblib')
     gb_r2 = gb_regressor.score(X_test, y_test)
     gb_mse = mean_squared_error(y_test, gb_regressor.predict(X_test))
     print(f"Gradient Boosting R²: {gb_r2}")
@@ -269,6 +274,7 @@ def linear_regression(X,y,X_train, X_test, y_train, y_test):
     print('linear regression')
     model = LinearRegression()
     model.fit(X_train, y_train)
+    dump(model, modelOutDir+'linearRegression_model.joblib')
     get_scores(model,X_test,y_test)
     cross_validate_model(model,X,y)
     #tune_hyperparameters(X_train, X_test, y_train, y_test,'linear_regression')
@@ -309,16 +315,16 @@ def plot3D( X, y):
     fig.add_axes(ax)
     # get colormap from seaborn
     cmap = ListedColormap(sns.color_palette("husl", 256).as_hex())
-    x = np.log1p(X['Input1'])
+    x = np.log1p(X['input1'])
     #print(y)
     z = y#np.log1p(y)
-    y = np.log1p(X['Input2'])
+    y = np.log1p(X['input2'])
     #z = regressor.predict(X)
     
     # plot
     sc = ax.scatter(x, y, z, s=40, c=x, marker='o', cmap=cmap, alpha=1)
-    ax.set_xlabel('Input1')
-    ax.set_ylabel('Input2')
+    ax.set_xlabel('input1')
+    ax.set_ylabel('input2')
     ax.set_zlabel('Energy')
     # legend
     plt.legend(*sc.legend_elements(), bbox_to_anchor=(1.05, 1), loc=2)
@@ -333,7 +339,7 @@ df = separate_data(df,'')
 #print(df)
 df = drop_column(df,'Filename')
 
-#lx = df['Input1'].tolist()
+#lx = df['input1'].tolist()
 #lx = sorted(set(lx))
 #print(lx)
 #ly = list(range(0,len(lx)))

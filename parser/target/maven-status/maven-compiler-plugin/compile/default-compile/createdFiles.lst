@@ -6,5 +6,6 @@ com/parse/TestParseInputs.class
 com/parse/App.class
 com/parse/TestObject.class
 com/parse/ASTFeatureExtractor.class
+com/parse/TestModelProg.class
 com/parse/TestObject2.class
 com/parse/TestFile.class

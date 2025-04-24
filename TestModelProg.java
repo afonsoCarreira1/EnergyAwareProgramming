@@ -1,10 +1,6 @@
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Random;
-import java.util.Stack;
-import java.util.Vector;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TestModelProg {
     public static void main(String[] args) {

@@ -20,11 +20,15 @@ dirName="logs/run_${formatted_time}"
 powerjoularDir="${dirName}/powerjoular_files"
 tmpDir="${dirName}/tmp_files"
 errorDir="${dirName}/error_files"
-sudo mkdir -p "$dirName" "$powerjoularDir" "$tmpDir" "$errorDir"
+progsDir="${dirName}/prog_files"
+sudo mkdir -p "$dirName" "$powerjoularDir" "$tmpDir" "$errorDir" "$progsDir"
 sudo mv powerjoular.* "$powerjoularDir"
 sudo mv tmp/* "$tmpDir"
 sudo mv src/main/java/com/aux_runtime/error_files/* "$errorDir"
 sudo mv logs/runner_logs/* "$dirName"
 sudo mv features.csv "$dirName"
+
+cd ..
+sudo cp codegen/src/main/java/com/generated_progs/* orchestrator/"$progsDir" #copy programs ran to log
 
 #set MAVEN_OPTS=-Xss10M

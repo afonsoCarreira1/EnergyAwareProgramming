@@ -315,10 +315,10 @@ def plot3D( X, y):
     fig.add_axes(ax)
     # get colormap from seaborn
     cmap = ListedColormap(sns.color_palette("husl", 256).as_hex())
-    x = np.log1p(X['input1'])
+    x = X['input0']#np.log1p()
     #print(y)
     z = y#np.log1p(y)
-    y = np.log1p(X['input2'])
+    y = X['input1']#np.log1p()
     #z = regressor.predict(X)
     
     # plot

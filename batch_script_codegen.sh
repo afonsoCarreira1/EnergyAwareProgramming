@@ -24,5 +24,6 @@ targetProgram=$(echo "$ARG_PAIR" | awk '{print $1}')
 targetMethods=$(echo "$ARG_PAIR" | cut -d' ' -f2- | sed -E 's/\s*,\s*/,/g' | tr -d ' ')
 
 
+cd codegen/  
 echo "[Task $SLURM_ARRAY_TASK_ID] Running codegen for $targetProgram $targetMethods"
-java -jar codegen/target/codegen-1.0-SNAPSHOT-jar-with-dependencies.jar "$targetProgram" "$targetMethods"
+java -jar target/codegen-1.0-SNAPSHOT-jar-with-dependencies.jar $targetProgram $targetMethods

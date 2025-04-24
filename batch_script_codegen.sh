@@ -19,4 +19,10 @@ ARGS=(
     "lists size"
 ) 
 
-./run_codegen.sh ${ARGS[$SLURM_ARRAY_TASK_ID]}
+ARG_PAIR="${ARGS[$SLURM_ARRAY_TASK_ID]}"
+targetProgram=$(echo "$ARG_PAIR" | awk '{print $1}')
+targetMethods=$(echo "$ARG_PAIR" | cut -d' ' -f2- | sed -E 's/\s*,\s*/,/g' | tr -d ' ')
+
+
+echo "[Task $SLURM_ARRAY_TASK_ID] Running codegen for $targetProgram $targetMethods"
+java -jar codegen/target/codegen-1.0-SNAPSHOT-jar-with-dependencies.jar "$targetProgram" "$targetMethods"

@@ -197,7 +197,7 @@ public class TemplateCreator {
             case "float":
                 return Float.valueOf(min + (max - min) * rand.nextFloat())+"f";
             case "long":
-                return Long.valueOf(rand.nextLong(min, max + 1))+"";
+                return Long.valueOf(rand.nextLong(min, max + 1))+"l";
             case "boolean":
                 return Boolean.valueOf(rand.nextBoolean())+"";
             case "short":

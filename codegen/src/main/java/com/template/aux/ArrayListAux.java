@@ -70,7 +70,7 @@ public class ArrayListAux {
     }
 
 
-    /*@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public static <T> Set<T> insertRandomNumbers(Set<T> set, int size, String type) {
             for (int i = 0; i < size; i++) {
                 if (type.equals("Integer")) {
@@ -96,7 +96,7 @@ public class ArrayListAux {
                 }
             }
         return set;
-    }*/
+    }
 
     //public static <T> void populateArrayObject(T[] arr, Supplier<T> sup) {
     //    for (int i = 0; i < arr.length; i++) {

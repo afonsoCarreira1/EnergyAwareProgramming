@@ -1,5 +1,4 @@
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/programsToBenchmark/TestTwoInputs.java
-/home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/generated_InputTestTemplate/Prog_ArrayList_removeAll_java_util_Collection_.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/aux/DeepCopyUtil.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/RunTest.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/Template.java
@@ -7,11 +6,12 @@
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/programsToBenchmark/Fibonacci.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/InputTest.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/programsToBenchmark/TestClass.java
-/home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/generated_InputTestTemplate/Prog_ArrayList_get_int_.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/aux/WritePid.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/SpoonInjector.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/TemplateCreator.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/T.java
+/home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/programsToBenchmark/TT.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/aux/ArrayListAux.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/InputData.java
 /home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/aux/TemplatesAux.java
+/home/afonso/Documents/EnergyAwareProgramming/codegen/src/main/java/com/template/tt.java

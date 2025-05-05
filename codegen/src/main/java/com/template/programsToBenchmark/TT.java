@@ -9,5 +9,7 @@ public class TT {
     Long n;
 
     @JsonCreator
-    public TT(@JsonProperty("n")long n) {this.n=n;}
+    public TT(@JsonProperty("n")Long n) {this.n=n;}
+
+    public void doNothing() {}
 }

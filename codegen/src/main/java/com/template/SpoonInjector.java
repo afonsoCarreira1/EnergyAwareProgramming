@@ -50,6 +50,15 @@ import java.util.Random;
 import java.util.Set;
 
 public class SpoonInjector {
+    private static final Set<String> wrapperDefaults = Set.of(
+    "java.lang.Long",
+    "java.lang.Integer",
+    "java.lang.Double",
+    "java.lang.Float",
+    "java.lang.Boolean",
+    "java.lang.Character",
+    "java.lang.Byte",
+    "java.lang.Short");
     final static String packageToUse = "com.template.";
     Launcher launcher;
     Factory factory;
@@ -163,6 +172,10 @@ public class SpoonInjector {
         processor.createJavaFile(ctClass);
     }
 
+    private boolean isWrapper(String className) {
+        return wrapperDefaults.contains(className);
+    }
+
     private CtConstructor<?> getConstructors(CtType<?> t) {
         List<CtConstructor<?>> constructors = t.filterChildren(new TypeFilter<>(CtConstructor.class))
         .map(m -> (CtConstructor<?>) m)
@@ -180,9 +193,6 @@ public class SpoonInjector {
         } catch (Exception e) {
             return null;
         }
-        //if (type.getQualifiedName().equals("java.util."+type.getSimpleName())) return factory.Type().get(type.getActualClass());
-        //if (type.getQualifiedName().equals("java.io."+type.getSimpleName())) return factory.Type().get(type.getActualClass());
-        //return null;
     }
 
     private boolean isArray(String type){
@@ -200,6 +210,9 @@ public class SpoonInjector {
         if (paramClass == null) paramClass = checkForMoreTypes(finalParamType);
 
         if (paramClass != null) {
+            if (isWrapper(paramClass.getTypeErasure().getQualifiedName())) 
+            return factory.Code().createLiteral(createRandomLiteral(paramClass.getTypeErasure(),false,false));
+            //return factory.Code().createCodeSnippetExpression(getWrapperConstructor(paramClass.getTypeErasure().getQualifiedName())) ;
             CtConstructor<?> paramConstructor = getConstructors(paramClass);
 
             if (paramConstructor != null) {
@@ -233,18 +246,6 @@ public class SpoonInjector {
         CtBlock<?> tryBlockBody = tryBlock.getBody();
         CtWhile whileBlock = null;
         String methodCall = Introspector.decapitalize(newClassName)+"("+args+")";
-        //for (CtStatement st : tryBlockBody){
-        //    if (st instanceof CtWhile) {
-        //        whileBlock = (CtWhile) st;
-        //        break; 
-        //    }
-        //}
-        //CtExpression<Boolean> condition = factory.Code().createCodeSnippetExpression("end - begin < 1000000000 && iter < arr.length");
-        //condition.setType(factory.Type().booleanPrimitiveType());
-        //whileBlock.setLoopingExpression(condition);
-        //whileBlock.getBody().insertBefore(factory.Code().createCodeSnippetStatement(methodCall));
-        //methodCalls.addStatement(factory.Code().createCodeSnippetStatement("clearArr(arr)"));
-        //methodCalls.addStatement(callPopulateMethod());
 
         statements.addStatement(factory.Code().createCodeSnippetStatement("TemplatesAux.sendStartSignalToOrchestrator(args[0])"));
         statements.addStatement(factory.Code().createCodeSnippetStatement("TemplatesAux.launchTimerThread(1100)"));
@@ -303,11 +304,6 @@ public class SpoonInjector {
             return primitive_to_wrapper.getOrDefault(type.toString(), type.toString());
     }
 
-    //private CtField<?> createBenchmarkClassFields(CtLocalVariable var) {
-    //    CtField<?> field = factory.createCtField(var.getSimpleName(), var.getType(),var.getDefaultExpression().toString());
-    //    field.addModifier(ModifierKind.PUBLIC);
-    //    return field;
-    //}
 
     private CtField<?> createBenchmarkClassFields(CtLocalVariable<?> var) {
         CtField<?> field = factory.Core().createField();
@@ -374,16 +370,6 @@ public class SpoonInjector {
         String p = packageToUse+"aux.ArrayListAux";
         if (var.getType().toString().contains("List") || var.getType().toString().contains("Vector")) {
             addImport(p);
-            //CtClass<?> ctClass = factory.Class().get(p);
-            //CtMethod<?> insertRandomNumbersMethod = ctClass.getMethodsByName("insertRandomNumbers").get(0);
-            //CtInvocation<?> invocation = factory.Core().createInvocation();
-            //invocation.setExecutable((CtExecutableReference) insertRandomNumbersMethod.getReference()); //adciciona a fun
-            //invocation.setTarget(factory.createLiteral(ctClass.getReference())); //adiciona a Class.
-            //invocation.addArgument(factory.Code().createVariableRead(var.getReference(), false));
-            //if (useConstructorSize) invocation.addArgument(factory.Code().createLiteral(createRandomLiteral(null,false,true)));
-            //else invocation.addArgument(factory.Code().createLiteral(createRandomLiteral(factory.createReference(typeToUse),false,false)));
-            //invocation.addArgument(factory.Code().createLiteral(typeToUse));
-            //return invocation;
             Object size = createRandomLiteral(factory.createReference(typeToUse),false,false);
             CtStatement st = factory.Code().createCodeSnippetStatement("ArrayListAux.insertRandomNumbers("+var.getSimpleName()+", \""+size+"\", \""+typeToUse +"\")");
             return st;
@@ -438,6 +424,7 @@ public class SpoonInjector {
                     return !ctClass2.getFormalCtTypeParameters().isEmpty();
                 } 
             }
+            return false;
         }
         return !ctClass.getFormalCtTypeParameters().isEmpty();
     }

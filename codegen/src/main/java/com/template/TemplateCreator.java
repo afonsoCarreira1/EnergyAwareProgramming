@@ -37,7 +37,7 @@ public class TemplateCreator {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
     public static void main(String[] args) throws Exception {
-        //args = new String[]{"lists","containsAll"};//Fibonacci //TestTwoInputs
+        args = new String[]{"TT","doNothing"};//args = new String[]{"lists","containsAll"};//Fibonacci //TestTwoInputs
         if (args == null || args.length == 0) return;
         HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;
@@ -55,7 +55,7 @@ public class TemplateCreator {
             getCustomImports = true;
         }
         outputDir += "/"+args[0];
-        if (args.length>=1) outputDir+="_"+args[1].replace(",", "_");
+        if (args.length>1) outputDir+="_"+args[1].replace(",", "_");
         new File(initialPath+"generated_InputTestTemplate").mkdirs();
         createTemplates(collections,methods,getCustomImports,targetMethods);
         createProgramsFromTemplates();

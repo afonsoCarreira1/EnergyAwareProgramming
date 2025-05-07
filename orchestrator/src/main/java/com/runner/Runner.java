@@ -379,7 +379,10 @@ public class Runner {
         Map<String, Object> methodfeatures = methods.get(methodName);
         for (int i = 0; i < inputValues.size(); i++) {
             //System.out.println(inputValues);
-            methodfeatures.put("input"+i, inputValues.get(i));
+            String str = inputValues.get(i);
+            String cleaned = str.matches(".*[lLfF]$") ? str.substring(0, str.length() - 1) : str;
+            methodfeatures.put("input"+i, cleaned); //rmove the f from 5.5f or l from 5l 
+            //methodfeatures.put("input"+i, inputValues.get(i));
         }
         //ArrayList<String> inputs = getInputValues(file,currentDirBeingTested);
         featuresName.addAll(methodfeatures.keySet());

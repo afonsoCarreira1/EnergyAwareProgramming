@@ -67,3 +67,27 @@ mvn clean compile assembly:single -U #-Dorg.slf4j.simpleLogger.defaultLogLevel=E
 cd ..
 echo all projects compiled
 
+
+#create venv for python
+cd ml/
+VENV_DIR="venv"
+
+# Create venv if it doesn't exist
+if [ ! -d "$VENV_DIR" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv "$VENV_DIR"
+fi
+
+# Activate venv
+source "$VENV_DIR/bin/activate"
+
+# Upgrade pip
+pip install --upgrade pip
+
+# Install dependencies
+pip install -r requirements.txt
+
+deactivate
+
+echo "Environment created. To activate it enter the ml directory and run: source $VENV_DIR/bin/activate "
+cd ..

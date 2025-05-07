@@ -24,6 +24,7 @@ templates_old/
 logs/
 ml/outputs/
 ml/ml_env/
+ml/venv/
 generated_progs/
 generated_templates/
 **/cp.txt

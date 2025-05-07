@@ -19,7 +19,7 @@ import re, seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
 #features/addAll_features/features_4700.csv
-filename = 'new_gen_feat/features_1900.csv'
+filename = 'lists/features_mix_11k.csv'#new_gen_feat/features_1900.csv
 df = pd.read_csv(f'features/{filename}')
 modelOutDir = 'models/'
 
@@ -127,12 +127,12 @@ def plot_energy_vs_feature(X, y, column_name):
     X_log = X[column_name]#np.log1p(X[column_name])
     df = pd.DataFrame({'x': X_log, 'y': y})
     df_avg = df.groupby('x', as_index=False)['y'].mean()
-    plt.scatter(X_log, y, label="Real Energy", alpha=0.6, color="blue", marker="o")
+    plt.scatter(X_log, y, label="Energy used", alpha=0.6, color="blue", marker="o")
     #plt.scatter(df_avg['x'], df_avg['y'], label="Averaged Energy", alpha=0.6, color="blue", marker="o")
-    plt.xlabel(f"log(1 + {column_name})")
+    plt.xlabel(f"input")#{column_name}
     plt.ylabel("Energy")
-    plt.xscale("log")  # Log scale for the X-axis
-    plt.title(f"Log-Scaled Predicted vs Real Energy for {column_name}")
+    #plt.xscale("log")  # Log scale for the X-axis
+    plt.title(f"Energy vs feature")
     plt.legend()
     plt.grid(False)
     plt.show()
@@ -147,8 +147,8 @@ def model(df):
 
     # Initialize and train the DecisionTreeRegressor
     #print('----------------------')
-    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    #decision_tree_regressor(X,y,X_train, X_test, y_train, y_test)
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    decision_tree_regressor(X,y,X_train, X_test, y_train, y_test,save = False)
     #print('----------------------')
     #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     #random_forest_regression(X,y,X_train, X_test, y_train, y_test)
@@ -165,7 +165,7 @@ def model(df):
 
     #checkStrangeValuesOfBubbleSort()
     #save_figure_pdf(df,regressor)
-    #plot_energy_vs_feature(X,y,'input1')
+    #plot_energy_vs_feature(X,y,'ImportsUsed')
     #plot_prediction_vs_feature(regressor, X_test, y_test, 'input2')
     plot3D(X,y)
     
@@ -235,11 +235,11 @@ def cross_validate_model(model, X, y):
     print(f"Mean Cross-Validation MSE: {mean_cv_mse}")
     return mean_cv_mse
 
-def decision_tree_regressor(X,y,X_train, X_test, y_train, y_test):
+def decision_tree_regressor(X,y,X_train, X_test, y_train, y_test,save = False):
     print('decision tree regression')
     regressor = DecisionTreeRegressor(random_state=42)
     regressor.fit(X_train, y_train)
-    dump(regressor, modelOutDir+'decisionTree_model.joblib')
+    if save: dump(regressor, modelOutDir+'decisionTree_model.joblib')
     get_scores(regressor,X_test,y_test)
     cross_validate_model(regressor,X,y)
     tune_hyperparameters(X,y,X_train, X_test, y_train, y_test,'decision_tree_regressor')

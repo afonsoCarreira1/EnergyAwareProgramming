@@ -24,7 +24,6 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.support.StandardEnvironment;
 
 public class TemplateCreator {
 
@@ -38,7 +37,7 @@ public class TemplateCreator {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
     public static void main(String[] args) throws Exception {
-        //args = new String[]{"maps","put"};//args = new String[]{"lists","containsAll"};//Fibonacci //TestTwoInputs
+        args = new String[]{"maps","keySet"};//args = new String[]{"lists","containsAll"};//Fibonacci //TestTwoInputs
         if (args == null || args.length == 0) return;
         HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;
@@ -66,6 +65,7 @@ public class TemplateCreator {
         for (CtType<?> collec : collections) {
             for (CtMethod<?> method : methods) {
                 if (!targetMethods.contains(method.getSimpleName()) && !targetMethods.isEmpty()) continue;
+                System.out.println(method);
                 Launcher launcher = initSpoon(new ArrayList<>(Arrays.asList("src/main/java/com/template/")));
                 SpoonInjector spi = new SpoonInjector(launcher, launcher.getFactory(), 0, method.clone(),
                 collec, "", 0, outputDir,isGeneric,getCustomImports);

@@ -22,7 +22,6 @@ ARGS=(
     "maps isEmpty",
     "maps size",
     "maps clear",
-    "maps keySet",
     "maps values",
     "maps entrySet",
 ) 

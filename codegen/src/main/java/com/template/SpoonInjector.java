@@ -441,7 +441,7 @@ public class SpoonInjector {
         if (generic == 2) ref.addActualTypeArgument(factory.Type().createReference(typeToUse));
     }
 
-    private CtExpression<?> createVar(CtTypeReference<?> typeRef, boolean getDefaultValue) {       
+    private CtExpression<?> createVar(CtTypeReference<?> typeRef, boolean getDefaultValue) {  
         if (typeRef.isPrimitive() || isPlaceHolderType(typeRef.toString())) return factory.Code().createLiteral(createRandomLiteral(typeRef,getDefaultValue,false));
         if (typeRef.toString().contains("Collection")) return factory.Code().createConstructorCall(typeRef);
         if (typeRef.isArray()) return getDefaultValueForType((((CtArrayTypeReference<?>) typeRef).getComponentType().getTypeDeclaration()),true);
@@ -499,7 +499,7 @@ public class SpoonInjector {
 
 
     private boolean isPlaceHolderType(String ref) {
-        if (ref.equals("E") || ref.equals("T") || ref.equals("Object")) return true;
+        if (ref.equals("E") || ref.equals("T") || ref.equals("K") || ref.equals("V") || ref.equals("Object")) return true;
         return false;
     }
 

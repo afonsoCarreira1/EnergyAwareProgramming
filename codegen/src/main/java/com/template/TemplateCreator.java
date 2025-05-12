@@ -37,7 +37,7 @@ public class TemplateCreator {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
     public static void main(String[] args) throws Exception {
-        args = new String[]{"TT","doNothing"};//args = new String[]{"lists","containsAll"};//Fibonacci //TestTwoInputs
+        args = new String[]{"maps","get"};//args = new String[]{"lists","containsAll"};//Fibonacci //TestTwoInputs
         if (args == null || args.length == 0) return;
         HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;
@@ -348,6 +348,19 @@ public class TemplateCreator {
             // Stack extends Vector
             collectionTypes[2] = launcher.getFactory().Type().get(java.util.LinkedList.class);
             collectionTypes[3] = launcher.getFactory().Type().get(java.util.concurrent.CopyOnWriteArrayList.class);
+        } else if (collection.toLowerCase().equals("sets")) {
+            collectionTypes = new CtType<?>[4];
+            collectionTypes[0] = launcher.getFactory().Type().get(java.util.HashSet.class);
+            collectionTypes[1] = launcher.getFactory().Type().get(java.util.LinkedHashSet.class);
+            collectionTypes[2] = launcher.getFactory().Type().get(java.util.TreeSet.class);
+            collectionTypes[3] = launcher.getFactory().Type().get(java.util.concurrent.CopyOnWriteArraySet.class);
+        } else if (collection.toLowerCase().equals("maps")) {
+            collectionTypes = new CtType<?>[5];
+            collectionTypes[0] = launcher.getFactory().Type().get(java.util.HashMap.class);
+            collectionTypes[1] = launcher.getFactory().Type().get(java.util.LinkedHashMap.class);
+            collectionTypes[2] = launcher.getFactory().Type().get(java.util.TreeMap.class);
+            collectionTypes[3] = launcher.getFactory().Type().get(java.util.Hashtable.class);
+            collectionTypes[4] = launcher.getFactory().Type().get(java.util.concurrent.ConcurrentHashMap.class);
         }
         return collectionTypes;
     }

@@ -19,7 +19,7 @@ import re, seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
 #features/addAll_features/features_4700.csv
-filename = 'lists/features_mix_11k.csv'#new_gen_feat/features_1900.csv
+filename = 'new_gen_feat/features_1900.csv'##lists/features_mix_11k.csv
 df = pd.read_csv(f'features/{filename}')
 modelOutDir = 'models/'
 
@@ -146,28 +146,28 @@ def model(df):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42) 
 
     # Initialize and train the DecisionTreeRegressor
-    #print('----------------------')
+    print('----------------------')
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     decision_tree_regressor(X,y,X_train, X_test, y_train, y_test,save = False)
-    #print('----------------------')
-    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    #random_forest_regression(X,y,X_train, X_test, y_train, y_test)
-    #print('----------------------')
-    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    #gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test)
-    #print('----------------------')
-    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    #linear_regression(X,y,X_train, X_test, y_train, y_test)
-    #print('----------------------')
-    #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    #pysr(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    random_forest_regression(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    linear_regression(X,y,X_train, X_test, y_train, y_test)
+    print('----------------------')
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    pysr(X,y,X_train, X_test, y_train, y_test)
 
 
     #checkStrangeValuesOfBubbleSort()
     #save_figure_pdf(df,regressor)
     #plot_energy_vs_feature(X,y,'ImportsUsed')
     #plot_prediction_vs_feature(regressor, X_test, y_test, 'input2')
-    plot3D(X,y)
+    #plot3D(X,y)
     
     
 
@@ -244,11 +244,11 @@ def decision_tree_regressor(X,y,X_train, X_test, y_train, y_test,save = False):
     cross_validate_model(regressor,X,y)
     tune_hyperparameters(X,y,X_train, X_test, y_train, y_test,'decision_tree_regressor')
 
-def random_forest_regression(X,y,X_train, X_test, y_train, y_test):
+def random_forest_regression(X,y,X_train, X_test, y_train, y_test,save = False):
     print('random forest')
     rf_regressor = RandomForestRegressor(random_state=42)
     rf_regressor.fit(X_train, y_train)
-    dump(rf_regressor, modelOutDir+'randomForest_model.joblib')
+    if save: dump(rf_regressor, modelOutDir+'randomForest_model.joblib')
     rf_r2 = rf_regressor.score(X_test, y_test)
     rf_mse = mean_squared_error(y_test, rf_regressor.predict(X_test))
     print(f"Random Forest R²: {rf_r2}")
@@ -257,11 +257,11 @@ def random_forest_regression(X,y,X_train, X_test, y_train, y_test):
     tune_hyperparameters(X,y,X_train, X_test, y_train, y_test,'random_forest')
     return rf_regressor
 
-def gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test):
+def gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test,save = False):
     print('gradient boosting')
     gb_regressor = GradientBoostingRegressor(random_state=42)
     gb_regressor.fit(X_train, y_train)
-    dump(gb_regressor, modelOutDir+'gardientBoosting_model.joblib')
+    if save: dump(gb_regressor, modelOutDir+'gardientBoosting_model.joblib')
     gb_r2 = gb_regressor.score(X_test, y_test)
     gb_mse = mean_squared_error(y_test, gb_regressor.predict(X_test))
     print(f"Gradient Boosting R²: {gb_r2}")
@@ -270,11 +270,11 @@ def gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test):
     tune_hyperparameters(X,y,X_train, X_test, y_train, y_test,'gradient_boosting')
     return gb_regressor
 
-def linear_regression(X,y,X_train, X_test, y_train, y_test):
+def linear_regression(X,y,X_train, X_test, y_train, y_test,save = False):
     print('linear regression')
     model = LinearRegression()
     model.fit(X_train, y_train)
-    dump(model, modelOutDir+'linearRegression_model.joblib')
+    if save: dump(model, modelOutDir+'linearRegression_model.joblib')
     get_scores(model,X_test,y_test)
     cross_validate_model(model,X,y)
     #tune_hyperparameters(X_train, X_test, y_train, y_test,'linear_regression')

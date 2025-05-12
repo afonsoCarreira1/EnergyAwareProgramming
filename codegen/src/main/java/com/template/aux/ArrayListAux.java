@@ -1,6 +1,7 @@
 package com.template.aux;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -71,31 +72,87 @@ public class ArrayListAux {
 
 
     @SuppressWarnings("unchecked")
-    public static <T> Set<T> insertRandomNumbers(Set<T> set, int size, String type) {
-            for (int i = 0; i < size; i++) {
-                if (type.equals("Integer")) {
-                   int randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
-                   set.add((T) Integer.valueOf(randomNum)); 
-                } else if (type.equals("Double")){
-                    double randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
-                    set.add((T) Double.valueOf(randomNum)); 
-                }
-                else if (type.equals("Float")){
-                    float randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
-                    set.add((T) Float.valueOf(randomNum)); 
-                }
-                else if (type.equals("Long")){
-                    long randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
-                    set.add((T) Long.valueOf(randomNum)); 
-                }
-                else if (type.equals("Character")){
-                    char minChar = 'a';
-                    char maxChar = 'z';
-                    char randomChar = (char) (rand.nextInt((maxChar - minChar) + 1) + minChar);
-                    set.add((T) Character.valueOf(randomChar));
-                }
+    public static <T> Set<T> insertRandomNumbers(Set<T> set, Object sizeT, String type) {
+        int size = getSize(sizeT);
+        if (type.equals("Integer")) {
+            for (int i = 0; i < (Integer) size; i++) {
+                int randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                set.add((T) Integer.valueOf(randomNum));
             }
+        }else if (type.equals("Short")) {
+            for (int i = 0; i < size; i++) {
+                short randomNum = (short) (rand.nextInt((Short.MAX_VALUE - min) + 1) + min);
+                set.add((T) Short.valueOf(randomNum));
+            }
+        } else if (type.equals("Double")) {
+            for (int i = 0; i < size; i++) {
+                double randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                set.add((T) Double.valueOf(randomNum));
+            }
+        } else if (type.equals("Float")) {
+            for (int i = 0; i < size; i++) {
+                float randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                set.add((T) Float.valueOf(randomNum));
+            }
+        } else if (type.equals("Long")) {
+            for (int i = 0; i < size; i++) {
+                long randomNum = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                set.add((T) Long.valueOf(randomNum));
+            }
+        } else if (type.equals("Character")) {
+            char minChar = 'a';
+            char maxChar = 'z';
+            for (int i = 0; i < (Integer) size; i++) {
+                char randomChar = (char) (rand.nextInt((maxChar - minChar) + 1) + minChar);
+                set.add((T) Character.valueOf(randomChar));
+            }
+        }
         return set;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Map<T,T> insertRandomNumbers(Map<T,T> map, Object sizeT, String type) {
+        int size = getSize(sizeT);
+        if (type.equals("Integer")) {
+            for (int i = 0; i < (Integer) size; i++) {
+                int key = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                int val = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                map.put((T) Integer.valueOf(key), (T) Integer.valueOf(val));
+            }
+        }else if (type.equals("Short")) {
+            for (int i = 0; i < size; i++) {
+                short key = (short) (rand.nextInt((Short.MAX_VALUE - min) + 1) + min);
+                short val = (short) (rand.nextInt((Short.MAX_VALUE - min) + 1) + min);
+                map.put((T) Short.valueOf(key), (T) Short.valueOf(val));
+            }
+        } else if (type.equals("Double")) {
+            for (int i = 0; i < size; i++) {
+                double key = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                double val = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                map.put((T) Double.valueOf(key), (T) Double.valueOf(val));
+            }
+        } else if (type.equals("Float")) {
+            for (int i = 0; i < size; i++) {
+                float key = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                float val = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                map.put((T) Float.valueOf(key), (T) Float.valueOf(val));
+            }
+        } else if (type.equals("Long")) {
+            for (int i = 0; i < size; i++) {
+                long key = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                long val = rand.nextInt(((Integer) max - (Integer) min) + 1) + (Integer) min;
+                map.put((T) Long.valueOf(key), (T) Long.valueOf(val));
+            }
+        } else if (type.equals("Character")) {
+            char minChar = 'a';
+            char maxChar = 'z';
+            for (int i = 0; i < (Integer) size; i++) {
+                char key = (char) (rand.nextInt((maxChar - minChar) + 1) + minChar);
+                char val = (char) (rand.nextInt((maxChar - minChar) + 1) + minChar);
+                map.put((T) Character.valueOf(key), (T) Character.valueOf(val));
+            }
+        }
+        return map;
     }
 
     //public static <T> void populateArrayObject(T[] arr, Supplier<T> sup) {

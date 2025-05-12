@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=codegen
 #SBATCH --output=log_codegen_%A_%a.log
-#SBATCH --array=0-17
+#SBATCH --array=0-16
 #SBATCH --ntasks=1
 #SBATCH --mem=1G
 

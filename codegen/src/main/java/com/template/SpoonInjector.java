@@ -256,10 +256,13 @@ public class SpoonInjector {
         constructor.setSimpleName(innerClassName);
         ArrayList<CtParameter<?>> params = new ArrayList<>();
         CtBlock<?> bodyStatements = factory.createBlock();
-        for (CtLocalVariable<?> var : vars){
+
+        for (int i = 0; i < vars.size(); i++){
+            CtLocalVariable<?> var = vars.get(i);
             innerClass.addField(createBenchmarkClassFields(var));
             params.add(factory.createParameter(constructor, var.getType(), var.getSimpleName()));
-            String exp = "this."+var.getSimpleName() +" = DeepCopyUtil.deepCopy("+var.getSimpleName()+", new TypeReference<"+changePrimitiveTypeToWrapperType(var.getType())+">(){})";
+            //String exp = "this."+var.getSimpleName() +" = DeepCopyUtil.deepCopy("+var.getSimpleName()+", new TypeReference<"+changePrimitiveTypeToWrapperType(var.getType())+">(){})";
+            String exp = "this.var"+ i + " = " + statements.getStatement(i).toString().split(" = ")[1];
             bodyStatements.addStatement(factory.Code().createCodeSnippetStatement(exp));
         }
         constructor.setParameters(params);

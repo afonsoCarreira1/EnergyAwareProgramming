@@ -49,7 +49,7 @@ public class InputTest {
     public  List<Integer> findMaxInput() throws IOException, InterruptedException{
         int numberOfInputs = TemplateCreator.findNumberOfInputs(program);
         StringBuilder inputBuild = new StringBuilder();
-        
+        String inputInit = "";
         List<String> valuesToReplace = TemplateCreator.findStringsToReplace(program,"ChangeValueHere\\d+_[^\",;\\s]+");
         String finalProgram = program.replaceAll("public class .* \\{", "public class "+progFName+" {").replaceAll("package .*;", "package com.generated_InputTestTemplate;");
         Map<String,String> inputType = new HashMap<>();
@@ -58,11 +58,15 @@ public class InputTest {
             String[] valueSplitted = valueToReplace.split("_");
             String type = valueSplitted[1];
             finalProgram = finalProgram.replace("\""+valueToReplace+"\"", "in"+i);
+            inputInit+="    static "+type+" in"+i+";\n";
             inputType.put("in"+i, type);
         }
         for (int i = 0; i < numberOfInputs; i++) {
-            inputBuild.append("        "+inputType.get("in"+i)+" in"+i+" = "+TemplateCreator.getPrimitiveTypeToWrapper(inputType.get("in"+i))+".valueOf(args["+i+"]);\n");
+            inputBuild.append("        "+" in"+i+" = "+TemplateCreator.getPrimitiveTypeToWrapper(inputType.get("in"+i))+".valueOf(args["+i+"]);\n");
         }
+
+        finalProgram = finalProgram.replace("public class "+progFName+" {","public class "+progFName+" {"+inputInit);
+        
 
         List<String> types = new ArrayList<String>(inputType.values());
         List<Integer> maxInputsFromData = getInputDataIfItExists(types);

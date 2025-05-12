@@ -15,6 +15,6 @@ public class TestTwoInputs {
         this.n2 = n2;
     }
 
-    public void doNothing() {}
+    public void doNothing(int x,int y) {}
 
 }

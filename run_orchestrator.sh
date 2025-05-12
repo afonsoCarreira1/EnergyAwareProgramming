@@ -29,6 +29,6 @@ sudo mv logs/runner_logs/* "$dirName"
 sudo mv features.csv "$dirName"
 
 cd ..
-sudo cp codegen/src/main/java/com/generated_progs/* orchestrator/"$progsDir" #copy programs ran to log
+sudo cp -r codegen/src/main/java/com/generated_progs/* orchestrator/"$progsDir" #copy programs ran to log
 
 #set MAVEN_OPTS=-Xss10M

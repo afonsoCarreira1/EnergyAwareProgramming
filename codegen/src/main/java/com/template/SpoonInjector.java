@@ -11,7 +11,6 @@ import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTry;
-import spoon.reflect.code.CtWhile;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtField;
@@ -37,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -229,20 +227,14 @@ public class SpoonInjector {
     }
     
     private void callMethods() {
-        CtStatementList methodCalls = factory.createStatementList();
         StringBuilder args = new StringBuilder();
         for (int i = 0; i < varIndex; i++) {
             args.append("arr[iter].var"+i);
             if (i != varIndex-1) args.append(", ");
         }
-        CtBlock<?> tryBlockBody = tryBlock.getBody();
-        CtWhile whileBlock = null;
-        String methodCall = Introspector.decapitalize(newClassName)+"("+args+")";
-
         statements.addStatement(factory.Code().createCodeSnippetStatement("TemplatesAux.sendStartSignalToOrchestrator(args[0])"));
         statements.addStatement(factory.Code().createCodeSnippetStatement("TemplatesAux.launchTimerThread(1100)"));
         statements.addStatement(factory.Code().createCodeSnippetStatement("iter = computation(arr, arr.length)"));
-        //whileBlock.insertAfter(methodCalls);
         callExceptions();
     }
 
@@ -359,7 +351,7 @@ public class SpoonInjector {
             Object size = createRandomLiteral(factory.createReference(typeToUse),false,false);
             CtStatement st = factory.Code().createCodeSnippetStatement("ArrayListAux.insertRandomNumbers("+var.getSimpleName()+", \""+size+"\", \""+typeToUse +"\")");
             return st;
-        }//TODO do the same for sets and other collections
+        }
         return null;
     }
 
@@ -367,8 +359,9 @@ public class SpoonInjector {
         if (type.contains("List")) return true;
         if (type.contains("Vector")) return true;
         if (type.contains("Set")) return true;
-        if (type.contains("Map")) return true;
         if (type.contains("TreeSet")) return true;
+        if (type.contains("Map")) return true;
+        if (type.contains("Hashtable")) return true;
         return false;
     }
     
@@ -378,11 +371,10 @@ public class SpoonInjector {
 
     private boolean isCollection(CtLocalVariable<?> var) {
         try {
-            return var.getType().isSubtypeOf(factory.Type().createReference("java.util.Collection"));
+            return var.getType().isSubtypeOf(factory.Type().createReference("java.util.Collection")) || var.getType().isSubtypeOf(factory.Type().createReference("java.util.Map"));
         } catch (Exception e) {
             return false;
-        }
-        
+        }  
     }
 
     private String callArgs() {
@@ -423,17 +415,15 @@ public class SpoonInjector {
             return 0;
             //return false;
         }
-        //System.out.println("number of params -> "+ctClass.getFormalCtTypeParameters().size());
         //return !ctClass.getFormalCtTypeParameters().isEmpty();
         return ctClass.getFormalCtTypeParameters().size();
     }
 
     private CtLocalVariable<?> createVar(CtTypeReference typeRef, String varName, boolean getDefaultValue) {
         CtTypeReference ref = typeRef.toString().contains("Collection") ? factory.Type().createReference(collec) : typeRef;
-        CtTypeReference<?> genericType = factory.Type().createReference(typeToUse);
         if (typeRef.isArray()) ref = typeRef.getTypeErasure();
         //if (isGeneric(ref)) ref.addActualTypeArgument(genericType);
-        handleGenericClasses(ref,genericType);
+        handleGenericClasses(ref,null);
         CtExpression<?> exp = createVar(ref,getDefaultValue);
         if (isPlaceHolderType(ref.getSimpleName())) ref =factory.createReference("changetypehere");
         CtLocalVariable<?> variable = factory.Code().createLocalVariable(
@@ -447,8 +437,8 @@ public class SpoonInjector {
     private void handleGenericClasses(CtTypeReference<?> ref, CtTypeReference<?> genericType) {
         int generic = isGeneric(ref);
         if (generic == 0) return;
-        ref.addActualTypeArgument(genericType);
-        if (generic == 2) ref.addActualTypeArgument(genericType);
+        ref.addActualTypeArgument(factory.Type().createReference(typeToUse));
+        if (generic == 2) ref.addActualTypeArgument(factory.Type().createReference(typeToUse));
     }
 
     private CtExpression<?> createVar(CtTypeReference<?> typeRef, boolean getDefaultValue) {       
@@ -687,13 +677,24 @@ public class SpoonInjector {
     }
 
     public CtParameter<?> createParameter(String paramType, String paramName, boolean isTypeArray) {
-        CtTypeReference<?> type = factory.Type().createReference(paramType);
+        CtTypeReference<?> type = handleTypeCreation(paramType);
         CtArrayTypeReference<?> typeArr = factory.Type().createArrayReference(type);
         CtParameter<?> param = factory.Core().createParameter();
         param.setSimpleName(paramName);
         if (isTypeArray) param.setType(typeArr);
         else param.setType(type);
         return param;
+    }
+
+    private CtTypeReference<?> handleTypeCreation(String paramType) {
+        if (!paramType.contains("<")) return factory.Type().createReference(paramType);
+        String[] typeAndGeneric = paramType.split("<");
+        CtTypeReference<?> type = factory.Type().createReference(typeAndGeneric[0]);
+        String[] types = typeAndGeneric[1].substring(0, typeAndGeneric[1].length()-1).split(",");
+        for (String t : types) {
+            type.addActualTypeArgument(factory.Type().createReference(t.trim()));
+        }
+        return type;
     }
 
     public void insertImport() {

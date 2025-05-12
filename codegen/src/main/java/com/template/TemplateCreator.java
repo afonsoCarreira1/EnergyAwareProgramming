@@ -24,6 +24,7 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.support.StandardEnvironment;
 
 public class TemplateCreator {
 
@@ -283,7 +284,7 @@ public class TemplateCreator {
         for (int i = 0; i < paths.size(); i++) {
             launcher.addInputResource(paths.get(i));
         }
-        
+        //launcher.getFactory().getEnvironment().setIgnoreSyntaxErrors(true);
         launcher.getFactory().getEnvironment().setAutoImports(true);
         launcher.getEnvironment().setNoClasspath(false);
         launcher.setSourceOutputDirectory(outputDir);

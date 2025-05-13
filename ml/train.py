@@ -1,7 +1,9 @@
-from datetime import datetime
 import numpy as np 
 import matplotlib.pyplot as plt 
 import pandas as pd 
+import seaborn as sns
+import os
+from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor 
 from sklearn.metrics import mean_squared_error
@@ -10,18 +12,10 @@ from sklearn.tree import plot_tree
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression, LogisticRegression
-from pysr import PySRRegressor
 from joblib import dump, load
-
-
-
-import re, seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
-#features/addAll_features/features_4700.csv
-filename = 'new_gen_feat/features_1900.csv'##lists/features_mix_11k.csv
-df = pd.read_csv(f'features/{filename}')
-modelOutDir = 'models/'
+from pysr import PySRRegressor
 
 def print_full_df(df):
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
@@ -137,7 +131,7 @@ def plot_energy_vs_feature(X, y, column_name):
     plt.grid(False)
     plt.show()
 
-def model(df):
+def model(df,modelPath):
     # Separate features and target
     X = df.iloc[:, :-1]  # All columns except the last one
     y = df.iloc[:, -1]   # Energy column
@@ -148,19 +142,19 @@ def model(df):
     # Initialize and train the DecisionTreeRegressor
     print('----------------------')
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    decision_tree_regressor(X,y,X_train, X_test, y_train, y_test,save = False)
+    decision_tree_regressor(X,y,X_train, X_test, y_train, y_test,modelPath,save = True)
     print('----------------------')
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    random_forest_regression(X,y,X_train, X_test, y_train, y_test)
+    random_forest_regression(X,y,X_train, X_test, y_train, y_test,modelPath,save = True)
     print('----------------------')
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test)
+    gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test,modelPath,save = True)
     print('----------------------')
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    linear_regression(X,y,X_train, X_test, y_train, y_test)
+    linear_regression(X,y,X_train, X_test, y_train, y_test,modelPath,save = True)
     print('----------------------')
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    pysr(X,y,X_train, X_test, y_train, y_test)
+    pysr(X,y,X_train, X_test, y_train, y_test,modelPath,save = True)
 
 
     #checkStrangeValuesOfBubbleSort()
@@ -169,8 +163,6 @@ def model(df):
     #plot_prediction_vs_feature(regressor, X_test, y_test, 'input2')
     #plot3D(X,y)
     
-    
-
 def checkStrangeValuesOfBubbleSort():
     filtered_df = df.loc[(df['input1'] > 2743)]#.loc[(df['input1'] >= 1e3) & (df['input1'] <= 1e4)  ]#& (df['EnergyUsed'] >= 50)
     filtered_df = filtered_df.sort_values(by='EnergyUsed')
@@ -235,11 +227,11 @@ def cross_validate_model(model, X, y):
     print(f"Mean Cross-Validation MSE: {mean_cv_mse}")
     return mean_cv_mse
 
-def decision_tree_regressor(X,y,X_train, X_test, y_train, y_test,save = False):
+def decision_tree_regressor(X,y,X_train, X_test, y_train, y_test,modelPath,save = False):
     print('decision tree regression')
     regressor = DecisionTreeRegressor(random_state=42)
     regressor.fit(X_train, y_train)
-    if save: dump(regressor, modelOutDir+'decisionTree_model.joblib')
+    if save: dump(regressor, f"models/{modelPath}"+'decisionTree_model.joblib')
     get_scores(regressor,X_test,y_test)
     cross_validate_model(regressor,X,y)
     tune_hyperparameters(X,y,X_train, X_test, y_train, y_test,'decision_tree_regressor')
@@ -330,26 +322,46 @@ def plot3D( X, y):
     plt.legend(*sc.legend_elements(), bbox_to_anchor=(1.05, 1), loc=2)
     plt.show()
 
-#print(df)
-#print(df.shape[0]) # print number of rows
-print('Size before cleaning',df.shape[0])
-df = clean_data(df,False)
-print('Size after cleaning',df.shape[0])
-df = separate_data(df,'')
-#print(df)
-df = drop_column(df,'Filename')
 
-#lx = df['input1'].tolist()
-#lx = sorted(set(lx))
-#print(lx)
-#ly = list(range(0,len(lx)))
-#plt.plot(lx, ly)
-#plt.show()
+def divideAllFeaturesInMultipleDfs(df):
+    files = []
+    df['collection_method'] = df['Filename'].str.split('_').str[:2].str.join('_')
+    grouped = df.groupby('collection_method')
+    for name, group in grouped:
+        filename = f"divided_features/{name}.csv"
+        files.append(name+".csv")
+        group.to_csv(filename, index=False)
+    return files
 
-#print(df.isnull().sum())
-#print(df[df.isnull().any(axis=1)])
 
-model(df)
 
-#df_sorted = df.sort_values(by='EnergyUsed', ascending=False)
-#print(df_sorted.head(10))
+
+
+def readMixedFeatures():
+    #features/addAll_features/features_4700.csv
+    filename = 'lists/features_mix_11k.csv'##new_gen_feat/features_1900.csv
+    df = pd.read_csv(f'features/{filename}')
+    
+    #print(df)
+    #print(df.shape[0]) # print number of rows
+    print('Size before cleaning',df.shape[0])
+    df = clean_data(df,False)
+    print('Size after cleaning',df.shape[0])
+    df = separate_data(df,'')
+    #print(df)
+
+    divideAllFeaturesInMultipleDfs(df)
+
+def readDividedFeatures(files):
+    for filename in files:  
+        modelPath = createModelsDir(filename)
+        df = pd.read_csv(f'divided_features/{filename}')
+        df = drop_column(df,'Filename')
+        model(df,modelPath)
+
+def createModelsDir(filename):
+    info = filename.split(".")[0].replace("_","/") + "/"
+    os.makedirs('models/'+info, exist_ok=True)
+    return info
+
+#model(df)

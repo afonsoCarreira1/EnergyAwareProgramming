@@ -1,8 +1,14 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class TestModelProg {
+
+    static String frequency = ".1";
+    static int loopSize = 10_000;
     public static void main(String[] args) {
         int maxListSIze = 1000;
         int max = 100;
@@ -14,7 +20,7 @@ public class TestModelProg {
             l2.add(rand.nextInt(max));
         }
         String pid = ProcessHandle.current().pid()+"";
-        ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",".1", "-f", "powerjoular.csv");
+        ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
         try {
             Process powerjoularProcess = powerjoularBuilder.start();
         } catch (IOException e) {
@@ -22,12 +28,20 @@ public class TestModelProg {
             System.exit(0);
         }
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 10_000; i++) {
+        for (int i = 0; i < loopSize; i++) {
             l.addAll(l2);
         }
         long end = System.currentTimeMillis();
         long diff = end - start;
         System.out.println("dif -> "+diff);
+        String energyUsed = readPowerjoularCsv("powerjoular.csv-"+pid+".csv");
+        System.out.println("Energy used was: "+energyUsed + "J");
+        double prediction = maxListSIze * ((0 * 6.805649e-7) + 3.9773587e-7);
+        System.out.println("Energy from model was: "+prediction + "J");
+        ProcessBuilder removePowerjoularFiles = new ProcessBuilder("rm", "powerjoular.csv*");
+        try {
+            removePowerjoularFiles.start();
+        } catch (Exception e) {}
     }
 
     public static void sendStopSignalToOrchestrator(String pid, int iter) throws IOException {
@@ -37,6 +51,48 @@ public class TestModelProg {
     public static void sendStartSignalToOrchestrator(String pid) throws IOException, InterruptedException {
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", pid });
         Thread.sleep(100);
+    }
+
+    private static String readPowerjoularCsv(String csvFile) {
+        try {Thread.sleep(100);
+        } catch (InterruptedException e) {e.printStackTrace();}
+        List<String> cpuPowerValues = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+            String line;
+            String[] headers = br.readLine().split(",");
+            int cpuPowerColumnIndex = -1;
+
+            for (int i = 0; i < headers.length; i++) {
+                if ("CPU Power".equalsIgnoreCase(headers[i])) {
+                    cpuPowerColumnIndex = i;
+                    break;
+                }
+            }
+
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                cpuPowerValues.add(values[cpuPowerColumnIndex]);
+            }
+        } catch (Exception e) {
+            //e.printStackTrace();
+            System.out.println("Program ran so fast it did not create a CSV file or other error.\n");
+        }
+        Double cpuPower = 0.0;
+        //TODO fix this so when it catches "+Inf***********" ignores it
+        try {
+            
+            Double freq = Double.parseDouble(frequency);
+            for (int i = 0; i < cpuPowerValues.size(); i++) {
+                cpuPower += Double.parseDouble(cpuPowerValues.get(i)) * freq;
+            }
+            // return Double.toString(Math.round(cpuPower));
+            cpuPower /= loopSize;
+            
+        } catch (Exception e) {
+            cpuPower = 0.0;
+            System.out.println("Error with powerjoular csv.\n");
+        }
+        return "" + cpuPower;// String.format("%.5f", cpuPower);
     }
 }
 

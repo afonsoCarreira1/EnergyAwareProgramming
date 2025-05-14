@@ -178,7 +178,7 @@ public class Runner {
                     notifyRunnerClass();
                     return;
                 }
-                String cpuUsage = readCsv("powerjoular.csv-" + childPid + ".csv");
+                String cpuUsage = readPowerjoularCsv("powerjoular.csv-" + childPid + ".csv");
                 log.append("Program used " + cpuUsage + "J\n");
                 Double duration = (endTime - startTime) / 1000.0;
                 log.append("Time taken: " + duration + " seconds, for " + loopSize + " operations\n");
@@ -300,7 +300,7 @@ public class Runner {
         };  
     }
 
-    private static String readCsv(String csvFile) {
+    private static String readPowerjoularCsv(String csvFile) {
         try {Thread.sleep(100);
         } catch (InterruptedException e) {e.printStackTrace();}
         List<String> cpuPowerValues = new ArrayList<>();
@@ -340,7 +340,6 @@ public class Runner {
             cpuPower = 0.0;
             log.append("Error with powerjoular csv.\n");
         }
-
         return "" + cpuPower;// String.format("%.5f", cpuPower);
     }
 

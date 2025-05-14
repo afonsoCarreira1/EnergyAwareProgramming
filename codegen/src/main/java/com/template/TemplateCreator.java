@@ -37,7 +37,7 @@ public class TemplateCreator {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
     public static void main(String[] args) throws Exception {
-        args = new String[]{"testTwoInputs","doNothing"};//args = new String[]{"lists","containsAll"};//Fibonacci //TestTwoInputs
+        args = new String[]{"lists","addAll"};//args = new String[]{"lists","containsAll"};//Fibonacci //TestTwoInputs
         if (args == null || args.length == 0) return;
         HashSet<String> targetMethods = getTargetMethodSet(args);
         String programToRun;

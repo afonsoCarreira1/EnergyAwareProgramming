@@ -1,4 +1,0 @@
-in0 | arrSize: 75000 | type: long -> maxInput: 6248
-in0 | arrSize: 75000 | type: Long -> maxInput: 100000
-in0 | arrSize: 100000 | type: Long -> maxInput: 100000
-in0 | arrSize: 150000 | type: Long -> maxInput: 100000

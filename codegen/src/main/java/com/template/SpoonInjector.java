@@ -40,6 +40,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SpoonInjector {
     private static final Set<String> wrapperDefaults = Set.of(
@@ -257,12 +259,21 @@ public class SpoonInjector {
         ArrayList<CtParameter<?>> params = new ArrayList<>();
         CtBlock<?> bodyStatements = factory.createBlock();
 
-        for (int i = 0; i < vars.size(); i++){
-            CtLocalVariable<?> var = vars.get(i);
+        //create class vars
+        for (CtLocalVariable<?> var : vars) {
             innerClass.addField(createBenchmarkClassFields(var));
-            params.add(factory.createParameter(constructor, var.getType(), var.getSimpleName()));
-            //String exp = "this."+var.getSimpleName() +" = DeepCopyUtil.deepCopy("+var.getSimpleName()+", new TypeReference<"+changePrimitiveTypeToWrapperType(var.getType())+">(){})";
-            String exp = "this.var"+ i + " = " + statements.getStatement(i).toString().split(" = ")[1];
+        }
+        
+        //class constructor
+        for (int i = 0; i < statements.getStatements().size(); i++){
+            String currentStatement = statements.getStatements().get(i).toString();
+            Pattern pattern = Pattern.compile(".*\\s(var\\d+)\\s");//find space varNumber space
+            Matcher matcher = pattern.matcher(currentStatement);
+            String exp = currentStatement;
+            if (matcher.find()) {
+                String matchedVar = matcher.group(1);
+                exp = matcher.replaceAll("this."+matchedVar.trim()+" ");
+            } 
             bodyStatements.addStatement(factory.Code().createCodeSnippetStatement(exp));
         }
         constructor.setParameters(params);
@@ -617,7 +628,7 @@ public class SpoonInjector {
         String args = getAllVarsAsString();
 
         String body ="for (int i = 0;i < \"numberOfFunCalls\";i++) {\n" + //
-                     "  arr[i] = new BenchmarkArgs("+args+");\n" + //
+                     "  arr[i] = new BenchmarkArgs();\n" + //
                      "}";
 
         CtCodeSnippetStatement snippet = factory.Code().createCodeSnippetStatement(body);

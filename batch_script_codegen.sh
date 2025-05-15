@@ -7,23 +7,16 @@
 
 #test args
 ARGS=(
-    "sets add",
-    "sets remove",
-    "sets contains",
-    "sets isEmpty",
-    "sets size",
-    "sets clear",
-    "sets iterator",
-    "maps put",
-    "maps get",
-    "maps removes",
-    "maps containsKey",
-    "maps containsValue",
-    "maps isEmpty",
-    "maps size",
-    "maps clear",
-    "maps values",
-    "maps entrySet",
+    "lists addAll",
+    "lists containsAll",
+    "lists add",
+    "lists get",
+    "lists equals",
+    "lists replaceAll",
+    "lists retainAll",
+    "lists set",
+    "lists subList",
+    "lists size"
 ) 
 
 ARG_PAIR="${ARGS[$SLURM_ARRAY_TASK_ID]}"

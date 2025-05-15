@@ -25,7 +25,7 @@ import spoon.reflect.factory.Factory;
 
 public class InputTest {
 
-    int timeoutMilliseconds = 5_000;//5_000;
+    int timeoutMilliseconds = 10_000;//10 seconds
     int maxInputToTest = 100_000;
     String filename;
     String program;

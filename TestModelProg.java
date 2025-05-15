@@ -10,7 +10,7 @@ public class TestModelProg {
     static String frequency = ".1";
     static int loopSize = 10_000;
     public static void main(String[] args) {
-        int maxListSIze = 1000;
+        int maxListSIze = 2000;
         int max = 100;
         Random rand = new Random();
         ArrayList<Integer> l = new ArrayList<>();
@@ -29,15 +29,25 @@ public class TestModelProg {
         }
         long start = System.currentTimeMillis();
         for (int i = 0; i < loopSize; i++) {
+            
             l.addAll(l2);
+            
+            //l.size();
+            
+            //l.equals(l2);
         }
         long end = System.currentTimeMillis();
         long diff = end - start;
-        System.out.println("dif -> "+diff);
+        //System.out.println("dif -> "+diff);
         String energyUsed = readPowerjoularCsv("powerjoular.csv-"+pid+".csv");
         System.out.println("Energy used was: "+energyUsed + "J");
-        double prediction = maxListSIze * ((0 * 6.805649e-7) + 3.9773587e-7);
-        System.out.println("Energy from model was: "+prediction + "J");
+        double addAllPrediction = maxListSIze * ((0 * 6.805649e-7) + 3.9773587e-7);
+        System.out.println("Energy from addAll model was: "+addAllPrediction + "J");
+        double sizePrediction = ((maxListSIze * maxListSIze) * maxListSIze) * 1.8982225e-14;
+        System.out.println("Energy from size model was: "+sizePrediction + "J");
+        double equalsPrediction = Math.cos(Math.cos(maxListSIze * 2.8268437)) * 1.0714932e-5;
+        System.out.println("Energy from equals model was: "+equalsPrediction + "J");
+        System.out.println("Energy from model summed is: "+(addAllPrediction+sizePrediction+equalsPrediction) + "J");
         ProcessBuilder removePowerjoularFiles = new ProcessBuilder("rm", "powerjoular.csv*");
         try {
             removePowerjoularFiles.start();

@@ -68,16 +68,18 @@ public class Runner {
         File[] dirsToRun = reviewBeforeRunning();
         int progNum = 0;
         for (File dirToRun : dirsToRun) {
+            progNum = 0;
             String tmpDir = "tmp/"+dirToRun.getName()+"/";
             new File(tmpDir).mkdirs();
             List<String> programs = getAllFilenamesInDir(dirToRun);
             String currentDirBeingTested = dirToRun.getAbsolutePath();
             String logFilename = createLogFile();
             for (String program : programs) {
+                if (progNum == 5) break;
                 //Thread.sleep(100);
                 if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                     String fileName = program.toString().replace(".class", "");
-                    if (!(args[0].equals("test") && fileName.equals("ArrayList_addAll_int_java_util_Collection_1200"))) continue;//just to test one prog file 
+                    //if (!(args[0].equals("test") && fileName.equals("ArrayList_addAll_int_java_util_Collection_1200"))) continue;//just to test one prog file 
                     log.append("---------------------------------------\n");
                     log.append("Program number -> " + (progNum++) + "\n");
                     //System.out.println("Program number -> " + i);
@@ -411,16 +413,17 @@ public class Runner {
     }
 
     private static void createFeaturesCSV(String dir) throws IOException {
-        try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter(CSV_FILE_NAME))) {
+        try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter(dir+CSV_FILE_NAME))) {
             // Write the header row
             List<String> featureList = new ArrayList<>(featuresName);
             featureList.add("EnergyUsed");
             featureList.add("Filename");
             csvWriter.write(String.join(",", featureList));
             csvWriter.newLine();
-            File[] tmpFiles = getAllFilesInDir(dir);//("tmp/");
+            File[] tmpFiles = getAllFilesInDir(dir);
             for (int i = 0; i < tmpFiles.length; i++) {
                 List<String> row = new ArrayList<>();
+                if (tmpFiles[i].toString().contains("features.csv")) continue;//skip reading the file i am creating
                 Map<String, Object> programFeatures = readCSVTempFile(tmpFiles[i].toString());
                 for (String feature : featureList) {
                     if (programFeatures.get(feature) == null) {

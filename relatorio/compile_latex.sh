@@ -1,20 +1,30 @@
 #!/bin/bash
 
-# Name of your main LaTeX file (without extension)
-MAIN_TEX="main"
+# Exit if any command fails
+#set -e
 
-# Run pdflatex to create the initial .aux file and process citations, sending output to /dev/null
-pdflatex "$MAIN_TEX.tex" > /dev/null 2>&1
+# Set the main filename
+MAIN_TEX="main.tex"
+OUTPUT_PDF="main.pdf"
 
-# Run BibTeX to process the .bib file and generate the .bbl file, sending output to /dev/null
-bibtex "$MAIN_TEX" > /dev/null 2>&1
+# Run pdflatex (first pass)
+pdflatex -interaction=nonstopmode -shell-escape "$MAIN_TEX"
 
-# Run pdflatex twice more to resolve all references, sending output to /dev/null
-pdflatex "$MAIN_TEX.tex" > /dev/null 2>&1
-pdflatex "$MAIN_TEX.tex" > /dev/null 2>&1
+# Run bibtex if you're using a .bib file (optional)
+#if grep -q "\\bibliography{" "$MAIN_TEX"; then
+    echo "Running bibtex..."
+    BIBFILE=$(basename "$MAIN_TEX" .tex)
+    bibtex "$BIBFILE"
+#fi
 
-# Optional: clean up auxiliary files
-echo "Cleaning up auxiliary files..."
-rm -f "$MAIN_TEX.aux" "$MAIN_TEX.bbl" "$MAIN_TEX.blg" "$MAIN_TEX.log" "$MAIN_TEX.out"
+# Run pdflatex two more times to resolve references
+pdflatex -interaction=nonstopmode -shell-escape "$MAIN_TEX"
+pdflatex -interaction=nonstopmode -shell-escape "$MAIN_TEX"
 
-echo "Compilation complete! Check $MAIN_TEX.pdf for the final document."
+echo "cleaning auxiliary files"
+rm *.aux
+rm main.glo main.idx main.lof main.lot main.log main.out main.ist main.toc main.bbl main.blg
+cd tex
+rm *.aux
+
+echo "Compilation finished. Output: $OUTPUT_PDF"

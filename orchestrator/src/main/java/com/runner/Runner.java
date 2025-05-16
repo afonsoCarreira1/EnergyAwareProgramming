@@ -68,6 +68,8 @@ public class Runner {
         File[] dirsToRun = reviewBeforeRunning();
         int progNum = 0;
         for (File dirToRun : dirsToRun) {
+            String tmpDir = "tmp/"+dirToRun.getName()+"/";
+            new File(tmpDir).mkdirs();
             List<String> programs = getAllFilenamesInDir(dirToRun);
             String currentDirBeingTested = dirToRun.getAbsolutePath();
             String logFilename = createLogFile();
@@ -75,7 +77,7 @@ public class Runner {
                 //Thread.sleep(100);
                 if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                     String fileName = program.toString().replace(".class", "");
-                    //if (!(args[0].equals("test") && fileName.equals("ArrayList_addAll_int_java_util_Collection_1200"))) continue;//just to test one prog file
+                    if (!(args[0].equals("test") && fileName.equals("ArrayList_addAll_int_java_util_Collection_1200"))) continue;//just to test one prog file 
                     log.append("---------------------------------------\n");
                     log.append("Program number -> " + (progNum++) + "\n");
                     //System.out.println("Program number -> " + i);
@@ -87,7 +89,7 @@ public class Runner {
                     for (int j = 0; j < runs; j++) {
                         timeOutThread = handleTimeOutThread(fileName,currentDirBeingTested);
                         timeOutThread.start();
-                        run(fileName,readCFile,currentDirBeingTested);
+                        run(fileName,readCFile,currentDirBeingTested,tmpDir);
                     }
                     if (programThrowedError(fileName)) {
                         log.append("Error in "+fileName+". Check logs for more info.\n");
@@ -104,8 +106,9 @@ public class Runner {
                     System.out.println("Invalid args");
                 }
             } 
+            createFeaturesCSV(tmpDir);
         }
-        createFeaturesCSV();
+        //createFeaturesCSV();
     }
 
     private static void runProgramCommand(String filename,String currentDirBeingTested) throws IOException{
@@ -120,10 +123,10 @@ public class Runner {
         Runtime.getRuntime().exec(command);
     }
 
-    public static void run(String filename, Boolean readCFile, String currentDirBeingTested) throws IOException, InterruptedException {
+    public static void run(String filename, Boolean readCFile, String currentDirBeingTested,String tempDir) throws IOException, InterruptedException {
         runProgramCommand(filename,currentDirBeingTested);
         handleStartSignal(readCFile);
-        handleStopSignal(filename,currentDirBeingTested);
+        handleStopSignal(filename,currentDirBeingTested,tempDir);
         synchronized (Runner.class) {
             Runner.class.wait();
         }
@@ -154,7 +157,7 @@ public class Runner {
         });
     }
 
-    private static void handleStopSignal(String filename,String currentDirBeingTested) {
+    private static void handleStopSignal(String filename,String currentDirBeingTested,String tempDir) {
         Signal.handle(new Signal("USR2"), new SignalHandler() {
             public void handle(Signal sig) {
                 log.append("Received STOP signal at " + LocalDateTime.now() + "\n");
@@ -185,7 +188,7 @@ public class Runner {
                 averageJoules += Double.parseDouble(cpuUsage);
                 averageTime += endTime - startTime;
                 try {
-                    saveFeature(filename, cpuUsage,currentDirBeingTested);
+                    saveFeature(filename, cpuUsage,currentDirBeingTested,tempDir);
                 } catch (IOException e) {
                     log.append("Error saving feature\n");
                 }
@@ -343,12 +346,12 @@ public class Runner {
         return "" + cpuPower;// String.format("%.5f", cpuPower);
     }
 
-    private static void saveFeature(String file, String cpuUsage, String currentDirBeingTested) throws IOException  {
-        getFeaturesFromParser(file, cpuUsage,currentDirBeingTested);
+    private static void saveFeature(String file, String cpuUsage, String currentDirBeingTested,String tempDir) throws IOException  {
+        getFeaturesFromParser(file, cpuUsage,currentDirBeingTested,tempDir);
     }
 
-    private static void createFeaturesTempFile(String fileName,Map<String, Object> methodfeatures) throws IOException{
-        try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter("tmp/tmp_"+fileName+".csv"))) {
+    private static void createFeaturesTempFile(String fileName,Map<String, Object> methodfeatures,String tempDir) throws IOException{
+        try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter(tempDir+"tmp_"+fileName+".csv"))) {
             // Write the header row
             List<String> featureList = new ArrayList<>(methodfeatures.keySet());
             csvWriter.write(String.join(",", featureList));
@@ -368,7 +371,7 @@ public class Runner {
         //tmpFileNumber++;
     }
 
-    private static void getFeaturesFromParser(String file, String cpuUsage,String currentDirBeingTested) throws IOException {
+    private static void getFeaturesFromParser(String file, String cpuUsage,String currentDirBeingTested,String tempDir) throws IOException {
         String path = targetProgramFiles+"/"+file.replaceAll("\\d+", "")+"/";
         ASTFeatureExtractor parser = new ASTFeatureExtractor(path,file,true);
         HashMap<String, Map<String, Object>> methods = parser.getFeatures();
@@ -389,7 +392,7 @@ public class Runner {
         //if(inputs.get(1) != null) methodfeatures.put("Input2", inputs.get(1));
         methodfeatures.put("EnergyUsed", cpuUsage);
         methodfeatures.put("Filename", file);
-        createFeaturesTempFile(file,methodfeatures);
+        createFeaturesTempFile(file,methodfeatures,tempDir);
     }
 
     private static String getFunMapName(String filename,String currentDirBeingTested) throws IOException{
@@ -407,17 +410,15 @@ public class Runner {
         return filename + "."+Introspector.decapitalize(filename)+"("+mapName+")";
     }
 
-    private static void createFeaturesCSV() throws IOException {
+    private static void createFeaturesCSV(String dir) throws IOException {
         try (BufferedWriter csvWriter = new BufferedWriter(new FileWriter(CSV_FILE_NAME))) {
             // Write the header row
             List<String> featureList = new ArrayList<>(featuresName);
-            //featureList.add("Input1");
-            //featureList.add("Input2");
             featureList.add("EnergyUsed");
             featureList.add("Filename");
             csvWriter.write(String.join(",", featureList));
             csvWriter.newLine();
-            File[] tmpFiles = getAllFilesInDir("tmp/");
+            File[] tmpFiles = getAllFilesInDir(dir);//("tmp/");
             for (int i = 0; i < tmpFiles.length; i++) {
                 List<String> row = new ArrayList<>();
                 Map<String, Object> programFeatures = readCSVTempFile(tmpFiles[i].toString());

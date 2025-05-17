@@ -107,6 +107,7 @@ public class Runner {
                 }
             } 
             createFeaturesCSV(tmpDir);
+            featuresName.clear();
         }
         //createFeaturesCSV();
     }

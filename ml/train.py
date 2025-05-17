@@ -323,29 +323,29 @@ def plot3D( X, y):
     plt.show()
 
 
-def divideAllFeaturesInMultipleDfs(df):
-    files = []
-    #df['collection_method'] = df['Filename'].str.split('_').str[:2].str.join('_')
-    df['method'] = df['Filename'].str.split('_').str[1]
-    grouped = df.groupby('method')
-    for name, group in grouped:
-        filename = f"divided_features/{name}.csv"
-        files.append(name+".csv")
-        group.to_csv(filename, index=False)
-    return files
+#def divideAllFeaturesInMultipleDfs(df):
+#    files = []
+#    #df['collection_method'] = df['Filename'].str.split('_').str[:2].str.join('_')
+#    df['method'] = df['Filename'].str.split('_').str[1]
+#    grouped = df.groupby('method')
+#    for name, group in grouped:
+#        filename = f"divided_features/{name}.csv"
+#        files.append(name+".csv")
+#        group.to_csv(filename, index=False)
+#    return files
 
-def readMixedFeatures():
-    #features/addAll_features/features_4700.csv
-    filename = 'lists/features_mix_11k.csv'##new_gen_feat/features_1900.csv
-    df = pd.read_csv(f'features/{filename}')
-    
-    #print(df)
-    #print(df.shape[0]) # print number of rows
-    print('Size before cleaning',df.shape[0])
-    df = clean_data(df,False)
-    print('Size after cleaning',df.shape[0])
-    df = separate_data(df,'')
-    return df
+#def readMixedFeatures():
+#    #features/addAll_features/features_4700.csv
+#    filename = 'lists/features_mix_11k.csv'##new_gen_feat/features_1900.csv
+#    df = pd.read_csv(f'features/{filename}')
+#    
+#    #print(df)
+#    #print(df.shape[0]) # print number of rows
+#    print('Size before cleaning',df.shape[0])
+#    df = clean_data(df,False)
+#    print('Size after cleaning',df.shape[0])
+#    df = separate_data(df,'')
+#    return df
     
 
 
@@ -365,9 +365,57 @@ def createModelsDir(filename):
     return info
 
 
+def getAllFeatures():
+    original_dir = os.getcwd()
+    os.chdir("..")# go up one folder
+    os.chdir("orchestrator/logs/log_2025_05_16/tmp_files")
+    features_paths = get_feature_file_per_subdir_path()
+    #dfs = [pd.read_csv(features_path) for features_path in features_paths.values()]
+    join_method_features(features_paths)
+    
+
+def join_method_features(features_paths):
+    data_dict = {}
+    for features_path in features_paths: 
+        print(features_path)
+        parts2 = features_path.split("_")
+        method_name = "_".join(parts2[1:])
+        add_or_concat_df(data_dict,method_name,pd.read_csv(features_paths[features_path]))
+    print(data_dict['addAll_int_java_util_Collection_'])
+
+
+def add_or_concat_df(dct, key, df):
+    print(df)
+    if key in dct:dct[key] = pd.concat([dct[key], df], ignore_index=True)
+    else:dct[key] = df.copy()
+
+#vai a cada dir do log/tmp e saca o path do file features.csv
+#def get_feature_file_per_subdir_path(filename="features.csv"):
+#    cwd = os.getcwd()
+#    return [
+#        os.path.join(cwd, d, filename or next(
+#            f for f in os.listdir(os.path.join(cwd, d))
+#            if os.path.isfile(os.path.join(cwd, d, f))
+#        ))
+#        for d in os.listdir(cwd)
+#        if os.path.isdir(os.path.join(cwd, d))
+#           and (filename in os.listdir(os.path.join(cwd, d)) if filename else True)
+#    ]
+
+def get_feature_file_per_subdir_path(filename="features.csv"):
+    cwd = os.getcwd()
+    return {
+        d: os.path.join(cwd, d, filename or next(f for f in os.listdir(os.path.join(cwd, d))
+                                                 if os.path.isfile(os.path.join(cwd, d, f))))
+        for d in os.listdir(cwd)
+        if os.path.isdir(os.path.join(cwd, d))
+           and (filename in os.listdir(os.path.join(cwd, d)) if filename else True)
+    }
+
 def main():
-    df = readMixedFeatures()
-    files = divideAllFeaturesInMultipleDfs(df)
-    readDividedFeatures(files)
+    getAllFeatures()
+    #df = readMixedFeatures()
+    #files = divideAllFeaturesInMultipleDfs(df)
+    #readDividedFeatures(files)
 
 main()

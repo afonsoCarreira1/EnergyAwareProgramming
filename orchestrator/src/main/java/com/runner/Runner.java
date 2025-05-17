@@ -68,14 +68,12 @@ public class Runner {
         File[] dirsToRun = reviewBeforeRunning();
         int progNum = 0;
         for (File dirToRun : dirsToRun) {
-            progNum = 0;
             String tmpDir = "tmp/"+dirToRun.getName()+"/";
             new File(tmpDir).mkdirs();
             List<String> programs = getAllFilenamesInDir(dirToRun);
             String currentDirBeingTested = dirToRun.getAbsolutePath();
             String logFilename = createLogFile();
             for (String program : programs) {
-                if (progNum == 5)break;
                 //Thread.sleep(100);
                 if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                     String fileName = program.toString().replace(".class", "");

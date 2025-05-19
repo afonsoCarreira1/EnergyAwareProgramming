@@ -99,7 +99,7 @@ public class TemplateCreator {
     }
 
     public static void createProgramsFromTemplates() throws IOException, InterruptedException {
-        List<Integer> sizes = createInputRange(1, 1.5, 0);//Arrays.asList(150);
+        List<Integer> sizes = createInputRange(1, 2, 0);//Arrays.asList(150);
         int[] funCalls =  new int[] { /*20_000, 50_000,*/ 75_000, 100_000, 150_000 };//{20_000};
         File[] templates = getTemplates(outputDir);//getAllTemplates();
         int id = 0;

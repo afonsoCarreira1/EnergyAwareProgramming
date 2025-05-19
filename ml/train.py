@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import pandas as pd 
 import seaborn as sns
-import os
+import os, subprocess
 from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor 
@@ -22,6 +22,7 @@ def print_full_df(df):
         print(df)
 
 def clean_data(df,clean_zeros = True):
+    df = drop_column(df,'Filename')
     col_name = 'EnergyUsed'
     df = df.replace([np.inf, -np.inf], np.nan)  # Replace infinity with NaN
     if clean_zeros: df[col_name] = df[col_name].replace(0.0, np.nan)
@@ -236,7 +237,7 @@ def decision_tree_regressor(X,y,X_train, X_test, y_train, y_test,modelPath,log,s
     log.append('decision tree regression')
     regressor = DecisionTreeRegressor(random_state=42)
     regressor.fit(X_train, y_train)
-    if save: dump(regressor, f"models/{modelPath}"+'decisionTree_model.joblib')
+    if save: dump(regressor, f"{modelPath}"+'decisionTree_model.joblib')
     get_scores(regressor,X_test,y_test,log)
     cross_validate_model(regressor,X,y,log)
     tune_hyperparameters(X,y,X_train, X_test, y_train, y_test,'decision_tree_regressor',log)
@@ -245,7 +246,7 @@ def random_forest_regression(X,y,X_train, X_test, y_train, y_test,modelPath,log,
     log.append('random forest')
     rf_regressor = RandomForestRegressor(random_state=42)
     rf_regressor.fit(X_train, y_train)
-    if save: dump(rf_regressor, f"models/{modelPath}"+'randomForest_model.joblib')
+    if save: dump(rf_regressor, f"{modelPath}"+'randomForest_model.joblib')
     rf_r2 = rf_regressor.score(X_test, y_test)
     rf_mse = mean_squared_error(y_test, rf_regressor.predict(X_test))
     log.append(f"Random Forest R²: {rf_r2}")
@@ -258,7 +259,7 @@ def gradient_boosting_regression(X,y,X_train, X_test, y_train, y_test,modelPath,
     log.append('gradient boosting')
     gb_regressor = GradientBoostingRegressor(random_state=42)
     gb_regressor.fit(X_train, y_train)
-    if save: dump(gb_regressor, f"models/{modelPath}"+'gardientBoosting_model.joblib')
+    if save: dump(gb_regressor, f"{modelPath}"+'gardientBoosting_model.joblib')
     gb_r2 = gb_regressor.score(X_test, y_test)
     gb_mse = mean_squared_error(y_test, gb_regressor.predict(X_test))
     log.append(f"Gradient Boosting R²: {gb_r2}")
@@ -271,7 +272,7 @@ def linear_regression(X,y,X_train, X_test, y_train, y_test,modelPath,log,save = 
     log.append('linear regression')
     model = LinearRegression()
     model.fit(X_train, y_train)
-    if save: dump(model, f"models/{modelPath}"+'linearRegression_model.joblib')
+    if save: dump(model, f"{modelPath}"+'linearRegression_model.joblib')
     get_scores(model,X_test,y_test,log)
     cross_validate_model(model,X,y,log)
     #tune_hyperparameters(X_train, X_test, y_train, y_test,'linear_regression')
@@ -295,7 +296,7 @@ def pysr(X,y,X_train, X_test, y_train, y_test,modelPath,log):
     unary_operators=["sin", "cos", "exp","log"],
     binary_operators=["+", "*"],
     population_size=100,
-    run_id=f"models/{modelPath}",
+    run_id=f"{modelPath}",
     #select_k_features=1,
     verbosity=0
     )
@@ -353,7 +354,7 @@ def plot3D( X, y):
 #    return df
     
 def save_log_to_file(log, path):
-    filename = path+"log.txt"
+    filename = path+"/log.txt"
     with open(filename, "w", encoding="utf-8") as f:
         for entry in log:
             f.write(f"{entry}\n")
@@ -366,15 +367,20 @@ def readDividedFeatures(files):
         log.append(f"Training model {filename}")
         print(f"Training model {filename}")
         modelPath = createModelsDir(filename)
-        df = pd.read_csv(f'divided_features/{filename}')
-        df = drop_column(df,'Filename')
+        df = pd.read_csv(filename)
         df = clean_data(df,False)
-        model(df,modelPath,log)
-        save_log_to_file(log,"models/"+modelPath)
+        model(df,modelPath+'/models/',log)
+        fname = modelPath.split('/')[1]
+        subprocess.run(f"cp -r outputs/out/{fname}* {modelPath}/models/pysr", shell=True, capture_output=True, text=True) #copy pysr model to method folder
+        save_log_to_file(log,modelPath)
+        exit(0)
+        
 
 def createModelsDir(filename):
-    info = filename.split(".")[0] + "/"
-    os.makedirs('models/'+info, exist_ok=True)
+    parts = filename.split("/")
+    info = "/".join(parts[:2])
+    os.makedirs(info+'/models/', exist_ok=True)
+    os.makedirs(info+'/models/pysr/', exist_ok=True)
     return info
 
 
@@ -398,10 +404,9 @@ def join_method_features(features_paths):
         add_or_concat_df(data_dict,method_name,pd.read_csv(features_paths[features_path]))
     for key in data_dict:
         df = data_dict[key]
-        #df = swap_energyUsed_col_to_last_place(df)
-        df.to_csv("divided_features/"+key+".csv", index=False)
-        files.append(key+".csv")
-    
+        os.makedirs('out/'+key, exist_ok=True)
+        df.to_csv('out/'+key+'/'+key+".csv", index=False)
+        files.append('out/'+key+'/'+key+".csv")
     return files
 
 
@@ -436,20 +441,6 @@ def add_or_concat_df(dct, key, df):
             dct[key] = dct[key][cols + ['EnergyUsed']]
 
 
-def swap_energyUsed_col_to_last_place(df):
-    # Get the name of the last column
-    last_col_name = df.columns[-1]
-    # Swap the values of 'EnergyUsed' and the last column
-    df['temp'] = df['EnergyUsed']
-    df['EnergyUsed'] = df[last_col_name]
-    df[last_col_name] = df['temp']
-    df.drop(columns='temp', inplace=True)
-    # Now move 'EnergyUsed' to the last column position
-    cols = list(df.columns)
-    cols.append(cols.pop(cols.index('EnergyUsed')))
-    df = df[cols]
-    return df
-
 #vai a cada dir do log/tmp e saca o path do file features.csv -> retorna um dict
 def get_feature_file_per_subdir_path(filename="features.csv"):
     cwd = os.getcwd()
@@ -472,6 +463,7 @@ def check_one_method(method = "add_int_java_lang_Object_"):
     model(df,modelPath)
 
 def main():
+    os.makedirs('out/', exist_ok=True)
     files = getAllFeatures()
     readDividedFeatures(files)
     #check_one_method()

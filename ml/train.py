@@ -296,6 +296,7 @@ def pysr(X,y,X_train, X_test, y_train, y_test,modelPath,log):
     unary_operators=["sin", "cos", "exp","log"],
     binary_operators=["+", "*"],
     population_size=100,
+    constraints={"log": 1},  # Max 1 log per expression (no nested logs) avoids log(log(1))
     run_id=f"{modelPath}",
     #select_k_features=1,
     verbosity=0
@@ -373,7 +374,6 @@ def readDividedFeatures(files):
         fname = modelPath.split('/')[1]
         subprocess.run(f"cp -r outputs/out/{fname}* {modelPath}/models/pysr", shell=True, capture_output=True, text=True) #copy pysr model to method folder
         save_log_to_file(log,modelPath)
-        exit(0)
         
 
 def createModelsDir(filename):
@@ -387,7 +387,7 @@ def createModelsDir(filename):
 def getAllFeatures():
     original_dir = os.getcwd()
     os.chdir("..")# go up one folder
-    os.chdir("orchestrator/logs/log_2025_05_18/tmp_files")
+    os.chdir("orchestrator/logs/log_2025_05_20/tmp_files")
     features_paths = get_feature_file_per_subdir_path()
     os.chdir(original_dir)
     files = join_method_features(features_paths)
@@ -462,10 +462,21 @@ def check_one_method(method = "add_int_java_lang_Object_"):
     df = drop_column(df,'method')
     model(df,modelPath)
 
+def plots(files,fname):
+    for filename in files:
+        if fname not in filename:continue 
+        df = pd.read_csv(filename)
+        df = clean_data(df,False)
+        X = df.iloc[:, :-1]  # All columns except the last one
+        y = df.iloc[:, -1]   # Energy column
+        plot3D(X,y)
+        #plot_energy_vs_feature(X,y,'input0')
+
 def main():
-    os.makedirs('out/', exist_ok=True)
+    #os.makedirs('out/', exist_ok=True)
     files = getAllFeatures()
-    readDividedFeatures(files)
+    plots(files,"equals_java_lang_Object_")
+    #readDividedFeatures(files)
     #check_one_method()
 
 main()

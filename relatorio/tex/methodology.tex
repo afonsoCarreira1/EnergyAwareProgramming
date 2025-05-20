@@ -10,6 +10,18 @@ Java is an excellent choice for developing this tool because of its high interop
 
 There are several Java parsing tools available, such as WALA\cite{wala_main}, SootUp\cite{sootup_main}, and Spoon\cite{spoon_main}. WALA and SootUp are primarily designed for analyzing Java Bytecode and are generally more complex to use. For this project, Spoon was chosen because it is a user-friendly tool that facilitates easy retrieval and manipulation of the AST from Java source code.
 
+\section{Step 1: Program Generation} \label{sec:work_step1_program_generation}
+
+In order to be able to predict energy using ML models it is of course needed a lot of data, so the models can train, and the results can be analyzed. To obtain a considerable amount of data a program generator was built.
+The program generator works alongside with Java Spoon to make it the more general as possible allowing custom programs to be massed generated.
+The generator works for custom Java classes or for some collections (Lists, Sets, Maps), and it can be called to analyze all the public methods of the class or just specific ones.
+It starts by reading a custom Java file (or just access the Lists, Sets, Maps classes), and using Spoon it finds every public method available in the provided class. If it is needed to analyze a specific method, the generator will search in the class for every method with the name requested. Now it has access to all the public methods in the class and what parameters they receive. Since it has access to the whole custom class, it can see how its constructors are called, and use them if any of the methods parameters requires. It recursively calls constructors if needed, making it very versatile to use. After identifying the methods that will be targeted, it starts by creating templates for each of them. It creates the template to have the necessary variables needed to run the specific method, and the template is also carefully structured to function with the orchestrator that will extract the energy profile for each program, that will be explained in the next step. With the template created it is possible to create multiple programs from it. The template has some placeholders, for example to change the type or to change the size of some variable, and they will be replaced with values. By replacing the values of the template and its types, it is possible to generate multiple programs from a template that calls a specific method.
+
+The types used by the generator are the Java wrapper classes, which are object representations of the primitive types. Using these types it is possible to achieve a more general generator, as every program can use them and if other costum types were used it would make the generator more complex and not general.
+
+A very important aspect of the program generator is the inputs it generates. Every method works differently, and receives different parameters, and even when changing the values of these parameters, the method can behave completely different. So, this generator has an intermediate step, between the creation of the template and creating multiple programs.
+
+\begin{comment}
 \section{Step 1: Energy Profiling} \label{sec:work_step1_energy_profiling}
 
 To give energy consumption estimates, first it is necessary to obtain energy profiles~\cite{10.1145/2884781.2884869,8816747}, so the inference function can obtain the most accurate results possible. The goal in this step is to first obtain energy profiles of collections and APIs that are widely used, break them down to their smallest functions, and understand their energy behavior. From there, it is possible to build from these granular functions to more complex and interconnected functions, ultimately covering the entire API set in detail. So whenever an API call is detected in the code, pre-built energy profiles are already available for it.
@@ -39,6 +51,7 @@ This allows for more precise energy measurements, avoiding reading the JVM start
 
 The same workflow will be repeated across multiple machines to gather data from as many locations as possible. This approach ensures that the model developed in the next step will generate accurate outputs applicable to a wide range of machines and scenarios.
 
+
 \section{Step 2: Energy Inference Function} \label{sec:work_step2_energy_inference_function}
 
 \begin{figure}%[h]
@@ -55,6 +68,8 @@ As explained in \ref{sec:background_machine_learning}, there are several ways of
 The model will be trained using a variety of energy profiles and code inputs from different devices to achieve the most accurate energy estimates possible. This approach will improve its accuracy across devices with different hardware and software configurations.
 The estimation will be the total energy used by the program, the total energy used for each function and the snippets of the function that spend the most energy.
 The Figure \ref{fig:energy_inference_function} helps to visualize the function.
+\end{comment}
+
 
 \section{Step 3: Implementation and testing} \label{sec:work_step3_implementation_and_testing}
 

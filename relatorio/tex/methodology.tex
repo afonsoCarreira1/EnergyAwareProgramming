@@ -19,7 +19,8 @@ It starts by reading a custom Java file (or just access the Lists, Sets, Maps cl
 
 The types used by the generator are the Java wrapper classes, which are object representations of the primitive types. Using these types it is possible to achieve a more general generator, as every program can use them and if other costum types were used it would make the generator more complex and not general.
 
-A very important aspect of the program generator is the inputs it generates. Every method works differently, and receives different parameters, and even when changing the values of these parameters, the method can behave completely different. So, this generator has an intermediate step, between the creation of the template and creating multiple programs.
+A very important aspect of the program generator is the inputs it generates. Every method works differently, and receives different parameters, and even when changing the values of these parameters, the method can behave completely different. So, this generator has an intermediate step, between the creation of the template and creating multiple programs, that finds the maximum size the input parameters should receive. Knowing the maximum size the different parameters can have is very important as it needs to be big enough, so the energy profiles can be abundant, but not to big so that the programs start to get out of memory or taking too much time to complete.
+The way it works is by using binary search. It has a maximum valid input defined, and it   
 
 \begin{comment}
 \section{Step 1: Energy Profiling} \label{sec:work_step1_energy_profiling}

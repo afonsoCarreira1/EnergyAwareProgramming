@@ -9,8 +9,8 @@ public class TestModelProg {
 
     static String frequency = ".1";
     static int loopSize = 10_000;
-    public static void main(String[] args) {
-        int maxListSize = 2000;
+    public static void main(String[] args) throws IOException {
+        int maxListSize = 1000;
         int max = 100;
         Random rand = new Random();
         ArrayList<Integer> l = new ArrayList<>();
@@ -21,12 +21,9 @@ public class TestModelProg {
         }
         String pid = ProcessHandle.current().pid()+"";
         ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
-        try {
-            Process powerjoularProcess = powerjoularBuilder.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
+
+        Process powerjoularProcess = powerjoularBuilder.start();
+
         long start = System.currentTimeMillis();
         for (int i = 0; i < loopSize; i++) {
             
@@ -36,6 +33,8 @@ public class TestModelProg {
             
             //l.equals(l2);
         }
+        Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularProcess.pid()});
+        killPowerjoular.waitFor();
         long end = System.currentTimeMillis();
         long diff = end - start;
         //System.out.println("dif -> "+diff);

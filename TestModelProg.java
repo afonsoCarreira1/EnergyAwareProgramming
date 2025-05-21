@@ -41,11 +41,12 @@ public class TestModelProg {
         //System.out.println("dif -> "+diff);
         String energyUsed = readPowerjoularCsv("powerjoular.csv-"+pid+".csv");
         System.out.println("Energy used was: "+energyUsed + "J");
-        double addAllPrediction = Math.log(maxListSize) *6.469111e-5;
+        double addAllPrediction = ((maxListSize + ((((maxListSize * -0.00020094767) + Math.cos(Math.log(maxListSize))) * maxListSize) + maxListSize)) * 1.9027777e-7) + (0 * Math.sin((Math.cos(Math.log(maxListSize) * 0.33795547) * -0.00022468693) + 0.00018942966));
+        //Math.log(maxListSize) * 6.469111e-5
         System.out.println("Energy from addAll model was: "+addAllPrediction + "J");
         double sizePrediction = Math.log(maxListSize) * 7.2244998e-6;
         System.out.println("Energy from size model was: "+sizePrediction + "J");
-        double equalsPrediction = log(maxListSize) * 7.43854e-6;
+        double equalsPrediction = Math.log(maxListSize) * 7.43854e-6;
         System.out.println("Energy from equals model was: "+equalsPrediction + "J");
         System.out.println("Energy from model summed is: "+(addAllPrediction+sizePrediction+equalsPrediction) + "J");
         ProcessBuilder removePowerjoularFiles = new ProcessBuilder("rm", "powerjoular.csv*");

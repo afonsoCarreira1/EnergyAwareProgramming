@@ -47,10 +47,26 @@ However, to create the energy consumption dataset required to train the ML model
 
 Using a machine learning (ML) model to estimate energy consumption can offer advantages over a traditional approach. While traditional approaches such as empirical estimates based on historical data may work, they may not be the best solution in this case due to the unpredictable behavior of energy. Using an ML algorithm can help identify more complex patterns and provide a highly accurate estimate while adapting to the arrival of new information.
 
-To build the energy inference function, an ML model will be used. It's important to understand how different ML algorithms work and which ones are best suited for the proposed project. There are several ML algorithms, and they fall into four main categories\cite{sarker2021machine}: supervised learning, unsupervised learning, semi-supervised learning and reinforcement learning.
+To predict energy, an ML model will be used. It's important to understand how different ML algorithms work and which ones are best suited for the proposed project. There are several ML algorithms, and they fall into four main categories\cite{sarker2021machine}: supervised learning, unsupervised learning, semi-supervised learning and reinforcement learning.
 
-The supervised ML requires labeled data for the model to train on. During training, the model has access to the input and output parameters, and it will try to match inputs to the correct outputs. It has 2 categories: classification, where it predicts discrete labels, such as whether a picture is a cat or a dog; and regression, where it predicts continuous values, for example, predicting the price of a house based on location, size, and so on or predicting energy consumption. These models can be very accurate, but they can also make incorrect predictions for patterns they were not trained on.
+The supervised ML requires labeled data for the model to train on. During training, the model has access to the input and output parameters, and it will try to match inputs to the correct outputs. It has 2 categories: classification, where it predicts discrete labels, such as whether a picture is a cat or a dog; and regression, where it predicts continuous values, for example, predicting the price of a house based on location, size, and so on or predicting energy consumption. These models can be very accurate, but they can also make incorrect predictions for patterns they were not trained on. These techniques also are accompanied by some metrics to evaluate how well the models perform.
 
+For classification models:
+\begin{itemize}
+    \item \textbf{Accuracy:} Measures the percentage of correctly classified instances.
+    \item \textbf{Precision:} Focuses on the correctness of positive predictions.
+    \item \textbf{Recall (Sensitivity):} Evaluates how well the model detects actual positives.
+    \item \textbf{F1 Score}: Balances precision and recall, useful when data is imbalanced.
+    \item \textbf{ROC-AUC (Receiver Operating Characteristic - Area Under Curve):} Assesses classification performance across different thresholds.
+\end{itemize}
+
+For regression models:
+\begin{itemize}
+    \item \textbf{R² (R-squared or Coefficient of Determination):} Measures how well the model's predictions fit the actual data. A value close to 1 indicates a better fit.
+    \item \textbf{MSE (Mean Squared Error):} Computes the average squared difference between predicted and actual values, penalizing large errors more heavily.
+    \item \textbf{RMSE (Root Mean Squared Error):} The square root of MSE, offering a more interpretable error magnitude.
+    \item \textbf{MAE (Mean Absolute Error):} Calculates the average absolute difference between predictions and actual values, making it less sensitive to extreme outliers.
+\end{itemize}
 In unsupervised ML, the model attempts to find patterns and relationships in the unlabeled data set. With this technique, it is possible to find similarities or clusters in the data, for example, to detect an anomaly in the data. This technique does not require the effort of acquiring labeled data, but also it will be harder to understand if the output is correct or not.
 
 Semi-supervised learning, as the name implies, uses a combination of supervised and unsupervised learning techniques. This hybrid approach is very useful in real-world scenarios where parts of the data can be labeled and others can't, allowing for better predictions in the output.
@@ -73,4 +89,18 @@ Support Vector Machines (SVMs) are a powerful tool in machine learning, capable 
 
 Another alternative is to use genetic programming, which is not exactly a conventional ML algorithm, but rather a technique that can be applied to solve ML problems. It is a form of artificial intelligence inspired by the process of natural selection and evolution, where potential solutions to a problem are represented as programs or symbolic expressions. These programs improve iteratively, over generations, through mutations and crossovers, that sometimes can be random, guided by a fitness function. Genetic programming is useful for tasks like symbolic regression and feature classification. However, it can be computationally expensive and can produce inconsistent results due to its uncertain nature.
 
-These algorithms will be taken into account when developing the energy inference function.
+A good example of genetic programming in machine learning is Python Symbolic Regression (PySR). PySR builds on this technique to discover mathematical expressions that model data in a way that is both accurate and interpretable. Unlike black-box models, PySR generates human-readable formulas, making the results more interpretable and transparent.
+PySR works by searching the space of mathematical expressions to find those that best fit the data:
+
+\begin{itemize}
+    \item It starts with a random population of simple mathematical expressions, such as $x + 1$ or $\sin(x)$.
+    \item Evaluates how well each expression fits the data using a loss function (like MSE).
+    \item Expressions are then evolved over several generations using operations like mutation and crossover to produce new, often more complex formulas.
+\end{itemize}
+
+At the end of the process, PySR provides a list of candidate expressions, typically sorted along a Pareto front balancing complexity and accuracy. While more complex expressions often provide better predictions, users can select simpler ones if interpretability is a priority.
+
+This technique is particularly well-suited for energy prediction, as it can reveal easy-to-understand formulas that explain how certain parts of a program contribute to energy consumption. This can help developers understand and optimize the energy efficiency of their code more effectively than with traditional black-box models.
+
+
+These algorithms will be taken into account when developing the model that can best predict energy.

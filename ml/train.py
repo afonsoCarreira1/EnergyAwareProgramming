@@ -16,6 +16,7 @@ from joblib import dump, load
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
 from pysr import PySRRegressor
+from m3gp.M3GP import M3GP
 
 def print_full_df(df):
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
@@ -162,6 +163,10 @@ def model(df,modelPath,log):
     log.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     pysr(X,y,X_train, X_test, y_train, y_test,modelPath,log)
     log.append("\n\n\n")
+    log.append('m3gp')
+    log.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    m3gp_model(X,y,X_train, X_test, y_train, y_test,modelPath,log,save = True)
+    log.append("\n\n\n")
 
     #checkStrangeValuesOfBubbleSort()
     #save_figure_pdf(df,regressor)
@@ -306,6 +311,16 @@ def pysr(X,y,X_train, X_test, y_train, y_test,modelPath,log):
     #print(model.sympy())
     get_scores(model,X_test,y_test,log)
     #cross_validate_model(model,X,y)
+
+
+def m3gp_model(X,y,X_train, X_test, y_train, y_test,modelPath,log,save = False):
+    log.append('m3gp')
+    model = M3GP(fitnessType="MSE")
+    model.fit(X_train, y_train, X_test, y_test) # test is optional
+    if save: dump(model, f"{modelPath}"+'linearRegression_model.joblib')
+    get_scores(model,X_test,y_test,log)
+    cross_validate_model(model,X,y,log)
+
 
 def plot3D( X, y):
     # axes instance
@@ -452,15 +467,21 @@ def get_feature_file_per_subdir_path(filename="features.csv"):
            and (filename in os.listdir(os.path.join(cwd, d)) if filename else True)
     }
 
-def check_one_method(method = "add_int_java_lang_Object_"):
+def check_one_method(method = "addAll_java_util_Collection_"):
+    log = []
     filename = method + ".csv"
     print("------------------------------------------------------")
     print(f"Training model {filename}")
     modelPath = createModelsDir(filename)
     df = pd.read_csv(f'divided_features/{filename}')
     df = drop_column(df,'Filename')
-    df = drop_column(df,'method')
-    model(df,modelPath)
+    #model(df,modelPath,[])
+    X = df.iloc[:, :-1]
+    y = df.iloc[:, -1]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    m3gp_model(X,y,X_train, X_test, y_train, y_test,modelPath,log,save = False)
+    for x in log:
+        print(x)
 
 def plots(files,fname):
     for filename in files:
@@ -475,8 +496,8 @@ def plots(files,fname):
 def main():
     #os.makedirs('out/', exist_ok=True)
     files = getAllFeatures()
-    plots(files,"equals_java_lang_Object_")
+    #plots(files,"equals_java_lang_Object_")
     #readDividedFeatures(files)
-    #check_one_method()
+    check_one_method()
 
 main()

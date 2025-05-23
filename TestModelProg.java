@@ -9,7 +9,7 @@ public class TestModelProg {
 
     static String frequency = ".1";
     static int loopSize = 10_000;
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         int maxListSize = 1000;
         int max = 100;
         Random rand = new Random();
@@ -33,7 +33,7 @@ public class TestModelProg {
             
             //l.equals(l2);
         }
-        Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularProcess.pid()});
+        Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularProcess.pid()+""});
         killPowerjoular.waitFor();
         long end = System.currentTimeMillis();
         long diff = end - start;

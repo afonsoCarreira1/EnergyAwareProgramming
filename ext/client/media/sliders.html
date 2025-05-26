@@ -1,0 +1,101 @@
+<!--
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Java Sliders</title>
+</head>
+<body>
+  <h2>Adjust Parameters</h2>
+  <label for="slider1">Value 1:</label>
+  <input type="range" id="slider1" name="slider1" min="0" max="100"><br><br>
+
+  <label for="slider2">Value 2:</label>
+  <input type="range" id="slider2" name="slider2" min="0" max="100"><br><br>
+
+  <script>
+    const vscode = acquireVsCodeApi();
+
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+      slider.addEventListener('input', () => {
+        vscode.postMessage({
+          type: 'sliderChange',
+          id: slider.id,
+          value: slider.value
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Java Sliders</title>
+</head>
+<body>
+  <h2>Adjust Parameters</h2>
+  <div id="slider-container"></div>
+
+  <script>
+    const vscode = acquireVsCodeApi();
+
+    window.addEventListener('message', event => {
+      const message = event.data;
+
+      if (message.type === 'updateSliders') {
+        const sliders = message.sliders;
+        const container = document.getElementById('slider-container');
+        container.innerHTML = ''; // Clear previous sliders
+
+        for (const config of sliders) {
+          const id = config.id || 'slider';
+          const labelText =  id || config.label;
+
+          // Label
+          const label = document.createElement('label');
+          label.setAttribute('for', id);
+          label.textContent = labelText + ': ';
+
+          // Value display
+          const valueDisplay = document.createElement('span');
+          const initialValue = config.value ?? ((+config.min + +config.max) / 2);
+          valueDisplay.textContent = initialValue;
+
+          // Slider input
+          const input = document.createElement('input');
+          input.type = 'range';
+          input.id = id;
+          input.name = id;
+          input.min = config.min ?? 0;
+          input.max = config.max ?? 100;
+          input.value = initialValue;
+
+          // On input change
+          input.addEventListener('input', () => {
+            valueDisplay.textContent = input.value;
+
+            vscode.postMessage({
+              type: 'sliderChange',
+              id: input.id,
+              value: input.value
+            });
+          });
+
+          // Add to DOM
+          container.appendChild(label);
+          container.appendChild(valueDisplay);
+          container.appendChild(document.createElement('br'));
+          container.appendChild(input);
+          container.appendChild(document.createElement('br'));
+          container.appendChild(document.createElement('br'));
+        }
+      }
+    });
+  </script>
+</body>
+</html>

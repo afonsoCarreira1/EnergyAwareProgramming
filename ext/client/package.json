@@ -1,0 +1,45 @@
+{
+  "name": "java-lsp-slider-extension",
+  "displayName": "Java LSP Slider Extension",
+  "description": "Java LSP Extension that opens a slider window.",
+  "version": "0.0.1",
+  "publisher": "your-name",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "activationEvents": [
+    "onLanguage:java"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "java",
+        "extensions": [
+          ".java"
+        ],
+        "aliases": [
+          "Java"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "javaLspExtension.openSliders",
+        "title": "Open Sliders"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@types/vscode": "^1.100.0",
+    "typescript": "^4.7.0",
+    "vscode": "^1.1.34"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
+}

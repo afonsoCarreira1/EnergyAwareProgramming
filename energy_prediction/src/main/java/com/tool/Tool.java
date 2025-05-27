@@ -37,6 +37,13 @@ public class Tool implements LanguageServer {
         Sliders.updateSliders(id,value);
     }
 
+    @JsonNotification("custom/calculateEnergy")
+    public void onCalculateEnergy(Object ignored) throws URISyntaxException {
+        Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
+        //HashSet<String> collectedModels = Sliders.getModels(serverDir.toString()+"/"+"collected_models/");
+        System.err.println("CalculateEnergy");
+    }
+
     public void connect(LanguageClient client) {
         this.client = (CustomLanguageClient) client;
     }

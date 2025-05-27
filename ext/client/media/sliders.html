@@ -1,15 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Java Sliders</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+    }
+
+    #slider-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    footer {
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      text-align: center;
+    }
+
+    button {
+      font-size: 16px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
   <h2>Adjust Parameters</h2>
   <div id="slider-container"></div>
 
+  <footer>
+    <button id="estimate-btn">Estimate Energy</button>
+  </footer>
+
   <script>
     const vscode = acquireVsCodeApi();
+
+    let currentSliderValues = {};
 
     window.addEventListener('message', event => {
       const message = event.data;
@@ -18,6 +52,8 @@
         const sliders = message.sliders;
         const container = document.getElementById('slider-container');
         container.innerHTML = ''; // Clear previous sliders
+
+        currentSliderValues = {}; // reset
 
         for (const config of sliders) {
           const id = config.id || 'slider';
@@ -42,13 +78,17 @@
           input.max = config.max ?? 100;
           input.value = initialValue;
 
+          // Store initial value
+          currentSliderValues[id] = initialValue;
+
           // Update value display on input
           input.addEventListener('input', () => {
             valueDisplay.textContent = input.value;
           });
 
-          // Only send message on 'change' (when user releases slider)
+          // On change update current values and send message
           input.addEventListener('change', () => {
+            currentSliderValues[id] = input.value;
             vscode.postMessage({
               type: 'sliderChange',
               id: input.id,
@@ -66,6 +106,14 @@
         }
       }
     });
+
+    // Button sends all current slider values as one message
+    document.getElementById('estimate-btn').addEventListener('click', () => {
+      vscode.postMessage({
+        type: 'calculateEnergy'
+      });
+    });
   </script>
 </body>
+
 </html>

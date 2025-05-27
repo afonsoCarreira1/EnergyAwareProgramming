@@ -676,8 +676,9 @@ public class ASTFeatureExtractor {
         return inputValues;
     }
 
-    public HashSet<String> getMethodsForSliders(HashSet<String> modelsAvailable) {
-        HashSet<String> featuresToSlider = new HashSet<>();
+    public ModelInfo getMethodsForSliders(HashSet<String> modelsAvailable) {
+        //HashSet<String> featuresToSlider = new HashSet<>();
+        ModelInfo modelInfo = new ModelInfo();
         for (CtType<?> ctType : model.getAllTypes()) {
             if (ctType.getSimpleName().equals(file)) {
                 for (CtInvocation<?> invocation : ctType.getElements(new TypeFilter<>(CtInvocation.class))) {
@@ -687,46 +688,68 @@ public class ASTFeatureExtractor {
                     for (int i = 0; i < paramTypes.size(); i++) {
                         paramKey.append(paramTypes.get(i).getQualifiedName().replace(".", "_") + "_");
                     }
-                    String finalName = execRef.getSimpleName() + "_" + paramKey;
-                    if (paramKey.isEmpty()) finalName += "_";
-                    //System.err.println(finalName);
-                    if (modelsAvailable.contains(finalName)){
+                    String modelName = execRef.getSimpleName() + "_" + paramKey;
+                    if (paramKey.isEmpty())
+                        modelName += "_";
+                    if (modelsAvailable.contains(modelName)) {
+                        modelInfo.setModelName(modelName);
+                        getFeaturesForTool(modelInfo,invocation);
                         List<CtExpression<?>> arguments = invocation.getArguments();
-                        CtMethod<?> parentMethod = invocation.getParent(CtMethod.class); // ← Get enclosing method
+                        CtMethod<?> parentMethod = invocation.getParent(CtMethod.class);
                         String methodContext = parentMethod != null ? parentMethod.getSimpleName() : "UNKNOWN_METHOD";
                         for (int i = 0; i < arguments.size(); i++) {
                             CtExpression<?> arg = arguments.get(i);
                             if (arg instanceof CtVariableRead)
-                            featuresToSlider.add("Method: "+methodContext+" Variable: " + arg.toString());
+                                {
+                                    String id = "Method: " + methodContext + " Variable: " + arg.toString();
+                                    //featuresToSlider.add(id);
+                                    modelInfo.addId(id);
+                                }
                         }
-                        featuresToSlider.add("Method: "+methodContext+" Variable: " + invocation.getTarget());
+                        String id = "Method: " + methodContext + " Variable: " + invocation.getTarget();
+                        modelInfo.addId(id);
+                        //featuresToSlider.add("Method: " + methodContext + " Variable: " + invocation.getTarget());
                     }
                 }
             }
         }
-        return featuresToSlider;
+        return modelInfo;
+    }
+
+    public void getFeaturesForTool(ModelInfo modelInfo,CtInvocation<?> invocation) {
+
+        CtExecutableReference<?> execRef = invocation.getExecutable();
+
+            // Get type of the target (e.g., the list)
+            CtExpression<?> target = invocation.getTarget();
+            CtTypeReference<?> targetType = target.getType();
+            String colType = targetType.getQualifiedName();
+            System.err.println("Target type: " + targetType.getQualifiedName());
+
+            // Get the full method signature
+            String methodType = execRef.getDeclaringType().getQualifiedName() + execRef.getSignature();
+            System.err.println("Method: "+methodType);
+
+            // Get the argument types
+            StringBuilder sb = new StringBuilder();
+            if (!invocation.getArguments().isEmpty()) {
+                List<CtExpression<?>> methodArgs = invocation.getArguments();
+                for (int i = 0; i < methodArgs.size(); i++) {
+                    
+                    CtExpression<?> arg = invocation.getArguments().get(i);
+                    CtTypeReference<?> argType = arg.getType();
+                    System.err.println("Argument type: " + argType.getQualifiedName());
+                    if (i > 0) {
+                        sb.append(" | ");
+                    }
+                    sb.append(argType.getQualifiedName());
+                }  
+            }
+            modelInfo.setColType(colType);
+            modelInfo.setMethodType(methodType);
+            modelInfo.setArgs(sb.toString());
+            System.err.println("----");
+            //return modelInfo;
     }
 
 }
-/*
- * for (CtType<?> ctType : model.getAllTypes()) {
- * if (ctType.getSimpleName().equals(file)) {
- * // Now we are inside the type corresponding to your file
- * for (CtInvocation<?> invocation : model.getElements(new
- * TypeFilter<>(CtInvocation.class))) {
- * System.out.println(invocation);
- * System.exit(0);
- * var execRef = invocation.getExecutable();
- * var paramTypes = execRef.getReferencedTypes();
- * 
- * System.out.println("Method: " + execRef.getSimpleName());
- * ArrayList<CtTypeReference<?>> typesList = new ArrayList<>(paramTypes);
- * for (int i = 0; i < typesList.size(); i++) {
- * var typeRef = typesList.get(i);
- * System.out.println("Parameter " + i + ": " + typeRef.getQualifiedName());
- * }
- * }
- * 
- * }
- * }
- */

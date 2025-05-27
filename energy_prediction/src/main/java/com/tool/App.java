@@ -1,8 +1,6 @@
 package com.tool;
 
 import org.eclipse.lsp4j.jsonrpc.Launcher;
-import org.eclipse.lsp4j.jsonrpc.Launcher.Builder;
-import org.eclipse.lsp4j.services.LanguageClient;
 
 public class App 
 {

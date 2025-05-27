@@ -3,16 +3,13 @@ package com.tool;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
 import com.parse.ASTFeatureExtractor;
+import com.parse.ModelInfo;
 
 public class Sliders {
 
@@ -26,7 +23,11 @@ public class Sliders {
             path.append(parts[i] + "/");
         }
         ASTFeatureExtractor parser = new ASTFeatureExtractor(path.toString(), file, true);
-        HashSet<String> featuresToSlider = parser.getMethodsForSliders(modelsSaved);
+        //HashSet<String> featuresToSlider = parser.getMethodsForSliders(modelsSaved);
+        ModelInfo modelInfo = parser.getMethodsForSliders(modelsSaved);
+        System.err.println(modelInfo.getIds());
+        HashSet<String> featuresToSlider = modelInfo.getIds();
+        System.err.println(featuresToSlider);
         ArrayList<String> l = new ArrayList<>(featuresToSlider);
         List<HashMap<String, Object>> slidersTemp = new ArrayList<>();
         for (String id : l) {

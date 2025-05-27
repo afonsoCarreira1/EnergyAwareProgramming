@@ -1,36 +1,3 @@
-<!--
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Java Sliders</title>
-</head>
-<body>
-  <h2>Adjust Parameters</h2>
-  <label for="slider1">Value 1:</label>
-  <input type="range" id="slider1" name="slider1" min="0" max="100"><br><br>
-
-  <label for="slider2">Value 2:</label>
-  <input type="range" id="slider2" name="slider2" min="0" max="100"><br><br>
-
-  <script>
-    const vscode = acquireVsCodeApi();
-
-    document.querySelectorAll('input[type="range"]').forEach(slider => {
-      slider.addEventListener('input', () => {
-        vscode.postMessage({
-          type: 'sliderChange',
-          id: slider.id,
-          value: slider.value
-        });
-      });
-    });
-  </script>
-</body>
-</html>
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,7 +21,7 @@
 
         for (const config of sliders) {
           const id = config.id || 'slider';
-          const labelText =  id || config.label;
+          const labelText = id || config.label;
 
           // Label
           const label = document.createElement('label');
@@ -63,7 +30,7 @@
 
           // Value display
           const valueDisplay = document.createElement('span');
-          const initialValue = config.value ?? ((+config.min + +config.max) / 2);
+          const initialValue = config.val;
           valueDisplay.textContent = initialValue;
 
           // Slider input
@@ -75,10 +42,13 @@
           input.max = config.max ?? 100;
           input.value = initialValue;
 
-          // On input change
+          // Update value display on input
           input.addEventListener('input', () => {
             valueDisplay.textContent = input.value;
+          });
 
+          // Only send message on 'change' (when user releases slider)
+          input.addEventListener('change', () => {
             vscode.postMessage({
               type: 'sliderChange',
               id: input.id,
@@ -86,7 +56,7 @@
             });
           });
 
-          // Add to DOM
+          // Add elements to DOM
           container.appendChild(label);
           container.appendChild(valueDisplay);
           container.appendChild(document.createElement('br'));

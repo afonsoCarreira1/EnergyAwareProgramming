@@ -16,6 +16,8 @@ import com.parse.ASTFeatureExtractor;
 
 public class Sliders {
 
+    private static HashMap<String,HashMap<String, Object>> sliders = new HashMap<>();
+
     public static Map<String, Object> getSlidersInfo(String fullPath,HashSet<String> modelsSaved) {
         StringBuilder path = new StringBuilder();
         String[] parts = fullPath.split("/");
@@ -23,25 +25,41 @@ public class Sliders {
         for (int i = 2; i < parts.length - 1; i++) {
             path.append(parts[i] + "/");
         }
-        System.err.println("path -> " + path);
-        System.err.println("file -> " + file);
         ASTFeatureExtractor parser = new ASTFeatureExtractor(path.toString(), file, true);
-        HashMap<String, Map<String, Object>> features = parser.getFeatures();
-        //System.err.println("features -> " + features);
         HashSet<String> featuresToSlider = parser.getMethodsForSliders(modelsSaved);
         ArrayList<String> l = new ArrayList<>(featuresToSlider);
-        List<Map<String, Object>> sliders = new ArrayList<>();
+        List<HashMap<String, Object>> slidersTemp = new ArrayList<>();
         for (String id : l) {
-            System.err.println(id);
-            sliders.add(Map.of("id", id, "label", "Value", "min", 0, "max", 2000));
+            System.err.println("found important inputs -> "+ id);
+            int val = 1000;
+            if (sliders.get(id) != null) val = (int) sliders.get(id).get("val"); //get slider value if it already exists
+            HashMap<String, Object> slider = new HashMap<>();
+            slider.put("id", id);
+            slider.put("label", "Value");
+            slider.put("min", 0);
+            slider.put("max", 2000);
+            slider.put("val", val);
+            slidersTemp.add(slider);
         }
-
+        restartSlidersGlobalVar(slidersTemp);
         Map<String, Object> message = Map.of(
             "command", "updateSliders",
-            "sliders", sliders
+            "sliders", slidersTemp
         );
 
         return message;
+    }
+
+    private static void restartSlidersGlobalVar(List<HashMap<String, Object>> slidersTemp) {
+        sliders.clear();
+        for (HashMap<String, Object> sliderTemp: slidersTemp) {
+            sliders.put((String) sliderTemp.get("id"),sliderTemp);
+        }
+    }
+
+    public static void updateSliders(String id,String value) {
+        HashMap<String,Object> slider = sliders.get(id);
+        slider.put("val", Integer.parseInt(value));
     }
 
     public static HashSet<String> getModels(String path) {

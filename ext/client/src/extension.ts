@@ -66,12 +66,11 @@ export async function activate(context: vscode.ExtensionContext) {
     };
 
     client = new LanguageClient('javaLspServer', 'Java LSP Server', serverOptions, clientOptions);
-
     await client.start();
 
+    // Receive notification from server to update sliders
     client.onNotification('custom/updateSliders', (params) => {
-        console.log('Received custom/updateSliders notification:', params); // 🔍 Log here
-
+        console.log('Received custom/updateSliders notification:', params);
         if (sliderPanel) {
             sliderPanel.webview.postMessage({
                 type: 'updateSliders',
@@ -94,6 +93,19 @@ export async function activate(context: vscode.ExtensionContext) {
         const buffer = await vscode.workspace.fs.readFile(htmlPath);
         sliderPanel.webview.html = buffer.toString();
 
+        // Listen for slider changes from the WebView
+        sliderPanel.webview.onDidReceiveMessage(message => {
+            if (message.type === 'sliderChange') {
+                console.log(`Slider changed: ${message.id} = ${message.value}`);
+
+                // Send slider value to the Java language server
+                client.sendNotification('custom/sliderChanged', {
+                    id: message.id,
+                    value: message.value
+                });
+            }
+        });
+
         sliderPanel.onDidDispose(() => {
             sliderPanel = undefined;
         });
@@ -101,3 +113,4 @@ export async function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(disposable);
 }
+

@@ -1,2 +1,11 @@
+addAll_int_java_util_Collection_
+addAll_java_util_Collection_
+add_int_java_lang_Object_
 add_java_lang_Object_
+containsAll_java_util_Collection_
+equals_java_lang_Object_
+get_int_
+retainAll_java_util_Collection_
+set_int_java_lang_Object_
 size__
+subList_int_int_

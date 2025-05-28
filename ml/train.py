@@ -493,11 +493,16 @@ def plots(files,fname):
         plot3D(X,y)
         #plot_energy_vs_feature(X,y,'input0')
 
+
+def createFilesForExtension():
+    subprocess.run(f"./move_models_to_extension.sh", shell=True, capture_output=True, text=True)
+
 def main():
     #os.makedirs('out/', exist_ok=True)
     files = getAllFeatures()
     #plots(files,"equals_java_lang_Object_")
     #readDividedFeatures(files)
     check_one_method()
+    #createFilesForExtension()
 
 main()

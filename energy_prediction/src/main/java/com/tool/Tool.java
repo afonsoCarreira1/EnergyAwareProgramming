@@ -24,7 +24,7 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 import org.eclipse.lsp4j.jsonrpc.services.JsonNotification;
 
 public class Tool implements LanguageServer {
- 
+
     private final TextDocumentService textDocumentService = new ToolTextDocumentService();
     private CustomLanguageClient client;
 
@@ -34,14 +34,15 @@ public class Tool implements LanguageServer {
         String value = (String) params.get("value");
         System.err.println("Slider changed: " + id + " = " + value);
         System.err.println("Updating slider [" + id + "] to value: " + value);
-        Sliders.updateSliders(id,value);
+        Sliders.updateSliders(id, value);
     }
 
     @JsonNotification("custom/calculateEnergy")
     public void onCalculateEnergy(Object ignored) throws URISyntaxException {
         Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
-        //HashSet<String> collectedModels = Sliders.getModels(serverDir.toString()+"/"+"collected_models/");
-        System.err.println("CalculateEnergy");
+        double totalEnergyUsed = CalculateEnergy.calculateEnergy(serverDir.toString() + "/collected_models/");
+        Map<String,Object> message = Map.of("totalEnergyUsed",totalEnergyUsed);
+        if (client != null) client.updateEnergy(message);
     }
 
     public void connect(LanguageClient client) {
@@ -65,7 +66,6 @@ public class Tool implements LanguageServer {
 
     private class ToolTextDocumentService implements TextDocumentService {
         private Map<String, String> openDocuments = new HashMap<>();
-        
 
         @Override
         public void didOpen(DidOpenTextDocumentParams params) {
@@ -95,13 +95,14 @@ public class Tool implements LanguageServer {
         @Override
         public void didSave(DidSaveTextDocumentParams params) {
             String file = params.getTextDocument().getUri();
-            //System.err.println("uri -> "+ file);
-            //System.err.println("didSave called -> "+ params);
+            // System.err.println("uri -> "+ file);
+            // System.err.println("didSave called -> "+ params);
             try {
-                Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
-                HashSet<String> modelsSaved = Sliders.getModels(serverDir.toString()+"/"+"ModelsAvailable.txt");
-                Map<String, Object> message = Sliders.getSlidersInfo(file.split("///")[1],modelsSaved);
-                if (client!=null) {
+                Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+                        .getParent();
+                HashSet<String> modelsSaved = Sliders.getModels(serverDir.toString() + "/" + "ModelsAvailable.txt");
+                Map<String, Object> message = Sliders.getSlidersInfo(file.split("///")[1], modelsSaved);
+                if (client != null) {
                     client.updateSliders(message);
                 }
 
@@ -131,11 +132,12 @@ public class Tool implements LanguageServer {
     }
 
     @Override
-    public void exit() {System.exit(0);}
+    public void exit() {
+        System.exit(0);
+    }
 
     @Override
     public WorkspaceService getWorkspaceService() {
         return null;
     }
 }
-

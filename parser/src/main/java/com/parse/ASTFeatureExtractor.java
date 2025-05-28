@@ -676,9 +676,9 @@ public class ASTFeatureExtractor {
         return inputValues;
     }
 
-    public ModelInfo getMethodsForSliders(HashSet<String> modelsAvailable) {
+    public List<ModelInfo> getMethodsForSliders(HashSet<String> modelsAvailable) {
         //HashSet<String> featuresToSlider = new HashSet<>();
-        ModelInfo modelInfo = new ModelInfo();
+        ArrayList<ModelInfo> modelInfos = new ArrayList<>();
         for (CtType<?> ctType : model.getAllTypes()) {
             if (ctType.getSimpleName().equals(file)) {
                 for (CtInvocation<?> invocation : ctType.getElements(new TypeFilter<>(CtInvocation.class))) {
@@ -692,7 +692,7 @@ public class ASTFeatureExtractor {
                     if (paramKey.isEmpty())
                         modelName += "_";
                     if (modelsAvailable.contains(modelName)) {
-                        modelInfo.setModelName(modelName);
+                        ModelInfo modelInfo = new ModelInfo(modelName);
                         getFeaturesForTool(modelInfo,invocation);
                         List<CtExpression<?>> arguments = invocation.getArguments();
                         CtMethod<?> parentMethod = invocation.getParent(CtMethod.class);
@@ -704,16 +704,19 @@ public class ASTFeatureExtractor {
                                     String id = "Method: " + methodContext + " Variable: " + arg.toString();
                                     //featuresToSlider.add(id);
                                     modelInfo.addId(id);
+                                    modelInfo.associateInputToVar("input"+(i+1), id);
                                 }
                         }
                         String id = "Method: " + methodContext + " Variable: " + invocation.getTarget();
                         modelInfo.addId(id);
+                        modelInfo.associateInputToVar("input0", id);
+                        modelInfos.add(modelInfo);
                         //featuresToSlider.add("Method: " + methodContext + " Variable: " + invocation.getTarget());
                     }
                 }
             }
         }
-        return modelInfo;
+        return modelInfos;
     }
 
     public void getFeaturesForTool(ModelInfo modelInfo,CtInvocation<?> invocation) {

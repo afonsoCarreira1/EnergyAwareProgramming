@@ -8,4 +8,7 @@ import java.util.Map;
 public interface CustomLanguageClient extends LanguageClient {
     @JsonNotification("custom/updateSliders")
     void updateSliders(Map<String, Object> params);
+
+    @JsonNotification("custom/updateEnergy")
+    void updateEnergy(Map<String, Object> params);
 }

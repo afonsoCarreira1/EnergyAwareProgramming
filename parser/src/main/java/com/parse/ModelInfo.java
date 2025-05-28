@@ -1,17 +1,32 @@
 package com.parse;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class ModelInfo {
 
-    String modelName;
-    String colType;
-    String methodType;
-    String args;
-    HashSet<String> ids;
+    private String modelName;
+    private String colType;
+    private String methodType;
+    private String args;
+    private HashSet<String> ids;
+    private HashMap<String,String> inputToVarName;
+
+    
 
     public ModelInfo() {
         this.ids = new HashSet<>();
+        this.inputToVarName = new HashMap<>();
+    }
+
+    public ModelInfo(String modelName) {
+        this.modelName = modelName;
+        this.ids = new HashSet<>();
+        this.inputToVarName = new HashMap<>();
+    }
+
+    public void setInputToVarName(HashMap<String, String> inputToVarName) {
+        this.inputToVarName = inputToVarName;
     }
 
     public void setModelName(String modelName) {
@@ -38,6 +53,10 @@ public class ModelInfo {
         this.ids.add(id);
     }
 
+    public void associateInputToVar(String input, String varName) {
+        this.inputToVarName.put(input, varName);
+    }
+
     public String getColType() {
         return colType;
     }
@@ -52,6 +71,14 @@ public class ModelInfo {
 
     public HashSet<String> getIds() {
         return ids;
+    }
+
+    public String getModelName() {
+        return this.modelName;
+    }
+
+    public HashMap<String, String> getInputToVarName() {
+        return inputToVarName;
     }
 
 }

@@ -24,6 +24,11 @@
       text-align: center;
     }
 
+    #energy-display {
+      font-size: 18px;
+      color: #007acc;
+    }
+
     button {
       font-size: 16px;
       padding: 8px 16px;
@@ -35,6 +40,10 @@
 <body>
   <h2>Adjust Parameters</h2>
   <div id="slider-container"></div>
+
+  <div id="energy-display" style="text-align: center; padding: 10px; font-weight: bold;">
+    Energy Used: <span id="energy-value">--</span>
+  </div>
 
   <footer>
     <button id="estimate-btn">Estimate Energy</button>
@@ -105,14 +114,33 @@
           container.appendChild(document.createElement('br'));
         }
       }
-    });
 
+      if (message.type === 'updateEnergy') {
+        const energyValue = formatEnergy(message.energy) ?? '--';
+        document.getElementById('energy-value').textContent = energyValue;
+      }
+
+    });
+    
     // Button sends all current slider values as one message
     document.getElementById('estimate-btn').addEventListener('click', () => {
       vscode.postMessage({
         type: 'calculateEnergy'
       });
     });
+
+    function formatEnergy(value) {
+      const num = parseFloat(value);
+      if (isNaN(num)) return "--";
+
+      // If value is less than 0.001, use scientific notation
+      if (Math.abs(num) < 0.001 && num !== 0) {
+        return num.toExponential(2) + " J"; // 2 decimal places in exponent form
+      } else {
+        return num.toFixed(5) + " J"; // 5 decimal places for regular numbers
+      }
+    }
+
   </script>
 </body>
 

@@ -33,6 +33,19 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // Handle server notification to update energy in webview
+    client.onNotification('custom/updateEnergy', (params) => {
+        console.log('Received custom/updateEnergy notification:', params);
+        if (sliderPanel) {
+            sliderPanel.webview.postMessage({
+                type: 'updateEnergy',
+                energy: params.totalEnergyUsed
+            });
+        } else {
+            console.warn('Slider panel is not open, message not sent.');
+        }
+    });
+
     const disposable = vscode.commands.registerCommand('javaLspExtension.openSliders', async () => {
         sliderPanel = vscode.window.createWebviewPanel(
             'javaSliders',

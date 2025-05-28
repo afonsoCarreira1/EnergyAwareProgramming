@@ -13,7 +13,8 @@ import com.parse.ModelInfo;
 
 public class Sliders {
 
-    private static HashMap<String,HashMap<String, Object>> sliders = new HashMap<>();
+    public static HashMap<String,HashMap<String, Object>> sliders = new HashMap<>();
+    
 
     public static Map<String, Object> getSlidersInfo(String fullPath,HashSet<String> modelsSaved) {
         StringBuilder path = new StringBuilder();
@@ -23,12 +24,15 @@ public class Sliders {
             path.append(parts[i] + "/");
         }
         ASTFeatureExtractor parser = new ASTFeatureExtractor(path.toString(), file, true);
-        //HashSet<String> featuresToSlider = parser.getMethodsForSliders(modelsSaved);
-        ModelInfo modelInfo = parser.getMethodsForSliders(modelsSaved);
-        System.err.println(modelInfo.getIds());
-        HashSet<String> featuresToSlider = modelInfo.getIds();
-        System.err.println(featuresToSlider);
-        ArrayList<String> l = new ArrayList<>(featuresToSlider);
+        CalculateEnergy.modelInfos = parser.getMethodsForSliders(modelsSaved);
+
+        //for every var associated with the method, put it in a set, then use it for the sliders, avoids repetitions
+        HashSet<String> filteredSlidersName = new HashSet<>();
+        for (ModelInfo modelInfo : CalculateEnergy.modelInfos) {
+            filteredSlidersName.addAll(modelInfo.getIds());
+        }
+        ArrayList<String> l = new ArrayList<>(filteredSlidersName);
+
         List<HashMap<String, Object>> slidersTemp = new ArrayList<>();
         for (String id : l) {
             System.err.println("found important inputs -> "+ id);
@@ -37,7 +41,7 @@ public class Sliders {
             HashMap<String, Object> slider = new HashMap<>();
             slider.put("id", id);
             slider.put("label", "Value");
-            slider.put("min", 0);
+            slider.put("min", 1);
             slider.put("max", 2000);
             slider.put("val", val);
             slidersTemp.add(slider);

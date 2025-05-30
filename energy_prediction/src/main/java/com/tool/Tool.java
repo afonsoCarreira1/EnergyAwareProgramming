@@ -21,12 +21,16 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.NotebookDocumentService;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
+
+import com.parse.ASTFeatureExtractor;
+
 import org.eclipse.lsp4j.jsonrpc.services.JsonNotification;
 
 public class Tool implements LanguageServer {
 
     private final TextDocumentService textDocumentService = new ToolTextDocumentService();
     private CustomLanguageClient client;
+    static public ASTFeatureExtractor parser = null;
 
     @JsonNotification("custom/sliderChanged")
     public void onSliderChanged(Map<String, Object> params) {

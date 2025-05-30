@@ -4,12 +4,10 @@ import spoon.Launcher;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.*;
-import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtPackageReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.filter.TypeFilter;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -38,6 +36,7 @@ public class ASTFeatureExtractor {
     String path, file;
     Boolean readOnlyFile;
     Set<String> importSet;
+    private ToolParser toolParser;
 
     public ASTFeatureExtractor(String path, String file, Boolean readOnlyFile) {
         this.path = path;
@@ -57,11 +56,12 @@ public class ASTFeatureExtractor {
         // launcher.addInputResource("src");
         // ("example_dir");
         launcher.getEnvironment().setNoClasspath(true);
-        model = launcher.buildModel();
+        this.model = launcher.buildModel();
         // Map<String, Object> featuresExtractedFromMethod = new HashMap<>();
 
         importSet = new HashSet<>();
         readImportFromFile(resolvedPath.toString(), importSet);
+        this.toolParser = new ToolParser(this.model, this.file);
     }
 
     public HashMap<String, Map<String, Object>> getFeatures() {
@@ -676,83 +676,12 @@ public class ASTFeatureExtractor {
         return inputValues;
     }
 
-    public List<ModelInfo> getMethodsForSliders(HashSet<String> modelsAvailable) {
-        //HashSet<String> featuresToSlider = new HashSet<>();
-        ArrayList<ModelInfo> modelInfos = new ArrayList<>();
-        for (CtType<?> ctType : model.getAllTypes()) {
-            if (ctType.getSimpleName().equals(file)) {
-                for (CtInvocation<?> invocation : ctType.getElements(new TypeFilter<>(CtInvocation.class))) {
-                    CtExecutableReference<?> execRef = invocation.getExecutable();
-                    List<CtTypeReference<?>> paramTypes = execRef.getParameters();
-                    StringBuilder paramKey = new StringBuilder();
-                    for (int i = 0; i < paramTypes.size(); i++) {
-                        paramKey.append(paramTypes.get(i).getQualifiedName().replace(".", "_") + "_");
-                    }
-                    String modelName = execRef.getSimpleName() + "_" + paramKey;
-                    if (paramKey.isEmpty())
-                        modelName += "_";
-                    if (modelsAvailable.contains(modelName)) {
-                        ModelInfo modelInfo = new ModelInfo(modelName);
-                        getFeaturesForTool(modelInfo,invocation);
-                        List<CtExpression<?>> arguments = invocation.getArguments();
-                        CtMethod<?> parentMethod = invocation.getParent(CtMethod.class);
-                        String methodContext = parentMethod != null ? parentMethod.getSimpleName() : "UNKNOWN_METHOD";
-                        for (int i = 0; i < arguments.size(); i++) {
-                            CtExpression<?> arg = arguments.get(i);
-                            if (arg instanceof CtVariableRead)
-                                {
-                                    String id = "Method: " + methodContext + " Variable: " + arg.toString();
-                                    //featuresToSlider.add(id);
-                                    modelInfo.addId(id);
-                                    modelInfo.associateInputToVar("input"+(i+1), id);
-                                }
-                        }
-                        String id = "Method: " + methodContext + " Variable: " + invocation.getTarget();
-                        modelInfo.addId(id);
-                        modelInfo.associateInputToVar("input0", id);
-                        modelInfos.add(modelInfo);
-                        //featuresToSlider.add("Method: " + methodContext + " Variable: " + invocation.getTarget());
-                    }
-                }
-            }
-        }
-        return modelInfos;
+    public List<MethodEnergyInfo> getMethodsForSliders(HashSet<String> modelsAvailable) {
+        return toolParser.getMethodsForSliders(modelsAvailable);
     }
 
-    public void getFeaturesForTool(ModelInfo modelInfo,CtInvocation<?> invocation) {
-
-        CtExecutableReference<?> execRef = invocation.getExecutable();
-
-            // Get type of the target (e.g., the list)
-            CtExpression<?> target = invocation.getTarget();
-            CtTypeReference<?> targetType = target.getType();
-            String colType = targetType.getQualifiedName();
-            System.err.println("Target type: " + targetType.getQualifiedName());
-
-            // Get the full method signature
-            String methodType = execRef.getDeclaringType().getQualifiedName() + execRef.getSignature();
-            System.err.println("Method: "+methodType);
-
-            // Get the argument types
-            StringBuilder sb = new StringBuilder();
-            if (!invocation.getArguments().isEmpty()) {
-                List<CtExpression<?>> methodArgs = invocation.getArguments();
-                for (int i = 0; i < methodArgs.size(); i++) {
-                    
-                    CtExpression<?> arg = invocation.getArguments().get(i);
-                    CtTypeReference<?> argType = arg.getType();
-                    System.err.println("Argument type: " + argType.getQualifiedName());
-                    if (i > 0) {
-                        sb.append(" | ");
-                    }
-                    sb.append(argType.getQualifiedName());
-                }  
-            }
-            modelInfo.setColType(colType);
-            modelInfo.setMethodType(methodType);
-            modelInfo.setArgs(sb.toString());
-            System.err.println("----");
-            //return modelInfo;
+    public ToolParser getToolParser() {
+        return this.toolParser;
     }
 
 }

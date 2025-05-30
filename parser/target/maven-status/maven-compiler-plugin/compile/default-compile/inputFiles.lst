@@ -1,11 +1,13 @@
 /home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/TestFile.java
-/home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/App.java
-/home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/ModelInfo.java
+/home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/MethodEnergyInfo.java
 /home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/OperatorExtractor.java
 /home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/TestObject.java
 /home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/ASTFeatureExtractor.java
+/home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/TestObject2.java
+/home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/App.java
+/home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/ModelInfo.java
+/home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/ToolParser.java
 /home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/TestModelProg.java
 /home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/TestParseInputs.java
-/home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/TestObject2.java
 /home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/example_dir/more_depth/MoreDepthFile.java
 /home/afonso/Documents/EnergyAwareProgramming/parser/src/main/java/com/parse/example_dir/ExampleExternalFile.java

@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import com.parse.ASTFeatureExtractor;
+import com.parse.MethodEnergyInfo;
 import com.parse.ModelInfo;
 
 public class Sliders {
@@ -23,18 +24,23 @@ public class Sliders {
         for (int i = 2; i < parts.length - 1; i++) {
             path.append(parts[i] + "/");
         }
-        ASTFeatureExtractor parser = new ASTFeatureExtractor(path.toString(), file, true);
-        CalculateEnergy.modelInfos = parser.getMethodsForSliders(modelsSaved);
-
-        //for every var associated with the method, put it in a set, then use it for the sliders, avoids repetitions
-        HashSet<String> filteredSlidersName = new HashSet<>();
-        for (ModelInfo modelInfo : CalculateEnergy.modelInfos) {
-            filteredSlidersName.addAll(modelInfo.getIds());
-        }
-        ArrayList<String> l = new ArrayList<>(filteredSlidersName);
+        Tool.parser = new ASTFeatureExtractor(path.toString(), file, true);
+        CalculateEnergy.methodsEnergyInfo = Tool.parser.getMethodsForSliders(modelsSaved);
+        ArrayList<String> slidersListNotRepeated = getSlidersNoRepetitions();
 
         List<HashMap<String, Object>> slidersTemp = new ArrayList<>();
-        for (String id : l) {
+        populateSildersTemp(slidersListNotRepeated, slidersTemp);
+        restartSlidersGlobalVar(slidersTemp);
+        Map<String, Object> message = Map.of(
+            "command", "updateSliders",
+            "sliders", slidersTemp
+        );
+
+        return message;
+    }
+
+    private static void populateSildersTemp(ArrayList<String> slidersListNotRepeated,List<HashMap<String, Object>> slidersTemp) {
+        for (String id : slidersListNotRepeated) {
             System.err.println("found important inputs -> "+ id);
             int val = 1000;
             if (sliders.get(id) != null) val = (int) sliders.get(id).get("val"); //get slider value if it already exists
@@ -46,13 +52,23 @@ public class Sliders {
             slider.put("val", val);
             slidersTemp.add(slider);
         }
-        restartSlidersGlobalVar(slidersTemp);
-        Map<String, Object> message = Map.of(
-            "command", "updateSliders",
-            "sliders", slidersTemp
-        );
+    }
 
-        return message;
+    //for every var associated with the method, put it in a set, then use it for the sliders, avoids repetitions
+    private static ArrayList<String> getSlidersNoRepetitions() {
+        HashSet<String> filteredSlidersName = new HashSet<>();
+        for (ModelInfo modelInfo : getAllVarsForSliders()) {
+            filteredSlidersName.addAll(modelInfo.getIds());
+        }
+        return new ArrayList<>(filteredSlidersName);
+    }
+
+    private static ArrayList<ModelInfo> getAllVarsForSliders() {
+        ArrayList<ModelInfo> modelInfos = new ArrayList<>();
+        for (MethodEnergyInfo methodEnergyInfo : CalculateEnergy.methodsEnergyInfo) {
+            modelInfos.addAll(methodEnergyInfo.getModelInfos());
+        }
+        return modelInfos;
     }
 
     private static void restartSlidersGlobalVar(List<HashMap<String, Object>> slidersTemp) {

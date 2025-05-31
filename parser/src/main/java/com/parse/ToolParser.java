@@ -131,41 +131,33 @@ public class ToolParser {
     }
 
 
-    public void methodsUsageCounter(HashMap<String,HashMap<String,Object>> existingMethods) {
+    public HashMap<String,Integer> methodsUsageCounter() {
         HashMap<String,CtMethod<?>> methodsMap = getAllMethodNames();
         ArrayList<String> methods = new ArrayList<>(methodsMap.keySet()); 
-        HashSet<String> visited = new HashSet<>();
         HashMap<String,Integer> counter = new HashMap<>();
         for (String exploringMethodName : methods) {
-            methodRecursiveCounter(existingMethods,visited, methodsMap.get(exploringMethodName),exploringMethodName,methodsMap,counter);
+            HashSet<String> visited = new HashSet<>();
+            methodRecursiveCounter(visited, methodsMap.get(exploringMethodName),exploringMethodName,methodsMap,counter);
         }
-        System.out.println("final counter -> "+counter);
+        //System.out.println("final counter -> "+counter);
+        return counter;
     }
 
     private void methodRecursiveCounter(
-        HashMap<String,HashMap<String,Object>> existingMethods,
         HashSet<String> visited, 
         CtMethod<?> method,
         String exploringMethod,
         HashMap<String,CtMethod<?>> methodsMap,
-        HashMap<String,Integer> counter) 
+        HashMap<String,Integer> counter)
         {
-            System.out.println("ja tenhos estes -> "+counter);
-            counter.merge(exploringMethod, 1, Integer::sum);
-            System.out.println("aumentei para "+exploringMethod);
+        counter.merge(exploringMethod, 1, Integer::sum);
         if (visited.contains(exploringMethod)) return;
         visited.add(exploringMethod);
-        
         List<CtInvocation<?>> invocations = method.getElements(new TypeFilter<>(CtInvocation.class));
         for (CtInvocation<?> invocation : invocations) {
             String newExploreMethod = buildInvocationString(invocation);
-            System.err.println("invocation -> "+newExploreMethod + " para existingMethods.containsKey(newExploreMethod) -> "+existingMethods.containsKey(newExploreMethod));
-
-            //if (existingMethods.containsKey(newExploreMethod)){
-            //    methodRecursiveCounter(existingMethods, visited, methodsMap.get(newExploreMethod), newExploreMethod,methodsMap,counter);  
-            //} else continue;
-            if (!existingMethods.containsKey(newExploreMethod)) continue; // only stop if i find a method call for a method i have
-            methodRecursiveCounter(existingMethods, visited, methodsMap.get(newExploreMethod), newExploreMethod,methodsMap,counter);
+            if (invocation.getExecutable().getDeclaration() == null) continue; //it means the methodCall is not from my code
+            methodRecursiveCounter(visited, methodsMap.get(newExploreMethod), newExploreMethod,methodsMap,counter);
         }
     }
 

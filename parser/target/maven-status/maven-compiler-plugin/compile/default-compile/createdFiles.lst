@@ -1,6 +1,7 @@
 com/parse/MethodEnergyInfo.class
 com/parse/ASTFeatureExtractor$1.class
 com/parse/TestParseInputs.class
+com/parse/Test.class
 com/parse/App.class
 com/parse/ToolParser.class
 com/parse/ASTFeatureExtractor.class

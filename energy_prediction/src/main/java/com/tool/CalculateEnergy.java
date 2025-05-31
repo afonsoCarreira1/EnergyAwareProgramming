@@ -39,16 +39,19 @@ public class CalculateEnergy {
         }
 
         System.err.println("total energy used was -> " + totalEnergyUsed + "J");
-        return totalEnergyUsed;
+        return /*totalEnergyUsed +*/ countMethodsUsedEnergy();
     }
 
-    private static void countMethodsUsedEnergy() {
-      if (Tool.parser == null) return;
-      HashMap<String,Integer> methodsCounter = new HashMap<>();
-      for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
-        methodsCounter.put(methodEnergyInfo.getMethodName(), 1);
-      }
-      Tool.parser.getToolParser().methodsUsageCounter(methodsCounter);
+    private static double countMethodsUsedEnergy() {
+        double moreEnergyToSum = 0.0;
+        if (Tool.parser == null) return moreEnergyToSum;
+        HashMap<String,Integer> methodCounter = Tool.parser.getToolParser().methodsUsageCounter();
+        System.err.println("methodCounter -> "+methodCounter);
+        for(MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
+            System.err.println("method -> "+methodEnergyInfo.getMethodName() + " | energy -> "+methodEnergyInfo.getTotalEnergy());
+            moreEnergyToSum += methodCounter.get(methodEnergyInfo.getMethodName()) * methodEnergyInfo.getTotalEnergy();
+        }
+        return moreEnergyToSum;
     }
 
     // loop all inputs, get their var names, go to the sliders, get their current

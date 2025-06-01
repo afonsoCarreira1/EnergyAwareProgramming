@@ -1,5 +1,6 @@
 package com.parse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -11,18 +12,21 @@ public class ModelInfo {
     private String args;
     private HashSet<String> ids;
     private HashMap<String,String> inputToVarName;
+    private ArrayList<String> loopIds;
 
     
 
     public ModelInfo() {
         this.ids = new HashSet<>();
         this.inputToVarName = new HashMap<>();
+        this.loopIds = new ArrayList<>();
     }
 
     public ModelInfo(String modelName) {
         this.modelName = modelName;
         this.ids = new HashSet<>();
         this.inputToVarName = new HashMap<>();
+        this.loopIds = new ArrayList<>();
     }
 
     public void setInputToVarName(HashMap<String, String> inputToVarName) {
@@ -79,6 +83,14 @@ public class ModelInfo {
 
     public HashMap<String, String> getInputToVarName() {
         return inputToVarName;
+    }
+
+    public ArrayList<String> getLoopIds() {
+        return this.loopIds;
+    }
+
+    public void addLoopId(String id) {
+        this.loopIds.add(id);
     }
 
 }

@@ -76,7 +76,6 @@ public class Tool implements LanguageServer {
             String uri = params.getTextDocument().getUri();
             String text = params.getTextDocument().getText();
             openDocuments.put(uri, text);
-            parseAndAnalyze(text);
             System.err.println("didOpen called");
         }
 
@@ -85,7 +84,6 @@ public class Tool implements LanguageServer {
             String uri = params.getTextDocument().getUri();
             String newText = params.getContentChanges().get(0).getText();
             openDocuments.put(uri, newText);
-            parseAndAnalyze(newText);
             System.err.println("didChange called");
         }
 
@@ -115,10 +113,6 @@ public class Tool implements LanguageServer {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void parseAndAnalyze(String javaSource) {
-        // Your parsing and logic here
     }
 
     @Override

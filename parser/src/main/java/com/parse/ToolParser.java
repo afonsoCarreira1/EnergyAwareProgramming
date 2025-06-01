@@ -4,12 +4,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import spoon.reflect.CtModel;
+import spoon.reflect.code.CtDo;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldRead;
+import spoon.reflect.code.CtFor;
+import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtInvocation;
+import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtLoop;
+import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableRead;
+import spoon.reflect.code.CtWhile;
+import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.reference.CtExecutableReference;
@@ -25,6 +35,7 @@ public class ToolParser {
         this.model = model;
         this.file = file;
     }
+
 
     public List<MethodEnergyInfo> getMethodsForSliders(HashSet<String> modelsAvailable) {
         List<MethodEnergyInfo> methodsEnergyInfo = new ArrayList<>();
@@ -51,8 +62,9 @@ public class ToolParser {
                     String modelName = execRef.getSimpleName() + "_" + (paramKey.length() == 0 ? "_" : paramKey.toString());
 
                     if (!modelsAvailable.contains(modelName)) continue; // ignore methods that are not trained
-
+                    
                     ModelInfo modelInfo = new ModelInfo(modelName);
+                    System.err.println("Loops around " + modelName + " -> "+countEnclosingLoops(invocation,modelInfo,methodName));
                     getFeaturesForTool(modelInfo, invocation);
 
                     int inputNum = addInput0AsTargetIfExists(invocation, modelInfo, methodName);
@@ -68,6 +80,115 @@ public class ToolParser {
 
         return methodsEnergyInfo;
     }
+
+    //Faster but will not find loops when calling methods
+    private int countEnclosingLoops(CtInvocation<?> invocation, ModelInfo modelInfo, String methodName) {
+        int loopCount = 0;
+        CtStatement parent = invocation.getParent(CtStatement.class);
+        while (parent != null) {
+            if (parent instanceof CtLoop) {
+                String id = "Method: "+methodName + " loopDepth " + loopCount;
+                modelInfo.addId(id);
+                modelInfo.addLoopId(id);
+                loopCount++;
+                
+                //List<String> loopVars = getLoopConditionVars((CtLoop) parent);
+                //System.err.println("Loop #" + loopCount + " condition vars: " + loopVars);
+            }
+            parent = parent.getParent(CtStatement.class);
+        }
+        return loopCount;
+    }
+
+
+    private List<String> getLoopConditionVars(CtLoop loop) {
+        List<String> conditionVars = new ArrayList<>();
+
+        if (loop instanceof CtForEach) {
+            CtForEach forEach = (CtForEach) loop;
+            conditionVars.add(forEach.getExpression().toString());
+            return conditionVars;
+        }
+
+        CtExpression<Boolean> condition = null;
+        if (loop instanceof CtWhile) {
+            condition = ((CtWhile) loop).getLoopingExpression();
+        } else if (loop instanceof CtFor) {
+            condition = ((CtFor) loop).getExpression();
+        } else if (loop instanceof CtDo) {
+            condition = ((CtDo) loop).getLoopingExpression();
+        }
+
+        if (condition != null) {
+            // Skip while(true) or while(false)
+            if (!(condition instanceof CtLiteral)) {
+                Set<CtVariableRead<?>> varReads = new HashSet<>(condition.getElements(new TypeFilter<>(CtVariableRead.class)));
+                for (CtVariableRead<?> var : varReads) {
+                    conditionVars.add(var.toString());
+                }
+
+                Set<CtFieldRead<?>> fieldReads = new HashSet<>(condition.getElements(new TypeFilter<>(CtFieldRead.class)));
+                for (CtFieldRead<?> field : fieldReads) {
+                    conditionVars.add(field.toString());
+                }
+
+                Set<CtLiteral<?>> literals = new HashSet<>(condition.getElements(new TypeFilter<>(CtLiteral.class)));
+                for (CtLiteral<?> literal : literals) {
+                    conditionVars.add(String.valueOf(literal.getValue()));
+                }
+            }
+        }
+
+        return conditionVars;
+    }
+
+
+
+    /*might be slower but finds all loops
+     n sei quando um metodo é chamado, por exemplo:
+     metedo 1 apenas tem loop depth 1
+     metedo 2 tem loop depth 2 e chama metedo 1 o que da um total de loop depth 2, mas
+     eu nao sei quando vai ser chamado apenas o metodo 1 ou apenas o metodo 2, logo mais
+     vale ter apenas a depth que cada metodo tem
+     */
+    /*private int countEnclosingLoops(CtInvocation<?> invocation, Set<CtExecutable<?>> visited) {
+        int loopCount = 0;
+        CtStatement parent = invocation.getParent(CtStatement.class);
+
+        // Count lexical loops
+        while (parent != null) {
+            if (parent instanceof CtLoop) {
+                loopCount++;
+            }
+            parent = parent.getParent(CtStatement.class);
+        }
+
+        // Go to enclosing method
+        CtExecutable<?> enclosingMethod = invocation.getParent(CtExecutable.class);
+        if (enclosingMethod == null || visited.contains(enclosingMethod)) {
+            return loopCount;
+        }
+
+        visited.add(enclosingMethod);
+
+        // Find all places where this method is called
+        Set<CtInvocation<?>> callers = new HashSet<>(invocation.getFactory()
+            .getModel()
+            .getElements(new TypeFilter<>(CtInvocation.class)));
+
+        int maxCallerLoops = 0;
+        for (CtInvocation<?> caller : callers) {
+            if (caller.getExecutable().getDeclaration() == enclosingMethod) {
+                // Recursively check caller's loop context
+                int callerLoops = countEnclosingLoops(caller, new HashSet<>(visited));
+                if (callerLoops > maxCallerLoops) {
+                    maxCallerLoops = callerLoops;
+                }
+            }
+        }
+
+        return loopCount + maxCallerLoops;
+    }*/
 
     private void handleMethodArgs(CtInvocation<?> invocation, ModelInfo modelInfo, String methodContext, int inputNum) {
         List<CtExpression<?>> arguments = invocation.getArguments();

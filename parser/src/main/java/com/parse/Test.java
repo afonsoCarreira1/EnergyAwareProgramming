@@ -13,13 +13,8 @@ class Test {
     
 
     public void c() {
-        b();
-        b();
         ArrayList<String> l = new ArrayList<>();
         l.add("1");
-        l.size();
-        l.get(0);
-
     }
 
     

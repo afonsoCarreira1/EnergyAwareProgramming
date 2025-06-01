@@ -29,7 +29,7 @@ public class CalculateEnergy {
                 expression = replaceExpressionInputsWithValues(modelInfo, expression);
                 expression = replaceExpressionWithFeatures(modelInfo, expression);
                 Expression expressionEvaluated = new ExpressionBuilder(expression).build();
-                totalMethodEnergy += expressionEvaluated.evaluate();
+                totalMethodEnergy += accountForLoops(modelInfo.getLoopIds(),expressionEvaluated.evaluate());//expressionEvaluated.evaluate();
                 System.err.println("New expression -> " + expression);
                 System.err.println("Energy for this was -> " + expressionEvaluated.evaluate());
                 System.err.println("------------");
@@ -52,6 +52,13 @@ public class CalculateEnergy {
             moreEnergyToSum += methodCounter.get(methodEnergyInfo.getMethodName()) * methodEnergyInfo.getTotalEnergy();
         }
         return moreEnergyToSum;
+    }
+
+    private static double accountForLoops(ArrayList<String> loopIds, double energy) {
+        for (String loopId : loopIds) {
+            energy *= (Integer) Sliders.sliders.get(loopId).get("val");
+        }
+        return energy;
     }
 
     // loop all inputs, get their var names, go to the sliders, get their current

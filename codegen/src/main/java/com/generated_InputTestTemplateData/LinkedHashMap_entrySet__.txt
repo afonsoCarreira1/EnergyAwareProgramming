@@ -1,0 +1,15 @@
+in0 | arrSize: 75000 | type: Integer -> maxInput: 53
+in0 | arrSize: 100000 | type: Integer -> maxInput: 39
+in0 | arrSize: 150000 | type: Integer -> maxInput: 20
+in0 | arrSize: 75000 | type: Double -> maxInput: 26
+in0 | arrSize: 100000 | type: Double -> maxInput: 17
+in0 | arrSize: 150000 | type: Double -> maxInput: 10
+in0 | arrSize: 75000 | type: Long -> maxInput: 49
+in0 | arrSize: 100000 | type: Long -> maxInput: 31
+in0 | arrSize: 150000 | type: Long -> maxInput: 19
+in0 | arrSize: 75000 | type: Float -> maxInput: 25
+in0 | arrSize: 100000 | type: Float -> maxInput: 18
+in0 | arrSize: 150000 | type: Float -> maxInput: 12
+in0 | arrSize: 75000 | type: Short -> maxInput: 46
+in0 | arrSize: 100000 | type: Short -> maxInput: 44
+in0 | arrSize: 150000 | type: Short -> maxInput: 25

@@ -1,22 +1,29 @@
 #!/bin/bash
 #SBATCH --job-name=codegen
 #SBATCH --output=log_codegen_%A_%a.log
-#SBATCH --array=0-9
+#SBATCH --array=0-16
 #SBATCH --ntasks=1
 #SBATCH --mem=1G
 
 #test args
 ARGS=(
-    "lists addAll",
-    "lists containsAll",
-    "lists add",
-    "lists get",
-    "lists equals",
-    "lists replaceAll",
-    "lists retainAll",
-    "lists set",
-    "lists subList",
-    "lists size"
+    "sets add",
+    "sets remove",
+    "sets contains",
+    "sets isEmpty",
+    "sets size",
+    "sets clear",
+    "sets iterator",
+    "maps put",
+    "maps get",
+    "maps removes",
+    "maps containsKey",
+    "maps containsValue",
+    "maps isEmpty",
+    "maps size",
+    "maps clear",
+    "maps values",
+    "maps entrySet"
 ) 
 
 ARG_PAIR="${ARGS[$SLURM_ARRAY_TASK_ID]}"

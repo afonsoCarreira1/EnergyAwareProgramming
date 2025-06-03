@@ -1,3 +1,4 @@
+\usepackage{xcolor}
 \chapter{Background}\label{chapter:background}
 
 To fully understand the processes involved in this work, it is important to first understand what energy profiling is, as it will be frequently referenced and used later.
@@ -49,7 +50,9 @@ Using a machine learning (ML) model to estimate energy consumption can offer adv
 
 To predict energy, an ML model will be used. It's important to understand how different ML algorithms work and which ones are best suited for the proposed project. There are several ML algorithms, and they fall into four main categories\cite{sarker2021machine}: supervised learning, unsupervised learning, semi-supervised learning and reinforcement learning.
 
-The supervised ML requires labeled data for the model to train on. During training, the model has access to the input and output parameters, and it will try to match inputs to the correct outputs. It has 2 categories: classification, where it predicts discrete labels, such as whether a picture is a cat or a dog; and regression, where it predicts continuous values, for example, predicting the price of a house based on location, size, and so on or predicting energy consumption. These models can be very accurate, but they can also make incorrect predictions for patterns they were not trained on. These techniques also are accompanied by some metrics to evaluate how well the models perform.
+The supervised ML requires labeled data for the model to train on. During training, the model has access to the input and output parameters, and it will try to match inputs to the correct outputs. It has 2 categories: classification, where it predicts discrete labels, such as whether a picture is a cat or a dog; and regression, where it predicts continuous values, for example, predicting the price of a house based on location, size, and so on or predicting energy consumption. These models can be very accurate, but they can also make incorrect predictions for patterns they were not trained on.{\color{blue} These techniques also are accompanied by some metrics to evaluate how well the models perform.
+
+
 
 For classification models:
 \begin{itemize}
@@ -67,6 +70,8 @@ For regression models:
     \item \textbf{RMSE (Root Mean Squared Error):} The square root of MSE, offering a more interpretable error magnitude.
     \item \textbf{MAE (Mean Absolute Error):} Calculates the average absolute difference between predictions and actual values, making it less sensitive to extreme outliers.
 \end{itemize}
+}
+
 In unsupervised ML, the model attempts to find patterns and relationships in the unlabeled data set. With this technique, it is possible to find similarities or clusters in the data, for example, to detect an anomaly in the data. This technique does not require the effort of acquiring labeled data, but also it will be harder to understand if the output is correct or not.
 
 Semi-supervised learning, as the name implies, uses a combination of supervised and unsupervised learning techniques. This hybrid approach is very useful in real-world scenarios where parts of the data can be labeled and others can't, allowing for better predictions in the output.
@@ -88,7 +93,7 @@ Gaussian Processes are particularly interesting, because they take into account 
 Support Vector Machines (SVMs) are a powerful tool in machine learning, capable of performing both classification and regression tasks. This algorithm identifies the optimal hyperplane in an N-dimensional space where it can separate all the features. When it is difficult to separate the features, a technique called kernel trick can be used to create an additional dimension to help separate them. This makes them good for high dimensional spaces, the ability to handle nonlinear relationships and the ability to ignore outliers. However, it can be harder to train this model, and tune the parameters.
 
 Another alternative is to use genetic programming, which is not exactly a conventional ML algorithm, but rather a technique that can be applied to solve ML problems. It is a form of artificial intelligence inspired by the process of natural selection and evolution, where potential solutions to a problem are represented as programs or symbolic expressions. These programs improve iteratively, over generations, through mutations and crossovers, that sometimes can be random, guided by a fitness function. Genetic programming is useful for tasks like symbolic regression and feature classification. However, it can be computationally expensive and can produce inconsistent results due to its uncertain nature.
-
+{\color{blue}
 A good example of genetic programming in machine learning is Python Symbolic Regression (PySR). PySR builds on this technique to discover mathematical expressions that model data in a way that is both accurate and interpretable. Unlike black-box models, PySR generates human-readable formulas, making the results more interpretable and transparent.
 PySR works by searching the space of mathematical expressions to find those that best fit the data:
 
@@ -101,6 +106,6 @@ PySR works by searching the space of mathematical expressions to find those that
 At the end of the process, PySR provides a list of candidate expressions, typically sorted along a Pareto front balancing complexity and accuracy. While more complex expressions often provide better predictions, users can select simpler ones if interpretability is a priority.
 
 This technique is particularly well-suited for energy prediction, as it can reveal easy-to-understand formulas that explain how certain parts of a program contribute to energy consumption. This can help developers understand and optimize the energy efficiency of their code more effectively than with traditional black-box models.
+}
 
-
-These algorithms will be taken into account when developing the model that can best predict energy.
+These algorithms were taken into account when developing the model that can best predict energy.

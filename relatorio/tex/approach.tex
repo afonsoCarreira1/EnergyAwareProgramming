@@ -1,14 +1,28 @@
+\usepackage{xcolor}
+
+\usepackage[most]{tcolorbox}
+
+\tcbuselibrary{listings, breakable}
+
 \chapter{Approach}\label{chapter:approach}
 
-As described in the previous sections, the aim of this work is to make developers aware of the energy consumption of their programs. By using a simple and practical tool, they can quickly and accurately estimate their program's energy consumption. This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development. It's important to note that this tool serves as a guide, providing energy consumption estimates to raise awareness rather than dictate action. Ultimately, it is up to developers to decide whether to prioritize performance, energy efficiency or any other factor. For example, if a program only needs to run within a certain timeframe and can afford a slight reduction in performance, developers may choose to trade some performance for improved energy efficiency, making more informed decisions thanks to the insights provided by the tool.
+As described in the previous sections, the aim of this work is to make developers aware of the energy consumption of their programs. By using a simple and practical tool, they can quickly and accurately estimate their program's energy consumption. This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development. It is important to note that this tool serves as a guide, providing energy consumption estimates to raise awareness rather than dictate action. Ultimately, it is up to developers to decide whether to prioritize performance, energy efficiency or any other factor. For example, if a program only needs to run within a certain timeframe and can afford a slight reduction in performance, developers may choose to trade some performance for improved energy efficiency, making more informed decisions thanks to the insights provided by the tool.
 
 To provide this insight to developers it is necessary to build a tool that can provide all of that. The tool needs to be practical, which means that integrating it in an IDE is recommended. With this the developer only needs to download an extension for an IDE and will access to the insights provided by the tool.
-The tool will be an extension using Language Server Protocol (LSP), so it can be integrated in all the IDEs that support this feature (VScode, Eclipse, Neovim, IntelliJ IDEA). This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an AST, from there it's capable of analyzing the code and using an inference function it will output the estimated cost.
 
-Many devices rely on Java and the JVM, so it is important that the code they run is energy efficient. Several factors can affect the power consumption of Java applications, including the behavior of the garbage collector and the efficiency of the memory management system \cite{10.5555/1267847.1267870} making it difficult to predict the power consumption of Java programs. This unpredictability highlights the need for a specialized tool to accurately measure and analyze power consumption so that developers can optimize their applications for energy efficiency.
+\textcolor{blue}{
+The tool will be a VSCode extension built using the Language Server Protocol (LSP). While VSCode may not be the most commonly used IDE for Java projects compared to Eclipse or IntelliJ IDEA, it provides a much simpler and more accessible environment for developing and testing extensions. This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an AST, from there it is capable of analyzing the code and using an inference function it will output the estimated cost.
+Although the tool is initially built for VSCode, its use of the LSP standard means it can be extended to other IDEs like Eclipse or IntelliJ IDEA. Since LSP handles the communication between the language server and the development environment, porting the tool to new IDEs would primarily involve adapting the user interface and integration specifics, rather than reworking the core logic.}
+
+
+Many devices rely on Java and the JVM, so it is important that the code they run is energy efficient. Several factors can affect the power consumption of Java applications, including the behavior of the garbage collector and the efficiency of the memory management system ~\cite{10.5555/1267847.1267870} making it difficult to predict the power consumption of Java programs. This unpredictability highlights the need for a specialized tool to accurately measure and analyze power consumption so that developers can optimize their applications for energy efficiency.
 Java is an excellent choice for developing this tool because of its high interoperability with various operating systems and its widespread usage across the globe, making it a reliable and option. It has a wide range of useful libraries (JRAPL, JoularJx, Jalen) that help to measure energy accurately, and Java's typing and object-oriented features make the code easier to maintain and extend, so the tool can evolve with new energy metering standards and technologies. 
 
-There are several Java parsing tools available, such as WALA\cite{wala_main}, SootUp\cite{sootup_main}, and Spoon\cite{spoon_main}. WALA and SootUp are primarily designed for analyzing Java Bytecode and are generally more complex to use. For this project, Spoon was chosen because it is a user-friendly tool that facilitates easy retrieval and manipulation of the AST from Java source code.
+There are several Java parsing tools available, such as WALA~\cite{wala_main}, SootUp~\cite{sootup_main}, Spoon~\cite{spoon_main} and JavaParser~\cite{javaParser}. WALA and SootUp are primarily designed for analyzing Java Bytecode and are generally more complex to use. For this project, Spoon was chosen because it is a user-friendly tool that facilitates easy retrieval and manipulation of the AST from Java source code. \textcolor{blue}{Both JavaParser and Spoon support AST manipulation and code generation. However, Spoon provides a deeper, type-aware metamodel and built-in templating features. These features make Spoon more suitable for generating code that conforms to Java’s syntactic and semantic rules, especially in complex transformation scenarios.} 
+
+In order to build the extension, it was necessary to build a system architecture capable of providing as final output the functioning tool. The architecture follows different stages, that were deeply analyzed before moving to the next one.
+The architecture is divided in 4 main modules, the Program Generator, Orchestrator, Parser and Tool.
+
 
 \section{Step 1: Program Generation} \label{sec:work_step1_program_generation}
 
@@ -17,10 +31,65 @@ The program generator works alongside with Java Spoon to make it the more genera
 The generator works for custom Java classes or for some collections (Lists, Sets, Maps), and it can be called to analyze all the public methods of the class or just specific ones.
 It starts by reading a custom Java file (or just access the Lists, Sets, Maps classes), and using Spoon it finds every public method available in the provided class. If it is needed to analyze a specific method, the generator will search in the class for every method with the name requested. Now it has access to all the public methods in the class and what parameters they receive. Since it has access to the whole custom class, it can see how its constructors are called, and use them if any of the methods parameters requires. It recursively calls constructors if needed, making it very versatile to use. After identifying the methods that will be targeted, it starts by creating templates for each of them. It creates the template to have the necessary variables needed to run the specific method, and the template is also carefully structured to function with the orchestrator that will extract the energy profile for each program, that will be explained in the next step. With the template created it is possible to create multiple programs from it. The template has some placeholders, for example to change the type or to change the size of some variable, and they will be replaced with values. By replacing the values of the template and its types, it is possible to generate multiple programs from a template that calls a specific method.
 
-The types used by the generator are the Java wrapper classes, which are object representations of the primitive types. Using these types it is possible to achieve a more general generator, as every program can use them and if other costum types were used it would make the generator more complex and not general.
+The types used by the generator are the Java wrapper classes, which are object representations of the primitive types. Using these types it is possible to achieve a more general generator, as every program can use them and if other custom types were used it would make the generator more complex and not general.
 
-A very important aspect of the program generator is the inputs it generates. Every method works differently, and receives different parameters, and even when changing the values of these parameters, the method can behave completely different. So, this generator has an intermediate step, between the creation of the template and creating multiple programs, that finds the maximum size the input parameters should receive. Knowing the maximum size the different parameters can have is very important as it needs to be big enough, so the energy profiles can be abundant, but not to big so that the programs start to get out of memory or taking too much time to complete.
-The way it works is by using binary search. It has a maximum valid input defined, and it   
+A very important aspect of the program generator is the inputs it generates. Every method works differently, receives different parameters, and even when changing the values of these parameters, the method can behave completely different. So, this generator has an intermediate step, between the creation of the template and creating multiple programs, it finds the maximum size the input parameters should receive. Knowing the maximum size the different parameters can have is very important as it needs to be big enough, so the energy profiles can be abundant, but not to big so that the programs start to get out of memory or taking too much time to complete.
+The input search works by using binary search. It has limits on the inputs (1-100,000) and it starts by trying to run the program with the half of the max input which is 50,000. Then it runs the program for maximum of 10 seconds (timeout also defined by us) and waits for the exit code of the program, if it is an error code it will lower the input by half again, of it is a normal finish code, it will increase the input by half. This operation is done until the maximum value for the input is found. If the method that is being tested has more than one input, the input tester, first sets all the input values to 1 and then starts the binary search individually for each of the parameters one by one while leaving the other parameters with the value of 1. This avoids having to find multiple combinations of parameters which would increase the time complexity exponentially. Since the process of finding the max inputs is time-consuming, when the maximum value is found, the values of the input type, maximum value and order (if it was the param 1 or param 2 or param 3) are stored in a file, so if the actual programs later generated are not stored, using this files they can be quickly generated.
+
+\begin{tcolorbox}[title=Example: Input Testing Process for \texttt{List.add()}, colback=gray!5!white, colframe=gray!75!black, fonttitle=\bfseries, breakable]
+
+Consider analyzing the \texttt{add} method of a list with the following parameters:
+\begin{itemize}
+    \item \texttt{arg0}: Size of the list (integer)
+    \item \texttt{arg1}: Index at which to insert the new value (integer)
+    \item \texttt{arg2}: Value to be added (integer)
+\end{itemize}
+
+\textbf{Step 1 – Varying \texttt{arg0} (list size):}
+
+\begin{itemize}
+    \item Iteration 1: \texttt{arg0 = 25,000}, \texttt{arg1 = 1}, \texttt{arg2 = 1}
+    \item Iteration 2: \texttt{arg0 = 12,500}, \texttt{arg1 = 1}, \texttt{arg2 = 1}
+    \item Iteration 3: \texttt{arg0 = 6,250}, \texttt{arg1 = 1}, \texttt{arg2 = 1}
+    \item $\vdots$
+    \item Final Iteration: \texttt{arg0 = 1,700}, \texttt{arg1 = 1}, \texttt{arg2 = 1}
+\end{itemize}
+
+
+\textbf{Step 2 – Varying \texttt{arg1} (index):}
+
+\begin{itemize}
+    \item Iteration 1: \texttt{arg0 = 1}, \texttt{arg1 = 25,000}, \texttt{arg2 = 1}
+    \item Iteration 2: \texttt{arg0 = 1}, \texttt{arg1 = 12,500}, \texttt{arg2 = 1}
+    \item $\vdots$
+    \item Final Iteration: \texttt{arg0 = 1}, \texttt{arg1 = 0}, \texttt{arg2 = 1}
+\end{itemize}
+
+{Note: Since the list size (\texttt{arg0}) remains 1, the maximum valid index (\texttt{arg1}) is constrained to 0. This reveals a limitation in the input testing approach.}
+\vspace{5mm}
+\textbf{Step 3 – Varying \texttt{arg2} (value to be added):}
+
+\begin{itemize}
+    \item Iteration 1: \texttt{arg0 = 1}, \texttt{arg1 = 1}, \texttt{arg2 = 25,000}
+    \item Iteration 2: \texttt{arg0 = 1}, \texttt{arg1 = 1}, \texttt{arg2 = 37,500}
+    \item $\vdots$
+    \item Final Iteration: \texttt{arg0 = 1}, \texttt{arg1 = 1}, \texttt{arg2 = 100,000}
+\end{itemize}
+
+\textbf{Final stored input limits:}
+\begin{itemize}
+    \item \texttt{arg0} — \texttt{integer} — \texttt{1,700}
+    \item \texttt{arg1} — \texttt{integer} — \texttt{1}
+    \item \texttt{arg2} — \texttt{integer} — \texttt{100,000}
+\end{itemize}
+
+\end{tcolorbox}
+
+
+
+
+
+The input search does not come without some limitations, first it only finds values from 1 to 100,000. It starts from 1 because during this project, we were dealing a lot with lists and collections, and all of them need at least a size of 1 to work, so the minimum input is 1 (in the future it can be changed). The maximum input is 100,000 because most of the time we are dealing with collections, and having a something bigger than 100,000 is not very common.
 
 \begin{comment}
 \section{Step 1: Energy Profiling} \label{sec:work_step1_energy_profiling}

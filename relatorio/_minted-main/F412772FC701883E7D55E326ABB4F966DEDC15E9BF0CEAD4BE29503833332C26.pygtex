@@ -1,0 +1,7 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{aeon}\PYG{o}{/}\PYG{n}{libraries}\PYG{o}{/}\PYG{n}{list}\PYG{p}{;}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{aeon}\PYG{o}{/}\PYG{n}{libraries}\PYG{o}{/}\PYG{n}{pair}\PYG{p}{;}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{aeon}\PYG{o}{/}\PYG{n}{libraries}\PYG{o}{/}\PYG{n}{santafe}\PYG{p}{;}
+
+\PYG{n}{size}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{n}{x}\PYG{p}{:}\PYG{n}{Integer}\PYG{+w}{ }\PYG{o}{|}\PYG{+w}{ }\PYG{n}{x}\PYG{+w}{ }\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{10}\PYG{p}{;}
+\end{Verbatim}

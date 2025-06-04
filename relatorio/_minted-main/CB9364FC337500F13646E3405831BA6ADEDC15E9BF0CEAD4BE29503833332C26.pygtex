@@ -1,0 +1,71 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{package}\PYG{+w}{ }\PYG{n+nn}{com.generated\PYGZus{}progs.HashMap\PYGZus{}put\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}}\PYG{p}{;}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{com.template.aux.DeepCopyUtil}\PYG{p}{;}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{com.template.aux.ArrayListAux}\PYG{p}{;}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{com.fasterxml.jackson.core.type.TypeReference}\PYG{p}{;}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{com.template.aux.TemplatesAux}\PYG{p}{;}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{java.util.HashMap}\PYG{p}{;}
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{class} \PYG{n+nc}{HashMap\PYGZus{}put\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{main}\PYG{p}{(}\PYG{n}{String}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{args}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{throws}\PYG{+w}{ }\PYG{n}{Exception}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{iter}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{try}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{HashMap}\PYG{o}{\PYGZlt{}}\PYG{n}{changetypehere}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{changetypehere}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{var0}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{HashMap}\PYG{p}{();}
+\PYG{+w}{            }\PYG{n}{ArrayListAux}\PYG{p}{.}\PYG{n+na}{insertRandomNumbers}\PYG{p}{(}\PYG{n}{var0}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere1\PYGZus{}changetypehere\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}changetypehere\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{changetypehere}\PYG{+w}{ }\PYG{n}{var1}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere2\PYGZus{}changetypehere\PYGZdq{}}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{changetypehere}\PYG{+w}{ }\PYG{n}{var2}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere3\PYGZus{}changetypehere\PYGZdq{}}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{BenchmarkArgs}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{arr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{BenchmarkArgs}\PYG{o}{[}\PYG{l+s}{\PYGZdq{}numberOfFunCalls\PYGZdq{}}\PYG{o}{]}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{populateArray}\PYG{p}{(}\PYG{n}{arr}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{var0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{var1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{var2}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{TemplatesAux}\PYG{p}{.}\PYG{n+na}{sendStartSignalToOrchestrator}\PYG{p}{(}\PYG{n}{args}\PYG{o}{[}\PYG{l+m+mi}{0}\PYG{o}{]}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{TemplatesAux}\PYG{p}{.}\PYG{n+na}{launchTimerThread}\PYG{p}{(}\PYG{l+m+mi}{1100}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{iter}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{computation}\PYG{p}{(}\PYG{n}{arr}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{arr}\PYG{p}{.}\PYG{n+na}{length}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{catch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{OutOfMemoryError}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{TemplatesAux}\PYG{p}{.}\PYG{n+na}{writeErrorInFile}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}HashMap\PYGZus{}put\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Out of memory error caught by the program:\PYGZbs{}n\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{.}\PYG{n+na}{getMessage}\PYG{p}{());}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{catch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Exception}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{TemplatesAux}\PYG{p}{.}\PYG{n+na}{writeErrorInFile}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}HashMap\PYGZus{}put\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Error caught by the program:\PYGZbs{}n\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{.}\PYG{n+na}{getMessage}\PYG{p}{());}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{finally}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{TemplatesAux}\PYG{p}{.}\PYG{n+na}{sendStopSignalToOrchestrator}\PYG{p}{(}\PYG{n}{args}\PYG{o}{[}\PYG{l+m+mi}{0}\PYG{o}{]}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{iter}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kd}{class} \PYG{n+nc}{BenchmarkArgs}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{HashMap}\PYG{o}{\PYGZlt{}}\PYG{n}{changetypehere}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{changetypehere}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{var0}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{changetypehere}\PYG{+w}{ }\PYG{n}{var1}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{changetypehere}\PYG{+w}{ }\PYG{n}{var2}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{n}{BenchmarkArgs}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{this}\PYG{p}{.}\PYG{n+na}{var0}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{HashMap}\PYG{p}{();}
+\PYG{+w}{            }\PYG{n}{ArrayListAux}\PYG{p}{.}\PYG{n+na}{insertRandomNumbers}\PYG{p}{(}\PYG{n}{var0}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere1\PYGZus{}changetypehere\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}changetypehere\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k}{this}\PYG{p}{.}\PYG{n+na}{var1}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere2\PYGZus{}changetypehere\PYGZdq{}}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k}{this}\PYG{p}{.}\PYG{n+na}{var2}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere3\PYGZus{}changetypehere\PYGZdq{}}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{hashMap\PYGZus{}put\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}}\PYG{p}{(}\PYG{n}{HashMap}\PYG{+w}{ }\PYG{n}{var}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{changetypehere}\PYG{+w}{ }\PYG{n}{arg0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{changetypehere}\PYG{+w}{ }\PYG{n}{arg1}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{var}\PYG{p}{.}\PYG{n+na}{put}\PYG{p}{(}\PYG{n}{arg0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{arg1}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n+nf}{computation}\PYG{p}{(}\PYG{n}{BenchmarkArgs}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{args}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{iter}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{TemplatesAux}\PYG{p}{.}\PYG{n+na}{stop}\PYG{+w}{ }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{iter}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{              }\PYG{n}{hashMap\PYGZus{}put\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}java\PYGZus{}lang\PYGZus{}Object\PYGZus{}}\PYG{p}{(}\PYG{n}{args}\PYG{o}{[}\PYG{n}{i}\PYG{o}{]}\PYG{p}{.}\PYG{n+na}{var0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{args}\PYG{o}{[}\PYG{n}{i}\PYG{o}{]}\PYG{p}{.}\PYG{n+na}{var1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{args}\PYG{o}{[}\PYG{n}{i}\PYG{o}{]}\PYG{p}{.}\PYG{n+na}{var2}\PYG{p}{);}
+\PYG{+w}{               }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{iter}\PYG{p}{;}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{populateArray}\PYG{p}{(}\PYG{n}{BenchmarkArgs}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{arr}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{HashMap}\PYG{o}{\PYGZlt{}}\PYG{n}{changetypehere}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{changetypehere}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{var0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{changetypehere}\PYG{+w}{ }\PYG{n}{var1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{changetypehere}\PYG{+w}{ }\PYG{n}{var2}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}numberOfFunCalls\PYGZdq{}}\PYG{p}{;}\PYG{n}{i}\PYG{o}{++}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{          }\PYG{n}{arr}\PYG{o}{[}\PYG{n}{i}\PYG{o}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{BenchmarkArgs}\PYG{p}{();}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{};}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{input1}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere1\PYGZdq{}}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{input2}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere2\PYGZdq{}}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{input3}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere3\PYGZdq{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+\end{Verbatim}

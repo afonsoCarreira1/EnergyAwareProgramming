@@ -1,10 +1,5 @@
 package com.template.programsToBenchmark;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Fibonacci {
 
     //public static int fibonacci(int n) {
@@ -15,8 +10,7 @@ public class Fibonacci {
 
     //int n;
     Test t;
-    @JsonCreator
-    public Fibonacci(@JsonProperty("t")Test t){this.t = t;}
+    public Fibonacci(Test t){this.t = t;}
     
     public int fibonacci() {return fibonacci(t.n);}
     
@@ -27,14 +21,5 @@ public class Fibonacci {
             return 1;
         else
             return fibonacci(n - 1) + fibonacci(n - 2);
-    }
-
-    @Override
-    public Fibonacci clone() {
-        try {
-            return (Fibonacci) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
     }
 }

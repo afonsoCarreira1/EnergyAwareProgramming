@@ -4,6 +4,7 @@
 \usepackage{minted}
 \usepackage{placeins}
 
+
 \tcbuselibrary{listings, breakable}
 
 \chapter{Approach}\label{chapter:approach}
@@ -28,9 +29,9 @@ The architecture is divided in 4 main modules, the Program Generator, Orchestrat
 
 \section{Stage 1: Program Generator} \label{sec:work_stage1_program_generator}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
-  \includegraphics[width = 0.7 \textwidth]{figures/program_generator.pdf}
+  \includegraphics[width = 1 \textwidth]{figures/program_generator.pdf}
   \caption{Program Generator}
   \label{fig:program_generator}
 \end{figure}
@@ -138,6 +139,17 @@ Template important features
 \end{itemize}
 
 Also, the template is structured so that the programs will work in harmony with the Orchestrator, that will extract the energy profile for each program (next section), so when the placeholders are replaced with actual values, the orchestrator can run the program, and communicate with them.
+
+\begin{listing}[H]
+\begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
+ArrayListAux.insertRandomNumbers(var0, "ChangeValueHere1_changetypehere", "changetypehere");
+            changetypehere var1 = "ChangeValueHere2_changetypehere";
+            changetypehere var2 = "ChangeValueHere3_changetypehere";
+\end{minted}
+\caption{Example of var placeholders creations}            
+\label{lst:var_placeholders}
+\end{listing}
+
 What mostly differs from template to template is the number of variables used, because different methods have different parameters, so the template can have more or less input placeholders, also the type placeholder changes according to the methods types and parameters.
 
 It is worth mentioning that the types used by the generator are the Java wrapper classes, which are object representations of the primitive types. Using these types it is possible to achieve a more general generator, as every program can use them and if other custom types were used it would make the generator more complex and not general.
@@ -208,9 +220,35 @@ Despite these limitations, the input search plays a crucial role in ensuring tha
 
 Finally, when the templates are created, and the maximum inputs are found the program generation can finally begin. This part consists on picking every template created and replacing the placeholder values with actual values created by a random number generator.
 
-It starts by looping through the types and changing them to the Java wrapper classes, then it loops through the array size, \textcolor{blue}{again this value will be explained in the next section}. Lastly, it loops through the input sizes determined by the input tester and can repeat this process a configurable number of times. By increasing the number of iterations, results in more programs being generated with random inputs, constrained by the previously identified input bounds.
+It starts by looping through the types and changing them to the Java wrapper classes, then it loops through the array size, \textcolor{blue}{{again this value will be explained in the next section}}. Lastly, it loops through the input sizes determined by the input tester and can repeat this process a configurable number of times. By increasing the number of iterations, results in more programs being generated with random inputs, constrained by the previously identified input bounds.
 
 This process easily generate thousands of programs which are crucial to train machine learn models that are able to predict energy consumption. When generating programs, a number is chosen to balance the requirements for effective model training while minimizing the time spent on input testing and collecting energy profiles. Afterwards, that the programs are ready to be compiled and used.
+
+
+
+\section{Stage 2: Orchestrator} \label{sec:work_stage2_orchestrator}
+
+Having all the programs generated, it is possible to move to the next stage. Gathering the energy profiles for each of the generated programs. This step is necessary, of course, because to give energy consumption estimates, first it is necessary to obtain energy profiles~\cite{10.1145/2884781.2884869,8816747}, so the machine learning models can obtain the most accurate results possible. To make this task as easily as possible, a process was implemented, so the task was made automatically. 
+
+Note: Although this part was developed chronologically before Section \ref{sec:work_stage1_program_generator}, it is presented as Stage 2 to reflect the logical structure of the system: programs must first be generated before they can be energy profiled. For this reason, the program generator templates are designed to integrate directly with the orchestrator.
+
+As described in \ref{sec:background_energy} there are several tools capable of performing dynamic energy measurements. In our case we choose PowerJoular, it has good features that caught our attention, for example being a command line tool that could be easily integrated in almost every programming language, it stores the energy used in a CSV file (easy to work with), capable of only reading energy of running processes and so on, as explained before. So, PowerJoular is the tool that will measure the energy of our programs.
+
+Since PowerJoular is a command line tool, it is launched as a process and then it can be killed whenever needed because it is a process as well. This allows to measure not only programs/processes energies but have a more precise measurement, as it is possible to call PowerJoular to measure a specific computation and then kill it when the computation is finished.
+
+With all of this in mind a process was built. The process uses an orchestrator that is responsible for invoking the target program and the measurement tool (PowerJoular) to accurately measure the energy consumption of the program or the specific computation being analyzed within it.
+
+
+The workflow of this step can be described as follows:
+
+\begin{itemize}
+  \item The orchestrator launches a command to start the target Java Program and waits a signal.
+  \item The Java program starts and setup the necessary elements to run (creating all the variables, reading/writing files, etc.) and then before starting the computation it wants to measure, it sends a start signal to the orchestrator to start monitoring, and waits for 100 milliseconds.
+  \item The orchestrator receives the start signal and reads the PID and number of runs the target computation is going to take, which is stored in a file during the target program setup. And, finally, it starts PowerJoular using that PID. Then it waits for the stop signal.
+  \item The Java program will run until it finishes the computation and then, send a stop signal back.
+  \item The orchestrator on receiving the stop signal, first stops PowerJoular and then stops the target program, if needed. Then it parses the target program to extract its features, combines them with the energy information stored in the files created by PowerJoular, stores it in a CSV file and displays the energy on the screen.
+\end{itemize}
+
 
 
 \begin{comment}

@@ -123,11 +123,11 @@ public class SpoonInjector {
     }
 
     public void injectInTemplate() {
-        addImport(packageToUse+"aux.DeepCopyUtil");
-        addImport("com.fasterxml.jackson.core.type.TypeReference");
         createInitialVar(false);
         createMethodArgs();
-        createClassThatHoldsArgs();
+        CtStatementList statementsTemp2 = statements.clone(); //gets the vars creations and copies them to a list 
+        createClassThatHoldsArgs(statementsTemp2);
+        statements.getStatements().clear(); //clears the vars creations
         createArrayWithVarAndArgs();
         statements.addStatement(callPopulateMethod());
         callMethods();
@@ -250,7 +250,7 @@ public class SpoonInjector {
         catchers.get(1).getBody().addStatement(factory.Code().createCodeSnippetStatement(call2));
     }
 
-    private void createClassThatHoldsArgs() {
+    private void createClassThatHoldsArgs(CtStatementList statementsTemp) {
         String innerClassName = "BenchmarkArgs";
         ArrayList<CtLocalVariable<?>> vars = getAllVars();
         CtClass<?> innerClass = factory.Class().create(innerClassName);
@@ -265,7 +265,7 @@ public class SpoonInjector {
         }
         
         //class constructor
-        for (int i = 0; i < statements.getStatements().size(); i++){
+        for (int i = 0; i < statementsTemp.getStatements().size(); i++){
             String currentStatement = statements.getStatements().get(i).toString();
             Pattern pattern = Pattern.compile(".*\\s(var\\d+)\\s");//find space varNumber space
             Matcher matcher = pattern.matcher(currentStatement);
@@ -283,19 +283,6 @@ public class SpoonInjector {
         newClass.addNestedType(innerClass);
     }
 
-    private String changePrimitiveTypeToWrapperType(CtTypeReference<?> type) {
-        Map<String, String> primitive_to_wrapper = Map.of(
-            "int", "Integer",
-            "short", "Short",
-            "long", "Long",
-            "byte", "Byte",
-            "float", "Float",
-            "double", "Double",
-            "boolean", "Boolean",
-            "char", "Character");
-            return primitive_to_wrapper.getOrDefault(type.toString(), type.toString());
-    }
-
 
     private CtField<?> createBenchmarkClassFields(CtLocalVariable<?> var) {
         CtField<?> field = factory.Core().createField();
@@ -307,10 +294,10 @@ public class SpoonInjector {
     }
     
     private CtStatement callPopulateMethod(){
-        String args = getAllVarsAsString();
-        String arr = "arr";
-        if (args.length() != 0) arr+=", ";
-        String statement ="populateArray("+arr+args+")";
+        //String args = getAllVarsAsString();
+        //String arr = "arr";
+        //if (args.length() != 0) arr+=", ";
+        String statement ="populateArray(arr)";
         return factory.Code().createCodeSnippetStatement(statement);
     }
 
@@ -329,6 +316,7 @@ public class SpoonInjector {
             statements.addStatement(var);
             callAndClearIntermidiateStatements();
             if(isCollection(var)) statements.addStatement(populateCollection(var,false));
+            
         }
     }
 
@@ -343,18 +331,18 @@ public class SpoonInjector {
         tryBlock.getBody().insertBegin(statements);
     }
     
-    private void createInitialVar(boolean useConstructorSize) {
-        String initialArray = "";
-        if (isMethodStatic) initialArray += collec.getQualifiedName()+ "()"+"."+method.getSimpleName();//TODO i assume there are no constructors here
-        else {
+    private void createInitialVar(boolean useConstructorSize ) {
+        //String initialArray = "";
+        //if (isMethodStatic) initialArray += collec.getQualifiedName()+ "()"+"."+method.getSimpleName();//TODO i assume there are no constructors here
+        //else {
             String varName = getVarName();
             CtLocalVariable<?> var = createVar(factory.Type().createReference(collec), varName,false);
             statements.addStatement(var);
             CtStatement initCollection = populateCollection(var,useConstructorSize);
-            if (initCollection != null) statements.addStatement(initCollection);
-            initialArray += varName+"."+method.getSimpleName();
+            if (initCollection != null) statements.addStatement(initCollection);   
+            //initialArray += varName+"."+method.getSimpleName();
             
-        }
+        //}
     }
 
     private CtStatement populateCollection(CtLocalVariable<?> var, boolean useConstructorSize) {
@@ -517,30 +505,6 @@ public class SpoonInjector {
         return false;
     }
 
-    //@SuppressWarnings("unchecked")
-    //public <T> T getDefaultValues(String type){
-    //    switch (type.toLowerCase()) {
-    //        case "int":
-    //            return (T) Integer.valueOf(0);
-    //        case "double":
-    //            return (T) Double.valueOf(0.0);
-    //        case "float":
-    //            return (T) Float.valueOf(0f);
-    //        case "long":
-    //            return (T) Long.valueOf(0);
-    //        case "boolean":
-    //            return (T) Boolean.valueOf(false);
-    //        case "short":
-    //            return (T) Short.valueOf("0");
-    //        case "integer":
-    //            return (T) Integer.valueOf(0);
-    //        case "character":
-    //            return (T) Character.valueOf('a');
-    //        default:
-    //            throw new IllegalArgumentException("Unsupported type: " + type);
-    //    }
-    //}
-
 
     private List<CtParameter<?>> getComputationParameters() {
         if (isMethodStatic) return method.getParameters();
@@ -638,9 +602,9 @@ public class SpoonInjector {
         params.add(createParameter("BenchmarkArgs","arr",true));
         
         
-        for (CtLocalVariable<?> var : vars) {
-            params.add(createParameter(var.getType().toString(),var.getSimpleName(),false/*var.getType().isArray()*/));
-        }
+        //for (CtLocalVariable<?> var : vars) {
+        //    params.add(createParameter(var.getType().toString(),var.getSimpleName(),false/*var.getType().isArray()*/));
+        //}
         
         CtMethod<Void> newMethod = factory.Method().create(
                 newClass,            // Target class

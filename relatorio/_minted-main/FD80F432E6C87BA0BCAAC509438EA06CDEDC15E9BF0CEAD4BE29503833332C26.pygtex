@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{ArrayListAux}\PYG{p}{.}\PYG{n+na}{insertRandomNumbers}\PYG{p}{(}\PYG{n}{var0}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere1\PYGZus{}changetypehere\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}changetypehere\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{changetypehere}\PYG{+w}{ }\PYG{n}{var1}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere2\PYGZus{}changetypehere\PYGZdq{}}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{changetypehere}\PYG{+w}{ }\PYG{n}{var2}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}ChangeValueHere3\PYGZus{}changetypehere\PYGZdq{}}\PYG{p}{;}
+\end{Verbatim}

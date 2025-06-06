@@ -128,6 +128,10 @@ calculo para esses casos? ou uso um fator por exemplo: list.add() * loop_depth1 
 usar sliders para os fors sempre que o valor do for nao for um valor martelado
 somar as energias das funçoes
 
+
+a parte do size generator nao cria uma dist flat, isto pq o arrayllist com tipo int tem max in 1000
+e o linked list tipo long tem max 500 +/- assim
+
 criar batch script continuar mambos de comparacao de a duas semanas ver notas
  scp -r acarreira@polaris:xpto . rsync 
 

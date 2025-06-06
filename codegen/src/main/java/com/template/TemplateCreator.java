@@ -117,7 +117,7 @@ public class TemplateCreator {
                     System.out.println("maxInputs -> "+maxInputs);
                     
                     for (int size : sizes) {
-                        String finalProg = replaceValues(programChangedFunCall,size,maxInputs);
+                        String finalProg = replaceValues(programChangedFunCall/* ,size*/,maxInputs);
                         String methodNameForClass = Introspector.decapitalize(className);
                         finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+className+"",className+id);
                         finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+methodNameForClass+"",methodNameForClass+id);
@@ -168,7 +168,7 @@ public class TemplateCreator {
         return new ArrayList<>(results);
     }
 
-    private static String replaceValues(String program,int size, List<Integer> maxInputs) {
+    private static String replaceValues(String program,/*int size,*/ List<Integer> maxInputs) {
         int min = 1;
 
         List<String> valuesToReplace = findStringsToReplace(program,"ChangeValueHere\\d+_[^\",;\\s]+");

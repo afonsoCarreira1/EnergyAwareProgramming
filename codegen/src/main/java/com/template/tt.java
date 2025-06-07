@@ -1,6 +1,6 @@
 package com.template;
 import com.template.aux.DeepCopyUtil;
-import com.template.aux.ArrayListAux;
+import com.template.aux.CollectionAux;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.template.aux.TemplatesAux;
 import java.util.Collection;
@@ -19,9 +19,9 @@ public class tt {
 
         try {
             CopyOnWriteArrayList<Double> var0 = new CopyOnWriteArrayList();
-            ArrayListAux.insertRandomNumbers(var0, in1, "Double");
+            CollectionAux.insertRandomNumbers(var0, in1, "Double");
             CopyOnWriteArrayList<Double> var1 = new CopyOnWriteArrayList();
-            ArrayListAux.insertRandomNumbers(var1, in0, "Double");
+            CollectionAux.insertRandomNumbers(var1, in0, "Double");
             BenchmarkArgs[] arr = new BenchmarkArgs[75000];
             populateArray(arr, var0, var1);
             TemplatesAux.sendStartSignalToOrchestrator(args[0]);

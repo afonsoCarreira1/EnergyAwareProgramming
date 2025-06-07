@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public class ArrayListAux {
+public class CollectionAux {
     public static int min = 0;
     public static int max = 100_000;
     public static Random rand = new Random(42);

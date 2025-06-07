@@ -54,6 +54,7 @@ public class SpoonInjector {
     "java.lang.Byte",
     "java.lang.Short");
     final static String packageToUse = "com.template.";
+    final static String collectionAux = "CollectionAux";
     Launcher launcher;
     Factory factory;
     int numberOfFunCalls;
@@ -347,11 +348,11 @@ public class SpoonInjector {
 
     private CtStatement populateCollection(CtLocalVariable<?> var, boolean useConstructorSize) {
         if (!isCollection(var)) return null;
-        String p = packageToUse+"aux.ArrayListAux";
+        String p = packageToUse+"aux."+collectionAux;
         if (containsCollectionToPopulate(var.getType().toString())) {
             addImport(p);
             Object size = createRandomLiteral(factory.createReference(typeToUse),false,false);
-            CtStatement st = factory.Code().createCodeSnippetStatement("ArrayListAux.insertRandomNumbers("+var.getSimpleName()+", \""+size+"\", \""+typeToUse +"\")");
+            CtStatement st = factory.Code().createCodeSnippetStatement(collectionAux+".insertRandomNumbers("+var.getSimpleName()+", \""+size+"\", \""+typeToUse +"\")");
             return st;
         }
         return null;
@@ -459,11 +460,11 @@ public class SpoonInjector {
     }
 
     private void populateArray(CtTypeReference<?> typeArr) {
-        addImport(packageToUse+"aux.ArrayListAux");
+        addImport(packageToUse+"aux."+collectionAux);
         CtTypeReference<?> type = factory.Type().createReference(typeArr.toString().split("\\[")[0]);
-        String populateArrayCall = "ArrayListAux.populateArrayPrimitive("+getLastVarName()+", () ->"; 
+        String populateArrayCall = collectionAux+".populateArrayPrimitive("+getLastVarName()+", () ->"; 
         if (!type.toString().equals("Object")) populateArrayCall+=getDefaultValueForType(typeArr.getTypeDeclaration(),false)+")";// se nao for do tipo object, vou buscar a sua expressao
-        else populateArrayCall += "ArrayListAux.getRandomValueOfType(\""+typeToUse+"\"))";//se for object mudo para o tipo changetypehere que vai ser depois o (Integer,Boolean,etc...)
+        else populateArrayCall += collectionAux+".getRandomValueOfType(\""+typeToUse+"\"))";//se for object mudo para o tipo changetypehere que vai ser depois o (Integer,Boolean,etc...)
         CtStatement statement = factory.Code().createCodeSnippetStatement(populateArrayCall);
         statementsLast.addStatement(statement);
     }

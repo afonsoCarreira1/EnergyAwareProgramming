@@ -1,5 +1,5 @@
 package com.template;
-import com.template.aux.ArrayListAux;
+import com.template.aux.CollectionAux;
 import com.template.aux.TemplatesAux;
 import java.util.HashMap;
 public class G {
@@ -29,7 +29,7 @@ public class G {
 
         BenchmarkArgs() {
             this.var0 = new HashMap();
-            ArrayListAux.insertRandomNumbers(var0, "ChangeValueHere1_changetypehere", "changetypehere");
+            CollectionAux.insertRandomNumbers(var0, "ChangeValueHere1_changetypehere", "changetypehere");
             this.var1 = 1;
             this.var2 = 1;
         }

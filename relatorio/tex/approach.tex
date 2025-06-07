@@ -50,6 +50,7 @@ The generator works for custom Java classes or for some collections (Lists, Sets
 \FloatBarrier
 
 
+\begin{listing}[H]
 \begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
 
 package com.generated_progs.ArrayList_add_java_lang_Object_;
@@ -112,7 +113,9 @@ public class ArrayList_add_java_lang_Object_ {
 
 
 \end{minted}
-
+\caption{Example of template for List.add(Object)}            
+\label{lst:template_example}
+\end{listing}
 
 The first step to generate multiple programs is to first create an intermediate template capable of holding the necessary code that will later be used for energy profiling.
 
@@ -243,6 +246,18 @@ As described in \ref{sec:background_energy} there are several tools capable of p
 Since PowerJoular is a command line tool, it is launched as a process and then it can be killed whenever needed because it is a process as well. This allows to measure not only programs/processes energies but have a more precise measurement, as it is possible to call PowerJoular to measure a specific computation and then kill it when the computation is finished.
 
 With all of this in mind a process was built. The process uses an orchestrator that is responsible for invoking the target program and the measurement tool (PowerJoular) to accurately measure the energy consumption of the program or the specific computation being analyzed within it.
+
+In the program generator it was shown an example of a template \ref{lst:template_example}. This structure was carefully crafted in order to work with the orchestrator.
+
+
+
+When measuring energy, there is a particular problem with computation. It is too fast. It is really difficult to measure a single operation of, for example, a List.add(Object) with most tools, as it simply to fast for the tool to capture, and if the tool was able to capture it, the energy measured would have too much noise to be considered. So, it surges the need to loop through the method until the tool (PowerJoular) is capable of getting its energy and then dividing the total energy by the number of times it looped. This can work, but it brings other errors that will need to be considered.
+
+If we approach the measurements with the loop technique, first we need to create the variables needed for the method target to analysis, like shown in \ref{lst:var_placeholders}. But there is a problem, the methods are treated like a black box, it is not possible to know what the methods are going to do with the parameters or with its variables, for example, the method List.size() it receives nothing, and return the size of the list which is fine. However, this raises problems with other methods, such as List.add(Object), maybe not in the first iterations. But what if the loop iterates too many times? It will make the list much bigger than the initial list, which again will cause differences in the energy measurements and later in the energy predictions. 
+Now, suppose we have a custom method called sort that takes a randomly ordered list and sorts it. This introduces a problem when measuring its energy consumption. On the first run, the method will sort the unsorted list, which may take significant time depending on the randomness of the data and the sorting algorithm used. However, on subsequent runs with the same list, the input is already sorted, meaning the sort method will likely complete much faster or with minimal effort. This difference can result in misleading or inconsistent measurements.
+
+To prevent this from happening the best approach is to create an array that holds the parameters. Basically, the parameters are created into an array, and they need a new 
+
 
 
 The workflow of this step can be described as follows:

@@ -1,6 +1,37 @@
 \usepackage{xcolor}
 \chapter{Background}\label{chapter:background}
 
+This section provides an overview of the essential concepts and foundational knowledge necessary for understanding the methods and approaches used throughout this thesis. A solid understanding of these concepts is necessary to fully comprehend the work presented.
+
+\section{Benchmarking} \label{sec:background_benchmarking}
+
+When performing benchmarking (i.e. measuring time, energy, memory, etc.) it is important to have in mind some important information that can affect the measurements. First it is important to know how the programming language being used works, and how it can affect the measurements. It is important to understand how to understand which noise can be avoidable and which cannot be.
+
+In this project the target language is Java, so the benchmark will have its constraints. Performing benchmarks in Java has its adversities, and needs careful approach when needed, ~\cref{10.1145/1297027.1297033} details important aspects on how to correctly benchmark Java applications, and how to avoid common pitfalls.
+It is important to understand the non-deterministic problems that may arrive when benchmarking in Java:
+
+\begin{listing}[H]
+\begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{Java}
+    int sum = 0;
+    for (int i = 0; i < 100; i++) {
+        sum++;
+    }
+    System.out.println(sum);
+\end{minted}
+\caption{Example for loop}            
+\label{lst:for_loop_example}
+\end{listing}
+
+
+\begin{itemize}
+    \item Just-In-Time (JIT) compilation : Automatically performs optimizations in during the compilation, which can affect measurements. Example: In the loop \ref{lst:for_loop_example}, the optimization done during the compilation, might understand that the loop is unnecessary and just replace the variable sum with \texttt{int sum = 100;}, avoiding the loop.
+    \item Garbage Collection (GC): It can be called randomly, which can affect measurements, for time measurements it can increase it, the same for energy measurements, for memory measurements it depends if it was called before or after the measurement.
+    \item Thread scheduling. It is also unpredictable when threads stop might have different schedules, resulting in different interactions.
+    \item Java Virtual Machine (JVM) : Different JVM implementations or configurations (e.g., heap size, GC algorithms, JIT strategies) can result in considerable performance differences. Even the same JVM may behave differently across runs due to internal optimizations and adaptive behaviors.
+\end{itemize}
+
+\section{Energy Profiling} \label{sec:background_energy_profiling}
+
 To fully understand the processes involved in this work, it is important to first understand what energy profiling is, as it will be frequently referenced and used later.
 
 Energy profiling is the systematic process of measuring, monitoring, and analyzing the power consumption of a system, using specialized software or hardware tools to collect detailed power consumption data. This data can be collected from different parts of a system, including applications, processes, and specific snippets of code, to provide insight into how different components and activities contribute to overall energy consumption. Through this type of power consumption profiling, developers are able to identify inefficiencies and optimize software to improve energy efficiency. This makes it very important for extending battery life in mobile devices, reducing operating costs in data centers, and also minimizing environmental impact through energy consumption. Energy profiling is a step toward making informed decisions to develop more sustainable and cost-effective computing solutions.
@@ -13,8 +44,6 @@ To perform hardware-based measurements, a power monitor or power meter device\ci
 An alternative with minimal overhead is to use software-based tools. These tools are typically easier to use, but may not provide values as accurate as hardware-based measurements. However, they are more versatile and can be implemented or modified to meet the user's needs. 
 
 \section{Energy Tools} \label{sec:background_energy}
-
-
 
 Understanding and optimizing energy consumption in software requires specialized tools capable of measuring and analyzing power usage. These tools provide valuable insights into how programs consume energy during execution, enabling developers to identify inefficiencies and optimize performance.
 
@@ -106,6 +135,7 @@ PySR works by searching the space of mathematical expressions to find those that
 At the end of the process, PySR provides a list of candidate expressions, typically sorted along a Pareto front balancing complexity and accuracy. While more complex expressions often provide better predictions, users can select simpler ones if interpretability is a priority.
 
 This technique is particularly well-suited for energy prediction, as it can reveal easy-to-understand formulas that explain how certain parts of a program contribute to energy consumption. This can help developers understand and optimize the energy efficiency of their code more effectively than with traditional black-box models.
-}
 
 These algorithms were taken into account when developing the model that can best predict energy.
+}
+

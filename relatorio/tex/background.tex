@@ -5,10 +5,10 @@ This section provides an overview of the essential concepts and foundational kno
 
 \section{Benchmarking} \label{sec:background_benchmarking}
 
-When performing benchmarking (i.e. measuring time, energy, memory, etc.) it is important to have in mind some important information that can affect the measurements. First it is important to know how the programming language being used works, and how it can affect the measurements. It is important to understand how to understand which noise can be avoidable and which cannot be.
+When performing benchmarking (i.e. measuring time, energy, memory, etc.) it is important to have in mind some important information that can affect the measurements. First it matters to know how the programming language being used works, and how it can affect the measurements. It is important to understand how to understand which noise can be avoidable and which cannot be.
 
 In this project the target language is Java, so the benchmark will have its constraints. Performing benchmarks in Java has its adversities, and needs careful approach when needed, ~\cref{10.1145/1297027.1297033} details important aspects on how to correctly benchmark Java applications, and how to avoid common pitfalls.
-It is important to understand the non-deterministic problems that may arrive when benchmarking in Java:
+It is essential to understand the non-deterministic problems that may arrive when benchmarking in Java:
 
 \begin{listing}[H]
 \begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{Java}
@@ -29,6 +29,11 @@ It is important to understand the non-deterministic problems that may arrive whe
     \item Thread scheduling. It is also unpredictable when threads stop might have different schedules, resulting in different interactions.
     \item Java Virtual Machine (JVM) : Different JVM implementations or configurations (e.g., heap size, GC algorithms, JIT strategies) can result in considerable performance differences. Even the same JVM may behave differently across runs due to internal optimizations and adaptive behaviors.
 \end{itemize}
+
+Some of these properties cannot be avoided, however there are some procedures that can be taken into consideration to avoid error in the measurements.
+To avoid JIT optimizations, harder and complex examples must be used in order to avoid optimizations, for example instead of filling a list in a for loop using the index values, the values added can be random, which will avoid optimizations, as the compiler cannot predict the next number in the iteration. This proves to be effective in energy measurement, because if it is needed to measure the energy consumption of the add method of a list collection, now the process can actually be measured avoiding optimizations, if it was optimized it would be too fast and would not be valid for energy measurement.
+The JVM start up can be avoided by starting the program without measuring anything and just start the measurement when the computation method is ready to be started and not for the whole machine. Avoiding reading JVM startup, warm up, even unnecessary computations, and focusing only on the necessary parts.
+Garbage collector can be harder, as there is not any method in Java that can call it, there is a method that can call the GC, but it does not mean that it will immediately be called. So this part is a bit harder to avoid. An alternative is to increase the memory the JVM can use, so the GC is called fewer times. 
 
 \section{Energy Profiling} \label{sec:background_energy_profiling}
 

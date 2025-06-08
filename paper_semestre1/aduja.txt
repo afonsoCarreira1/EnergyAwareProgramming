@@ -131,6 +131,7 @@ somar as energias das funçoes
 
 a parte do size generator nao cria uma dist flat, isto pq o arrayllist com tipo int tem max in 1000
 e o linked list tipo long tem max 500 +/- assim
+Eu ao correr os ciclos levo com o jit optimization
 
 criar batch script continuar mambos de comparacao de a duas semanas ver notas
  scp -r acarreira@polaris:xpto . rsync 

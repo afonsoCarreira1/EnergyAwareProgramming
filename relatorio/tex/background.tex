@@ -7,7 +7,7 @@ This section provides an overview of the essential concepts and foundational kno
 
 When performing benchmarking (i.e. measuring time, energy, memory, etc.) it is important to have in mind some important information that can affect the measurements. First it matters to know how the programming language being used works, and how it can affect the measurements. It is important to understand how to understand which noise can be avoidable and which cannot be.
 
-In this project the target language is Java, so the benchmark will have its constraints. Performing benchmarks in Java has its adversities, and needs careful approach when needed, ~\cref{10.1145/1297027.1297033} details important aspects on how to correctly benchmark Java applications, and how to avoid common pitfalls.
+In this project the target language is Java, so the benchmark will have its constraints. Performing benchmarks in Java has its adversities, and needs careful approach when needed. Several papers have studied how to perform better benchmarks ~\cref{10.1145/1297027.1297033,10.1145/1167515.1167488} details important aspects on how to correctly benchmark Java applications, and how to avoid common pitfalls.
 It is essential to understand the non-deterministic problems that may arrive when benchmarking in Java:
 
 \begin{listing}[H]
@@ -24,16 +24,41 @@ It is essential to understand the non-deterministic problems that may arrive whe
 
 
 \begin{itemize}
-    \item Just-In-Time (JIT) compilation : Automatically performs optimizations in during the compilation, which can affect measurements. Example: In the loop \ref{lst:for_loop_example}, the optimization done during the compilation, might understand that the loop is unnecessary and just replace the variable sum with \texttt{int sum = 100;}, avoiding the loop.
-    \item Garbage Collection (GC): It can be called randomly, which can affect measurements, for time measurements it can increase it, the same for energy measurements, for memory measurements it depends if it was called before or after the measurement.
-    \item Thread scheduling. It is also unpredictable when threads stop might have different schedules, resulting in different interactions.
-    \item Java Virtual Machine (JVM) : Different JVM implementations or configurations (e.g., heap size, GC algorithms, JIT strategies) can result in considerable performance differences. Even the same JVM may behave differently across runs due to internal optimizations and adaptive behaviors.
+    \item textbf{Just-In-Time (JIT) compilation}: Automatically performs optimizations in during the compilation, which can affect measurements. Example: In the loop \ref{lst:for_loop_example}, the optimization done during the compilation, might understand that the loop is unnecessary and just replace the variable sum with \texttt{int sum = 100;}, avoiding the loop. Basically, the JIT compiler may detect that a loop performs predictable work and optimize it away entirely, especially if the results are unused or can be computed ahead of time.
+    
+    \item textbf{Garbage Collection (GC)}: It can be called randomly, which can affect measurements, for time measurements it can increase it, the same for energy measurements, for memory measurements it depends if it was called before or after the measurement.
+    
+    \item textbf{Thread scheduling}: It is also unpredictable when threads stop might have different schedules, resulting in different interactions.
+    
+    \item textbf{Java Virtual Machine (JVM)}: Different JVM implementations or configurations (e.g., heap size, GC algorithms, JIT strategies) can result in considerable performance differences. Even the same JVM may behave differently across runs due to internal optimizations and adaptive behaviors.
 \end{itemize}
 
 Some of these properties cannot be avoided, however there are some procedures that can be taken into consideration to avoid error in the measurements.
 To avoid JIT optimizations, harder and complex examples must be used in order to avoid optimizations, for example instead of filling a list in a for loop using the index values, the values added can be random, which will avoid optimizations, as the compiler cannot predict the next number in the iteration. This proves to be effective in energy measurement, because if it is needed to measure the energy consumption of the add method of a list collection, now the process can actually be measured avoiding optimizations, if it was optimized it would be too fast and would not be valid for energy measurement.
 The JVM start up can be avoided by starting the program without measuring anything and just start the measurement when the computation method is ready to be started and not for the whole machine. Avoiding reading JVM startup, warm up, even unnecessary computations, and focusing only on the necessary parts.
-Garbage collector can be harder, as there is not any method in Java that can call it, there is a method that can call the GC, but it does not mean that it will immediately be called. So this part is a bit harder to avoid. An alternative is to increase the memory the JVM can use, so the GC is called fewer times. 
+Garbage collector can be harder, while System.gc() can be used to suggest a garbage collection cycle, the JVM is free to ignore this request. As such, it is not a reliable mechanism to control GC timing. So this part is a bit harder to avoid. An alternative is to increase the memory the JVM can use, so the GC is called fewer times. 
+
+
+It is also important to note that:
+
+
+\begin{itemize}
+    \item \textbf{Use multiple JVM invocations}: Run benchmarks in new JVM instances to capture variations and prevent biased warm-up effects.
+    
+    \item \textbf{Use multiple JVMs and versions}: Different JVM implementations and versions may apply different optimizations, affecting performance outcomes.
+    
+    \item \textbf{Avoid cherry-picking values}:  Instead of reporting only the best or worst results, use the median or mean along with variability.
+    
+    \item \textbf{Vary hardware configurations}: Using different hardware will have different results.
+    
+    \item \textbf{Test with multiple heap sizes}: Garbage collection behavior and performance can change depending on the heap size. Test different benchmarks with a range of heap sizes, starting from the minimum required.
+    
+    \item \textbf{Use realistic, diverse workloads}: Use real-world applications instead of microbenchmarks to better reflect practical behavior.
+    
+    \item \textbf{Avoid background system noise}: When running the benchmarks, preferably only have the necessary processes running, to reduce measurement noise.
+\end{itemize}
+
+When building the tool, it is necessary to gather data from the Java programs, which requires benchmarking best practices. Although it is not possible to apply all of them due to time and complexity constraints, it is always helpful to keep in mind what it takes to create a good benchmark.
 
 \section{Energy Profiling} \label{sec:background_energy_profiling}
 

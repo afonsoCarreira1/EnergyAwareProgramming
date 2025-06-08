@@ -124,8 +124,8 @@ public class SpoonInjector {
     }
 
     public void injectInTemplate() {
-        createInitialVar(false);
-        createMethodArgs();
+        getInitialVar(false);
+        getMethodArgs();
         CtStatementList statementsTemp2 = statements.clone(); //gets the vars creations and copies them to a list 
         createClassThatHoldsArgs(statementsTemp2);
         statements.getStatements().clear(); //clears the vars creations
@@ -307,7 +307,7 @@ public class SpoonInjector {
         statements.addStatement(factory.createCodeSnippetStatement(statement));
     }
 
-    private void createMethodArgs() {
+    private void getMethodArgs() {
         List<CtParameter<?>> args = method.getParameters();
         
         for (CtParameter<?> arg : args) {
@@ -332,18 +332,13 @@ public class SpoonInjector {
         tryBlock.getBody().insertBegin(statements);
     }
     
-    private void createInitialVar(boolean useConstructorSize ) {
-        //String initialArray = "";
-        //if (isMethodStatic) initialArray += collec.getQualifiedName()+ "()"+"."+method.getSimpleName();//TODO i assume there are no constructors here
-        //else {
-            String varName = getVarName();
-            CtLocalVariable<?> var = createVar(factory.Type().createReference(collec), varName,false);
-            statements.addStatement(var);
-            CtStatement initCollection = populateCollection(var,useConstructorSize);
-            if (initCollection != null) statements.addStatement(initCollection);   
-            //initialArray += varName+"."+method.getSimpleName();
-            
-        //}
+    private void getInitialVar(boolean useConstructorSize ) {
+        if (isMethodStatic) return;// No need to create any var like ArrayList<Integer> var = new ArrayList(); because the method does not need it
+        String varName = getVarName();
+        CtLocalVariable<?> var = createVar(factory.Type().createReference(collec), varName,false);
+        statements.addStatement(var);
+        CtStatement initCollection = populateCollection(var,useConstructorSize);
+        if (initCollection != null) statements.addStatement(initCollection);   
     }
 
     private CtStatement populateCollection(CtLocalVariable<?> var, boolean useConstructorSize) {

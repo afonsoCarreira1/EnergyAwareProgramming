@@ -44,9 +44,15 @@ public class TemplateCreator {
         List<CtMethod<?>> methods;
         List<CtType<?>> collections;
         boolean getCustomImports = false;
-        if (args[0].equals("lists") || args[0].equals("sets")|| args[0].equals("maps")){
+        if (args[0].contains("lib")) {
+            String lib = args[0].split("lib_")[1];
+            collections = Arrays.asList(getLib(lib));
+            CtType<?>[] arr = collections.toArray(new CtType<?>[0]);
+            methods = getCollectionMethods(arr);
+        }
+        else if (args[0].equals("lists") || args[0].equals("sets")|| args[0].equals("maps")) {
             collections = Arrays.asList(getCollections(args[0]));
-            methods = getCollectionMethods(args[0]);
+            methods = getCollectionMethods((CtType<?>[]) collections.toArray(new CtType<?>[0]));
         } else {
             programToRun = args[0];
             Launcher launcher = initSpoon(new ArrayList<>(Arrays.asList("src/main/java/com/template/")));
@@ -291,10 +297,10 @@ public class TemplateCreator {
         return launcher;
     }
 
-    private static ArrayList<CtMethod<?>> getCollectionMethods(String collection) {
+    private static ArrayList<CtMethod<?>> getCollectionMethods(CtType<?>[] collectionTypes) {
         HashMap<String, Integer> methods = new HashMap<String, Integer>();
         HashMap<String, CtMethod<?>> methodsParameters = new HashMap<String, CtMethod<?>>();
-        CtType<?>[] collectionTypes = getCollections(collection);
+        //CtType<?>[] collectionTypes = getCollections(collection);
 
         for (CtType<?> collectionType : collectionTypes) {
             for (CtMethod<?> method : collectionType.getMethods()) {
@@ -329,6 +335,20 @@ public class TemplateCreator {
             //}
         }
         return commonMethods;
+    }
+
+    private static CtType<?> getLib(String lib) {
+        Launcher launcher = null;
+        launcher = new Launcher();
+        //launcher.getEnvironment().setNoClasspath(false);
+        //launcher.getEnvironment().setComplianceLevel(17);
+        //launcher.buildModel();
+        //System.out.println("has  smthjng");
+        //for (CtType<?> type : launcher.getFactory().Class().getAll()) {
+        //        System.out.println("print -> "+type.getQualifiedName());
+        //}
+        //return launcher.getFactory().Type().get(lib);
+        return launcher.getFactory().Type().createReference(lib).getTypeDeclaration();
     }
 
     private static CtType<?>[] getCollections(String collection) {

@@ -41,6 +41,11 @@ This module **automatically generates Java programs** using methods from **Lists
 ./run_codegen.sh Fibonacci
 ```
 
+**Run for some Lib**  
+```sh
+./run_codegen.sh lib_java.lang.Math cos
+```
+
 ---
 
 ### 2️⃣ Parser (Feature Extractor)  

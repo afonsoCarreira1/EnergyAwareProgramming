@@ -7,25 +7,29 @@
 \floatstyle{plain}
 \newfloat{listing}{H}{lop}
 \floatname{listing}{Listing}
-
-
 \tcbuselibrary{listings, breakable}
 
 \chapter{Approach}\label{chapter:approach}
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width = .8 \textwidth]{figures/main_modules.pdf}
+  \caption{Main modules}
+  \label{fig:main_modules}
+\end{figure}
 As described in the previous sections, the aim of this work is to make developers aware of the energy consumption of their programs. By using a simple and practical tool, they can quickly and accurately estimate their program's energy consumption. This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development. It is important to note that this tool serves as a guide, providing energy consumption estimates to raise awareness rather than dictate action. Ultimately, it is up to developers to decide whether to prioritize performance, energy efficiency or any other factor. For example, if a program only needs to run within a certain timeframe and can afford a slight reduction in performance, developers may choose to trade some performance for improved energy efficiency, making more informed decisions thanks to the insights provided by the tool.
 
 To provide this insight to developers it is necessary to build a tool that can provide all of that. The tool needs to be practical, which means that integrating it in an IDE is recommended. With this the developer only needs to download an extension for an IDE and will access to the insights provided by the tool.
 
-\textcolor{blue}{
+
 The tool will be a VSCode extension built using the Language Server Protocol (LSP). While VSCode may not be the most commonly used IDE for Java projects compared to Eclipse or IntelliJ IDEA, it provides a much simpler and more accessible environment for developing and testing extensions. This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an AST, from there it is capable of analyzing the code and using an inference function it will output the estimated cost.
-Although the tool is initially built for VSCode, its use of the LSP standard means it can be extended to other IDEs like Eclipse or IntelliJ IDEA. Since LSP handles the communication between the language server and the development environment, porting the tool to new IDEs would primarily involve adapting the user interface and integration specifics, rather than reworking the core logic.}
+Although the tool is initially built for VSCode, its use of the LSP standard means it can be extended to other IDEs like Eclipse or IntelliJ IDEA. Since LSP handles the communication between the language server and the development environment, porting the tool to new IDEs would primarily involve adapting the user interface and integration specifics, rather than reworking the core logic.
 
 
 Many devices rely on Java and the JVM, so it is important that the code they run is energy efficient. Several factors can affect the power consumption of Java applications, including the behavior of the garbage collector and the efficiency of the memory management system ~\cite{10.5555/1267847.1267870} making it difficult to predict the power consumption of Java programs. This unpredictability highlights the need for a specialized tool to accurately measure and analyze power consumption so that developers can optimize their applications for energy efficiency.
 Java is an excellent choice for developing this tool because of its high interoperability with various operating systems and its widespread usage across the globe, making it a reliable and option. It has a wide range of useful libraries (JRAPL, JoularJx, Jalen) that help to measure energy accurately, and Java's typing and object-oriented features make the code easier to maintain and extend, so the tool can evolve with new energy metering standards and technologies. 
 
-There are several Java parsing tools available, such as WALA~\cite{wala_main}, SootUp~\cite{sootup_main}, Spoon~\cite{spoon_main} and JavaParser~\cite{javaParser}. WALA and SootUp are primarily designed for analyzing Java Bytecode and are generally more complex to use. For this project, Spoon was chosen because it is a user-friendly tool that facilitates easy retrieval and manipulation of the AST from Java source code. \textcolor{blue}{Both JavaParser and Spoon support AST manipulation and code generation. However, Spoon provides a deeper, type-aware metamodel and built-in templating features. These features make Spoon more suitable for generating code that conforms to Java’s syntactic and semantic rules, especially in complex transformation scenarios.} 
+There are several Java parsing tools available, such as WALA~\cite{wala_main}, SootUp~\cite{sootup_main}, Spoon~\cite{spoon_main} and JavaParser~\cite{javaParser}. WALA and SootUp are primarily designed for analyzing Java Bytecode and are generally more complex to use. For this project, Spoon was chosen because it is a user-friendly tool that facilitates easy retrieval and manipulation of the AST from Java source code. Both JavaParser and Spoon support AST manipulation and code generation. However, Spoon provides a deeper, type-aware metamodel and built-in templating features. These features make Spoon more suitable for generating code that conforms to Java’s syntactic and semantic rules, especially in complex transformation scenarios.
 
 In order to build the extension, it was necessary to build a system architecture capable of providing as final output the functioning tool. The architecture follows different stages, that were deeply analyzed before moving to the next one.
 The architecture is divided in 4 main modules, the Program Generator, Orchestrator, Parser and Tool.
@@ -33,7 +37,7 @@ The architecture is divided in 4 main modules, the Program Generator, Orchestrat
 
 \section{Stage 1: Program Generator} \label{sec:work_stage1_program_generator}
 
-\begin{figure}[H]
+\begin{figure}[htbp]%[H]
   \centering
   \includegraphics[width = 1 \textwidth]{figures/program_generator.pdf}
   \caption{Program Generator}
@@ -46,9 +50,7 @@ The generator works for custom Java classes or for some collections (Lists, Sets
 
 \subsection{Template Creation} \label{sec:work_stage1_template_creation}
 
-
-\FloatBarrier
-
+%\FloatBarrier
 
 \begin{listing}[H]
 \begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
@@ -132,7 +134,7 @@ Template important features
 
   \item Type placeholder: Placeholders that will later be replaced with Java wrapper classes.
   
-  \item \textcolor{blue}{Array Size placeholder: Placeholder that will later be replaced with the value of an array size. (This array will be explained in the next section)}. 
+  \item Array Size placeholder: Placeholder that will later be replaced with the value of an array size. (This array will be explained in \ref{sec:work_stage2_orchestrator}). 
 
 \end{itemize}
 
@@ -200,7 +202,7 @@ Consider analyzing the \texttt{add} method of a list with the following paramete
 \end{itemize}
 
 {Note: Since the list size (\texttt{arg0}) remains 1, the maximum valid index (\texttt{arg1}) is constrained to 0. This reveals a limitation in the input testing approach.}
-\vspace{5mm}
+%\vspace{5mm}
 \textbf{Step 3 – Varying \texttt{arg2} (value to be added):}
 
 \begin{itemize}
@@ -229,13 +231,21 @@ Despite these limitations, the input search plays a crucial role in ensuring tha
 
 Finally, when the templates are created, and the maximum inputs are found the program generation can finally begin. This part consists on picking every template created and replacing the placeholder values with actual values created by a random number generator.
 
-It starts by looping through the types and changing them to the Java wrapper classes, then it loops through the array size, \textcolor{blue}{{again this value will be explained in the next section}}. Lastly, it loops through the input sizes determined by the input tester and can repeat this process a configurable number of times. By increasing the number of iterations, results in more programs being generated with random inputs, constrained by the previously identified input bounds.
+It starts by looping through the types and changing them to the Java wrapper classes, then it loops through the array size. Lastly, it loops through the input sizes determined by the input tester and can repeat this process a configurable number of times. By increasing the number of iterations, results in more programs being generated with random inputs, constrained by the previously identified input bounds.
 
 This process easily generate thousands of programs which are crucial to train machine learn models that are able to predict energy consumption. When generating programs, a number is chosen to balance the requirements for effective model training while minimizing the time spent on input testing and collecting energy profiles. Afterwards, that the programs are ready to be compiled and used.
 
 
 
 \section{Stage 2: Orchestrator} \label{sec:work_stage2_orchestrator}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width = 1 \textwidth]{figures/orchestrators_process.pdf}
+  \caption{Orchestrator Workflow}
+  \label{fig:orchestrators_process}
+\end{figure}
+
 
 Having all the programs generated, it is possible to move to the next stage. Gathering the energy profiles for each of the generated programs. This step is necessary, of course, because to give energy consumption estimates, first it is necessary to obtain energy profiles~\cite{10.1145/2884781.2884869,8816747}, so the machine learning models can obtain the most accurate results possible. To make this task as easily as possible, a process was implemented, so the task was made automatically, taking into account what was said in \ref{sec:background_benchmarking}. 
 
@@ -256,7 +266,7 @@ When measuring energy, there is a particular problem with computation. It is too
 If we approach the measurements with the loop technique, first we need to create the variables needed for the method target to analysis, like shown in \ref{lst:var_placeholders}. But there is a problem, the methods are treated like a black box, it is not possible to know what the methods are going to do with the parameters or with its variables, for example, the method List.size() it receives nothing, and return the size of the list which is fine. However, this raises problems with other methods, such as List.add(Object), maybe not in the first iterations. But what if the loop iterates too many times? It will make the list much bigger than the initial list, which again will cause differences in the energy measurements and later in the energy predictions. 
 Now, suppose we have a custom method called sort that takes a randomly ordered list and sorts it. This introduces a problem when measuring its energy consumption. On the first run, the method will sort the unsorted list, which may take significant time depending on the randomness of the data and the sorting algorithm used. However, on subsequent runs with the same list, the input is already sorted, meaning the sort method will likely complete much faster or with minimal effort. This difference can result in misleading or inconsistent measurements.
 
-\begin{figure}
+\begin{figure}[htbp]
   \centering
   \includegraphics[width = 1 \textwidth]{figures/array.pdf}
   \caption{Array example}
@@ -295,9 +305,6 @@ The workflow of this step can be described as follows:
   \item The Java program will run until it finishes the computation. The computation runs for a maximum of one second. Then the number of iterations are stored in a file and the stop signal is sent back to the orchestrator.
   \item The orchestrator on receiving the stop signal, first stops PowerJoular and then stops the target program, if needed. Then it parses the target program to extract its features, combines them with the energy information stored in the files created by PowerJoular, stores it in a CSV file.
 \end{itemize}
-
-All these steps are done for every program generated. In the end a log file is created with important information, all the programs used, all the PowerJoular files created, all the temp files created, all the error files created and CSVs.
-Also, the features from some programs are joined at the end. They are all trained individually, however it does not make sense to have LinkedList.add(Object) separated from ArrayList.add(Object), they are both the same (List.add(Object)) method but with different features, so at the end, when all the energy profiles are collected this join is performed.
 
 All these steps are performed for each generated program. At the end of the process, a log file is created containing key information, including all the programs used, the PowerJoular files generated, temporary files, error logs, and features.
 Additionally, features from certain programs are merged at the final stage. While each method is initially trained individually, it is not useful to treat LinkedList.add(Object) and ArrayList.add(Object) as entirely separate cases. Both represent the same List.add(Object) method, differing only in their characteristics specific to their implementation. Therefore, once all energy profiles have been collected, a merging step is performed to consolidate these related methods.

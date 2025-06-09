@@ -1,6 +1,6 @@
 package com.runner;
 import com.template.aux.DeepCopyUtil;
-import com.template.aux.ArrayListAux;
+import com.template.aux.CollectionAux;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.template.aux.TemplatesAux;
 import java.util.ArrayList;
@@ -10,10 +10,10 @@ public class T {
     public static void main(String[] args) throws Exception {
         int iter = 0;
             ArrayList<Integer> var0 = new ArrayList();
-            ArrayListAux.insertRandomNumbers(var0, (int) 622, "Integer");
+            CollectionAux.insertRandomNumbers(var0, (int) 622, "Integer");
             int var1 = 1;
             ArrayList<Integer> var2 = new ArrayList();
-            ArrayListAux.insertRandomNumbers(var2, (int) 154, "Integer");
+            CollectionAux.insertRandomNumbers(var2, (int) 154, "Integer");
             BenchmarkArgs[] arr = new BenchmarkArgs[150000];
             populateArray(arr, var0, var1, var2);
             TemplatesAux.launchTimerThread(1100);

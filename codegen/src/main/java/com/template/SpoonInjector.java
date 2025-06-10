@@ -623,7 +623,8 @@ public class SpoonInjector {
         
         CtBlock<Void> methodBody = factory.Core().createBlock();
 
-        String args = String.join(", ", Arrays.stream(getAllVarsAsString().split(", ")).map(s -> "args[i]."+s).toArray(String[]::new));
+        String varsString = getAllVarsAsString();
+        String args = varsString.isEmpty() ? "" : String.join(", ", Arrays.stream(varsString.split(", ")).map(s -> "args[i]."+s).toArray(String[]::new));
 
         String body ="int i = 0;\n" + //
         "while (!TemplatesAux.stop && i < iter) {\n      " + //

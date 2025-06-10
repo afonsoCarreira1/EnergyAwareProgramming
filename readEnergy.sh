@@ -1,9 +1,8 @@
 #!/bin/bash
+#SBATCH --job-name=orchestrator
+#SBATCH --output=log_orchestrator_%A_%a.log
+#SBATCH --array=0
+#SBATCH --ntasks=1
+#SBATCH --mem=2G
 
-tmux new -s orchestrator './run_orchestrator.sh'
-
-#leave session 
-# Ctrl + b, then d
-
-# reattach to session
-# tmux attach -t orchestrator
+./run_orchestrator.sh

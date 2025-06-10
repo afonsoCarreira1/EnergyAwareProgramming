@@ -6,9 +6,11 @@ First there is a merge of features. While each method is initially trained indiv
 
 All these features are stored in a new CSV and for the python program in a Data frame, to be processed.
 
-In this phase the models tested were: Decision Tree Regressor, Random Forest, Gradient Boosting, Linear Regression, and PySR. The models were not implemented from scratch. Most of them were used from a python library called scikit-learn (sklearn)~\cite{scikit-learn} which is a library used for machine learning, and it already has the models implemented. As for PySR~\cite{cranmer2023interpretablemachinelearningscience} it is also already implemented.
+This part was developed in python using some libraries specialized on machine learning, like scikit-learn (sklearn)~\cite{scikit-learn} which contains some models and functions to evaluate the models, and PySR~\cite{cranmer2023interpretablemachinelearningscience} which was already explained in \ref{sec:background_machine_learning} an is also already implemented.
 
-The library used was from python sklearn. First the values of the MSE and R2 are evaluated by the default of sklearn, then in a second pass to a GridSearch, which is a function of sklearn that tries to find the best parameters for a model. After that the scores and models are saved.
+In this phase the models tested were: Decision Tree Regressor, Random Forest, Gradient Boosting, Linear Regression, and PySR.
+
+First the values of the MSE and R2 are evaluated by the default values of sklearn, then in a second pass, GridSearch was used, which is a function of sklearn that tries to find the best parameters for a model. After that the scores and models are saved. The GridSearch does not work with PySR as they are from different libraries so, the parameters for PySR were manually set.
 
 In the end the chosen model was PySR as it can represent the predictions in expressions which can help the users to try to understand why the code is using more energy. It has a nice feature of allowing to balance complexity and accuracy. And can easily be used in another code language as it is represented as a mathematical expression.
 

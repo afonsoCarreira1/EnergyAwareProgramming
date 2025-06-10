@@ -87,7 +87,7 @@ public class ToolParser {
         CtStatement parent = invocation.getParent(CtStatement.class);
         while (parent != null) {
             if (parent instanceof CtLoop) {
-                String id = "Method: "+methodName + " loopDepth " + loopCount;
+                String id = getId(methodName, loopCount);
                 modelInfo.addId(id);
                 modelInfo.addLoopId(id);
                 loopCount++;
@@ -98,6 +98,14 @@ public class ToolParser {
             parent = parent.getParent(CtStatement.class);
         }
         return loopCount;
+    }
+
+    private String getId(String methodName,int loopCount) {
+        return "Method: "+methodName + " | loopDepth " + loopCount;
+    }
+
+    private String getId(String methodName,String variable) {
+        return "Method: " + methodName + " | Variable: " + variable;
     }
 
 
@@ -195,7 +203,7 @@ public class ToolParser {
         for (int i = 0; i < arguments.size(); i++) {
             CtExpression<?> arg = arguments.get(i);
             if (arg instanceof CtVariableRead) {
-                String id = "Method: " + methodContext + " Variable: " + arg.toString();
+                String id = getId(methodContext, arg.toString());
                 modelInfo.addId(id);
                 modelInfo.associateInputToVar("input" + (i + inputNum), id);
             }
@@ -209,7 +217,7 @@ public class ToolParser {
     // input of the first arg is 1
     private int addInput0AsTargetIfExists(CtInvocation<?> invocation, ModelInfo modelInfo, String methodContext) {
         if (invocation.getTarget() == null) return 0;
-        String id = "Method: " + methodContext + " Variable: " + invocation.getTarget();
+        String id = getId(methodContext, invocation.getTarget().toString());
         modelInfo.addId(id);
         modelInfo.associateInputToVar("input0", id);
         return 1;

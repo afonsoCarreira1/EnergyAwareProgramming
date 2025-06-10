@@ -73,9 +73,8 @@ The workflow of this step can be described as follows:
 \end{itemize}
 
 All these steps are performed for each generated program. At the end of the process, a log file is created containing key information, including all the programs used, the PowerJoular files generated, temporary files, error logs, and features.
-Additionally, features from certain programs are merged at the final stage. While each method is initially trained individually, it is not useful to treat LinkedList.add(Object) and ArrayList.add(Object) as entirely separate cases. Both represent the same List.add(Object) method, differing only in their characteristics specific to their implementation. Therefore, once all energy profiles have been collected, a merging step is performed to consolidate these related methods.
 
-The features extracted from the parser are the following:
+The features extracted from the parser can be seen in the table \ref{tab:features_extracted}
 
 \begin{table}[htbp]
 \centering
@@ -101,21 +100,23 @@ BranchCount & Number of branching statements ( if, else if, else ) in the code. 
 \hline
 LoopCount & Number of loops ( for, while, do-while ) in the code. \\
 \hline
-loopMaxDepth & Maximum nesting depth of loops in the code. \\
+LoopMaxDepth & Maximum nesting depth of loops in the code. \\
 \hline
-cyclomaticComplexity & The cyclomatic complexity of the code (number of independent execution paths). \\
+CyclomaticComplexity & The cyclomatic complexity of the code (number of independent execution paths). \\
 \hline
-literalCount & Number of literals (numbers, strings, boolean values) in the code. \\
+LiteralCount & Number of literals (numbers, strings, boolean values) in the code. \\
 \hline
 VariableCount & Total number of variables in the code. \\
 \hline
 Reassignments & Number of times variables are reassigned a new value. \\
 \hline
-variableTypes & Types of variables used (e.g., int, String, List$<$String$>$). \\
+VariableTypes & Types of variables used (e.g., int, String, List$<$String$>$). \\
 \hline
-importsUsed & List of imported Java packages/libraries in the code. \\
+ImportsUsed & List of imported Java packages/libraries in the code. \\
 \hline
 java.langMethodUsed & If the method is from java.lang, the specific function name (e.g., ArrayList.get). \\
+\hline
+Inputs & The parameters received by the method. \\
 \hline\hline
 \end{tabular}
 \end{table}

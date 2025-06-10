@@ -162,11 +162,11 @@ def model(df,modelPath,log):
     log.append('Pysr')
     log.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     pysr(X,y,X_train, X_test, y_train, y_test,modelPath,log)
-    log.append("\n\n\n")
-    log.append('m3gp')
-    log.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    m3gp_model(X,y,X_train, X_test, y_train, y_test,modelPath,log,save = True)
-    log.append("\n\n\n")
+    #log.append("\n\n\n")
+    #log.append('m3gp')
+    #log.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #m3gp_model(X,y,X_train, X_test, y_train, y_test,modelPath,log,save = True)
+    #log.append("\n\n\n")
 
     #checkStrangeValuesOfBubbleSort()
     #save_figure_pdf(df,regressor)
@@ -479,7 +479,7 @@ def check_one_method(method = "addAll_java_util_Collection_"):
     X = df.iloc[:, :-1]
     y = df.iloc[:, -1]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-    m3gp_model(X,y,X_train, X_test, y_train, y_test,modelPath,log,save = False)
+    #m3gp_model(X,y,X_train, X_test, y_train, y_test,modelPath,log,save = False)
     for x in log:
         print(x)
 

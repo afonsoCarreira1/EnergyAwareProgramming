@@ -1,3 +1,14 @@
 \section{Stage 3: Model Training} \label{sec:work_stage3_model_training}
 
 Now, that all the energy profiles are collected it is possible to finally start training the models. As explained in \ref{sec:background_machine_learning} there are a lot of possible ways of using machine learning, however in this case the approach that best fit our need is supervised machine learning. So, some models were trained to see how good they performed using the data collected.
+
+First there is a merge of features. While each method is initially trained individually, it is not useful to treat LinkedList.add(Object) and ArrayList.add(Object) as entirely separate cases. Both represent the same List.add(Object) method, differing only in their characteristics specific to their implementation. Therefore, once all energy profiles have been collected, a merging step is performed to consolidate these related methods.
+
+All these features are stored in a new CSV and for the python program in a Data frame, to be processed.
+
+In this phase the models tested were: Decision Tree Regressor, Random Forest, Gradient Boosting, Linear Regression, and PySR. The models were not implemented from scratch. Most of them were used from a python library called scikit-learn (sklearn)~\cite{scikit-learn} which is a library used for machine learning, and it already has the models implemented. As for PySR~\cite{cranmer2023interpretablemachinelearningscience} it is also already implemented.
+
+The library used was from python sklearn. First the values of the MSE and R2 are evaluated by the default of sklearn, then in a second pass to a GridSearch, which is a function of sklearn that tries to find the best parameters for a model. After that the scores and models are saved.
+
+In the end the chosen model was PySR as it can represent the predictions in expressions which can help the users to try to understand why the code is using more energy. It has a nice feature of allowing to balance complexity and accuracy. And can easily be used in another code language as it is represented as a mathematical expression.
+

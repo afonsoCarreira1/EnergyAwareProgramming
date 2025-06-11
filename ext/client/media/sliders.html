@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Java Sliders</title>
@@ -8,7 +9,7 @@
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background-color: #333;
-      color: #333;/*#f9f9f9 -> white*/
+      color: #333;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -47,6 +48,7 @@
       justify-content: space-between;
       align-items: center;
       transition: background-color 0.2s ease;
+      gap: 10px;
     }
 
     .method-header:hover {
@@ -103,11 +105,19 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-5px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
+
 <body>
 
   <h2>Adjust Parameters</h2>
@@ -155,7 +165,8 @@
           const header = document.createElement('div');
           header.className = 'method-header';
           header.innerHTML = `
-            <span>${method}</span>
+            <span class="method-name">${method}</span>
+            <span class="method-energy"></span>
             <span>⯈</span>
           `;
 
@@ -222,7 +233,25 @@
       if (message.type === 'updateEnergy') {
         const energyValue = formatEnergy(message.energy) ?? '--';
         document.getElementById('energy-value').textContent = energyValue;
+
+        const methodsEnergy = message.methodsEnergy || {};
+        const methodHeaders = document.querySelectorAll('.method-header');
+
+        methodHeaders.forEach(header => {
+          const nameSpan = header.querySelector('.method-name');
+          const energySpan = header.querySelector('.method-energy');
+          const methodName = nameSpan?.textContent.trim();
+          const energy = methodsEnergy[methodName];
+          console.log('MethodsEnergy :', methodsEnergy);
+          console.log('Method header name:', methodName, " and its energy -> ", energy);
+          if (energy !== undefined) {
+            energySpan.textContent = `(${formatEnergy(energy)})`;
+          } else {
+            energySpan.textContent = '';
+          }
+        });
       }
+
     });
 
     document.getElementById('estimate-btn').addEventListener('click', () => {
@@ -240,4 +269,5 @@
     }
   </script>
 </body>
+
 </html>

@@ -45,8 +45,9 @@ public class Tool implements LanguageServer {
     public void onCalculateEnergy(Object ignored) throws URISyntaxException {
         Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
         double totalEnergyUsed = CalculateEnergy.calculateEnergy(serverDir.toString() + "/collected_models/");
-        Map<String,Object> message = Map.of("totalEnergyUsed",totalEnergyUsed);
-        if (client != null) client.updateEnergy(message);
+        Map<String,Object> message = Map.of("totalEnergyUsed",totalEnergyUsed,"methodsEnergy",CalculateEnergy.getMethodsEnergy());
+        if (client != null) client.updateEnergy(message); 
+        
     }
 
     public void connect(LanguageClient client) {

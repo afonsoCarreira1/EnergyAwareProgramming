@@ -10,3 +10,7 @@ The extension does this to every method it finds and groups it by method. In the
 If a method calls another user-defined method that already has an assigned energy cost (but is not a trained method), then the calling method will also include that energy cost.
 
 When a trained method is called inside a loop, a new slider appears to represent the loop size. The method’s energy cost is multiplied by this loop size. In the case of nested loops, the energy cost is multiplied by the product of all nested loop sizes.
+
+Note that only methods and variables that affect the energy appear on the panel.
+
+

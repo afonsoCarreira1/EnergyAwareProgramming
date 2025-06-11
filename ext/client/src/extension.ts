@@ -39,7 +39,8 @@ export async function activate(context: vscode.ExtensionContext) {
         if (sliderPanel) {
             sliderPanel.webview.postMessage({
                 type: 'updateEnergy',
-                energy: params.totalEnergyUsed
+                energy: params.totalEnergyUsed,
+                methodsEnergy: params.methodsEnergy
             });
         } else {
             console.warn('Slider panel is not open, message not sent.');

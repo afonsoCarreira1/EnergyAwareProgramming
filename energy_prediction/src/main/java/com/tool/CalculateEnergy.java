@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.parse.ModelInfo;
 import com.parse.MethodEnergyInfo;
@@ -92,6 +93,14 @@ public class CalculateEnergy {
         expression = expression.replaceAll("\\b(?!(" + allowedFunctions + ")\\b)[a-zA-Z_][a-zA-Z_0-9]*\\b", "0");
 
         return expression;
+    }
+
+    public static Map<String,Double> getMethodsEnergy() {
+        HashMap<String, Double> methodsEnergy = new HashMap<>();
+        for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
+            methodsEnergy.put(methodEnergyInfo.getMethodName(), methodEnergyInfo.getTotalEnergy());
+        }
+        return methodsEnergy;
     }
 
     private static String getModelExpression(String modelPath) {

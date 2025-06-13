@@ -6,3 +6,4 @@ scikit-learn
 pysr
 seaborn
 m3gp
+shutil

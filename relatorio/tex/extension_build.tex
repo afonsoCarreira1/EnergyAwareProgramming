@@ -1,7 +1,7 @@
 \section{Stage 4: Extension Build} \label{sec:work_stage4_extension_build}
 
 The last stage was to build an extension for an IDE, VSCode. This extension allows the user to have a better understanding of how much energy the code is consuming, and what are the methods, and variables that most affect it.
-It contains some sliders that can change the input values, and it has the estimate button, to predict the energy.
+When opening the extension side page, it contains some sliders that can change the input values, and it has the estimate button, to predict the energy.
 The sliders are updated when the document is saved.%, rather than on every change, to prevent performance slowdowns.
 
 The extension works by parsing the Java file of the user, and gathering all the methods used that are already models that are trained. Then it finds which variables affect those methods, meaning the variables that are the inputs to the method, for example, in \texttt{list.add(i);}  the inputs and important variables are \texttt{list} and \texttt{i}.

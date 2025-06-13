@@ -7,7 +7,7 @@ This section provides an overview of the essential concepts and foundational kno
 
 When performing benchmarking (i.e. measuring time, energy, memory, etc.) it is important to have in mind some important information that can affect the measurements. First it matters to know how the programming language being used works, and how it can affect the measurements. It is important to understand how to understand which noise can be avoidable and which cannot be.
 
-In this project the target language is Java, so the benchmark will have its constraints. Performing benchmarks in Java has its adversities, and needs careful approach when needed. Several papers have studied how to perform better benchmarks ~\cref{10.1145/1297027.1297033,10.1145/1167515.1167488} details important aspects on how to correctly benchmark Java applications, and how to avoid common pitfalls.
+In this project the target language is Java, so the benchmark will have its constraints. Performing benchmarks in Java has its adversities, and needs careful approach when needed. Several papers have studied how to perform better benchmarks ~\cite{10.1145/1297027.1297033,10.1145/1167515.1167488} details important aspects on how to correctly benchmark Java applications, and how to avoid common pitfalls.
 It is essential to understand the non-deterministic problems that may arrive when benchmarking in Java:
 
 \begin{listing}[H]
@@ -24,13 +24,13 @@ It is essential to understand the non-deterministic problems that may arrive whe
 
 
 \begin{itemize}
-    \item textbf{Just-In-Time (JIT) compilation}: Automatically performs optimizations in during the compilation, which can affect measurements. Example: In the loop \ref{lst:for_loop_example}, the optimization done during the compilation, might understand that the loop is unnecessary and just replace the variable sum with \texttt{int sum = 100;}, avoiding the loop. Basically, the JIT compiler may detect that a loop performs predictable work and optimize it away entirely, especially if the results are unused or can be computed ahead of time.
+    \item \textbf{Just-In-Time (JIT) compilation}: Automatically performs optimizations in during the compilation, which can affect measurements. Example: In the loop \ref{lst:for_loop_example}, the optimization done during the compilation, might understand that the loop is unnecessary and just replace the variable sum with \texttt{int sum = 100;}, avoiding the loop. Basically, the JIT compiler may detect that a loop performs predictable work and optimize it away entirely, especially if the results are unused or can be computed ahead of time.
     
-    \item textbf{Garbage Collection (GC)}: It can be called randomly, which can affect measurements, for time measurements it can increase it, the same for energy measurements, for memory measurements it depends if it was called before or after the measurement.
+    \item \textbf{Garbage Collection (GC)}: It can be called randomly, which can affect measurements, for time measurements it can increase it, the same for energy measurements, for memory measurements it depends if it was called before or after the measurement.
     
-    \item textbf{Thread scheduling}: It is also unpredictable when threads stop might have different schedules, resulting in different interactions.
+    \item \textbf{Thread scheduling}: It is also unpredictable when threads stop might have different schedules, resulting in different interactions.
     
-    \item textbf{Java Virtual Machine (JVM)}: Different JVM implementations or configurations (e.g., heap size, GC algorithms, JIT strategies) can result in considerable performance differences. Even the same JVM may behave differently across runs due to internal optimizations and adaptive behaviors.
+    \item \textbf{Java Virtual Machine (JVM)}: Different JVM implementations or configurations (e.g., heap size, GC algorithms, JIT strategies) can result in considerable performance differences. Even the same JVM may behave differently across runs due to internal optimizations and adaptive behaviors.
 \end{itemize}
 
 Some of these properties cannot be avoided, however there are some procedures that can be taken into consideration to avoid error in the measurements.

@@ -59,8 +59,9 @@ public class ToolParser {
                         paramKey.append(paramType.getQualifiedName().replace(".", "_")).append("_");
                     }
 
-                    String modelName = execRef.getSimpleName() + "_" + (paramKey.length() == 0 ? "_" : paramKey.toString());
+                    String declaringType = execRef.getDeclaringType() != null ? execRef.getDeclaringType().getSimpleName() : "UnknownType";
 
+                    String modelName = declaringType+"_"+execRef.getSimpleName() + "_" + (paramKey.length() == 0 ? "_" : paramKey.toString());
                     if (!modelsAvailable.contains(modelName)) continue; // ignore methods that are not trained
                     
                     ModelInfo modelInfo = new ModelInfo(modelName);

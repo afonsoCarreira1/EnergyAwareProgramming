@@ -15,6 +15,7 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from joblib import dump, load
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
+import shutil
 from pysr import PySRRegressor
 from m3gp.M3GP import M3GP
 
@@ -377,7 +378,7 @@ def save_log_to_file(log, path):
     print(f"Log saved to {filename}")
 
 def readDividedFeatures(files):
-    for filename in files:  
+    for filename in files: 
         log = []
         log.append("------------------------------------------------------")
         log.append(f"Training model {filename}")
@@ -405,25 +406,32 @@ def getAllFeatures():
     os.chdir("orchestrator/logs/log_2025_05_20/tmp_files")
     features_paths = get_feature_file_per_subdir_path()
     os.chdir(original_dir)
-    files = join_method_features(features_paths)
-    return files
+    files,modelsAvailable = join_method_features(features_paths)
+    return (files,modelsAvailable)
 
     
 
 def join_method_features(features_paths):
     files = []
     data_dict = {}
+    modelsAvailable = []
     for features_path in features_paths: 
         parts2 = features_path.split("_")
         method_name = "_".join(parts2[1:])
+        modelsAvailable.append("_".join(parts2[0:])) #ArrayList_addAll_int_java_util_Collection_ guarda com o nome da collec
         add_or_concat_df(data_dict,method_name,pd.read_csv(features_paths[features_path]))
     for key in data_dict:
         df = data_dict[key]
         os.makedirs('out/'+key, exist_ok=True)
         df.to_csv('out/'+key+'/'+key+".csv", index=False)
         files.append('out/'+key+'/'+key+".csv")
-    return files
+    createModelsAvailableFile(modelsAvailable)
+    return (files,modelsAvailable)
 
+def createModelsAvailableFile(modelsAvailable):
+    with open('ModelsAvailable.txt', 'w') as file:
+        for model in modelsAvailable:
+            file.write(model + '\n')
 
 
 #def add_or_concat_df(dct, key, df):
@@ -494,15 +502,27 @@ def plots(files,fname):
         #plot_energy_vs_feature(X,y,'input0')
 
 
-def createFilesForExtension():
+def create_dir_if_not_exists(path):
+    if not os.path.exists(path):os.makedirs(path)
+
+
+def createFilesForExtension(models_available):
+    create_dir_if_not_exists("collected_models")
+    for model in models_available:
+        pysr_model_name = "_".join(model.split("_")[1:])
+        pysr_model_path = "out/"+pysr_model_name+"/models/pysr/"+pysr_model_name+"/models/hall_of_fame.csv"
+        dst_dir = "collected_models"
+        dst_filename = model+".csv"
+        dst_path = os.path.join(dst_dir, dst_filename)
+        shutil.copyfile(pysr_model_path, dst_path)
     subprocess.run(f"./move_models_to_extension.sh", shell=True, capture_output=True, text=True)
 
 def main():
     #os.makedirs('out/', exist_ok=True)
-    files = getAllFeatures()
+    files,models_available = getAllFeatures()
     #plots(files,"equals_java_lang_Object_")
     #readDividedFeatures(files)
-    check_one_method()
-    #createFilesForExtension()
+    #check_one_method()
+    createFilesForExtension(models_available)
 
 main()

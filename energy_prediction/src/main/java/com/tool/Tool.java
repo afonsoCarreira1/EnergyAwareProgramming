@@ -31,6 +31,7 @@ public class Tool implements LanguageServer {
     private final TextDocumentService textDocumentService = new ToolTextDocumentService();
     private CustomLanguageClient client;
     static public ASTFeatureExtractor parser = null;
+    static private HashSet<String> modelsSaved = null;
 
     @JsonNotification("custom/sliderChanged")
     public void onSliderChanged(Map<String, Object> params) {
@@ -103,7 +104,7 @@ public class Tool implements LanguageServer {
             try {
                 Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI())
                         .getParent();
-                HashSet<String> modelsSaved = Sliders.getModels(serverDir.toString() + "/" + "ModelsAvailable.txt");
+                if (modelsSaved == null) modelsSaved = Sliders.getModels(serverDir.toString() + "/" + "ModelsAvailable.txt");
                 Map<String, Object> message = Sliders.getSlidersInfo(file.split("///")[1], modelsSaved);
                 if (client != null) {
                     client.updateSliders(message);

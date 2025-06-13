@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,17 @@ public class ToolParser {
                     String declaringType = execRef.getDeclaringType() != null ? execRef.getDeclaringType().getSimpleName() : "UnknownType";
 
                     String modelName = declaringType+"_"+execRef.getSimpleName() + "_" + (paramKey.length() == 0 ? "_" : paramKey.toString());
-                    if (!modelsAvailable.contains(modelName)) continue; // ignore methods that are not trained
+                    
+                    boolean isModelMethod = modelsAvailable.contains(modelName);
+                    //if (!modelsAvailable.contains(modelName)) continue; // ignore methods that are not trained
+                    
+                    //se for um metodo do user quero o guardar ate agora e dar skip ao resto
+                    System.err.println(invocation.getExecutable().getDeclaration());
+                    if (invocation.getExecutable().getDeclaration() != null) {
+                        methodsEnergyInfo.add(methodEnergyInfo);
+                        continue;
+                    }
+                    if (!isModelMethod) continue; // ignore methods that are not trained
                     
                     ModelInfo modelInfo = new ModelInfo(modelName);
                     System.err.println("Loops around " + modelName + " -> "+countEnclosingLoops(invocation,modelInfo,methodName));
@@ -260,7 +271,7 @@ public class ToolParser {
         // return modelInfo;
     }
 
-
+    /* 
     public HashMap<String,Integer> methodsUsageCounter() {
         HashMap<String,CtMethod<?>> methodsMap = getAllMethodNames();
         ArrayList<String> methods = new ArrayList<>(methodsMap.keySet()); 
@@ -288,6 +299,49 @@ public class ToolParser {
             String newExploreMethod = buildInvocationString(invocation);
             if (invocation.getExecutable().getDeclaration() == null) continue; //it means the methodCall is not from my code
             methodRecursiveCounter(visited, methodsMap.get(newExploreMethod), newExploreMethod,methodsMap,counter);
+        }
+    }*/
+
+    public Map<String,Object> methodsUsageCounter() {
+        HashMap<String,CtMethod<?>> methodsMap = getAllMethodNames();
+        ArrayList<String> methods = new ArrayList<>(methodsMap.keySet()); 
+        HashMap<String,Integer> counter = new HashMap<>();
+        HashMap<String, List<String>> callGraph = new HashMap<>();
+        Map<String, Integer> indegree = new HashMap<>();
+        HashSet<String> visited = new HashSet<>();
+        for (String exploringMethodName : methods) {
+            
+            methodRecursiveCounter(visited, methodsMap.get(exploringMethodName),exploringMethodName,methodsMap,counter,callGraph,indegree);
+        }
+        //System.out.println("final counter -> "+counter);
+        System.err.println("callGraph -> " + callGraph);
+        System.err.println("indegree -> " + indegree);
+        Map<String,Object> m = Map.of("callGraph",callGraph,"indegree",indegree);
+        return m;
+    }
+
+    private void methodRecursiveCounter(
+        HashSet<String> visited, 
+        CtMethod<?> method,
+        String exploringMethod,
+        HashMap<String,CtMethod<?>> methodsMap,
+        HashMap<String,Integer> counter,
+        HashMap<String, List<String>> callGraph,
+        Map<String, Integer> indegree
+        )
+        {
+        counter.merge(exploringMethod, 1, Integer::sum);
+        if (visited.contains(exploringMethod)) return;
+        visited.add(exploringMethod);
+        List<CtInvocation<?>> invocations = method.getElements(new TypeFilter<>(CtInvocation.class));
+        for (CtInvocation<?> invocation : invocations) {
+            String newExploreMethod = buildInvocationString(invocation);
+            if (invocation.getExecutable().getDeclaration() == null) continue; //it means the methodCall is not from my code
+            callGraph.computeIfAbsent(exploringMethod, k -> new ArrayList<>()).add(newExploreMethod);
+            indegree.putIfAbsent(newExploreMethod, 0);
+            indegree.putIfAbsent(exploringMethod, 0);
+            indegree.put(newExploreMethod, indegree.get(newExploreMethod) + 1);
+            methodRecursiveCounter(visited, methodsMap.get(newExploreMethod), newExploreMethod,methodsMap,counter,callGraph,indegree);
         }
     }
 

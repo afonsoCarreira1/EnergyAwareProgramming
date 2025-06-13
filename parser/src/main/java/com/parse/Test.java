@@ -5,16 +5,16 @@ import java.util.ArrayList;
 class Test {
 
     public void a(){
-        
+        b();
     }
 
     public void b() {
+        c();
     }
     
 
     public void c() {
-        ArrayList<String> l = new ArrayList<>();
-        l.add("1");
+        
     }
 
     

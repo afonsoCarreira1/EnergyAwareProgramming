@@ -4,9 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import com.parse.ModelInfo;
 import com.parse.MethodEnergyInfo;
@@ -40,19 +43,75 @@ public class CalculateEnergy {
         }
 
         System.err.println("total energy used was -> " + totalEnergyUsed + "J");
-        return /*totalEnergyUsed +*/ countMethodsUsedEnergy();
+        System.err.println(countMethodsUsedEnergy());
+        return 0.0; /*totalEnergyUsed +*/ //countMethodsUsedEnergy();
     }
 
-    private static double countMethodsUsedEnergy() {
+    //private static double countMethodsUsedEnergy() {
+    //    double moreEnergyToSum = 0.0;
+    //    if (Tool.parser == null) return moreEnergyToSum;
+    //    HashMap<String,Integer> methodCounter = Tool.parser.getToolParser().methodsUsageCounter();
+    //    System.err.println("methodCounter -> "+methodCounter);
+    //    for(MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
+    //        System.err.println("method -> "+methodEnergyInfo.getMethodName() + " | energy -> "+methodEnergyInfo.getTotalEnergy());
+    //        moreEnergyToSum += methodCounter.get(methodEnergyInfo.getMethodName()) * methodEnergyInfo.getTotalEnergy();
+    //    }
+    //    return moreEnergyToSum;
+    //}
+
+
+    public static Map<String, Double> countMethodsUsedEnergy(){
         double moreEnergyToSum = 0.0;
-        if (Tool.parser == null) return moreEnergyToSum;
-        HashMap<String,Integer> methodCounter = Tool.parser.getToolParser().methodsUsageCounter();
-        System.err.println("methodCounter -> "+methodCounter);
-        for(MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
-            System.err.println("method -> "+methodEnergyInfo.getMethodName() + " | energy -> "+methodEnergyInfo.getTotalEnergy());
-            moreEnergyToSum += methodCounter.get(methodEnergyInfo.getMethodName()) * methodEnergyInfo.getTotalEnergy();
+        //if (Tool.parser == null) return moreEnergyToSum;
+        Map<String, Object> info = Tool.parser.getToolParser().methodsUsageCounter();
+        Map<String, List<String>> callGraph = (Map<String, List<String>>) info.get("callGraph");
+        Map<String, Integer> indegree = (Map<String, Integer>) info.get("indegree");
+
+        Map<String, Double> baseEnergy =  getMethodsEnergy();
+        
+
+        // Copy indegree so original is not modified
+        Map<String, Integer> indegreeCopy = new HashMap<>(indegree);
+
+        // Map to store total energy for each method
+        Map<String, Double> totalEnergy = new HashMap<>();
+
+        // Queue for methods with no dependencies (indegree == 0)
+        Queue<String> queue = new LinkedList<>();
+
+        // Initialize queue and totalEnergy for methods with indegree 0
+        for (String method : indegreeCopy.keySet()) {
+            if (indegreeCopy.get(method) == 0) {
+                queue.offer(method);
+                totalEnergy.put(method, baseEnergy.getOrDefault(method, 0.0));
+            }
         }
-        return moreEnergyToSum;
+
+        // Process the graph bottom-up: from methods with no calls to callers
+        while (!queue.isEmpty()) {
+            String method = queue.poll();
+            double methodEnergy = totalEnergy.getOrDefault(method, baseEnergy.getOrDefault(method, 0.0));
+
+            // For each method that 'method' calls, accumulate their energy to 'method'
+            for (String callee : callGraph.getOrDefault(method, Collections.emptyList())) {
+
+                // Accumulate callee's energy into current method's total energy
+                double calleeEnergy = totalEnergy.getOrDefault(callee, baseEnergy.getOrDefault(callee, 0.0));
+                totalEnergy.put(method, totalEnergy.getOrDefault(method, baseEnergy.getOrDefault(method, 0.0)) + calleeEnergy);
+
+                // Reduce indegree of callee since we've "processed" one incoming edge
+                indegreeCopy.put(callee, indegreeCopy.get(callee) - 1);
+
+                // When callee has no more incoming edges, enqueue it
+                if (indegreeCopy.get(callee) == 0) {
+                    // If callee hasn't been added yet, initialize total energy with base energy
+                    totalEnergy.putIfAbsent(callee, baseEnergy.getOrDefault(callee, 0.0));
+                    queue.offer(callee);
+                }
+            }
+        }
+
+        return totalEnergy;
     }
 
     private static double accountForLoops(ArrayList<String> loopIds, double energy) {

@@ -45,24 +45,52 @@ public class CalculateEnergy {
 
         System.err.println("total energy used was -> " + totalEnergyUsed + "J");
         double e = countMethodsUsedEnergy();
+        
         System.err.println(e);
         return e; /* totalEnergyUsed + */ // countMethodsUsedEnergy();
     }
 
-    // private static double countMethodsUsedEnergy() {
-    // double moreEnergyToSum = 0.0;
-    // if (Tool.parser == null) return moreEnergyToSum;
-    // HashMap<String,Integer> methodCounter =
-    // Tool.parser.getToolParser().methodsUsageCounter();
-    // System.err.println("methodCounter -> "+methodCounter);
-    // for(MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
-    // System.err.println("method -> "+methodEnergyInfo.getMethodName() + " | energy
-    // -> "+methodEnergyInfo.getTotalEnergy());
-    // moreEnergyToSum += methodCounter.get(methodEnergyInfo.getMethodName()) *
-    // methodEnergyInfo.getTotalEnergy();
-    // }
-    // return moreEnergyToSum;
-    // }
+    public static Map<String, Integer> computeMethodCalls(
+            Map<String, List<String>> callGraph,
+            Map<String, Integer> indegree) {
+
+        Map<String, Integer> callCount = new HashMap<>();
+
+        Queue<String> queue = new LinkedList<>();
+        for (String method : indegree.keySet()) {
+            if (indegree.get(method) == 0) {
+                callCount.put(method, 1);
+                queue.add(method);
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+            int currentCalls = callCount.get(current);
+
+            List<String> children = callGraph.getOrDefault(current, Collections.emptyList());
+            Map<String, Integer> childFrequency = new HashMap<>();
+
+            for (String child : children) {
+                childFrequency.put(child, childFrequency.getOrDefault(child, 0) + 1);
+            }
+
+            for (Map.Entry<String, Integer> entry : childFrequency.entrySet()) {
+                String child = entry.getKey();
+                int timesCalled = entry.getValue();
+                int totalCalls = currentCalls * timesCalled;
+
+                callCount.put(child, callCount.getOrDefault(child, 0) + totalCalls);
+                indegree.put(child, indegree.get(child) - timesCalled);
+
+                if (indegree.get(child) == 0) {
+                    queue.add(child);
+                }
+            }
+        }
+
+        return callCount;
+    }
 
     public static double countMethodsUsedEnergy() {
         methodsEnergyForContainer = new HashMap<>();
@@ -72,20 +100,33 @@ public class CalculateEnergy {
         for (String methodName : savedMethodPaths.keySet()) {
             HashMap<String, List<String>> callGraph = (HashMap<String, List<String>>) savedMethodPaths.get(methodName).get("callGraph");
             Map<String, Integer> indegree = (Map<String, Integer>) savedMethodPaths.get(methodName).get("indegree");
-            // System.err.println("Method "+key+" -> callGraph -> "+ callGraph + "\n
-            // indegree -> " + indegree);
             System.err.println("---------------------------------");
             System.err.println("Method: " + methodName);
             System.err.println("callGraph -> " + callGraph + "\nindegree -> " + indegree);
+            //Map<String, Map<String, Integer>> countedGraph = countCalls(callGraph);
+            Map<String, Integer> m = computeMethodCalls(callGraph,indegree);
+            System.err.println("compute .> "+m);
             System.err.println("method " + methodName + " uses methods-> " + calculateTopologicSort(callGraph, indegree));
-            double methodEnergy = sumUserMethods(calculateTopologicSort(callGraph, indegree));
+            double methodEnergy = sumUserMethods2(methodName,m,calculateTopologicSort(callGraph, indegree));
+            //System.err.println("method " + methodName + " uses methods-> " + calculateTopologicSort(countedGraph, indegree));
+            //double methodEnergy = sumUserMethods(calculateTopologicSort(countedGraph, indegree));
             methodsEnergyForContainer.put(methodName, methodEnergy);
+            System.err.println("ENERGY -> "+methodEnergy);
             totalEnergy += methodEnergy;
             
         }
 
         return totalEnergy;
 
+    }
+
+    private static double sumUserMethods2(String methodName, Map<String, Integer> methodCalls, Map<String, Double> energy) {
+        double totalEnergy = 0.0;
+        for (String methodUsed : methodCalls.keySet() ) {
+            System.err.println("methodUsed: " + methodUsed + " energy: " + energy.get(methodUsed) + " methodCalls: "+methodCalls.get(methodUsed));
+            totalEnergy += energy.get(methodUsed) * methodCalls.get(methodUsed);
+        }
+        return totalEnergy;
     }
 
     private static double sumUserMethods(Map<String, Double> energy) {
@@ -99,7 +140,6 @@ public class CalculateEnergy {
     private static Map<String, Double> calculateTopologicSort(HashMap<String, List<String>> callGraph, Map<String, Integer> indegree) {
         Map<String, Double> baseEnergy = getMethodsEnergy(indegree);
 
-        // Create reverse graph: callee -> list of callers
         Map<String, List<String>> reverseGraph = new HashMap<>();
         for (Map.Entry<String, List<String>> entry : callGraph.entrySet()) {
             String caller = entry.getKey();
@@ -108,13 +148,11 @@ public class CalculateEnergy {
             }
         }
 
-        // Copy of indegree so original is not modified
         Map<String, Integer> indegreeCopy = new HashMap<>(indegree);
 
-        // Map to store total energy for each method
         Map<String, Double> totalEnergy = new HashMap<>();
 
-        // Queue for methods with no incoming edges (starting points)
+
         Queue<String> queue = new LinkedList<>();
         for (String method : indegreeCopy.keySet()) {
             if (indegreeCopy.get(method) == 0) {
@@ -123,33 +161,35 @@ public class CalculateEnergy {
             }
         }
 
-        // Topological sort - process methods in dependency order
         while (!queue.isEmpty()) {
             String method = queue.poll();
             double methodEnergy = totalEnergy.getOrDefault(method, baseEnergy.getOrDefault(method, 0.0));
 
-            // For each method that calls the current method, add current's energy to it
             for (String caller : reverseGraph.getOrDefault(method, Collections.emptyList())) {
-                double updatedEnergy = totalEnergy.getOrDefault(caller, baseEnergy.getOrDefault(caller, 0.0))
-                        + methodEnergy;
-                totalEnergy.put(caller, updatedEnergy);
 
-                // Reduce indegree of caller
+                double prevEnergy = totalEnergy.getOrDefault(caller, baseEnergy.getOrDefault(caller, 0.0));
+                //totalEnergy.put(caller, prevEnergy + methodEnergy);
+
+
                 indegreeCopy.put(caller, indegreeCopy.get(caller) - 1);
-
                 if (indegreeCopy.get(caller) == 0) {
                     queue.offer(caller);
                 }
             }
         }
 
-        // Make sure every method has an energy value (in case it's not in the graph)
         for (String method : baseEnergy.keySet()) {
             totalEnergy.putIfAbsent(method, baseEnergy.get(method));
         }
 
+        //for (String methodName : totalEnergy.keySet()) {
+        //    int methodCalls = indegree.get(methodName);
+        //    if (methodCalls > 1) totalEnergy.put(methodName, totalEnergy.get(methodName)*methodCalls);
+        //}
+
         return totalEnergy;
     }
+
 
     private static double accountForLoops(ArrayList<String> loopIds, double energy) {
         for (String loopId : loopIds) {

@@ -68,7 +68,6 @@ public class ToolParser {
                     //if (!modelsAvailable.contains(modelName)) continue; // ignore methods that are not trained
                     
                     //se for um metodo do user quero o guardar ate agora e dar skip ao resto
-                    //System.err.println("invocation -> "+invocation.getExecutable().getDeclaration());
                     if (invocation.getExecutable().getDeclaration() != null) {
                         methodsEnergyInfo.add(methodEnergyInfo);
                         continue;
@@ -76,7 +75,8 @@ public class ToolParser {
                     if (!isModelMethod) continue; // ignore methods that are not trained
                     
                     ModelInfo modelInfo = new ModelInfo(modelName);
-                    //System.err.println("Loops around " + modelName + " -> "+countEnclosingLoops(invocation,modelInfo,methodName));
+                    int loops = countEnclosingLoops(invocation,modelInfo,methodName);
+                    System.err.println("Loops around " + modelName + " -> "+loops);
                     getFeaturesForTool(modelInfo, invocation);
 
                     int inputNum = addInput0AsTargetIfExists(invocation, modelInfo, methodName);
@@ -314,6 +314,7 @@ public class ToolParser {
             HashSet<String> visited = new HashSet<>();
             HashMap<String, List<String>> callGraph = new HashMap<>();
             Map<String, Integer> indegree = new HashMap<>();
+            indegree.putIfAbsent(exploringMethodName, 0);
             methodRecursiveCounter(visited, methodsMap.get(exploringMethodName),exploringMethodName,methodsMap,counter,callGraph,indegree);
             savedMethodPaths.put(exploringMethodName, Map.of("callGraph",callGraph,"indegree",indegree));
         }

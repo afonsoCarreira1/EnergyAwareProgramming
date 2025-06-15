@@ -150,7 +150,7 @@
         console.log('Sliders:', sliders);
 
         const sliderMap = {};
-        
+
         for (const config of sliders) {
           const fullId = config.id || 'slider';
           const parts = fullId.split('|').map(s => s.trim());
@@ -162,17 +162,17 @@
           sliderMap[method].push(config);
         }
 
-        for (const method of methods) {
+        for (const [method, energy] of Object.entries(methods)) {
           const box = document.createElement('div');
           box.className = 'method-box';
 
           const header = document.createElement('div');
           header.className = 'method-header';
           header.innerHTML = `
-      <span class="method-name">${method}</span>
-      <span class="method-energy"></span>
-      <span>⯈</span>
-    `;
+    <span class="method-name">${method}</span>
+    <span class="method-energy">(${formatEnergy(energy)})</span>
+    <span>⯈</span>
+  `;
 
           const content = document.createElement('div');
           content.className = 'method-content';
@@ -180,7 +180,11 @@
           header.addEventListener('click', () => {
             const isVisible = content.style.display === 'block';
             content.style.display = isVisible ? 'none' : 'block';
-            header.querySelector('span:last-child').textContent = isVisible ? '⯈' : '⯆';
+            const arrowSpan = header.querySelector('span:last-child');
+            if (arrowSpan) {
+              arrowSpan.textContent = isVisible ? '⯈' : '⯆';
+            }
+
           });
 
           const configs = sliderMap[method] || [];
@@ -233,6 +237,8 @@
           box.appendChild(content);
           container.appendChild(box);
         }
+
+
       }
 
 
@@ -269,6 +275,7 @@
     function formatEnergy(value) {
       const num = parseFloat(value);
       if (isNaN(num)) return "--";
+      if (value === -1.0) return "--";
       return Math.abs(num) < 0.001 && num !== 0
         ? num.toExponential(2) + " J"
         : num.toFixed(5) + " J";

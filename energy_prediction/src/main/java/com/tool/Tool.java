@@ -42,6 +42,7 @@ public class Tool implements LanguageServer {
         Sliders.updateSliders(id, value);
     }
 
+    //bad solution, o melhor e so tirar isto dos update dos sliders e deixar so qd o bttn da energia e computado
     @JsonNotification("custom/calculateEnergy")
     public void onCalculateEnergy(Object ignored) throws URISyntaxException {
         Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
@@ -102,8 +103,7 @@ public class Tool implements LanguageServer {
             // System.err.println("uri -> "+ file);
             // System.err.println("didSave called -> "+ params);
             try {
-                Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI())
-                        .getParent();
+                Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
                 if (modelsSaved == null) modelsSaved = Sliders.getModels(serverDir.toString() + "/" + "ModelsAvailable.txt");
                 Map<String, Object> message = Sliders.getSlidersInfo(file.split("///")[1], modelsSaved);
                 if (client != null) {

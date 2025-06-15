@@ -40,10 +40,19 @@ public class Sliders {
         Map<String, Object> message = Map.of(
             "command", "updateSliders",
             "sliders", slidersTemp,
-            "methods",methodsNotRepeated
+            "methods",joinMethodsWithEnergy(methodsNotRepeated)
         );
 
         return message;
+    }
+
+    private static HashMap<String, Double> joinMethodsWithEnergy(HashSet<String> methods) {
+        HashMap<String, Double> methodsEnergy = new HashMap<>();
+        for (String method : methods) {
+            methodsEnergy.put(method, CalculateEnergy.methodsEnergyForContainer.getOrDefault(method, -1.0));//-1 pq n consigo enviar null para o .ts
+        }
+        System.err.println("methodsEnergy -> "+methodsEnergy);
+        return methodsEnergy;
     }
 
     private static void populateSildersTemp(ArrayList<String> slidersListNotRepeated,List<HashMap<String, Object>> slidersTemp) {

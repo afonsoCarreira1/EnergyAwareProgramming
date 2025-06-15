@@ -20,6 +20,7 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 public class CalculateEnergy {
 
     public static List<MethodEnergyInfo> methodsEnergyInfo = new ArrayList<>();
+    public static Map<String,Double> methodsEnergyForContainer = new HashMap<>(); 
 
     public static double calculateEnergy(String modelPath) {
         double totalEnergyUsed = 0;
@@ -64,6 +65,7 @@ public class CalculateEnergy {
     // }
 
     public static double countMethodsUsedEnergy() {
+        methodsEnergyForContainer = new HashMap<>();
         double totalEnergy = 0.0;
         if (Tool.parser == null) return totalEnergy;
         HashMap<String, Map<String, Object>> savedMethodPaths = Tool.parser.getToolParser().methodsUsageCounter();
@@ -76,7 +78,9 @@ public class CalculateEnergy {
             System.err.println("Method: " + methodName);
             System.err.println("callGraph -> " + callGraph + "\nindegree -> " + indegree);
             System.err.println("method " + methodName + " uses methods-> " + calculateTopologicSort(callGraph, indegree));
-            totalEnergy += sumUserMethods(calculateTopologicSort(callGraph, indegree));
+            double methodEnergy = sumUserMethods(calculateTopologicSort(callGraph, indegree));
+            methodsEnergyForContainer.put(methodName, methodEnergy);
+            totalEnergy += methodEnergy;
             
         }
 
@@ -188,11 +192,7 @@ public class CalculateEnergy {
     }
 
     public static Map<String, Double> getMethodsEnergy() {
-        HashMap<String, Double> methodsEnergy = new HashMap<>();
-        for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
-            methodsEnergy.put(methodEnergyInfo.getMethodName(), methodEnergyInfo.getTotalEnergy());
-        }
-        return methodsEnergy;
+        return methodsEnergyForContainer;
     }
 
     public static Map<String, Double> getMethodsEnergy(Map<String, Integer> indegree) {

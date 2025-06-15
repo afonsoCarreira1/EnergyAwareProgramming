@@ -44,12 +44,12 @@ public class ToolParser {
 
         for (CtType<?> ctType : model.getAllTypes()) {
             if (!ctType.getSimpleName().equals(file))continue; //only target class file, ignore other files
-
+            System.err.println("methods -> "+ctType.getMethods());
             for (CtMethod<?> method : ctType.getMethods()) {
                 String methodName = getMethodName(ctType, method);
                 MethodEnergyInfo methodEnergyInfo = new MethodEnergyInfo(methodName);
                 List<CtInvocation<?>> invocations = method.getElements(new TypeFilter<>(CtInvocation.class));
-
+                
                 List<ModelInfo> modelInfos = new ArrayList<>();
                 for (CtInvocation<?> invocation : invocations) {
                     CtExecutableReference<?> execRef = invocation.getExecutable();
@@ -68,7 +68,7 @@ public class ToolParser {
                     //if (!modelsAvailable.contains(modelName)) continue; // ignore methods that are not trained
                     
                     //se for um metodo do user quero o guardar ate agora e dar skip ao resto
-                    System.err.println(invocation.getExecutable().getDeclaration());
+                    //System.err.println("invocation -> "+invocation.getExecutable().getDeclaration());
                     if (invocation.getExecutable().getDeclaration() != null) {
                         methodsEnergyInfo.add(methodEnergyInfo);
                         continue;
@@ -76,7 +76,7 @@ public class ToolParser {
                     if (!isModelMethod) continue; // ignore methods that are not trained
                     
                     ModelInfo modelInfo = new ModelInfo(modelName);
-                    System.err.println("Loops around " + modelName + " -> "+countEnclosingLoops(invocation,modelInfo,methodName));
+                    //System.err.println("Loops around " + modelName + " -> "+countEnclosingLoops(invocation,modelInfo,methodName));
                     getFeaturesForTool(modelInfo, invocation);
 
                     int inputNum = addInput0AsTargetIfExists(invocation, modelInfo, methodName);
@@ -302,22 +302,26 @@ public class ToolParser {
         }
     }*/
 
-    public Map<String,Object> methodsUsageCounter() {
+    public HashMap<String,Map<String,Object>> methodsUsageCounter() {
         HashMap<String,CtMethod<?>> methodsMap = getAllMethodNames();
         ArrayList<String> methods = new ArrayList<>(methodsMap.keySet()); 
         HashMap<String,Integer> counter = new HashMap<>();
-        HashMap<String, List<String>> callGraph = new HashMap<>();
-        Map<String, Integer> indegree = new HashMap<>();
-        HashSet<String> visited = new HashSet<>();
+        //HashMap<String, List<String>> callGraph = new HashMap<>();
+        //Map<String, Integer> indegree = new HashMap<>();
+        //HashSet<String> visited = new HashSet<>();
+        HashMap<String,Map<String,Object>> savedMethodPaths = new HashMap<>();
         for (String exploringMethodName : methods) {
-            
+            HashSet<String> visited = new HashSet<>();
+            HashMap<String, List<String>> callGraph = new HashMap<>();
+            Map<String, Integer> indegree = new HashMap<>();
             methodRecursiveCounter(visited, methodsMap.get(exploringMethodName),exploringMethodName,methodsMap,counter,callGraph,indegree);
+            savedMethodPaths.put(exploringMethodName, Map.of("callGraph",callGraph,"indegree",indegree));
         }
-        //System.out.println("final counter -> "+counter);
-        System.err.println("callGraph -> " + callGraph);
-        System.err.println("indegree -> " + indegree);
-        Map<String,Object> m = Map.of("callGraph",callGraph,"indegree",indegree);
-        return m;
+        //System.err.println("callGraph -> " + callGraph);
+        //System.err.println("indegree -> " + indegree);
+        //Map<String,Object> m = Map.of("callGraph",callGraph,"indegree",indegree);
+        //return m;
+        return savedMethodPaths;
     }
 
     private void methodRecursiveCounter(

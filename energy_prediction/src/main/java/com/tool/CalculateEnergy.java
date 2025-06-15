@@ -33,7 +33,7 @@ public class CalculateEnergy {
                 expression = replaceExpressionInputsWithValues(modelInfo, expression);
                 expression = replaceExpressionWithFeatures(modelInfo, expression);
                 Expression expressionEvaluated = new ExpressionBuilder(expression).build();
-                totalMethodEnergy += accountForLoops(modelInfo.getLoopIds(),expressionEvaluated.evaluate());//expressionEvaluated.evaluate();
+                totalMethodEnergy += accountForLoops(modelInfo.getLoopIds(), expressionEvaluated.evaluate());// expressionEvaluated.evaluate();
                 System.err.println("New expression -> " + expression);
                 System.err.println("Energy for this was -> " + expressionEvaluated.evaluate());
                 System.err.println("------------");
@@ -43,43 +43,75 @@ public class CalculateEnergy {
         }
 
         System.err.println("total energy used was -> " + totalEnergyUsed + "J");
-        System.err.println(countMethodsUsedEnergy());
-        return 0.0; /*totalEnergyUsed +*/ //countMethodsUsedEnergy();
+        double e = countMethodsUsedEnergy();
+        System.err.println(e);
+        return e; /* totalEnergyUsed + */ // countMethodsUsedEnergy();
     }
 
-    //private static double countMethodsUsedEnergy() {
-    //    double moreEnergyToSum = 0.0;
-    //    if (Tool.parser == null) return moreEnergyToSum;
-    //    HashMap<String,Integer> methodCounter = Tool.parser.getToolParser().methodsUsageCounter();
-    //    System.err.println("methodCounter -> "+methodCounter);
-    //    for(MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
-    //        System.err.println("method -> "+methodEnergyInfo.getMethodName() + " | energy -> "+methodEnergyInfo.getTotalEnergy());
-    //        moreEnergyToSum += methodCounter.get(methodEnergyInfo.getMethodName()) * methodEnergyInfo.getTotalEnergy();
-    //    }
-    //    return moreEnergyToSum;
-    //}
+    // private static double countMethodsUsedEnergy() {
+    // double moreEnergyToSum = 0.0;
+    // if (Tool.parser == null) return moreEnergyToSum;
+    // HashMap<String,Integer> methodCounter =
+    // Tool.parser.getToolParser().methodsUsageCounter();
+    // System.err.println("methodCounter -> "+methodCounter);
+    // for(MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
+    // System.err.println("method -> "+methodEnergyInfo.getMethodName() + " | energy
+    // -> "+methodEnergyInfo.getTotalEnergy());
+    // moreEnergyToSum += methodCounter.get(methodEnergyInfo.getMethodName()) *
+    // methodEnergyInfo.getTotalEnergy();
+    // }
+    // return moreEnergyToSum;
+    // }
 
+    public static double countMethodsUsedEnergy() {
+        double totalEnergy = 0.0;
+        if (Tool.parser == null) return totalEnergy;
+        HashMap<String, Map<String, Object>> savedMethodPaths = Tool.parser.getToolParser().methodsUsageCounter();
+        for (String methodName : savedMethodPaths.keySet()) {
+            HashMap<String, List<String>> callGraph = (HashMap<String, List<String>>) savedMethodPaths.get(methodName).get("callGraph");
+            Map<String, Integer> indegree = (Map<String, Integer>) savedMethodPaths.get(methodName).get("indegree");
+            // System.err.println("Method "+key+" -> callGraph -> "+ callGraph + "\n
+            // indegree -> " + indegree);
+            System.err.println("---------------------------------");
+            System.err.println("Method: " + methodName);
+            System.err.println("callGraph -> " + callGraph + "\nindegree -> " + indegree);
+            System.err.println("method " + methodName + " uses methods-> " + calculateTopologicSort(callGraph, indegree));
+            totalEnergy += sumUserMethods(calculateTopologicSort(callGraph, indegree));
+            
+        }
 
-    public static Map<String, Double> countMethodsUsedEnergy(){
-        double moreEnergyToSum = 0.0;
-        //if (Tool.parser == null) return moreEnergyToSum;
-        Map<String, Object> info = Tool.parser.getToolParser().methodsUsageCounter();
-        Map<String, List<String>> callGraph = (Map<String, List<String>>) info.get("callGraph");
-        Map<String, Integer> indegree = (Map<String, Integer>) info.get("indegree");
+        return totalEnergy;
 
-        Map<String, Double> baseEnergy =  getMethodsEnergy();
-        
+    }
 
-        // Copy indegree so original is not modified
+    private static double sumUserMethods(Map<String, Double> energy) {
+        double totalEnergy = 0.0;
+        for (String methodUsed : energy.keySet() ) {
+            totalEnergy += energy.get(methodUsed);
+        }
+        return totalEnergy;
+    }
+
+    private static Map<String, Double> calculateTopologicSort(HashMap<String, List<String>> callGraph, Map<String, Integer> indegree) {
+        Map<String, Double> baseEnergy = getMethodsEnergy(indegree);
+
+        // Create reverse graph: callee -> list of callers
+        Map<String, List<String>> reverseGraph = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : callGraph.entrySet()) {
+            String caller = entry.getKey();
+            for (String callee : entry.getValue()) {
+                reverseGraph.computeIfAbsent(callee, k -> new ArrayList<>()).add(caller);
+            }
+        }
+
+        // Copy of indegree so original is not modified
         Map<String, Integer> indegreeCopy = new HashMap<>(indegree);
 
         // Map to store total energy for each method
         Map<String, Double> totalEnergy = new HashMap<>();
 
-        // Queue for methods with no dependencies (indegree == 0)
+        // Queue for methods with no incoming edges (starting points)
         Queue<String> queue = new LinkedList<>();
-
-        // Initialize queue and totalEnergy for methods with indegree 0
         for (String method : indegreeCopy.keySet()) {
             if (indegreeCopy.get(method) == 0) {
                 queue.offer(method);
@@ -87,28 +119,29 @@ public class CalculateEnergy {
             }
         }
 
-        // Process the graph bottom-up: from methods with no calls to callers
+        // Topological sort - process methods in dependency order
         while (!queue.isEmpty()) {
             String method = queue.poll();
             double methodEnergy = totalEnergy.getOrDefault(method, baseEnergy.getOrDefault(method, 0.0));
 
-            // For each method that 'method' calls, accumulate their energy to 'method'
-            for (String callee : callGraph.getOrDefault(method, Collections.emptyList())) {
+            // For each method that calls the current method, add current's energy to it
+            for (String caller : reverseGraph.getOrDefault(method, Collections.emptyList())) {
+                double updatedEnergy = totalEnergy.getOrDefault(caller, baseEnergy.getOrDefault(caller, 0.0))
+                        + methodEnergy;
+                totalEnergy.put(caller, updatedEnergy);
 
-                // Accumulate callee's energy into current method's total energy
-                double calleeEnergy = totalEnergy.getOrDefault(callee, baseEnergy.getOrDefault(callee, 0.0));
-                totalEnergy.put(method, totalEnergy.getOrDefault(method, baseEnergy.getOrDefault(method, 0.0)) + calleeEnergy);
+                // Reduce indegree of caller
+                indegreeCopy.put(caller, indegreeCopy.get(caller) - 1);
 
-                // Reduce indegree of callee since we've "processed" one incoming edge
-                indegreeCopy.put(callee, indegreeCopy.get(callee) - 1);
-
-                // When callee has no more incoming edges, enqueue it
-                if (indegreeCopy.get(callee) == 0) {
-                    // If callee hasn't been added yet, initialize total energy with base energy
-                    totalEnergy.putIfAbsent(callee, baseEnergy.getOrDefault(callee, 0.0));
-                    queue.offer(callee);
+                if (indegreeCopy.get(caller) == 0) {
+                    queue.offer(caller);
                 }
             }
+        }
+
+        // Make sure every method has an energy value (in case it's not in the graph)
+        for (String method : baseEnergy.keySet()) {
+            totalEnergy.putIfAbsent(method, baseEnergy.get(method));
         }
 
         return totalEnergy;
@@ -154,10 +187,20 @@ public class CalculateEnergy {
         return expression;
     }
 
-    public static Map<String,Double> getMethodsEnergy() {
+    public static Map<String, Double> getMethodsEnergy() {
         HashMap<String, Double> methodsEnergy = new HashMap<>();
         for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
             methodsEnergy.put(methodEnergyInfo.getMethodName(), methodEnergyInfo.getTotalEnergy());
+        }
+        return methodsEnergy;
+    }
+
+    public static Map<String, Double> getMethodsEnergy(Map<String, Integer> indegree) {
+        HashMap<String, Double> methodsEnergy = new HashMap<>();
+        for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
+            String methodName = methodEnergyInfo.getMethodName();
+            if (indegree.containsKey(methodName))
+            methodsEnergy.put(methodName, methodEnergyInfo.getTotalEnergy());
         }
         return methodsEnergy;
     }

@@ -26,14 +26,21 @@ public class Sliders {
         }
         Tool.parser = new ASTFeatureExtractor(path.toString(), file, true);
         CalculateEnergy.methodsEnergyInfo = Tool.parser.getMethodsForSliders(modelsSaved);
-        ArrayList<String> slidersListNotRepeated = getSlidersNoRepetitions();
+
+        HashSet<String> methodsNotRepeated = new HashSet<>();// to create the methods containers in the UI
+        for(MethodEnergyInfo m : CalculateEnergy.methodsEnergyInfo) {
+            methodsNotRepeated.add(m.getMethodName());
+        }
+        
+        ArrayList<String> slidersListNotRepeated = getSlidersNoRepetitions(); //gets the vars that can be sliders in the UI
 
         List<HashMap<String, Object>> slidersTemp = new ArrayList<>();
         populateSildersTemp(slidersListNotRepeated, slidersTemp);
         restartSlidersGlobalVar(slidersTemp);
         Map<String, Object> message = Map.of(
             "command", "updateSliders",
-            "sliders", slidersTemp
+            "sliders", slidersTemp,
+            "methods",methodsNotRepeated
         );
 
         return message;

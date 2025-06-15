@@ -138,37 +138,41 @@
     window.addEventListener('message', event => {
       const message = event.data;
 
+
       if (message.type === 'updateSliders') {
-        const sliders = message.sliders;
+        const sliders = message.sliders || [];
+        const methods = message.methods || [];
         const container = document.getElementById('slider-container');
         container.innerHTML = '';
         currentSliderValues = {};
+        console.log('Received updateSliders message:', message);
+        console.log('Methods:', methods);
+        console.log('Sliders:', sliders);
 
-        const methodGroups = {};
-
+        const sliderMap = {};
+        
         for (const config of sliders) {
           const fullId = config.id || 'slider';
           const parts = fullId.split('|').map(s => s.trim());
           const method = parts[0].split('Method:')[1]?.trim() ?? 'Unknown Method';
-
-          if (!methodGroups[method]) {
-            methodGroups[method] = [];
+          console.log('Method:', method);
+          if (!sliderMap[method]) {
+            sliderMap[method] = [];
           }
-
-          methodGroups[method].push(config);
+          sliderMap[method].push(config);
         }
 
-        for (const [method, configs] of Object.entries(methodGroups)) {
+        for (const method of methods) {
           const box = document.createElement('div');
           box.className = 'method-box';
 
           const header = document.createElement('div');
           header.className = 'method-header';
           header.innerHTML = `
-            <span class="method-name">${method}</span>
-            <span class="method-energy"></span>
-            <span>⯈</span>
-          `;
+      <span class="method-name">${method}</span>
+      <span class="method-energy"></span>
+      <span>⯈</span>
+    `;
 
           const content = document.createElement('div');
           content.className = 'method-content';
@@ -179,6 +183,7 @@
             header.querySelector('span:last-child').textContent = isVisible ? '⯈' : '⯆';
           });
 
+          const configs = sliderMap[method] || [];
           for (const config of configs) {
             const id = config.id || 'slider';
 
@@ -229,6 +234,7 @@
           container.appendChild(box);
         }
       }
+
 
       if (message.type === 'updateEnergy') {
         const energyValue = formatEnergy(message.energy) ?? '--';

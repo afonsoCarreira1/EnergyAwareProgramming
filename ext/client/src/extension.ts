@@ -26,7 +26,8 @@ export async function activate(context: vscode.ExtensionContext) {
         if (sliderPanel) {
             sliderPanel.webview.postMessage({
                 type: 'updateSliders',
-                sliders: params.sliders
+                sliders: params.sliders,
+                methods: params.methods
             });
         } else {
             console.warn('Slider panel is not open, message not sent.');

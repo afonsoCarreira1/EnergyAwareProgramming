@@ -148,16 +148,59 @@ public class CalculateEnergy {
 
     private static double sumUserMethods(String methodName, Map<String, Integer> methodCalls, Map<String, Double> energy, HashSet<String> loopIds) {
         double totalEnergy = 0.0;
-        for (String methodUsed : methodCalls.keySet()) {
-            System.err.println("--------------------------");
-            int loopsMultiplied = getLoopValuesForMethodCall(loopIds,methodUsed);
-            
-            System.err.println("Method: "+methodName + " called "+methodUsed +" "+methodCalls.get(methodUsed)+"x");
-            System.err.println("In loop "+loopsMultiplied);
-            //System.err.println("total energy: "+totalEnergy);
-            //System.err.println("methodUsed: " + methodUsed + " energy: " + energy.get(methodUsed) + " methodCalls: "+methodCalls.get(methodUsed));
-            totalEnergy += energy.get(methodUsed) * methodCalls.get(methodUsed) * loopsMultiplied;
+        HashMap<String,Integer> numberOfMethodCallsInLoopForMethod = new HashMap<>();
+        MethodEnergyInfo mei = null;
+        for (MethodEnergyInfo mei2 : methodsEnergyInfo) {
+            if (mei2.getMethodName().equals(methodName)) {
+                mei=mei2;
+                break;
+            }
         }
+        System.err.println("---------------------");
+        System.err.println("summing method: "+mei.getMethodName());
+        System.err.println("Methods used: "+methodCalls);
+        System.err.println("Energies data: "+energy);
+            for (ModelInfo mi : mei.getModelInfos()){
+                if (!mi.isMethodCall()) continue;
+                String methodCalled = mi.getModelName();
+                System.err.println("first call is: "+methodCalled);
+                if (mi.getLoopIds() != null && !mi.getLoopIds().isEmpty()) {
+                    int loopsMultiplied = 1;
+                    for (String loopId : mi.getLoopIds()) {
+                        System.err.println("loop: "+loopId);
+                        loopsMultiplied *= (Integer) Sliders.sliders.get(loopId).get("val");
+                    }
+                    totalEnergy += energy.get(methodCalled) * loopsMultiplied;
+                    System.err.println("found "+loopsMultiplied +" loops energy = "+totalEnergy);
+                    numberOfMethodCallsInLoopForMethod.put(methodCalled, numberOfMethodCallsInLoopForMethod.getOrDefault(methodCalled, 0) + 1);
+                }
+                
+                //int dif = methodCalls.get(mei.getMethodName()) - numberOfMethodCallsInLoop;
+                //System.err.println("dif -> "+dif + " | "+methodCalls.get(mei.getMethodName()));
+                //if (dif > 0) totalEnergy += energy.get(methodCalled) * dif;
+            }
+            
+            
+
+            for (String methodUsed : methodCalls.keySet()) {
+                
+                int dif = methodCalls.get(methodUsed) - numberOfMethodCallsInLoopForMethod.getOrDefault(methodUsed,0);
+                if (dif > 0) totalEnergy += energy.get(methodUsed) * dif;
+                System.err.println("dif -> "+dif +" | "+methodCalls.get(methodUsed) +" | "+ numberOfMethodCallsInLoopForMethod.get(methodUsed));
+            }
+            System.err.println("total energy: "+totalEnergy);
+        
+        //for (String methodUsed : methodCalls.keySet()) {
+        //    System.err.println("--------------------------");
+        //    int loopsMultiplied = getLoopValuesForMethodCall(loopIds,methodUsed);
+        //    
+        //    System.err.println("Method: "+methodName + " called "+methodUsed +" "+methodCalls.get(methodUsed)+"x");
+        //    System.err.println("In loop "+loopsMultiplied);
+        //    //System.err.println("total energy: "+totalEnergy);
+        //    //System.err.println("methodUsed: " + methodUsed + " energy: " + energy.get(methodUsed) + " methodCalls: "+methodCalls.get(methodUsed));
+        //    totalEnergy += energy.get(methodUsed) * (methodCalls.get(methodUsed) - numberOfMethodCallsInLoop);
+        //    //totalEnergy += energy.get(methodUsed) * methodCalls.get(methodUsed) * loopsMultiplied;
+        //}
         return totalEnergy;
     }
 
@@ -169,9 +212,10 @@ public class CalculateEnergy {
             //System.err.println("loopId: "+loopId + " | "+loopId.split(" | ")[2]);
             String id = loopId.split(" \\| ")[2].replace("calledMethod: ","");
             //System.err.println("id: "+id + " bol -> "+id.equals(methodName));
-            if (id.equals(methodName)){
+            if (id.equals(methodName)) {
                 System.err.println("Found: "+Sliders.sliders.get(loopId).get("val") + " for "+methodName);
-                loopsMultiplied *= (Integer) Sliders.sliders.get(loopId).get("val");}
+                loopsMultiplied *= (Integer) Sliders.sliders.get(loopId).get("val");
+            }
         }
         return loopsMultiplied;
     }

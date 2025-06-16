@@ -5,11 +5,14 @@ import java.util.ArrayList;
 class Test {
 
     public void a(){
-        b();
+        for (int i = 0; i < 10; i++) {
+            b();
+        }
+        
     }
 
     public void b() {
-        c();
+        //c();
     }
     
 

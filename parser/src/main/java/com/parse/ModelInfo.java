@@ -13,6 +13,7 @@ public class ModelInfo {
     private HashSet<String> ids;
     private HashMap<String,String> inputToVarName;
     private ArrayList<String> loopIds;
+    private boolean isMethodCall;
 
     
 
@@ -20,6 +21,7 @@ public class ModelInfo {
         this.ids = new HashSet<>();
         this.inputToVarName = new HashMap<>();
         this.loopIds = new ArrayList<>();
+        this.isMethodCall = false;
     }
 
     public ModelInfo(String modelName) {
@@ -91,6 +93,14 @@ public class ModelInfo {
 
     public void addLoopId(String id) {
         this.loopIds.add(id);
+    }
+
+    public void setMethodCall(boolean isMethodCall) {
+        this.isMethodCall = isMethodCall;
+    }
+
+    public boolean isMethodCall() { 
+        return this.isMethodCall;
     }
 
 }

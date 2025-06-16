@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -23,31 +24,56 @@ public class CalculateEnergy {
     public static Map<String,Double> methodsEnergyForContainer = new HashMap<>(); 
 
     public static double calculateEnergy(String modelPath) {
-        double totalEnergyUsed = 0;
+        //double totalEnergyUsed = 0;
+        HashMap<String,HashSet<String>> methodsLoops = new HashMap<>();
         for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
             double totalMethodEnergy = 0.0;
             ArrayList<ModelInfo> modelInfos = methodEnergyInfo.getModelInfos();
             for (ModelInfo modelInfo : modelInfos) {
+                if (modelInfo.isMethodCall()) {
+                    //System.err.println("Vou guardar para o "+methodEnergyInfo.getMethodName() +" os ids "+modelInfo.getLoopIds().toString());
+                    //if(!methodsLoops.containsKey(methodEnergyInfo.getMethodName())) methodsLoops.put(methodEnergyInfo.getMethodName(), modelInfo.getLoopIds());
+                    //methodsLoops.computeIfAbsent(methodEnergyInfo.getMethodName(), k -> new ArrayList<>()).addAll(modelInfo.getLoopIds());
+                    continue;
+                }
                 String expression = getModelExpression(modelPath + modelInfo.getModelName() + ".csv");
-                System.err.println("Using Expression -> " + expression + " for model " + modelInfo.getModelName());
+                //System.err.println("Using Expression -> " + expression + " for model " + modelInfo.getModelName());
                 // System.err.println("I have this inputs -> "+modelInfo.getInputToVarName());
                 expression = replaceExpressionInputsWithValues(modelInfo, expression);
                 expression = replaceExpressionWithFeatures(modelInfo, expression);
                 Expression expressionEvaluated = new ExpressionBuilder(expression).build();
                 totalMethodEnergy += accountForLoops(modelInfo.getLoopIds(), expressionEvaluated.evaluate());// expressionEvaluated.evaluate();
-                System.err.println("New expression -> " + expression);
-                System.err.println("Energy for this was -> " + expressionEvaluated.evaluate());
-                System.err.println("------------");
+                //System.err.println("New expression -> " + expression);
+                //System.err.println("Energy for this was -> " + expressionEvaluated.evaluate());
+                //System.err.println("------------");
             }
             methodEnergyInfo.setTotalEnergy(totalMethodEnergy);
-            totalEnergyUsed += totalMethodEnergy;
+            //totalEnergyUsed += totalMethodEnergy;
         }
-
-        System.err.println("total energy used was -> " + totalEnergyUsed + "J");
-        double e = countMethodsUsedEnergy();
+        addMethodLoops(methodsLoops);
+        System.err.println("Final loops -> "+methodsLoops);
+        //System.err.println("total energy used was -> " + totalEnergyUsed + "J");
+        double e = countMethodsUsedEnergy(methodsLoops);
         
-        System.err.println(e);
+        //System.err.println(e);
         return e; /* totalEnergyUsed + */ // countMethodsUsedEnergy();
+    }
+
+    public static void addMethodLoops(HashMap<String,HashSet<String>> methodsLoops) {
+        for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo){
+              for (ModelInfo modelInfo : methodEnergyInfo.getModelInfos()){
+                if (modelInfo.getLoopIds() == null || modelInfo.getLoopIds().isEmpty()) continue;
+                System.err.println("Vou guardar para o "+methodEnergyInfo.getMethodName() +" os ids "+modelInfo.getLoopIds().toString());
+                String key = methodEnergyInfo.getMethodName();
+                if(methodsLoops.containsKey(key)) {
+                    HashSet<String> loops = methodsLoops.get(key);
+                    loops.addAll(modelInfo.getLoopIds());
+                    methodsLoops.put(key, loops);
+                } else {
+                    methodsLoops.put(key, new HashSet<String>(modelInfo.getLoopIds())); 
+                }
+              }  
+        }
     }
 
     public static Map<String, Integer> computeMethodCalls(
@@ -92,7 +118,7 @@ public class CalculateEnergy {
         return callCount;
     }
 
-    public static double countMethodsUsedEnergy() {
+    public static double countMethodsUsedEnergy(Map<String,HashSet<String>> methodsLoops) {
         methodsEnergyForContainer = new HashMap<>();
         double totalEnergy = 0.0;
         if (Tool.parser == null) return totalEnergy;
@@ -100,18 +126,18 @@ public class CalculateEnergy {
         for (String methodName : savedMethodPaths.keySet()) {
             HashMap<String, List<String>> callGraph = (HashMap<String, List<String>>) savedMethodPaths.get(methodName).get("callGraph");
             Map<String, Integer> indegree = (Map<String, Integer>) savedMethodPaths.get(methodName).get("indegree");
-            System.err.println("---------------------------------");
-            System.err.println("Method: " + methodName);
-            System.err.println("callGraph -> " + callGraph + "\nindegree -> " + indegree);
+            //System.err.println("---------------------------------");
+            //System.err.println("Method: " + methodName);
+            //System.err.println("callGraph -> " + callGraph + "\nindegree -> " + indegree);
             //Map<String, Map<String, Integer>> countedGraph = countCalls(callGraph);
             Map<String, Integer> m = computeMethodCalls(callGraph,indegree);
-            System.err.println("compute .> "+m);
-            System.err.println("method " + methodName + " uses methods-> " + calculateTopologicSort(callGraph, indegree));
-            double methodEnergy = sumUserMethods2(methodName,m,calculateTopologicSort(callGraph, indegree));
+            //System.err.println("compute .> "+m);
+            //System.err.println("method " + methodName + " uses methods-> " + calculateTopologicSort(callGraph, indegree));
+            double methodEnergy = sumUserMethods(methodName,m,calculateTopologicSort(callGraph, indegree),methodsLoops.get(methodName));
             //System.err.println("method " + methodName + " uses methods-> " + calculateTopologicSort(countedGraph, indegree));
             //double methodEnergy = sumUserMethods(calculateTopologicSort(countedGraph, indegree));
             methodsEnergyForContainer.put(methodName, methodEnergy);
-            System.err.println("ENERGY -> "+methodEnergy);
+            //System.err.println("ENERGY -> "+methodEnergy);
             totalEnergy += methodEnergy;
             
         }
@@ -120,21 +146,34 @@ public class CalculateEnergy {
 
     }
 
-    private static double sumUserMethods2(String methodName, Map<String, Integer> methodCalls, Map<String, Double> energy) {
+    private static double sumUserMethods(String methodName, Map<String, Integer> methodCalls, Map<String, Double> energy, HashSet<String> loopIds) {
         double totalEnergy = 0.0;
-        for (String methodUsed : methodCalls.keySet() ) {
-            System.err.println("methodUsed: " + methodUsed + " energy: " + energy.get(methodUsed) + " methodCalls: "+methodCalls.get(methodUsed));
-            totalEnergy += energy.get(methodUsed) * methodCalls.get(methodUsed);
+        for (String methodUsed : methodCalls.keySet()) {
+            System.err.println("--------------------------");
+            int loopsMultiplied = getLoopValuesForMethodCall(loopIds,methodUsed);
+            
+            System.err.println("Method: "+methodName + " called "+methodUsed +" "+methodCalls.get(methodUsed)+"x");
+            System.err.println("In loop "+loopsMultiplied);
+            //System.err.println("total energy: "+totalEnergy);
+            //System.err.println("methodUsed: " + methodUsed + " energy: " + energy.get(methodUsed) + " methodCalls: "+methodCalls.get(methodUsed));
+            totalEnergy += energy.get(methodUsed) * methodCalls.get(methodUsed) * loopsMultiplied;
         }
         return totalEnergy;
     }
 
-    private static double sumUserMethods(Map<String, Double> energy) {
-        double totalEnergy = 0.0;
-        for (String methodUsed : energy.keySet() ) {
-            totalEnergy += energy.get(methodUsed);
+    private static int getLoopValuesForMethodCall(HashSet<String> loopIds,String methodName) {
+        int loopsMultiplied = 1;
+        if (loopIds == null) return loopsMultiplied;
+        for (String loopId : loopIds) {
+            //System.err.println("Loops found: "+loopId);
+            //System.err.println("loopId: "+loopId + " | "+loopId.split(" | ")[2]);
+            String id = loopId.split(" \\| ")[2].replace("calledMethod: ","");
+            //System.err.println("id: "+id + " bol -> "+id.equals(methodName));
+            if (id.equals(methodName)){
+                System.err.println("Found: "+Sliders.sliders.get(loopId).get("val") + " for "+methodName);
+                loopsMultiplied *= (Integer) Sliders.sliders.get(loopId).get("val");}
         }
-        return totalEnergy;
+        return loopsMultiplied;
     }
 
     private static Map<String, Double> calculateTopologicSort(HashMap<String, List<String>> callGraph, Map<String, Integer> indegree) {
@@ -211,12 +250,11 @@ public class CalculateEnergy {
     }
 
     private static String replaceExpressionWithFeatures(ModelInfo modelInfo, String expression) {
-        System.err.println(
-                "Before -> " + modelInfo.getColType() + " " + modelInfo.getMethodType() + " " + modelInfo.getArgs());
+        //System.err.println("Before -> " + modelInfo.getColType() + " " + modelInfo.getMethodType() + " " + modelInfo.getArgs());
         String cleanedColType = modelInfo.getColType().replaceAll("\\.", "");
         String cleanedMethodType = modelInfo.getMethodType().replaceAll("\\.|\\(|\\)", "");// remove . ( )
         String cleanedArgs = modelInfo.getArgs().replaceAll("\\.|\\|", "");// remove . |
-        System.err.println("After -> " + cleanedColType + " " + cleanedMethodType + " " + cleanedArgs);
+        //System.err.println("After -> " + cleanedColType + " " + cleanedMethodType + " " + cleanedArgs);
         expression = expression.replaceAll(cleanedColType, "1");
         expression = expression.replaceAll(cleanedMethodType, "1");
         if (!cleanedArgs.isEmpty())

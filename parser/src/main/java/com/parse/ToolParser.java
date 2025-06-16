@@ -44,7 +44,6 @@ public class ToolParser {
 
         for (CtType<?> ctType : model.getAllTypes()) {
             if (!ctType.getSimpleName().equals(file))continue; //only target class file, ignore other files
-            System.err.println("methods -> "+ctType.getMethods());
             for (CtMethod<?> method : ctType.getMethods()) {
                 String methodName = getMethodName(ctType, method);
                 MethodEnergyInfo methodEnergyInfo = new MethodEnergyInfo(methodName);
@@ -67,15 +66,23 @@ public class ToolParser {
                     boolean isModelMethod = modelsAvailable.contains(modelName);
                     //if (!modelsAvailable.contains(modelName)) continue; // ignore methods that are not trained
                     
+                    int loops = 0;
+
                     //se for um metodo do user quero o guardar ate agora e dar skip ao resto
                     if (invocation.getExecutable().getDeclaration() != null) {
+                        System.err.println("from "+ methodName+ " called "+invocation.getExecutable().getSimpleName());
                         methodsEnergyInfo.add(methodEnergyInfo);
+                        ModelInfo modelInfo = new ModelInfo(getMethodNameFromInvocation(invocation));
+                        modelInfo.setMethodCall(true);
+                        loops = countEnclosingLoops(invocation,modelInfo,methodName);
+                        modelInfos.add(modelInfo);
+                        methodEnergyInfo.addModelInfo(modelInfo);
                         continue;
                     }
                     if (!isModelMethod) continue; // ignore methods that are not trained
                     
                     ModelInfo modelInfo = new ModelInfo(modelName);
-                    int loops = countEnclosingLoops(invocation,modelInfo,methodName);
+                    loops = countEnclosingLoops(invocation,modelInfo,methodName);
                     System.err.println("Loops around " + modelName + " -> "+loops);
                     getFeaturesForTool(modelInfo, invocation);
 
@@ -98,69 +105,27 @@ public class ToolParser {
         int loopCount = 0;
         CtStatement parent = invocation.getParent(CtStatement.class);
         while (parent != null) {
+            //System.out.println("parent -> "+parent);
             if (parent instanceof CtLoop) {
-                String id = getId(methodName, loopCount);
+                String id = getIdForLoop(invocation,methodName, loopCount,modelInfo.getModelName());
                 modelInfo.addId(id);
                 modelInfo.addLoopId(id);
                 loopCount++;
-                
-                //List<String> loopVars = getLoopConditionVars((CtLoop) parent);
-                //System.err.println("Loop #" + loopCount + " condition vars: " + loopVars);
             }
             parent = parent.getParent(CtStatement.class);
         }
         return loopCount;
     }
 
-    private String getId(String methodName,int loopCount) {
-        return "Method: "+methodName + " | loopDepth " + loopCount;
+    private String getIdForLoop(CtInvocation<?> invocation, String methodName,int loopCount,String methodCallName) {
+        return "Method: "+methodName + " | loopDepth " + loopCount + " | calledMethod: "+ methodCallName +" | Line: " + invocation.getPosition().getLine();
     }
 
-    private String getId(String methodName,String variable) {
+    private String getId(CtInvocation<?> invocation, String methodName,String variable) {
         return "Method: " + methodName + " | Variable: " + variable;
     }
 
 
-    private List<String> getLoopConditionVars(CtLoop loop) {
-        List<String> conditionVars = new ArrayList<>();
-
-        if (loop instanceof CtForEach) {
-            CtForEach forEach = (CtForEach) loop;
-            conditionVars.add(forEach.getExpression().toString());
-            return conditionVars;
-        }
-
-        CtExpression<Boolean> condition = null;
-        if (loop instanceof CtWhile) {
-            condition = ((CtWhile) loop).getLoopingExpression();
-        } else if (loop instanceof CtFor) {
-            condition = ((CtFor) loop).getExpression();
-        } else if (loop instanceof CtDo) {
-            condition = ((CtDo) loop).getLoopingExpression();
-        }
-
-        if (condition != null) {
-            // Skip while(true) or while(false)
-            if (!(condition instanceof CtLiteral)) {
-                Set<CtVariableRead<?>> varReads = new HashSet<>(condition.getElements(new TypeFilter<>(CtVariableRead.class)));
-                for (CtVariableRead<?> var : varReads) {
-                    conditionVars.add(var.toString());
-                }
-
-                Set<CtFieldRead<?>> fieldReads = new HashSet<>(condition.getElements(new TypeFilter<>(CtFieldRead.class)));
-                for (CtFieldRead<?> field : fieldReads) {
-                    conditionVars.add(field.toString());
-                }
-
-                Set<CtLiteral<?>> literals = new HashSet<>(condition.getElements(new TypeFilter<>(CtLiteral.class)));
-                for (CtLiteral<?> literal : literals) {
-                    conditionVars.add(String.valueOf(literal.getValue()));
-                }
-            }
-        }
-
-        return conditionVars;
-    }
 
 
 
@@ -215,7 +180,7 @@ public class ToolParser {
         for (int i = 0; i < arguments.size(); i++) {
             CtExpression<?> arg = arguments.get(i);
             if (arg instanceof CtVariableRead) {
-                String id = getId(methodContext, arg.toString());
+                String id = getId(invocation,methodContext, arg.toString());
                 modelInfo.addId(id);
                 modelInfo.associateInputToVar("input" + (i + inputNum), id);
             }
@@ -229,7 +194,7 @@ public class ToolParser {
     // input of the first arg is 1
     private int addInput0AsTargetIfExists(CtInvocation<?> invocation, ModelInfo modelInfo, String methodContext) {
         if (invocation.getTarget() == null) return 0;
-        String id = getId(methodContext, invocation.getTarget().toString());
+        String id = getId(invocation,methodContext, invocation.getTarget().toString());
         modelInfo.addId(id);
         modelInfo.associateInputToVar("input0", id);
         return 1;
@@ -340,7 +305,7 @@ public class ToolParser {
         visited.add(exploringMethod);
         List<CtInvocation<?>> invocations = method.getElements(new TypeFilter<>(CtInvocation.class));
         for (CtInvocation<?> invocation : invocations) {
-            String newExploreMethod = buildInvocationString(invocation);
+            String newExploreMethod = getMethodNameFromInvocation(invocation);
             if (invocation.getExecutable().getDeclaration() == null) continue; //it means the methodCall is not from my code
             callGraph.computeIfAbsent(exploringMethod, k -> new ArrayList<>()).add(newExploreMethod);
             indegree.putIfAbsent(newExploreMethod, 0);
@@ -361,10 +326,6 @@ public class ToolParser {
         return methods;
     }
 
-    //private String getMethodName(CtType<?> ctType, CtMethod<?> method) {
-    //    return ctType.getSimpleName() + "." + method.getSimpleName();
-    //}
-
     private String getMethodName(CtType<?> ctType, CtMethod<?> method) {
         String className = ctType.getQualifiedName();
         String methodName = method.getSimpleName();
@@ -376,7 +337,7 @@ public class ToolParser {
         return className + "." + methodName + "(" + paramTypes + ")";
     }
 
-    private String buildInvocationString(CtInvocation<?> invocation) {
+    private String getMethodNameFromInvocation(CtInvocation<?> invocation) {
        CtExecutableReference<?> execRef = invocation.getExecutable();
 
         // Step 1: Get declaring class

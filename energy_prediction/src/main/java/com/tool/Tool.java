@@ -37,6 +37,7 @@ public class Tool implements LanguageServer {
     private CustomLanguageClient client;
     static public ASTFeatureExtractor parser = null;
     static private HashSet<String> modelsSaved = null;
+    static private boolean runningOnWorkspace = true;
 
     @JsonNotification("custom/sliderChanged")
     public void onSliderChanged(Map<String, Object> params) {
@@ -105,12 +106,10 @@ public class Tool implements LanguageServer {
         @Override
         public void didSave(DidSaveTextDocumentParams params) {
             String file = params.getTextDocument().getUri();
-            // System.err.println("uri -> "+ file);
-            // System.err.println("didSave called -> "+ params);
             try {
                 Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
                 if (modelsSaved == null) modelsSaved = Sliders.getModels(serverDir.toString() + "/" + "ModelsAvailable.txt");
-                Map<String, Object> message = Sliders.getSlidersInfo(file.split("///")[1], modelsSaved);
+                Map<String, Object> message = Sliders.getSlidersInfo(file.split("///")[1], modelsSaved,runningOnWorkspace);
                 if (client != null) {
                     client.updateSliders(message);
                 }
@@ -128,20 +127,15 @@ public class Tool implements LanguageServer {
             String text = openDocuments.get(uri);
             if (text == null) return CompletableFuture.completedFuture(null);
 
-            // Use the position to find the line being hovered
             String[] lines = text.split("\n");
             if (pos.getLine() >= lines.length) return CompletableFuture.completedFuture(null);
             String line = lines[pos.getLine()];
 
-            //String hoveredToken = getHoveredToken(line, pos.getCharacter());
             String key = line.trim().replace(";", "") + " | " +(pos.getLine()+1);
-            System.err.println("Available expression: "+CalculateEnergy.lineExpressions);
-            System.err.println("Esta key -> "+key);
             String expression = CalculateEnergy.lineExpressions.getOrDefault(key, "No expression available");
 
             if (expression == null) return CompletableFuture.completedFuture(null);
 
-            // Prepare hover content
             MarkupContent content = new MarkupContent();
             content.setKind(MarkupKind.MARKDOWN);
             content.setValue("🔋 **Energy Expression:**\n```java\n" + expression + "\n```");
@@ -159,6 +153,11 @@ public class Tool implements LanguageServer {
         // Enable text document synchronization (open, change, close)
         capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
         capabilities.setHoverProvider(true);
+        if (params.getWorkspaceFolders() == null || params.getWorkspaceFolders().isEmpty()) {
+            System.err.println("Running in single file mode");
+            runningOnWorkspace = false;
+        } else System.err.println("Running in folder workspace mode");
+        
         InitializeResult result = new InitializeResult(capabilities);
         return CompletableFuture.completedFuture(result);
     }

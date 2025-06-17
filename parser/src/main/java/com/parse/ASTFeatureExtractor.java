@@ -38,12 +38,14 @@ public class ASTFeatureExtractor {
     Set<String> importSet;
     private ToolParser toolParser;
 
-    public ASTFeatureExtractor(String path, String file, Boolean readOnlyFile) {
+    public ASTFeatureExtractor(String path, String file, Boolean readOnlyFile, boolean runningOnWorkspace) {
         this.path = path;
         this.file = file;
         this.readOnlyFile = readOnlyFile;
         // String inputPath = "java_progs/progs/"+file+".java";
         String inputPath = path + file + ".java";
+        if (runningOnWorkspace) inputPath = file + ".java";
+        System.err.println("inputPath -> "+inputPath);
         Path currentDir = Paths.get("").toAbsolutePath(); // Get the current directory
         Path resolvedPath = currentDir.resolve(inputPath).normalize(); // Resolve and normalize the path
 

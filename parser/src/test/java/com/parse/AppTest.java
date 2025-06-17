@@ -20,7 +20,7 @@ public class AppTest
     @Test
     public void test()
     {
-        ASTFeatureExtractor parser = new ASTFeatureExtractor("src/main/java/com/parse/","Test",false);
+        ASTFeatureExtractor parser = new ASTFeatureExtractor("src/main/java/com/parse/","Test",false,false);
         //parser.getToolParser().methodsUsageCounter();
         List<MethodEnergyInfo> methodEnergyInfos = parser.getToolParser().getMethodsForSliders(new HashSet<>());
         for (MethodEnergyInfo mei : methodEnergyInfos) {

@@ -17,14 +17,15 @@ public class Sliders {
     public static HashMap<String,HashMap<String, Object>> sliders = new HashMap<>();
     
 
-    public static Map<String, Object> getSlidersInfo(String fullPath,HashSet<String> modelsSaved) {
+    public static Map<String, Object> getSlidersInfo(String fullPath,HashSet<String> modelsSaved, boolean runningOnWorkspace) {
         StringBuilder path = new StringBuilder();
         String[] parts = fullPath.split("/");
         String file = parts[parts.length - 1].split("\\.")[0];
         for (int i = 2; i < parts.length - 1; i++) {
             path.append(parts[i] + "/");
         }
-        Tool.parser = new ASTFeatureExtractor(path.toString(), file, true);
+        System.err.println("Path: "+path+" File: "+file);
+        Tool.parser = new ASTFeatureExtractor(path.toString(), file, !runningOnWorkspace,runningOnWorkspace);
         CalculateEnergy.methodsEnergyInfo = Tool.parser.getMethodsForSliders(modelsSaved);
 
         HashSet<String> methodsNotRepeated = new HashSet<>();// to create the methods containers in the UI

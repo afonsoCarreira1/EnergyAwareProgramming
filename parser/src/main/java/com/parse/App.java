@@ -8,7 +8,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        ASTFeatureExtractor parser = new ASTFeatureExtractor("src/main/java/com/parse/","TestFile",false);
+        ASTFeatureExtractor parser = new ASTFeatureExtractor("src/main/java/com/parse/","TestFile",false,false);
         HashMap<String, Map<String, Object>> methods = parser.getFeatures();
         //Map<String, Object> methodfeatures = methods.get("TestModelProg.fun(ArrayList | ArrayList)");
         //Map<String, Object> methodfeatures = methods.get("TestFile.t()");

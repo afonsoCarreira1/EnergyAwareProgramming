@@ -43,7 +43,7 @@ public class ToolParser {
         
 
         for (CtType<?> ctType : model.getAllTypes()) {
-            if (!ctType.getSimpleName().equals(file))continue; //only target class file, ignore other files
+            //if (!ctType.getSimpleName().equals(file))continue; //only target class file, ignore other files
             for (CtMethod<?> method : ctType.getMethods()) {
                 String methodName = getMethodName(ctType, method);
                 MethodEnergyInfo methodEnergyInfo = new MethodEnergyInfo(methodName);
@@ -127,55 +127,6 @@ public class ToolParser {
     }
 
 
-
-
-
-    /*might be slower but finds all loops
-     n sei quando um metodo é chamado, por exemplo:
-     metedo 1 apenas tem loop depth 1
-     metedo 2 tem loop depth 2 e chama metedo 1 o que da um total de loop depth 2, mas
-     eu nao sei quando vai ser chamado apenas o metodo 1 ou apenas o metodo 2, logo mais
-     vale ter apenas a depth que cada metodo tem
-     */
-    /*private int countEnclosingLoops(CtInvocation<?> invocation, Set<CtExecutable<?>> visited) {
-        int loopCount = 0;
-        CtStatement parent = invocation.getParent(CtStatement.class);
-
-        // Count lexical loops
-        while (parent != null) {
-            if (parent instanceof CtLoop) {
-                loopCount++;
-            }
-            parent = parent.getParent(CtStatement.class);
-        }
-
-        // Go to enclosing method
-        CtExecutable<?> enclosingMethod = invocation.getParent(CtExecutable.class);
-        if (enclosingMethod == null || visited.contains(enclosingMethod)) {
-            return loopCount;
-        }
-
-        visited.add(enclosingMethod);
-
-        // Find all places where this method is called
-        Set<CtInvocation<?>> callers = new HashSet<>(invocation.getFactory()
-            .getModel()
-            .getElements(new TypeFilter<>(CtInvocation.class)));
-
-        int maxCallerLoops = 0;
-        for (CtInvocation<?> caller : callers) {
-            if (caller.getExecutable().getDeclaration() == enclosingMethod) {
-                // Recursively check caller's loop context
-                int callerLoops = countEnclosingLoops(caller, new HashSet<>(visited));
-                if (callerLoops > maxCallerLoops) {
-                    maxCallerLoops = callerLoops;
-                }
-            }
-        }
-
-        return loopCount + maxCallerLoops;
-    }*/
-
     private void handleMethodArgs(CtInvocation<?> invocation, ModelInfo modelInfo, String methodContext, int inputNum) {
         List<CtExpression<?>> arguments = invocation.getArguments();
         for (int i = 0; i < arguments.size(); i++) {
@@ -237,37 +188,7 @@ public class ToolParser {
         // return modelInfo;
     }
 
-    /* 
-    public HashMap<String,Integer> methodsUsageCounter() {
-        HashMap<String,CtMethod<?>> methodsMap = getAllMethodNames();
-        ArrayList<String> methods = new ArrayList<>(methodsMap.keySet()); 
-        HashMap<String,Integer> counter = new HashMap<>();
-        for (String exploringMethodName : methods) {
-            HashSet<String> visited = new HashSet<>();
-            methodRecursiveCounter(visited, methodsMap.get(exploringMethodName),exploringMethodName,methodsMap,counter);
-        }
-        //System.out.println("final counter -> "+counter);
-        return counter;
-    }
-
-    private void methodRecursiveCounter(
-        HashSet<String> visited, 
-        CtMethod<?> method,
-        String exploringMethod,
-        HashMap<String,CtMethod<?>> methodsMap,
-        HashMap<String,Integer> counter)
-        {
-        counter.merge(exploringMethod, 1, Integer::sum);
-        if (visited.contains(exploringMethod)) return;
-        visited.add(exploringMethod);
-        List<CtInvocation<?>> invocations = method.getElements(new TypeFilter<>(CtInvocation.class));
-        for (CtInvocation<?> invocation : invocations) {
-            String newExploreMethod = buildInvocationString(invocation);
-            if (invocation.getExecutable().getDeclaration() == null) continue; //it means the methodCall is not from my code
-            methodRecursiveCounter(visited, methodsMap.get(newExploreMethod), newExploreMethod,methodsMap,counter);
-        }
-    }*/
-
+    
     public HashMap<String,Map<String,Object>> methodsUsageCounter() {
         HashMap<String,CtMethod<?>> methodsMap = getAllMethodNames();
         ArrayList<String> methods = new ArrayList<>(methodsMap.keySet()); 
@@ -319,7 +240,7 @@ public class ToolParser {
     private HashMap<String,CtMethod<?>> getAllMethodNames() {
         HashMap<String,CtMethod<?>> methods = new HashMap<>();
         for (CtType<?> ctType : model.getAllTypes()) {
-            if (!ctType.getSimpleName().equals(file))continue; //only target class file, ignore other files
+            //if (!ctType.getSimpleName().equals(file))continue; //only target class file, ignore other files
             for (CtMethod<?> method : ctType.getMethods()) {
                 methods.put(getMethodName(ctType, method), method);
             }

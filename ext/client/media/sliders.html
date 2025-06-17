@@ -189,7 +189,11 @@
 
           const configs = sliderMap[method] || [];
           for (const config of configs) {
-            const id = config.id || 'slider';
+            const fullId2 = config.id || 'slider';
+            const idParts = fullId2.split('|').map(s => s.trim());
+            const varPart = idParts.find(part => part.startsWith('Variable:'));
+            const id = varPart ? varPart.trim() : fullId2;
+
 
             const sliderBlock = document.createElement('div');
             sliderBlock.className = 'slider-block';

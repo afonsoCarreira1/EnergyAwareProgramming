@@ -11,8 +11,13 @@ import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MarkupKind;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SetTraceParams;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
@@ -115,6 +120,37 @@ public class Tool implements LanguageServer {
                 e.printStackTrace();
             }
         }
+
+        public CompletableFuture<Hover> hover(HoverParams params) {
+            String uri = params.getTextDocument().getUri();
+            Position pos = params.getPosition();
+
+            String text = openDocuments.get(uri);
+            if (text == null) return CompletableFuture.completedFuture(null);
+
+            // Use the position to find the line being hovered
+            String[] lines = text.split("\n");
+            if (pos.getLine() >= lines.length) return CompletableFuture.completedFuture(null);
+            String line = lines[pos.getLine()];
+
+            //String hoveredToken = getHoveredToken(line, pos.getCharacter());
+            String key = line.trim().replace(";", "") + " | " +(pos.getLine()+1);
+            System.err.println("Available expression: "+CalculateEnergy.lineExpressions);
+            System.err.println("Esta key -> "+key);
+            String expression = CalculateEnergy.lineExpressions.getOrDefault(key, "No expression available");
+
+            if (expression == null) return CompletableFuture.completedFuture(null);
+
+            // Prepare hover content
+            MarkupContent content = new MarkupContent();
+            content.setKind(MarkupKind.MARKDOWN);
+            content.setValue("🔋 **Energy Expression:**\n```java\n" + expression + "\n```");
+
+            Hover hover = new Hover(content);
+            return CompletableFuture.completedFuture(hover);
+        }
+
+
     }
 
     @Override
@@ -122,6 +158,7 @@ public class Tool implements LanguageServer {
         ServerCapabilities capabilities = new ServerCapabilities();
         // Enable text document synchronization (open, change, close)
         capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
+        capabilities.setHoverProvider(true);
         InitializeResult result = new InitializeResult(capabilities);
         return CompletableFuture.completedFuture(result);
     }

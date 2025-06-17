@@ -72,7 +72,7 @@ public class ToolParser {
                     if (invocation.getExecutable().getDeclaration() != null) {
                         System.err.println("from "+ methodName+ " called "+invocation.getExecutable().getSimpleName());
                         methodsEnergyInfo.add(methodEnergyInfo);
-                        ModelInfo modelInfo = new ModelInfo(getMethodNameFromInvocation(invocation));
+                        ModelInfo modelInfo = new ModelInfo(getMethodNameFromInvocation(invocation),invocation.toString());
                         modelInfo.setMethodCall(true);
                         loops = countEnclosingLoops(invocation,modelInfo,methodName);
                         modelInfos.add(modelInfo);
@@ -81,7 +81,7 @@ public class ToolParser {
                     }
                     if (!isModelMethod) continue; // ignore methods that are not trained
                     
-                    ModelInfo modelInfo = new ModelInfo(modelName);
+                    ModelInfo modelInfo = new ModelInfo(modelName,invocation.toString());
                     loops = countEnclosingLoops(invocation,modelInfo,methodName);
                     System.err.println("Loops around " + modelName + " -> "+loops);
                     getFeaturesForTool(modelInfo, invocation);
@@ -90,6 +90,7 @@ public class ToolParser {
 
                     handleMethodArgs(invocation, modelInfo, methodName, inputNum);
 
+                    modelInfo.setLine(invocation.getPosition().getLine());
                     modelInfos.add(modelInfo);
                     methodEnergyInfo.addModelInfo(modelInfo);
                 }

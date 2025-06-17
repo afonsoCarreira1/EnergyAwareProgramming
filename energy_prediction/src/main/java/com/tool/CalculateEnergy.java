@@ -22,8 +22,10 @@ public class CalculateEnergy {
 
     public static List<MethodEnergyInfo> methodsEnergyInfo = new ArrayList<>();
     public static Map<String,Double> methodsEnergyForContainer = new HashMap<>(); 
+    public static HashMap<String,String> lineExpressions = new HashMap<>();
 
     public static double calculateEnergy(String modelPath) {
+        lineExpressions.clear();
         //double totalEnergyUsed = 0;
         HashMap<String,HashSet<String>> methodsLoops = new HashMap<>();
         for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
@@ -39,9 +41,12 @@ public class CalculateEnergy {
                 String expression = getModelExpression(modelPath + modelInfo.getModelName() + ".csv");
                 //System.err.println("Using Expression -> " + expression + " for model " + modelInfo.getModelName());
                 // System.err.println("I have this inputs -> "+modelInfo.getInputToVarName());
-                expression = replaceExpressionInputsWithValues(modelInfo, expression);
+                Map<String, String> expressions = replaceExpressionInputsWithValues(modelInfo, expression);
+                expression = expressions.get("expression"); 
                 expression = replaceExpressionWithFeatures(modelInfo, expression);
                 Expression expressionEvaluated = new ExpressionBuilder(expression).build();
+                modelInfo.setExpression(expressions.get("expressionUi"));
+                lineExpressions.put(modelInfo.toString() + " | "+modelInfo.getLine(), modelInfo.getExpression());
                 totalMethodEnergy += accountForLoops(modelInfo.getLoopIds(), expressionEvaluated.evaluate());// expressionEvaluated.evaluate();
                 //System.err.println("New expression -> " + expression);
                 //System.err.println("Energy for this was -> " + expressionEvaluated.evaluate());
@@ -283,14 +288,16 @@ public class CalculateEnergy {
 
     // loop all inputs, get their var names, go to the sliders, get their current
     // values, and replace them in the expression
-    private static String replaceExpressionInputsWithValues(ModelInfo modelInfo, String expression) {
+    private static Map<String,String> replaceExpressionInputsWithValues(ModelInfo modelInfo, String expression) {
+        String expressionForUi = expression;
         ArrayList<String> inputs = new ArrayList<>(modelInfo.getInputToVarName().keySet());
         for (String input : inputs) {
             String varName = modelInfo.getInputToVarName().get(input);
             Integer inputVal = (Integer) Sliders.sliders.get(varName).get("val");
             expression = expression.replaceAll(input, inputVal + "");
+            expressionForUi=expressionForUi.replaceAll(input, varName.split(" \\| ")[1]);
         }
-        return expression;
+        return Map.of("expression",expression,"expressionUi",expressionForUi);
     }
 
     private static String replaceExpressionWithFeatures(ModelInfo modelInfo, String expression) {

@@ -14,22 +14,44 @@ public class ModelInfo {
     private HashMap<String,String> inputToVarName;
     private ArrayList<String> loopIds;
     private boolean isMethodCall;
+    private int line;
+    private String expression;
+    private String realInvocation;
+
+    //public ModelInfo(String realInvocation) {
+    //    this.realInvocation = realInvocation;
+    //    this.ids = new HashSet<>();
+    //    this.inputToVarName = new HashMap<>();
+    //    this.loopIds = new ArrayList<>();
+    //    this.isMethodCall = false;
+    //}
+
+    public ModelInfo(String modelName,String realInvocation) {
+        this.modelName = modelName;
+        this.realInvocation = realInvocation;
+        this.ids = new HashSet<>();
+        this.inputToVarName = new HashMap<>();
+        this.loopIds = new ArrayList<>();
+    }
+    
+    @Override
+    public String toString() {
+        return realInvocation;
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
+    }
+
+    public String getExpression() {
+        return expression;
+    }
+
+    public void setLine(int line) {
+        this.line = line;
+    }
 
     
-
-    public ModelInfo() {
-        this.ids = new HashSet<>();
-        this.inputToVarName = new HashMap<>();
-        this.loopIds = new ArrayList<>();
-        this.isMethodCall = false;
-    }
-
-    public ModelInfo(String modelName) {
-        this.modelName = modelName;
-        this.ids = new HashSet<>();
-        this.inputToVarName = new HashMap<>();
-        this.loopIds = new ArrayList<>();
-    }
 
     public void setInputToVarName(HashMap<String, String> inputToVarName) {
         this.inputToVarName = inputToVarName;
@@ -101,6 +123,14 @@ public class ModelInfo {
 
     public boolean isMethodCall() { 
         return this.isMethodCall;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public String getRealInvocation() {
+        return realInvocation;
     }
 
 }

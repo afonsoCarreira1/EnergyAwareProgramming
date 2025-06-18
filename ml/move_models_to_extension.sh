@@ -48,6 +48,6 @@ mv merged_models_deduped.txt ../../ext/server/ModelsAvailable.txt
 # Step 3: Move the entire collected_models/ directory
 mv collected_models/* ../ext/server/collected_models/
 
-rm ModelsAvailable.txt
+#rm ModelsAvailable.txt
 rm -rf collected_models/
 

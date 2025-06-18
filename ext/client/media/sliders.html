@@ -224,7 +224,7 @@
               currentSliderValues[id] = input.value;
               vscode.postMessage({
                 type: 'sliderChange',
-                id: input.id,
+                id: `Method: ${method} | ${input.id}`,
                 value: input.value
               });
             });

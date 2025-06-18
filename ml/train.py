@@ -403,7 +403,7 @@ def createModelsDir(filename):
 def getAllFeatures():
     original_dir = os.getcwd()
     os.chdir("..")# go up one folder
-    os.chdir("orchestrator/logs/log_2025_05_20/tmp_files")
+    os.chdir("orchestrator/logs/log_2025_06_10/tmp_files")
     features_paths = get_feature_file_per_subdir_path()
     os.chdir(original_dir)
     files,modelsAvailable = join_method_features(features_paths)
@@ -521,7 +521,7 @@ def main():
     #os.makedirs('out/', exist_ok=True)
     files,models_available = getAllFeatures()
     #plots(files,"equals_java_lang_Object_")
-    #readDividedFeatures(files)
+    readDividedFeatures(files)
     #check_one_method()
     createFilesForExtension(models_available)
 

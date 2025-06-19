@@ -369,7 +369,7 @@ public class Runner {
 
     private static void getFeaturesFromParser(String file, String cpuUsage,String currentDirBeingTested,String tempDir) throws IOException {
         String path = targetProgramFiles+"/"+file.replaceAll("\\d+", "")+"/";
-        ASTFeatureExtractor parser = new ASTFeatureExtractor(path,file,true);
+        ASTFeatureExtractor parser = new ASTFeatureExtractor(path,file,true,false);
         HashMap<String, Map<String, Object>> methods = parser.getFeatures();
         List<String> inputValues = parser.getNumberOfInputs();
         

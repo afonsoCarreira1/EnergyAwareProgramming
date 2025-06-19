@@ -47,7 +47,7 @@ def get_scores(regressor,X_test,y_test,log):
     predictions = regressor.predict(X_test)
     mse = mean_squared_error(y_test, predictions)
     r2 = r2_score(y_test, predictions)
-    log.append(f"Mean Squared Error: {mse:.4f}")
+    log.append(f"Mean Squared Error: {mse}")#mse:.4f
     log.append(f"R² Score: {r2:.4f}")
 
 def save_figure_pdf(df, regressor):
@@ -475,21 +475,22 @@ def get_feature_file_per_subdir_path(filename="features.csv"):
            and (filename in os.listdir(os.path.join(cwd, d)) if filename else True)
     }
 
-def check_one_method(method = "addAll_java_util_Collection_"):
+def check_one_method(method = "size__"):#addAll_java_util_Collection_
     log = []
     filename = method + ".csv"
     print("------------------------------------------------------")
     print(f"Training model {filename}")
-    modelPath = createModelsDir(filename)
-    df = pd.read_csv(f'divided_features/{filename}')
+    #modelPath = createModelsDir(filename)
+    df = pd.read_csv(f'out/{method}/{filename}')
     df = drop_column(df,'Filename')
     #model(df,modelPath,[])
     X = df.iloc[:, :-1]
     y = df.iloc[:, -1]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    plot_energy_vs_feature(X,y,'input0')
+    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     #m3gp_model(X,y,X_train, X_test, y_train, y_test,modelPath,log,save = False)
-    for x in log:
-        print(x)
+    #for x in log:
+    #    print(x)
 
 def plots(files,fname):
     for filename in files:
@@ -521,8 +522,8 @@ def main():
     #os.makedirs('out/', exist_ok=True)
     files,models_available = getAllFeatures()
     #plots(files,"equals_java_lang_Object_")
-    readDividedFeatures(files)
-    #check_one_method()
-    createFilesForExtension(models_available)
+    #readDividedFeatures(files)
+    check_one_method()
+    #createFilesForExtension(models_available)
 
 main()

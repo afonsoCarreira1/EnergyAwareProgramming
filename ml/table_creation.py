@@ -55,7 +55,7 @@ def parse_log_file(filepath):
                     tuning = 'After'
 
                 r2_match = re.search(r'R² Score:\s*([0-9.]+)', line)
-                mse_match = re.search(r'Mean Squared Error:\s*([0-9.eE+-]+)', line)
+                mse_match = re.search(r'Mean Cross-Validation MSE:\s*([0-9.eE+-]+)', line)
 
                 if r2_match:
                     r2_score = float(r2_match.group(1))
@@ -88,11 +88,13 @@ def main():
     for dir in dir_names:
         df = parse_log_file("out/"+dir+"/log.txt")
         all_dfs.append(df)
+        print(dir)
 
     #panel_charts(all_dfs,"MSE")
-    combined_df = pd.concat(all_dfs, ignore_index=True)
-    sorted_mse = combined_df['MSE'].sort_values(ascending=False)
-    print(sorted_mse)
+
+    #combined_df = pd.concat(all_dfs, ignore_index=True)
+    #sorted_mse = combined_df['MSE'].sort_values(ascending=False)
+    #print(sorted_mse)
 
     
 
@@ -102,11 +104,14 @@ def single_chart(df, ax, model_colors,val='R²'):
     bar_colors = [model_colors[model] for model in df_best['Model']]
     
     bars = ax.bar(df_best['Model'], df_best[val], color=bar_colors)
-    ax.set_ylim(0, 1.15)  # Give space above bars
+    if (val == "R²"): ax.set_ylim(0, 1.15)  # Give space above bars
+    #else: ax.set_ylim(0, 1e-8)  # Give space above bars
     ax.set_xlabel('')
     ax.set_title(f'Method: {method_name}')
     ax.set_xticks([])
 
+
+    if(val != "R²"): return
     for bar, value in zip(bars, df_best[val]):
         height = bar.get_height()
         label = f"{value:.2f}"[:4]
@@ -162,7 +167,7 @@ def panel_charts(df_list,val, cols=2):
         ncol=len(model_colors),
         bbox_to_anchor=(0.5, 0.02)
     )
-    fig.suptitle("R² Score Comparison", fontsize=16, fontweight='bold')
+    fig.suptitle(f"{val} Score Comparison", fontsize=16, fontweight='bold')
     plt.tight_layout(rect=[0, 0.05, 1, 0.93])  # leave space for legend and title
     plt.subplots_adjust(hspace=.5, bottom=0.2, top=0.9)
     plt.show()

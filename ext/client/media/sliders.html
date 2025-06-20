@@ -135,20 +135,13 @@
     const vscode = acquireVsCodeApi();
     let currentSliderValues = {};
 
-
+    
 
     window.addEventListener('message', event => {
       const message = event.data;
 
 
-      if (message.type === 'requestHtmlSnapshot') {
-        // Serialize entire HTML document and send back
-        const htmlContent = document.documentElement.outerHTML;
-        vscode.postMessage({
-          type: 'htmlSnapshot',
-          html: htmlContent
-        });
-      }
+      
 
       if (message.type === 'updateSliders') {
         const sliders = message.sliders || [];

@@ -36,7 +36,7 @@ public class CalculateEnergy {
             ArrayList<ModelInfo> modelInfos = methodEnergyInfo.getModelInfos();
             for (ModelInfo modelInfo : modelInfos) {
                 if (modelInfo.isMethodCall()) continue;
-                String expression = getModelExpression(modelPath + modelInfo.getModelName() + ".csv");
+                String expression = getModelExpression(modelPath + modelInfo.getModelName() + ".csv",8,9);
                 //System.err.println("Using Expression -> " + expression + " for model " + modelInfo.getModelName());
                 // System.err.println("I have this inputs -> "+modelInfo.getInputToVarName());
                 Map<String, String> expressions = replaceExpressionInputsWithValues(modelInfo, expression);
@@ -259,11 +259,13 @@ public class CalculateEnergy {
     private static String replaceExpressionWithFeatures(ModelInfo modelInfo, String expression) {
         //System.err.println("Before -> " + modelInfo.getColType() + " " + modelInfo.getMethodType() + " " + modelInfo.getArgs());
         String cleanedColType = modelInfo.getColType().replaceAll("\\.", "");
-        String cleanedMethodType = modelInfo.getMethodType().replaceAll("\\.|\\(|\\)", "");// remove . ( )
+        String cleanedMethodType = modelInfo.getMethodType().replaceAll("\\.|\\(|\\)|,", "");// remove . ( )
         String cleanedArgs = modelInfo.getArgs().replaceAll("\\.|\\|", "");// remove . |
         //System.err.println("After -> " + cleanedColType + " " + cleanedMethodType + " " + cleanedArgs);
-        expression = expression.replaceAll(cleanedColType, "1");
+        //System.err.println("joined -> "+cleanedMethodType);
         expression = expression.replaceAll(cleanedMethodType, "1");
+        expression = expression.replaceAll(cleanedColType, "1");
+        
         if (!cleanedArgs.isEmpty())
             expression = expression.replaceAll(cleanedArgs, "1"); // TODO isto esta mal, se tiver mais q um arg da erro
                                                                   // pq vai ter Double | Integer e dps n da replace
@@ -290,7 +292,7 @@ public class CalculateEnergy {
         return methodsEnergy;
     }
 
-    private static String getModelExpression(String modelPath) {
+    private static String getModelExpression(String modelPath, int targetComplexity, int backupComplexity) {
         String expression = "";
         String filePath = modelPath;
         String line;
@@ -323,8 +325,8 @@ public class CalculateEnergy {
             // Read each row
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
-                if (values.length > complexityIndex && values[complexityIndex].trim().equals("5")
-                        || values.length > complexityIndex && values[complexityIndex].trim().equals("6")) {
+                if (values.length > complexityIndex && values[complexityIndex].trim().equals(targetComplexity+"")
+                        || values.length > complexityIndex && values[complexityIndex].trim().equals(backupComplexity+"")) {
                     expression = values[expressionIndex].replaceAll("\"", "");
                     break;
                 }

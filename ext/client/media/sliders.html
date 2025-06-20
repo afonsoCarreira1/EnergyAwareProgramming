@@ -135,9 +135,20 @@
     const vscode = acquireVsCodeApi();
     let currentSliderValues = {};
 
+
+
     window.addEventListener('message', event => {
       const message = event.data;
 
+
+      if (message.type === 'requestHtmlSnapshot') {
+        // Serialize entire HTML document and send back
+        const htmlContent = document.documentElement.outerHTML;
+        vscode.postMessage({
+          type: 'htmlSnapshot',
+          html: htmlContent
+        });
+      }
 
       if (message.type === 'updateSliders') {
         const sliders = message.sliders || [];
@@ -188,19 +199,34 @@
           });
 
           const configs = sliderMap[method] || [];
+
           for (const config of configs) {
             const fullId2 = config.id || 'slider';
             const idParts = fullId2.split('|').map(s => s.trim());
-            const varPart = idParts.find(part => part.startsWith('Variable:'));
-            const id = varPart ? varPart.trim() : fullId2;
 
+            // Extract display ID for label
+            let displayId = '';
+            const varPart = idParts.find(part => part.startsWith('Variable:'));
+            if (varPart) {
+              displayId = varPart;
+            } else {
+              const filteredParts = idParts.filter(part =>
+                part.startsWith('loopDepth') || part.startsWith('Line')
+              );
+              displayId = filteredParts.join(' | ');
+            }
+
+            // Fallback if displayId is still empty
+            if (!displayId) {
+              displayId = fullId2;
+            }
 
             const sliderBlock = document.createElement('div');
             sliderBlock.className = 'slider-block';
 
             const label = document.createElement('label');
-            label.setAttribute('for', id);
-            label.textContent = id + ': ';
+            label.setAttribute('for', displayId);
+            label.textContent = displayId + ': ';
 
             const valueDisplay = document.createElement('span');
             const initialValue = config.val;
@@ -208,23 +234,23 @@
 
             const input = document.createElement('input');
             input.type = 'range';
-            input.id = id;
-            input.name = id;
+            input.id = displayId;
+            input.name = displayId;
             input.min = config.min ?? 0;
             input.max = config.max ?? 100;
             input.value = initialValue;
 
-            currentSliderValues[id] = initialValue;
+            currentSliderValues[displayId] = initialValue;
 
             input.addEventListener('input', () => {
               valueDisplay.textContent = input.value;
             });
 
             input.addEventListener('change', () => {
-              currentSliderValues[id] = input.value;
+              currentSliderValues[displayId] = input.value;
               vscode.postMessage({
                 type: 'sliderChange',
-                id: `Method: ${method} | ${input.id}`,
+                id: `${fullId2}`,//Method: ${method} | 
                 value: input.value
               });
             });
@@ -236,6 +262,7 @@
 
             content.appendChild(sliderBlock);
           }
+
 
           box.appendChild(header);
           box.appendChild(content);

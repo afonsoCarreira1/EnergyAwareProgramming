@@ -25,8 +25,8 @@
     ],
     "commands": [
       {
-        "command": "javaLspExtension.openSliders",
-        "title": "Open Sliders"
+        "command": "javaLspExtension.openEnergyExtension",
+        "title": "Open Energy Extension"
       }
     ]
   },

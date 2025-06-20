@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as os from 'os';
+import * as fs from 'fs/promises';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 let sliderPanel: vscode.WebviewPanel | undefined;
@@ -35,7 +37,7 @@ export async function activate(context: vscode.ExtensionContext) {
     });
 
     // Handle server notification to update energy in webview
-    client.onNotification('custom/updateEnergy', (params) => {
+    client.onNotification('custom/updateEnergy', async (params) => {
         console.log('Received custom/updateEnergy notification:', params);
         if (sliderPanel) {
             sliderPanel.webview.postMessage({
@@ -43,15 +45,21 @@ export async function activate(context: vscode.ExtensionContext) {
                 energy: params.totalEnergyUsed,
                 methodsEnergy: params.methodsEnergy
             });
+
+            // Wait 1 second before requesting HTML content
+            setTimeout(() => {
+                // Ask webview to send its current full HTML content
+                sliderPanel?.webview.postMessage({ type: 'requestHtmlSnapshot' });
+            }, 1000);
         } else {
             console.warn('Slider panel is not open, message not sent.');
         }
     });
 
-    const disposable = vscode.commands.registerCommand('javaLspExtension.openSliders', async () => {
+    const disposable = vscode.commands.registerCommand('javaLspExtension.openEnergyExtension', async () => {
         sliderPanel = vscode.window.createWebviewPanel(
-            'javaSliders',
-            'Java Sliders',
+            'energyExtension',
+            'Energy Extension',
             vscode.ViewColumn.Beside,
             { enableScripts: true }
         );
@@ -60,8 +68,8 @@ export async function activate(context: vscode.ExtensionContext) {
         const buffer = await vscode.workspace.fs.readFile(htmlPath);
         sliderPanel.webview.html = buffer.toString();
 
-        // Listen for messages from the webview (sliders and button)
-        sliderPanel.webview.onDidReceiveMessage(message => {
+        // Listen for messages from the webview (sliders and button, plus HTML snapshot response)
+        sliderPanel.webview.onDidReceiveMessage(async message => {
             switch (message.type) {
                 case 'sliderChange':
                     console.log(`Slider changed: ${message.id} = ${message.value}`);
@@ -76,6 +84,20 @@ export async function activate(context: vscode.ExtensionContext) {
                     console.log('Received calculateEnergy request from webview');
                     // Send a notification to the Java language server to trigger energy estimation
                     client.sendNotification('custom/calculateEnergy');
+                    break;
+
+                case 'htmlSnapshot':
+                    // message.html contains the full HTML string from the webview
+                    console.log('Received HTML snapshot from webview, saving to temp file...');
+                    const tempFilePath = path.join(os.tmpdir(), `energy_sliders_${Date.now()}.html`);
+                    try {
+                        await fs.writeFile(tempFilePath, message.html, 'utf8');
+                        vscode.window.showInformationMessage(`Saved snapshot to ${tempFilePath}`);
+                        console.log(`Snapshot saved: ${tempFilePath}`);
+                    } catch (err) {
+                        console.error('Error saving HTML snapshot:', err);
+                        vscode.window.showErrorMessage('Failed to save HTML snapshot.');
+                    }
                     break;
 
                 default:

@@ -13,4 +13,42 @@ When a trained method is called inside a loop, a new slider appears to represent
 
 Note that only methods and variables that affect the energy appear on the panel.
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width = .8 \textwidth]{figures/extension_example1.png}
+  \caption{Extension example}
+  \label{fig:extension_example1}
+\end{figure}
+
+This extension can help understand how much energy the code is using.
+For example, this small code snippet ~\ref{lst:Java_program_to_count_word_frequencies_in_a_string} that counts how many times each word appears in a given text string, can be estimated for how much energy it uses.
+
+\begin{listing}[H]
+\begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{Java}
+    public class WordFrequency {
+    public static HashMap<String, Integer> countWordFrequency(String text) {
+        String[] words = text.toLowerCase().split("\\W+");
+        HashMap<String, Integer> frequencyMap = new HashMap<>();
+        for (String word : words) {
+            if (word.isEmpty()) continue; 
+            frequencyMap.put(word, frequencyMap.getOrDefault(word, 0) + 1);
+        }
+        return frequencyMap;
+    }
+    public static void main(String[] args) {
+        String input = "Java is simple. Java is powerful. Java is everywhere!";
+        HashMap<String, Integer> result = countWordFrequency(input);
+        for (String word : result.keySet()) {
+            System.out.println(word + ": " + result.get(word));
+        }
+    }
+}
+\end{minted}
+\caption{Java program to count word frequencies in a string}            
+\label{lst:Java_program_to_count_word_frequencies_in_a_string}
+\end{listing}
+
+Using the energy prediction extension it is possible to understand how much energy this code uses, as it can be seen in the figure \ref{fig:extension_example1}.
+In the figure 2 methods can be seen, and their energy is displayed, also one of the containers has the important variables that might affect the energy of the code. For instance, in the method \texttt{countWordFrequency(String)} it can be seen that the size of the variables \texttt{word} and \texttt{frequencyMap} can change the energy usage. Also, the loop size is taken into account, and the number operations performed will impact the energy significantly.
+ The 2 variables shown in the figure\ref{fig:extension_example1}, show up because of the method \texttt{Map.put(Object,Object)}, which means it will have 3 inputs. The first one is the collection input, (i.e \texttt{frequencyMap}), the second one is the first Object which is the variable \texttt{word} and teh last Object is not a variable, so it does not appear in the extension.
 

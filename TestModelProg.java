@@ -10,8 +10,8 @@ import java.util.Random;
 public class TestModelProg {
 
     static String frequency = ".1";
-    static int loopSize = 1_000;
-/* 
+    static int loopSize = 10_000;
+ 
     public static void main(String[] args) throws IOException, InterruptedException {
         int maxListSize = 1000;
         int max = 100;
@@ -57,9 +57,9 @@ public class TestModelProg {
         } catch (Exception e) {}
     }
 
-*/
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+
+    /*public static void main(String[] args) throws IOException, InterruptedException {
         String input = generateRandomWordString(1000);//"Java is simple. Java is powerful.";
         String pid = ProcessHandle.current().pid()+"";
         ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
@@ -74,8 +74,20 @@ public class TestModelProg {
     }
 
     public static void compute(String input) {
-        HashMap<String, Integer> result = countWordFrequency(input);
-        System.out.println(result);
+        //HashMap<String, Integer> result = countWordFrequency(input);
+        //System.out.println(result);
+
+    }
+
+    public static List<Integer> generateRandomNumberList(int size) {
+        Random rand = new Random();
+        List<Integer> numbers = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
+            numbers.add(rand.nextInt(100)); // random number between 0 and 99
+        }
+
+        return numbers;
     }
 
     public static HashMap<String, Integer> countWordFrequency(String text) {
@@ -101,7 +113,7 @@ public class TestModelProg {
         }
 
         return sb.toString();
-    }
+    }*/
 
 
     /*public static void sendStopSignalToOrchestrator(String pid, int iter) throws IOException {

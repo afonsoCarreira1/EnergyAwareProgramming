@@ -55,7 +55,7 @@ public class CalculateEnergy {
             System.err.println("energia final metodos -> "+methodEnergyInfo.getTotalEnergy());
         }
         addMethodLoops(methodsLoops);
-        System.err.println("Final loops -> "+methodsLoops);
+        //System.err.println("Final loops -> "+methodsLoops);
         //System.err.println("total energy used was -> " + totalEnergyUsed + "J");
         double e = countMethodsUsedEnergy(methodsLoops);
         
@@ -67,7 +67,7 @@ public class CalculateEnergy {
         for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo){
               for (ModelInfo modelInfo : methodEnergyInfo.getModelInfos()){
                 if (modelInfo.getLoopIds() == null || modelInfo.getLoopIds().isEmpty()) continue;
-                System.err.println("Vou guardar para o "+methodEnergyInfo.getMethodName() +" os ids "+modelInfo.getLoopIds().toString());
+                //System.err.println("Vou guardar para o "+methodEnergyInfo.getMethodName() +" os ids "+modelInfo.getLoopIds().toString());
                 String key = methodEnergyInfo.getMethodName();
                 if(methodsLoops.containsKey(key)) {
                     HashSet<String> loops = methodsLoops.get(key);

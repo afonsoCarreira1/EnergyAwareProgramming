@@ -2,7 +2,29 @@
 
 Now that the extension has been built, we can present the results and evaluate how accurately the tool estimates energy consumption compared to real measurements obtained using PowerJoular. Since the energy profiles were generated on a specific hardware setup (see Table~\ref{tab:hardware_specs}), the resulting models are tailored to that particular system. If the tool were run on a different machine, the absolute energy values would likely differ due to variations in hardware characteristics. However, the relative differences in energy consumption between operations are expected to remain consistent. For instance, if \texttt{TreeMap} consumes more energy than \texttt{HashMap} on one system, the same trend will likely hold on another system, even if the exact energy values vary.
 
-So to test if the extension tool is accurate, the energy measurement needs to be run in the same machine were the data was collected.
+\begin{listing}[H]
+\begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{Java}
+    ArrayList<Integer> l = new ArrayList<>();
+    ArrayList<Integer> l2 = new ArrayList<>();
+    l.addAll(l2);
+\end{minted}
+\caption{Code example}            
+\label{lst:code_example}
+\end{listing}
+
+To test if the extension tool is accurate, the energy measurement needs to be run in the same machine were the data was collected.
+For this a simple program was developed~\ref{lst:code_example}, more like simple Java instructions, of just creating two lists (both with size 1000) and using the method \texttt{addAll(Object)} and checking if the prediction matches the actual measurement.
+
+The actual value measured by PowerJoular is in the range of (4.9e-4, 5.1e-4J) while the prediction is 5.51e-4J. This shows that the prediction was good for this method in particular.
+When trying to add two more operations (\texttt{size()} and \texttt{equals(Object)}) the measurement is in the range of (5.0e-4, 5.2e-4J) and the prediction is 6.49e-4J, so now the values are getting off. The method \texttt{addAll(Object)} is one of the methods that has the best accuracy of around 80\%, and the other two do not. This makes it so that when adding the other two methods the real energy value starts drifting away from the real one.
+
+This can get worse when the number of methods used and variables involved start increasing, making it so the prediction will output different values from the reality. 
+
+Using the example of the wordCounting program, which involves \texttt{Maps} and loops, the bigger gap between reality and prediction can be seen, as the \texttt{Map} methods predictions are not very accurate.
+
+
+
+
 
 
 

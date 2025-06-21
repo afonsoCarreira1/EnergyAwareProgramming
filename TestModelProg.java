@@ -2,13 +2,16 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class TestModelProg {
 
     static String frequency = ".1";
-    static int loopSize = 10_000;
+    static int loopSize = 1_000;
+/* 
     public static void main(String[] args) throws IOException, InterruptedException {
         int maxListSize = 1000;
         int max = 100;
@@ -54,14 +57,61 @@ public class TestModelProg {
         } catch (Exception e) {}
     }
 
-    public static void sendStopSignalToOrchestrator(String pid, int iter) throws IOException {
+*/
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        String input = generateRandomWordString(1000);//"Java is simple. Java is powerful.";
+        String pid = ProcessHandle.current().pid()+"";
+        ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
+        Process powerjoularProcess = powerjoularBuilder.start();
+        for (int i = 0; i < loopSize; i++) {
+            compute(input);
+        }
+        Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularProcess.pid()+""});
+        killPowerjoular.waitFor();
+        String energyUsed = readPowerjoularCsv("powerjoular.csv-"+pid+".csv");
+        System.out.println("Energy used was: "+energyUsed + "J");
+    }
+
+    public static void compute(String input) {
+        HashMap<String, Integer> result = countWordFrequency(input);
+        System.out.println(result);
+    }
+
+    public static HashMap<String, Integer> countWordFrequency(String text) {
+        HashMap<String, Integer> frequencyMap = new HashMap<>();
+        String[] words = text.toLowerCase().split("\\W+");
+        for (String word : words) {
+            if (word.isEmpty()) continue;
+            frequencyMap.put(word, frequencyMap.getOrDefault(word, 0) + 1);
+        }
+        return frequencyMap;
+    }
+
+    public static String generateRandomWordString(int wordCount) {
+        String[] words = {"red", "blue", "green"};
+        Random rand = new Random();
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < wordCount; i++) {
+            sb.append(words[rand.nextInt(words.length)]);
+            if (i < wordCount - 1) {
+                sb.append(" ");
+            }
+        }
+
+        return sb.toString();
+    }
+
+
+    /*public static void sendStopSignalToOrchestrator(String pid, int iter) throws IOException {
         Runtime.getRuntime().exec(new String[] { "kill", "-USR2", pid });
     }
 
     public static void sendStartSignalToOrchestrator(String pid) throws IOException, InterruptedException {
         Runtime.getRuntime().exec(new String[] { "kill", "-USR1", pid });
         Thread.sleep(100);
-    }
+    }*/
 
     private static String readPowerjoularCsv(String csvFile) {
         try {Thread.sleep(100);

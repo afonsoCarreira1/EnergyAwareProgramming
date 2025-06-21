@@ -34,7 +34,48 @@ There are several Java parsing tools available, such as WALA~\cite{wala_main}, S
 In order to build the extension, it was necessary to build a system architecture capable of providing as final output the functioning tool. The architecture follows different stages, that were deeply analyzed before moving to the next one.
 The architecture is divided in 4 main modules, the Program Generator, Orchestrator, Parser and Tool.
 
+To perform this experiment two computers were used:
 
+\begin{table}[h!]
+\centering
+\caption{System Hardware Specifications}
+\label{tab:hardware_specs}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Component} & \textbf{Specification} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{System 1 — Data Generation and Collection (High-Performance Workstation)}} \\
+\hline
+Operating System & Ubuntu 24.04.2 LTS (x86\_64) \\
+\hline
+CPU & AMD Ryzen Threadripper 3960X \\
+     & 24 cores / 48 threads \\
+     & Base frequency: 2.2 GHz, Boost up to ~5.05 GHz \\
+\hline
+Memory (RAM) & 94 GiB \\
+\hline
+GPU & NVIDIA GeForce RTX 3090 Ti (GA102) \\
+    & VRAM: 24 GiB (standard) \\
+\hline
+
+\multicolumn{2}{|l|}{\textbf{System 2 — Personal Machine for Testing (Lower-Spec)}} \\
+\hline
+Operating System & Ubuntu 24.04.2 LTS (x86\_64) \\
+\hline
+CPU & AMD Ryzen 5 3600 \\
+     & 6 cores / 12 threads \\
+     & Base frequency: 3.6 GHz, Boost up to ~4.2 GHz \\
+\hline
+Memory (RAM) & 16 GiB \\
+\hline
+GPU & NVIDIA GeForce RTX 3060 Ti \\
+    & VRAM: 8 GiB (standard) \\
+\hline
+\end{tabular}
+\label{tab:hardware_specs}
+\end{table}
+
+The more powerful system was used for program generation and data collection, as it was configured to work with SLURM (Simple Linux Utility for Resource Management). SLURM is a highly scalable, open-source job scheduler used to efficiently manage compute resources on shared systems. It allows tasks to be queued and scheduled based on resource availability and job priority, helping to organize workloads across users without manual intervention.
 
 \input{./tex/program_generator}
 

@@ -15,72 +15,67 @@ The generator works for custom Java classes, for some collections (Lists, Sets, 
 
 %\FloatBarrier
 
-\begin{listing}[H]
-\begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
-
-package com.generated_progs.ArrayList_add_java_lang_Object_;
-import com.template.aux.CollectionAux;
-import com.template.aux.TemplatesAux;
-import java.util.ArrayList;
-public class ArrayList_add_java_lang_Object_ {
-    public static void main(String[] args) throws Exception {
-        int iter = 0;
-        try {
-            BenchmarkArgs[] arr = new BenchmarkArgs["numberOfFunCalls"];
-            populateArray(arr);
-            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
-            TemplatesAux.launchTimerThread(1100);
-            iter = computation(arr, arr.length);
-        } catch (OutOfMemoryError e) {
-            TemplatesAux.writeErrorInFile("ArrayList_add_java_lang_Object_", "Out of memory error caught by the program:\n" + e.getMessage());
-        } catch (Exception e) {
-            TemplatesAux.writeErrorInFile("ArrayList_add_java_lang_Object_", "Error caught by the program:\n" + e.getMessage());
-        } finally {
-            TemplatesAux.sendStopSignalToOrchestrator(args[0], iter);
-        }
-    }
-
-    static class BenchmarkArgs {
-        public ArrayList<changetypehere> var0;
-
-        public changetypehere var1;
-
-        BenchmarkArgs() {
-            this.var0 = new ArrayList();
-            CollectionAux.insertRandomNumbers(var0, "ChangeValueHere1_changetypehere", "changetypehere");
-            this.var1 = "ChangeValueHere2_changetypehere";
-        }
-    }
-
-    private static void arrayList_add_java_lang_Object_(ArrayList var, changetypehere arg0) {
-        var.add(arg0);
-    }
-
-    private static int computation(BenchmarkArgs[] args, int iter) {
-        int i = 0;
-        while (!TemplatesAux.stop && i < iter) {
-              arrayList_add_java_lang_Object_(args[i].var0, args[i].var1);
-               i++;
-        }
-        return iter;
-    }
-
-    private static void populateArray(BenchmarkArgs[] arr) {
-        for (int i = 0;i < "numberOfFunCalls";i++) {
-          arr[i] = new BenchmarkArgs();
-        };
-    }
-
-    private String input1 = "ChangeValueHere1";
-
-    private String input2 = "ChangeValueHere2";
-}
-
-
-\end{minted}
-\caption{Example of template for List.add(Object)}            
-\label{lst:template_example}
-\end{listing}
+%\begin{listing}[htbp]
+%\begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
+%
+%public class ArrayList_add_java_lang_Object_ {
+%    public static void main(String[] args) throws Exception {
+%        int iter = 0;
+%        try {
+%            BenchmarkArgs[] arr = new BenchmarkArgs["numberOfFunCalls"];
+%            populateArray(arr);
+%            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
+%            TemplatesAux.launchTimerThread(1100);
+%            iter = computation(arr, arr.length);
+%        } catch (OutOfMemoryError e) {
+%            TemplatesAux.writeErrorInFile("ArrayList_add_java_lang_Object_", "Out of memory error caught by the program:\n" + e.getMessage());
+%        } catch (Exception e) {
+%            TemplatesAux.writeErrorInFile("ArrayList_add_java_lang_Object_", "Error caught by the program:\n" + e.getMessage());
+%        } finally {
+%            TemplatesAux.sendStopSignalToOrchestrator(args[0], iter);
+%        }
+%    }
+%
+%    static class BenchmarkArgs {
+%        public ArrayList<changetypehere> var0;
+%
+%        public changetypehere var1;
+%
+%        BenchmarkArgs() {
+%            this.var0 = new ArrayList();
+%            CollectionAux.insertRandomNumbers(var0, "ChangeValueHere1_changetypehere", "changetypehere");
+%            this.var1 = "ChangeValueHere2_changetypehere";
+%        }
+%    }
+%
+%    private static void arrayList_add_java_lang_Object_(ArrayList var, changetypehere arg0) {
+%        var.add(arg0);
+%    }
+%
+%    private static int computation(BenchmarkArgs[] args, int iter) {
+%        int i = 0;
+%        while (!TemplatesAux.stop && i < iter) {
+%              arrayList_add_java_lang_Object_(args[i].var0, args[i].var1);
+%               i++;
+%        }
+%        return iter;
+%    }
+%
+%    private static void populateArray(BenchmarkArgs[] arr) {
+%        for (int i = 0;i < "numberOfFunCalls";i++) {
+%          arr[i] = new BenchmarkArgs();
+%        };
+%    }
+%
+%    private String input1 = "ChangeValueHere1";
+%    private String input2 = "ChangeValueHere2";
+%}
+%
+%
+%\end{minted}
+%\caption{Example of template for List.add(Object)}            
+%\label{lst:template_example}
+%\end{listing}
 
 The first step to generate multiple programs is to first create an intermediate template capable of holding the necessary code that will later be used for energy profiling.
 
@@ -89,7 +84,7 @@ Since it has access to the whole custom class, it can see how its constructors a
 
 After identifying the methods that will be targeted, it starts by creating templates for each of them. 
 
-Template important features
+Template important features:
 
 \begin{itemize}
 
@@ -104,6 +99,7 @@ Template important features
 Also, the template is structured so that the programs will work in harmony with the Orchestrator, that will extract the energy profile for each program (next section), so when the placeholders are replaced with actual values, the orchestrator can run the program, and communicate with them.
 
 \begin{listing}[H]
+\noindent\rule{\linewidth}{0.4pt}
 \begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
 static class BenchmarkArgs {
         public ArrayList<changetypehere> var0;
@@ -117,6 +113,7 @@ static class BenchmarkArgs {
         }
     }
 \end{minted}
+\noindent\rule{\linewidth}{0.4pt}
 \caption{Example of variable placeholders creations}            
 \label{lst:var_placeholders}
 \end{listing}

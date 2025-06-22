@@ -1,13 +1,10 @@
-\usepackage{array}
-\usepackage{booktabs}
-\usepackage{xcolor}
-\usepackage{colortbl}
+
 
 \section{Stage 2: Orchestrator} \label{sec:work_stage2_orchestrator}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width = 1 \textwidth]{figures/orchestrators_process.pdf}
+  \includegraphics[scale = 0.7]{figures/orchestrators_process.pdf}
   \caption{Orchestrator Workflow}
   \label{fig:orchestrators_process}
 \end{figure}
@@ -39,10 +36,13 @@ Now, suppose we have a custom method called sort that takes a randomly ordered l
   \label{fig:array}
 \end{figure}
 
-To prevent this from happening the approach used was to create an array that holds the parameters \ref{fig:array}. Basically, the parameters are created into an array, all with the same values, but with different references. Now, if one of the elements is changed during its execution on the method, it will not affect the other's execution. Of course, since now there are multiple references of the same values, the memory usage is much higher, so that is why there is an array size, also empirically chosen, to avoid memory errors and avoid having the array so small the PowerJoular would not have time to perform the measurements. There are, for now, 3 different array sizes (75_000, 100_000, 150_000). PowerJoular by default needs to run for 1 second to create the CSV file that has the energy used for the target process, so these sizes aim so that looping the array takes at least a second. In some cases, the CSV file may not be generated because the loop executes too quickly. In such instances, the energy reading will be assumed to be 0 J, as the execution was too fast to record a value. Using an array in this case is preferable to a list, as it introduces less overhead and has a smaller impact on energy measurements.
+To prevent this from happening the approach used was to create an array that holds the parameters \ref{fig:array}. Basically, the parameters are created into an array, all with the same values, but with different references. Now, if one of the elements is changed during its execution on the method, it will not affect the other's execution. Of course, since now there are multiple references of the same values, the memory usage is much higher, so that is why there is an array size, also empirically chosen, to avoid memory errors and avoid having the array so small the PowerJoular would not have time to perform the measurements. There are, for now, 3 different array sizes (75\_000, 100\_000, 150\_000). PowerJoular by default needs to run for 1 second to create the CSV file that has the energy used for the target process, so these sizes aim so that looping the array takes at least a second. In some cases, the CSV file may not be generated because the loop executes too quickly. In such instances, the energy reading will be assumed to be 0 J, as the execution was too fast to record a value. Using an array in this case is preferable to a list, as it introduces less overhead and has a smaller impact on energy measurements.
+
+Additionally, the original PowerJoular was modified to allow customizable measurement durations, enabling readings at intervals shorter than the default 1 second, such as 100ms, which provides greater flexibility and finer granularity in energy profiling.
 
 
 \begin{listing}[H]
+\noindent\rule{\linewidth}{0.4pt}
 \begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
 private static int computation(BenchmarkArgs[] args, int iter) {
         int i = 0;
@@ -53,6 +53,7 @@ private static int computation(BenchmarkArgs[] args, int iter) {
         return iter;
     }
 \end{minted}
+\noindent\rule{\linewidth}{0.4pt}
 \caption{Computation method}            
 \label{lst:Computation_method}
 \end{listing}
@@ -78,7 +79,7 @@ The features extracted from the parser can be seen in the table \ref{tab:feature
 
 \begin{table}[htbp]
 \centering
-\caption{Features extracted}
+\caption{Features Extracted}
 \label{tab:features_extracted}
 \begin{tabular}{||l|c||}
 \hline\hline

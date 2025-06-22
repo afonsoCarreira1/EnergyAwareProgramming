@@ -54,8 +54,10 @@ def parse_log_file(filepath):
                 if 'best model scores' in line.lower():
                     tuning = 'After'
 
-                r2_match = re.search(r'R² Score:\s*([0-9.]+)', line)
-                mse_match = re.search(r'Mean Cross-Validation MSE:\s*([0-9.eE+-]+)', line)
+                #r2_match = re.search(r'R² Score:\s*([0-9.]+)', line)
+                #mse_match = re.search(r'Mean Squared Error:\s*([0-9.eE+-]+)', line)
+                r2_match = re.search(r'R² Score:\s*(-?[0-9.eE+-]+)', line)
+                mse_match = re.search(r'Mean Squared Error:\s*(-?[0-9.eE+-]+)', line)
 
                 if r2_match:
                     r2_score = float(r2_match.group(1))
@@ -70,6 +72,7 @@ def parse_log_file(filepath):
                     'R²': r2_score,
                     'MSE': mse_score
                 })
+
                 # Clear vars for next round
                 del r2_score
                 del mse_score
@@ -88,9 +91,9 @@ def main():
     for dir in dir_names:
         df = parse_log_file("out/"+dir+"/log.txt")
         all_dfs.append(df)
-        print(dir)
+        #print(dir)
 
-    #panel_charts(all_dfs,"MSE")
+    panel_charts(all_dfs,"MSE")
 
     #combined_df = pd.concat(all_dfs, ignore_index=True)
     #sorted_mse = combined_df['MSE'].sort_values(ascending=False)

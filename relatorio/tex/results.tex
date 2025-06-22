@@ -1,4 +1,4 @@
-\chapter{Results}\label{chapter:results}
+\chapter{Results}\label{chapter:results}\textcolor{blue}{Tudo novo}
 
 During program generation, most of the tested collections focused on List, Set, and Map. However, programs were also generated for another collection category, the Math collection. This introduced an issue. The computations in these programs were extremely fast, completing too quickly for PowerJoular to measure any meaningful energy consumption. As a result, all energy readings for the Math collection programs were reported as 0J.
 The problem was the array sizes used to hold the method parameters. While the three predefined array sizes worked well for List, Set, and Map collections, they were too small for the Math collection. The smaller input sizes caused the Math computations to execute very fast, not giving PowerJoular enough time to capture energy usage.
@@ -8,11 +8,13 @@ This highlights a challenge in energy profiling: some collections, especially th
 Since the extension has been built, we can present the results and evaluate how accurately the tool estimates energy consumption compared to real measurements obtained using PowerJoular. Since the energy profiles were generated on a specific hardware setup (see Table~\ref{tab:hardware_specs}), the resulting models are tailored to that particular system. If the tool were run on a different machine, the absolute energy values would likely differ due to variations in hardware characteristics. However, the relative differences in energy consumption between operations are expected to remain consistent. For instance, if \texttt{TreeMap} consumes more energy than \texttt{HashMap} on one system, the same trend will likely hold on another system, even if the exact energy values vary.
 
 \begin{listing}[H]
+\noindent\rule{\linewidth}{0.4pt}
 \begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{Java}
     ArrayList<Integer> l = new ArrayList<>();
     ArrayList<Integer> l2 = new ArrayList<>();
     l.addAll(l2);
 \end{minted}
+\noindent\rule{\linewidth}{0.4pt}
 \caption{Code example}            
 \label{lst:code_example}
 \end{listing}

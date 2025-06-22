@@ -1,8 +1,9 @@
-\usepackage{xcolor}
+
 \chapter{Background}\label{chapter:background}
 
 This section provides an overview of the essential concepts and foundational knowledge necessary for understanding the methods and approaches used throughout this thesis. A solid understanding of these concepts is necessary to fully comprehend the work presented.
-
+{
+\color{blue}
 \section{Benchmarking} \label{sec:background_benchmarking}
 
 When performing benchmarking (i.e. measuring time, energy, memory, etc.) it is important to have in mind some important information that can affect the measurements. First it matters to know how the programming language being used works, and how it can affect the measurements. It is important to understand how to understand which noise can be avoidable and which cannot be.
@@ -11,6 +12,7 @@ In this project the target language is Java, so the benchmark will have its cons
 It is essential to understand the non-deterministic problems that may arrive when benchmarking in Java:
 
 \begin{listing}[H]
+\noindent\rule{\linewidth}{0.4pt}
 \begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{Java}
     int sum = 0;
     for (int i = 0; i < 100; i++) {
@@ -18,6 +20,7 @@ It is essential to understand the non-deterministic problems that may arrive whe
     }
     System.out.println(sum);
 \end{minted}
+\noindent\rule{\linewidth}{0.4pt}
 \caption{Example for loop}            
 \label{lst:for_loop_example}
 \end{listing}
@@ -59,7 +62,7 @@ It is also important to note that:
 \end{itemize}
 
 When building the tool, it is necessary to gather data from the Java programs, which requires benchmarking best practices. Although it is not possible to apply all of them due to time and complexity constraints, it is always helpful to keep in mind what it takes to create a good benchmark.
-
+}
 \section{Energy Profiling} \label{sec:background_energy_profiling}
 
 To fully understand the processes involved in this work, it is important to first understand what energy profiling is, as it will be frequently referenced and used later.

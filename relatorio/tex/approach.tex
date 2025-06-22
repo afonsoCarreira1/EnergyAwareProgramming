@@ -1,22 +1,6 @@
-\usepackage{xcolor}
+\chapter{Approach}\label{chapter:approach} \textcolor{blue}{Tudo novo}
 
-\usepackage[most]{tcolorbox}
-\usepackage{minted}
-\usepackage{placeins}
-\usepackage{float}
-\floatstyle{plain}
-\newfloat{listing}{H}{lop}
-\floatname{listing}{Listing}
-\tcbuselibrary{listings, breakable}
 
-\chapter{Approach}\label{chapter:approach}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width = .8 \textwidth]{figures/main_modules.pdf}
-  \caption{Main modules}
-  \label{fig:main_modules}
-\end{figure}
 As described in the previous sections, the aim of this work is to make developers aware of the energy consumption of their programs. By using a simple and practical tool, they can quickly and accurately estimate their program's energy consumption. This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development. It is important to note that this tool serves as a guide, providing energy consumption estimates to raise awareness rather than dictate action. Ultimately, it is up to developers to decide whether to prioritize performance, energy efficiency or any other factor. For example, if a program only needs to run within a certain timeframe and can afford a slight reduction in performance, developers may choose to trade some performance for improved energy efficiency, making more informed decisions thanks to the insights provided by the tool.
 
 To provide this insight to developers it is necessary to build a tool that can provide all of that. The tool needs to be practical, which means that integrating it in an IDE is recommended. With this the developer only needs to download an extension for an IDE and will access to the insights provided by the tool.
@@ -31,15 +15,27 @@ Java is an excellent choice for developing this tool because of its high interop
 
 There are several Java parsing tools available, such as WALA~\cite{wala_main}, SootUp~\cite{sootup_main}, Spoon~\cite{spoon_main} and JavaParser~\cite{javaParser}. WALA and SootUp are primarily designed for analyzing Java Bytecode and are generally more complex to use. For this project, Spoon was chosen because it is a user-friendly tool that facilitates easy retrieval and manipulation of the AST from Java source code. Both JavaParser and Spoon support AST manipulation and code generation. However, Spoon provides a deeper, type-aware metamodel and built-in templating features. These features make Spoon more suitable for generating code that conforms to Java’s syntactic and semantic rules, especially in complex transformation scenarios.
 
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.7]{figures/main_modules.pdf}
+  \caption{Main modules}
+  \label{fig:main_modules}
+\end{figure}
+
+
+
+
 In order to build the extension, it was necessary to build a system architecture capable of providing as final output the functioning tool. The architecture follows different stages, that were deeply analyzed before moving to the next one.
-The architecture is divided in 4 main modules, the Program Generator, Orchestrator, Parser and Tool.
+The architecture is divided in 4 main modules~\ref{fig:main_modules}, the Program Generator, Orchestrator, Parser and Tool.
+
+
 
 To perform this experiment two computers were used:
 
-\begin{table}[h!]
+\begin{table}[htbp]
 \centering
 \caption{System Hardware Specifications}
-\label{tab:hardware_specs}
 \begin{tabular}{|l|p{10cm}|}
 \hline
 \textbf{Component} & \textbf{Specification} \\

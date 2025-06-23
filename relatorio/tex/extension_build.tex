@@ -7,9 +7,10 @@ The sliders are updated when the document is saved.%, rather than on every chang
 The extension analyzes the user's Java files, identifies all the methods used, and matches them against a set of pre-trained models. Then it finds which variables affect those methods, meaning the variables that are the inputs to the method, for example, in \texttt{list.add(i)}  the inputs and important variables are \texttt{list} and \texttt{i}.
 The extension does this to every method it finds and groups it by method. In the end it creates groups of input variables for each method, and displays it in sliders. The sliders allow the user to change the input values and when pressing the estimate button, depending on the changed values, it will change the energy estimation.
 
-If a method calls another user-defined method that already has an assigned energy cost (but is not a trained method), then the calling method will also include that energy cost.
+If a method calls another user-defined method that already has an assigned energy cost (but is not a trained method), then the calling method will also include that energy cost. This part was done by first analyzing individual methods for the model-trained methods and get their base energy. In a second iteration, each method is traversed to determine which calls are made, how many calls are made, and whether the calls are inside or outside loops. With this information, the total energy cost of each method could be calculated, accounting for both direct and indirect calls to model-trained methods.
 
-When a trained method is called inside a loop, a new slider appears to represent the loop size. The method’s energy cost is multiplied by this loop size. In the case of nested loops, the energy cost is multiplied by the product of all nested loop sizes.
+
+When a model-trained method or a user-defined method are called inside a loop, a new slider appears to represent the loop size. The method’s energy cost is multiplied by this loop size. In the case of nested loops, the energy cost is multiplied by the product of all nested loop sizes.
 
 Note that only methods and variables that affect the energy appear on the panel.
 

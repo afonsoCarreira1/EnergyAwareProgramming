@@ -14,7 +14,16 @@ Having all the programs generated, it is possible to move to the next stage. Gat
 
 Note: Although this part was developed chronologically before Section \ref{sec:work_stage1_program_generator}, it is presented as Stage 2 to reflect the logical structure of the system: programs must first be generated before they can be energy profiled. For this reason, the program generator templates are designed to integrate directly with the orchestrator.
 
-As described in \ref{sec:background_energy} there are several tools capable of performing dynamic energy measurements. In our case we choose PowerJoular, it has good features that caught our attention, for example being a command line tool that could be easily integrated in almost every programming language, it stores the energy used in a CSV file (easy to work with), capable of only reading energy of running processes and so on, as explained before. So, PowerJoular is the tool that will measure the energy of our programs.
+As described in \ref{sec:background_energy} there are several tools capable of performing dynamic energy measurements.
+At the start some tools were tested in order to see the one that best suited the needs of the project.
+
+Perf is a Linux tool primarily designed for analyzing application performance characteristics rather than precise energy measurement. While it can provide some energy-related metrics, its measurements tend to be imprecise. In this context, Perf was used mainly to get a rough idea of energy consumption and to serve as an alternative when more accurate tools were unavailable.
+
+Powertop was also tested, but it could only perform energy measurements on laptops, as it relies on battery drain data to calculate energy consumption. Since this approach does not align with our specific requirements, we considered Powertop as a last-resort option.
+
+JoularJx is an energy measurement tool capable of measuring the consumption of Java programs and its methods. However, it is not as precise as other tools as it requires to measure the entire start of the JVM and whole functions instead of small code blocks.
+
+In our case we choose PowerJoular, it has good features that caught our attention, for example being a command line tool that could be easily integrated in almost every programming language, it stores the energy used in a CSV file (easy to work with), capable of only reading energy of running processes and so on, as explained before. So, PowerJoular is the tool that will measure the energy of our programs.
 
 Since PowerJoular is a command line tool, it is launched as a process, and then it can be killed whenever needed because it is a process as well. This allows to measure not only programs/processes energies but have a more precise measurement, as it is possible to call PowerJoular to measure a specific computation and then kill it when the computation is finished.
 

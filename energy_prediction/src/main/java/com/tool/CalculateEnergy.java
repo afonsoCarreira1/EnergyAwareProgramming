@@ -23,15 +23,17 @@ public class CalculateEnergy {
     public static List<MethodEnergyInfo> methodsEnergyInfo = new ArrayList<>();
     public static Map<String,Double> methodsEnergyForContainer = new HashMap<>();
     public static HashMap<String,String> lineExpressions = new HashMap<>();
+    public static HashMap<String, HashMap<String,String>> mostEnergyExpensiveLines = new HashMap<>();
 
     public static double calculateEnergy(String modelPath) {
-        System.err.println("----------------------------");
-        System.err.println("vou calcular para estes metodos: ");
+        //System.err.println("----------------------------");
+        //System.err.println("vou calcular para estes metodos: ");
         lineExpressions.clear();
+        mostEnergyExpensiveLines.clear();
         //double totalEnergyUsed = 0;
         HashMap<String,HashSet<String>> methodsLoops = new HashMap<>();
         for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
-            System.err.println("method: "+methodEnergyInfo.getMethodName());
+            //System.err.println("method: "+methodEnergyInfo.getMethodName());
             double totalMethodEnergy = 0.0;
             ArrayList<ModelInfo> modelInfos = methodEnergyInfo.getModelInfos();
             for (ModelInfo modelInfo : modelInfos) {
@@ -45,21 +47,24 @@ public class CalculateEnergy {
                 Expression expressionEvaluated = new ExpressionBuilder(expression).build();
                 modelInfo.setExpression(expressions.get("expressionUi"));
                 lineExpressions.put(modelInfo.toString() + " | "+modelInfo.getLine(), modelInfo.getExpression());
-                totalMethodEnergy += accountForLoops(modelInfo.getLoopIds(), expressionEvaluated.evaluate());// expressionEvaluated.evaluate();
+                double currentEnergy = accountForLoops(modelInfo.getLoopIds(), expressionEvaluated.evaluate());
+                totalMethodEnergy += currentEnergy;// expressionEvaluated.evaluate();
                 //System.err.println("New expression -> " + expression);
                 //System.err.println("Energy for this was -> " + expressionEvaluated.evaluate());
                 //System.err.println("------------");
+                insertIfHigher(methodEnergyInfo, currentEnergy,modelInfo.getLine());
             }
             methodEnergyInfo.setTotalEnergy(totalMethodEnergy);
             //totalEnergyUsed += totalMethodEnergy;
-            System.err.println("energia final metodos -> "+methodEnergyInfo.getTotalEnergy());
+            //System.err.println("energia final metodos -> "+methodEnergyInfo.getTotalEnergy());
         }
         addMethodLoops(methodsLoops);
         //System.err.println("Final loops -> "+methodsLoops);
         //System.err.println("total energy used was -> " + totalEnergyUsed + "J");
         double e = countMethodsUsedEnergy(methodsLoops);
         
-        System.err.println("energia final -> "+e);
+        //System.err.println("energia final -> "+e);
+        System.err.println("mostEnergyExpensiveLines -> "+mostEnergyExpensiveLines);
         return e; /* totalEnergyUsed + */ // countMethodsUsedEnergy();
     }
 
@@ -128,7 +133,7 @@ public class CalculateEnergy {
         double totalEnergy = 0.0;
         if (Tool.parser == null) return totalEnergy;
         HashMap<String, Map<String, Object>> savedMethodPaths = Tool.parser.getToolParser().methodsUsageCounter();
-        System.err.println("savedMethodPaths -> "+savedMethodPaths);
+        //System.err.println("savedMethodPaths -> "+savedMethodPaths);
         for (String methodName : savedMethodPaths.keySet()) {
             HashMap<String, List<String>> callGraph = (HashMap<String, List<String>>) savedMethodPaths.get(methodName).get("callGraph");
             Map<String, Integer> indegree = (Map<String, Integer>) savedMethodPaths.get(methodName).get("indegree");
@@ -155,6 +160,7 @@ public class CalculateEnergy {
     private static double sumUserMethods(String methodName, Map<String, Integer> methodCalls, Map<String, Double> energy, HashSet<String> loopIds) {
         double totalEnergy = 0.0;
         HashMap<String,Integer> numberOfMethodCallsInLoopForMethod = new HashMap<>();
+        
         MethodEnergyInfo mei = null;
         for (MethodEnergyInfo mei2 : methodsEnergyInfo) {
             if (mei2.getMethodName().equals(methodName)) {
@@ -162,6 +168,8 @@ public class CalculateEnergy {
                 break;
             }
         }
+        HashMap<String,Integer> methodUsedLine = getCallsLine(mei);
+        
         //System.err.println("---------------------");
         //System.err.println("summing method: "+mei.getMethodName());
         //System.err.println("Methods used: "+methodCalls);
@@ -177,17 +185,30 @@ public class CalculateEnergy {
                         loopsMultiplied *= (Integer) Sliders.sliders.get(loopId).get("val");
                     }
                     totalEnergy += energy.get(methodCalled) * loopsMultiplied;
+                    if (methodUsedLine.containsKey(methodCalled)) insertIfHigher(mei, totalEnergy, methodUsedLine.get(methodCalled));
                     //System.err.println("found "+loopsMultiplied +" loops energy = "+totalEnergy);
                     numberOfMethodCallsInLoopForMethod.put(methodCalled, numberOfMethodCallsInLoopForMethod.getOrDefault(methodCalled, 0) + 1);
                 }
+                
             }
+            
             for (String methodUsed : methodCalls.keySet()) {    
                 int dif = methodCalls.get(methodUsed) - numberOfMethodCallsInLoopForMethod.getOrDefault(methodUsed,0);
                 if (dif > 0) totalEnergy += energy.get(methodUsed) * dif;
+                System.err.println(methodName + " uses "+methodUsed+ " -> " +methodUsedLine);
+                if (methodUsedLine.containsKey(methodUsed)) insertIfHigher(mei, totalEnergy, methodUsedLine.get(methodUsed));
                 //System.err.println("dif -> "+dif +" | "+methodCalls.get(methodUsed) +" | "+ numberOfMethodCallsInLoopForMethod.get(methodUsed));
             }
             //System.err.println("total energy: "+totalEnergy);
         return totalEnergy;
+    }
+
+    private static HashMap<String, Integer> getCallsLine(MethodEnergyInfo mei) {
+        HashMap<String, Integer> m = new HashMap<>();
+        for (ModelInfo mi : mei.getModelInfos()) {
+            m.put(mi.getModelName(), mi.getLine());
+        }
+        return m;
     }
 
     private static Map<String, Double> calculateTopologicSort(HashMap<String, List<String>> callGraph, Map<String, Integer> indegree) {
@@ -292,6 +313,22 @@ public class CalculateEnergy {
         return methodsEnergy;
     }
 
+    private static void insertIfHigher(MethodEnergyInfo method, double energy, Integer line) {
+        if (!mostEnergyExpensiveLines.containsKey(method.getMethodName())) {
+            HashMap<String,String> m = new HashMap<>();
+            m.put("Energy", energy+"");
+            m.put("Line", line+"");
+            m.put("Uri", method.getUri());
+            mostEnergyExpensiveLines.put(method.getMethodName(), m);
+            return;
+        }
+        HashMap<String,String> info = mostEnergyExpensiveLines.get(method.getMethodName());
+        double e = Double.parseDouble(info.get("Energy"));
+        if (energy <= e) return;
+        info.put("Energy", e + "");
+        mostEnergyExpensiveLines.put(method.getMethodName(), info);
+    }
+
     private static String getModelExpression(String modelPath, int targetComplexity, int backupComplexity) {
         String expression = "";
         String filePath = modelPath;
@@ -336,6 +373,16 @@ public class CalculateEnergy {
             e.printStackTrace();
         }
         return expression;
+    }
+
+    public static Map<String, List<String>> getMostEnergyExpensiveLines() {
+        Map<String, List<String>> linesPath = new HashMap<>();
+        for (String key : mostEnergyExpensiveLines.keySet()){
+            String uri = mostEnergyExpensiveLines.get(key).get("Uri");
+            String line = mostEnergyExpensiveLines.get(key).get("Line");
+            linesPath.computeIfAbsent(uri, k -> new ArrayList<>()).add(line);
+        }
+        return linesPath;
     }
 
 }

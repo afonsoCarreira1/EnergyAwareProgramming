@@ -63,7 +63,7 @@ public class ASTFeatureExtractor {
 
         importSet = new HashSet<>();
         readImportFromFile(resolvedPath.toString(), importSet);
-        this.toolParser = new ToolParser(this.model, this.file);
+        this.toolParser = new ToolParser(this.model, this.file, this.path);
     }
 
     public HashMap<String, Map<String, Object>> getFeatures() {

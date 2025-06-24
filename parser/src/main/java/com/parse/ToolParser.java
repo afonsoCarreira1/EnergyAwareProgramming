@@ -1,26 +1,19 @@
 package com.parse;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
-
 import spoon.reflect.CtModel;
-import spoon.reflect.code.CtDo;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtFieldRead;
-import spoon.reflect.code.CtFor;
-import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtLoop;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableRead;
-import spoon.reflect.code.CtWhile;
-import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.reference.CtExecutableReference;
@@ -31,10 +24,12 @@ public class ToolParser {
 
     CtModel model;
     String file;
+    String path;
 
-    public ToolParser(CtModel model, String file) {
+    public ToolParser(CtModel model, String file, String path) {
         this.model = model;
         this.file = file;
+        this.path = path;
     }
 
 
@@ -46,7 +41,7 @@ public class ToolParser {
             //if (!ctType.getSimpleName().equals(file))continue; //only target class file, ignore other files
             for (CtMethod<?> method : ctType.getMethods()) {
                 String methodName = getMethodName(ctType, method);
-                MethodEnergyInfo methodEnergyInfo = new MethodEnergyInfo(methodName);
+                MethodEnergyInfo methodEnergyInfo = new MethodEnergyInfo(methodName,Paths.get(path,file+".java"));
                 List<CtInvocation<?>> invocations = method.getElements(new TypeFilter<>(CtInvocation.class));
                 
                 List<ModelInfo> modelInfos = new ArrayList<>();
@@ -74,6 +69,7 @@ public class ToolParser {
                         methodsEnergyInfo.add(methodEnergyInfo);
                         ModelInfo modelInfo = new ModelInfo(getMethodNameFromInvocation(invocation),invocation.toString());
                         modelInfo.setMethodCall(true);
+                        modelInfo.setLine(invocation.getPosition().getLine());
                         loops = countEnclosingLoops(invocation,modelInfo,methodName);
                         modelInfos.add(modelInfo);
                         methodEnergyInfo.addModelInfo(modelInfo);

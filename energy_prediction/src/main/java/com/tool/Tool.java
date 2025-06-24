@@ -3,10 +3,17 @@ package com.tool;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -18,6 +25,8 @@ import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.MarkupKind;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SetTraceParams;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
@@ -55,8 +64,58 @@ public class Tool implements LanguageServer {
         double totalEnergyUsed = CalculateEnergy.calculateEnergy(serverDir.toString() + "/collected_models/");
         Map<String,Object> message = Map.of("totalEnergyUsed",totalEnergyUsed,"methodsEnergy",CalculateEnergy.getMethodsEnergy());
         if (client != null) client.updateEnergy(message); 
-        
+        handleMostEnergyExpensiveLines();
     }
+
+    public void handleMostEnergyExpensiveLines() {
+        Map<String, List<String>> hotLinesPerFilePath = CalculateEnergy.getMostEnergyExpensiveLines();
+        //System.err.println("Most expensive lines: "+hotLinesPerFilePath);
+        for (Map.Entry<String, List<String>> entry : hotLinesPerFilePath.entrySet()) {
+            String uri = entry.getKey();
+            List<String> lines = entry.getValue();
+            clearEnergyHighlights(uri);
+            highlightHighEnergyLines(uri, lines);
+        }
+    }
+
+    public void highlightHighEnergyLines(String uri, List<String> lines) {
+        List<Diagnostic> diagnostics = new ArrayList<>();
+
+        for (String lineStr : lines) {
+            int line;
+            try {
+                line = Integer.parseInt(lineStr);
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid line number: " + lineStr);
+                continue;
+            }
+
+            Diagnostic diagnostic = new Diagnostic();
+            diagnostic.setSeverity(DiagnosticSeverity.Information);
+            diagnostic.setMessage("⚡ Highest energy usage of method");
+            diagnostic.setRange(new Range(
+                new Position(line-1, 0),
+                new Position(line-1, 1000)
+            ));
+            diagnostic.setSource("EnergyTool");
+
+            diagnostics.add(diagnostic);
+        }
+
+        if (client != null) {
+            System.err.println("entrei");
+            PublishDiagnosticsParams params = new PublishDiagnosticsParams(uri, diagnostics);
+            client.publishDiagnostics(params);
+        }
+    }
+
+    public void clearEnergyHighlights(String uri) {
+        if (client != null) {
+            PublishDiagnosticsParams params = new PublishDiagnosticsParams(uri, Collections.emptyList());
+            client.publishDiagnostics(params);
+        }
+    }
+
 
     public void connect(LanguageClient client) {
         this.client = (CustomLanguageClient) client;
@@ -85,7 +144,7 @@ public class Tool implements LanguageServer {
             String uri = params.getTextDocument().getUri();
             String text = params.getTextDocument().getText();
             openDocuments.put(uri, text);
-            System.err.println("didOpen called");
+            //System.err.println("didOpen called, for uri -> "+uri.toString());
         }
 
         @Override
@@ -175,5 +234,27 @@ public class Tool implements LanguageServer {
     @Override
     public WorkspaceService getWorkspaceService() {
         return null;
+    }
+
+
+    public void highlightLineRed(String uri, int lineNumber, String message) {
+        DiagnosticSeverity severity = DiagnosticSeverity.Error; // Red color in most clients
+
+        Diagnostic diagnostic = new Diagnostic();
+        diagnostic.setSeverity(severity);
+        diagnostic.setMessage(message);
+        diagnostic.setRange(new Range(
+            new Position(lineNumber, 0),     // Start at column 0
+            new Position(lineNumber, 1000)   // Arbitrary end column — the whole line
+        ));
+        diagnostic.setSource("EnergyTool");
+
+        PublishDiagnosticsParams params = new PublishDiagnosticsParams();
+        params.setUri(uri);
+        params.setDiagnostics(Arrays.asList(diagnostic));
+
+        if (client != null) {
+            client.publishDiagnostics(params);
+        }
     }
 }

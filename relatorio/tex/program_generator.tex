@@ -7,9 +7,10 @@
   \label{fig:program_generator}
 \end{figure}
 
-In order to be able to predict energy using ML models it is of course needed a lot of data, so the models can train, and the results can be analyzed. To obtain a considerable amount of data a program generator was built.
+In order to be able to predict energy using ML models it is of course needed a lot of data, so the models can train, and the results can be analyzed. To obtain a considerable amount of data, a program generator was built, as illustrated in Figure~\ref{fig:program_generator}.
+
 The program generator works alongside with Java Spoon to make it the more general as possible allowing custom programs to be mass generated.
-The generator works for custom Java classes, for some collections (Lists, Sets, Maps), for utility classes like Math, Base64, Duration, and it can be called to analyze all the public methods of the class or just specific ones.
+The generator works for custom, developer-created, Java classes, for most collections interface (Lists, Sets, Maps) implementations, for utility classes like Math, Base64, Duration, and it can be called to analyze all the public methods of the class or just specific ones.
 
 \subsection{Template Creation} \label{sec:work_stage1_template_creation}
 
@@ -96,7 +97,8 @@ Template important features:
 
 \end{itemize}
 
-Also, the template is structured so that the programs will work in harmony with the Orchestrator, that will extract the energy profile for each program (next section), so when the placeholders are replaced with actual values, the orchestrator can run the program, and communicate with them.
+Also, the template is structured so that the programs will work in harmony with the Orchestrator, that will extract the energy profile for each program (see Section~\ref{sec:work_stage2_orchestrator}), so when the placeholders are replaced with actual values, the orchestrator can run the program, and communicate with them.
+
 
 \begin{listing}[H]
 \noindent\rule{\linewidth}{0.4pt}
@@ -118,7 +120,29 @@ static class BenchmarkArgs {
 \label{lst:var_placeholders}
 \end{listing}
 
-The template creates a class that holds the necessary variables the method needs to run, \ref{lst:var_placeholders} shows an example of the variables that need to be created to run the method List.add(Object). First it creates the list with the smallest constructor possible, then if the variable is a collection (List, Set, Map) it calls a custom-made method that populates collections with random values of a given type, and then it starts creating variables of parameters that the method List.add(Object) uses. The placeholder "ChangeValueHere1" will change to a random number, it contains a number ("1") because it represents the input number of the method that will later help the model training understand how inputs can affect energy consumption. The placeholder "changetypehere" later changes to a type.
+The template creates a class that holds the necessary variables the method needs to run, Listing~\ref{lst:var_placeholders} shows an example of the variables that need to be created to run the method \texttt{List.add(Object)}. First it creates the list with the smallest constructor possible, then if the variable is a collection (List, Set, Map) it calls a custom-made method that populates collections with random values of a given type, and then it starts creating variables of parameters that the method \texttt{List.add(Object)} uses. The placeholder \texttt{ChangeValueHere1} will change to a random number, it contains a number \texttt{1} because it represents the input number of the method that will later help the model training understand how inputs can affect energy consumption. The placeholder \texttt{changetypehere} later changes to a type. The template after the transformation can be seen in the Listing~\ref{lst:var_placeholders_replaced}
+
+
+\begin{listing}[H]
+\noindent\rule{\linewidth}{0.4pt}
+\begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
+static class BenchmarkArgs {
+        public ArrayList<Integer> var0;
+
+        public Integer var1;
+
+        BenchmarkArgs() {
+            this.var0 = new ArrayList();
+            CollectionAux.insertRandomNumbers(var0, 1000, "Integer");
+            this.var1 = 10;
+        }
+    }
+\end{minted}
+\noindent\rule{\linewidth}{0.4pt}
+\caption{Example of variable placeholders replaced}            
+\label{lst:var_placeholders_replaced}
+\end{listing}
+
 
 It is worth mentioning that the types used by the generator are the Java wrapper classes, which are object representations of the primitive types. Using these types it is possible to achieve a more general generator, as every program can use them and if other custom types were used it would make the generator more complex and not general.
 
@@ -130,7 +154,7 @@ Creating the template for each method allows cutting off time of the program gen
 \subsection{Input Tester} \label{sec:work_stage1_input_tester}
 
 A very important aspect of the program generator is the inputs it generates. Every method works differently, receives different parameters, and even when changing the values of these parameters, the method can behave completely different. So, this generator has an intermediate step, between the creation of the template and creating multiple programs, it finds the maximum size the input parameters should receive. Knowing the maximum size the different parameters can have is very important as it needs to be big enough, so the energy profiles can be abundant, but not to big so that the programs start to get out of memory or taking too much time to complete.
-The input search works by using binary search. It has limits on the inputs (1-100,000) and it starts by trying to run the program with the half of the max input which is 50,000. Then it runs the program for maximum of 10 seconds (timeout also defined by us) and waits for the exit code of the program, if it is an error code it will lower the input by half again, of it is a normal finish code, it will increase the input by half. This operation is done until the maximum value for the input is found. If the method that is being tested has more than one input, the input tester, first sets all the input values to 1 and then starts the binary search individually for each of the parameters one by one while leaving the other parameters with the value of 1. This avoids having to find multiple combinations of parameters which would increase the time complexity exponentially. Since the process of finding the max inputs is time-consuming, when the maximum value is found, the values of the input type, maximum value and order (if it was the parameter 1 or parameter 2 or parameter 3) are stored in a file, so if the actual programs later generated are not stored, using this files they can be quickly generated.
+The input search works by using binary search. It has limits on the inputs (1-100,000) and it starts by trying to run the program with the half of the max input which is 50,000. Then it runs the program for maximum of 10 seconds, which is a threshold based on empirical experimentation, and waits for the exit code of the program, if it is an error code it will lower the input by half again, of it is a normal finish code, it will increase the input by half. This operation is done until the maximum value for the input is found. If the method that is being tested has more than one input, the input tester, first sets all the input values to 1 and then starts the binary search individually for each of the parameters one by one while leaving the other parameters with the value of 1. This avoids having to find multiple combinations of parameters which would increase the time complexity exponentially. Since the process of finding the max inputs is time-consuming, when the maximum value is found, the values of the input type, maximum value and order (if it was the parameter 1 or parameter 2 or parameter 3) are stored in a file, so if the actual programs later generated are not stored, using this files they can be quickly generated. It is worthy to mention that the maximum inputs found depend heavily on the machine where the program generation is taking place, as different hardware will change the maximum values allowed for the inputs.
 
 \begin{tcolorbox}[title=Example: Input Testing Process for \texttt{List.add(index, Element)}, colback=gray!5!white, colframe=gray!75!black, fonttitle=\bfseries, breakable]
 

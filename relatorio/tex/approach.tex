@@ -27,7 +27,8 @@ There are several Java parsing tools available, such as WALA~\cite{wala_main}, S
 
 
 In order to build the extension, it was necessary to build a system architecture capable of providing as final output the functioning tool. The architecture follows different stages, that were deeply analyzed before moving to the next one.
-The architecture is divided in 4 main modules~\ref{fig:main_modules}, the Program Generator, Orchestrator, Parser and Tool.
+The architecture is divided in four main modules, Program Generator, Orchestrator, Parser, and Tool, as illustrated in Figure~\ref{fig:main_modules}.
+
 
 
 
@@ -71,7 +72,8 @@ GPU & NVIDIA GeForce RTX 3060 Ti \\
 \label{tab:hardware_specs}
 \end{table}
 
-The more powerful system was used for program generation and data collection, as it was configured to work with SLURM (Simple Linux Utility for Resource Management). SLURM is a highly scalable, open-source job scheduler used to efficiently manage compute resources on shared systems. It allows tasks to be queued and scheduled based on resource availability and job priority, helping to organize workloads across users without manual intervention.
+The more powerful system, System 1, as described in Table~\ref{tab:hardware_specs}, was used for program generation and data collection, as it was configured to work with SLURM (Simple Linux Utility for Resource Management). SLURM is a highly scalable, open-source job scheduler used to efficiently manage compute resources on shared systems. It allows tasks to be queued and scheduled based on resource availability and job priority, helping to organize workloads across users without manual intervention. The model training did not use SLURM, as it did not require significant computation time.
+
 
 \input{./tex/program_generator}
 

@@ -6,7 +6,11 @@ This section provides an overview of the essential concepts and foundational kno
 \color{blue}
 \section{Benchmarking} \label{sec:background_benchmarking}
 
-When performing benchmarking (i.e. measuring time, energy, memory, etc.) it is important to have in mind some important information that can affect the measurements. First it matters to know how the programming language being used works, and how it can affect the measurements. It is important to understand how to understand which noise can be avoidable and which cannot be.
+Benchmarking is the process of measuring the performance of a program or system by running a series of tests under controlled conditions. This typically involves evaluating factors such as execution time, memory usage, and energy consumption. The purpose of benchmarking is to gain a clear understanding of how the software behaves in different scenarios, to compare different implementations, and to identify potential areas for improvement.
+
+In this project, the primary goal of benchmarking is to accurately measure the energy consumption of Java applications, while taking into account the factors that can affect these measurements.
+
+When performing benchmarking (i.e. measuring time, energy, memory, etc.) it is important to have in mind some important information that can affect the measurements. First it matters to know how the programming language being used works, and how it can affect the measurements. It is important to understand which noises can be avoided and which cannot.
 
 In this project the target language is Java, so the benchmark will have its constraints. Performing benchmarks in Java has its adversities, and needs careful approach when needed. Several papers have studied how to perform better benchmarks ~\cite{10.1145/1297027.1297033,10.1145/1167515.1167488} details important aspects on how to correctly benchmark Java applications, and how to avoid common pitfalls.
 It is essential to understand the non-deterministic problems that may arrive when benchmarking in Java:
@@ -27,9 +31,9 @@ It is essential to understand the non-deterministic problems that may arrive whe
 
 
 \begin{itemize}
-    \item \textbf{Just-In-Time (JIT) compilation}: Automatically performs optimizations in during the compilation, which can affect measurements. Example: In the loop \ref{lst:for_loop_example}, the optimization done during the compilation, might understand that the loop is unnecessary and just replace the variable sum with \texttt{int sum = 100;}, avoiding the loop. Basically, the JIT compiler may detect that a loop performs predictable work and optimize it away entirely, especially if the results are unused or can be computed ahead of time.
+    \item \textbf{Just-In-Time (JIT) compilation}: Automatically performs optimizations in during the compilation, which can affect measurements. Example: In the loop presented in the Listing \ref{lst:for_loop_example}, the optimization done during the compilation, might understand that the loop is unnecessary and just replace the variable sum with \texttt{int sum = 100;}, avoiding the loop. Basically, the JIT compiler may detect that a loop performs predictable work and optimize it away entirely, especially if the results are unused or can be computed ahead of time.
     
-    \item \textbf{Garbage Collection (GC)}: It can be called randomly, which can affect measurements, for time measurements it can increase it, the same for energy measurements, for memory measurements it depends if it was called before or after the measurement.
+    \item \textbf{Garbage Collection (GC)}: Garbage collection can occur unpredictably, which may impact the accuracy of measurements. For time and energy measurements, it often results in increased values, while for memory measurements, the effect depends on whether garbage collection occurs before or after the measurement period.
     
     \item \textbf{Thread scheduling}: It is also unpredictable when threads stop might have different schedules, resulting in different interactions.
     
@@ -39,7 +43,7 @@ It is essential to understand the non-deterministic problems that may arrive whe
 Some of these properties cannot be avoided, however there are some procedures that can be taken into consideration to avoid error in the measurements.
 To avoid JIT optimizations, harder and complex examples must be used in order to avoid optimizations, for example instead of filling a list in a for loop using the index values, the values added can be random, which will avoid optimizations, as the compiler cannot predict the next number in the iteration. This proves to be effective in energy measurement, because if it is needed to measure the energy consumption of the add method of a list collection, now the process can actually be measured avoiding optimizations, if it was optimized it would be too fast and would not be valid for energy measurement.
 The JVM start up can be avoided by starting the program without measuring anything and just start the measurement when the computation method is ready to be started and not for the whole machine. Avoiding reading JVM startup, warm up, even unnecessary computations, and focusing only on the necessary parts.
-Garbage collector can be harder, while System.gc() can be used to suggest a garbage collection cycle, the JVM is free to ignore this request. As such, it is not a reliable mechanism to control GC timing. So this part is a bit harder to avoid. An alternative is to increase the memory the JVM can use, so the GC is called fewer times. 
+Garbage collector can be harder, while \texttt{System.gc()} can be used to suggest a garbage collection cycle, the JVM is free to ignore this request. As such, it is not a reliable mechanism to control GC timing. An alternative is to increase the memory the JVM can use, so the GC is called fewer times. 
 
 
 It is also important to note that:
@@ -61,7 +65,7 @@ It is also important to note that:
     \item \textbf{Avoid background system noise}: When running the benchmarks, preferably only have the necessary processes running, to reduce measurement noise.
 \end{itemize}
 
-When building the tool, it is necessary to gather data from the Java programs, which requires benchmarking best practices. Although it is not possible to apply all of them due to time and complexity constraints, it is always helpful to keep in mind what it takes to create a good benchmark.
+When building the tool, it is necessary to gather data from the Java programs, which requires benchmarking best practices. Although it is not possible to apply all of them due to time and complexity constraints, it is always helpful to keep in mind what it takes to create a good benchmark. In this project, the techniques applied included using multiple JVM invocations, avoiding cherry-picking by reporting average values, minimizing background system noise, excluding JVM startup time, and focusing measurements on the relevant computation phases.
 }
 \section{Energy Profiling} \label{sec:background_energy_profiling}
 
@@ -170,5 +174,6 @@ At the end of the process, PySR provides a list of candidate expressions, typica
 This technique is particularly well-suited for energy prediction, as it can reveal easy-to-understand formulas that explain how certain parts of a program contribute to energy consumption. This can help developers understand and optimize the energy efficiency of their code more effectively than with traditional black-box models.
 
 These algorithms were taken into account when developing the model that can best predict energy.
+Specifically, the models evaluated in this project include: Decision Tree Regressor, Random Forest, Gradient Boosting, Linear Regression, and PySR. These algorithms were chosen based on characteristics such as the simplicity of linear regression, the predictive strength of trees, and the interpretability of symbolic regression with PySR. Together, these models offer a balance of accuracy, efficiency, and explainability, which is important for modeling energy consumption in Java applications.
 }
 

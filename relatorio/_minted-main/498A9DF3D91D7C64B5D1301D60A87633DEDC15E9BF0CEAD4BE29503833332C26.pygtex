@@ -1,0 +1,13 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kd}{class} \PYG{n+nc}{BenchmarkArgs}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{ArrayList}\PYG{o}{\PYGZlt{}}\PYG{n}{Integer}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{var0}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{Integer}\PYG{+w}{ }\PYG{n}{var1}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{n}{BenchmarkArgs}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{this}\PYG{p}{.}\PYG{n+na}{var0}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayList}\PYG{p}{();}
+\PYG{+w}{            }\PYG{n}{CollectionAux}\PYG{p}{.}\PYG{n+na}{insertRandomNumbers}\PYG{p}{(}\PYG{n}{var0}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Integer\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k}{this}\PYG{p}{.}\PYG{n+na}{var1}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{10}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

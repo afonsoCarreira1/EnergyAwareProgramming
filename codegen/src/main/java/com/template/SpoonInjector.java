@@ -101,7 +101,7 @@ public class SpoonInjector {
             return;
         }
         this.newClass = myClass.clone();
-        this.newClassName = collec.getSimpleName()+"_"+method.getSignature().replaceAll("\\.|,|\\(|\\)|\\[|\\]", "_");//+id;
+        this.newClassName = collec.getSimpleName()+"_"+method.getSignature().replaceAll("\\.|,|\\(|\\)|\\[|\\]|\\$", "_");//+id;
         this.mainMethod = newClass.getMethod("main", factory.Type().createArrayReference(factory.Type().stringType()));
         this.tryBlock = (CtTry) mainMethod.getElements(el -> el instanceof CtTry).get(0);
         this.statements = factory.Core().createStatementList();
@@ -142,7 +142,6 @@ public class SpoonInjector {
 
         injectInputFieldsInClass();
 
-
         newClass.setSimpleName(newClassName);
         launcher.getFactory().Class().getAll().add(newClass);
         launcher.getModel().getRootPackage().addType(newClass);
@@ -173,12 +172,15 @@ public class SpoonInjector {
 
     private CtConstructor<?> getConstructors(CtType<?> t) {
         List<CtConstructor<?>> constructors = t.filterChildren(new TypeFilter<>(CtConstructor.class))
-        .map(m -> (CtConstructor<?>) m)
-        .list();
-
+        .map(m -> (CtConstructor<?>) m).list();
         if (constructors.isEmpty()) return null;
-        constructors.sort(Comparator.comparingInt(c -> c.getParameters().size()));
-        CtConstructor<?> shortestConstructor = constructors.get(0);
+        List<CtConstructor<?>> publicConstructors = new ArrayList<>();
+        for (CtConstructor<?> constructor : constructors) {
+            if (constructor.hasModifier(ModifierKind.PUBLIC)) publicConstructors.add(constructor);
+        }
+        if (publicConstructors.isEmpty()) return null;
+        publicConstructors.sort(Comparator.comparingInt(c -> c.getParameters().size()));
+        CtConstructor<?> shortestConstructor = publicConstructors.get(0);
         return shortestConstructor;
     }
 
@@ -417,13 +419,16 @@ public class SpoonInjector {
         return ctClass.getFormalCtTypeParameters().size();
     }
 
-    private CtLocalVariable<?> createVar(CtTypeReference typeRef, String varName, boolean getDefaultValue) {
+    private CtLocalVariable<?> createVar(CtTypeReference<?> typeRef, String varName, boolean getDefaultValue) {
         CtTypeReference ref = typeRef.toString().contains("Collection") ? factory.Type().createReference(collec) : typeRef;
         if (typeRef.isArray()) ref = typeRef.getTypeErasure();
-        //if (isGeneric(ref)) ref.addActualTypeArgument(genericType);
         handleGenericClasses(ref,null);
         CtExpression<?> exp = createVar(ref,getDefaultValue);
         if (isPlaceHolderType(ref.getSimpleName())) ref =factory.createReference("changetypehere");
+        else if (ref.getDeclaringType() != null) { // It's a nested/inner class – use full qualified name
+            String qualifiedName = ref.getQualifiedName(); //BinaryTrees.TreeNode
+            ref = factory.Type().createReference(qualifiedName);
+        }
         CtLocalVariable<?> variable = factory.Code().createLocalVariable(
             ref,           // var type
             varName,          // Variable name
@@ -501,29 +506,53 @@ public class SpoonInjector {
         return false;
     }
 
-
     private List<CtParameter<?>> getComputationParameters() {
-        if (isMethodStatic) return method.getParameters();
-        CtParameter<?> param = factory.createParameter();
-        param.setSimpleName("var");
-        param.setType(collec.getReference());
+        //if (isMethodStatic) return method.getParameters();
+
         List<CtParameter<?>> params = new ArrayList<>();
-        params.add(param);
+        CtParameter<?> param = factory.createParameter();
+        if (!isMethodStatic) {
+            param.setSimpleName("var");
+            param.setType(collec.getReference());
+            params.add(param);
+        }
+  
+
         for (int i = 0; i < method.getParameters().size(); i++) {
-            CtTypeReference<?> t = method.getParameters().get(i).getType();
-            if (t.isArray()) method.getParameters().get(i).setType(factory.Type().createReference(t.getTypeErasure().toString()));
-            if(isPlaceHolderType(t.getSimpleName())) method.getParameters().get(i).setType(factory.createReference("changetypehere"));
-            for (CtTypeReference<?> tr : t.getActualTypeArguments()){
-                if (tr.toString().contains("? extends E")){// change the type from <? extends E> to <?>
+            CtParameter<?> originalParam = method.getParameters().get(i);
+            CtTypeReference<?> t = originalParam.getType();
+
+            // Handle array types
+            if (t.isArray()) {
+                originalParam.setType(factory.Type().createReference(t.getTypeErasure().toString()));
+            }
+
+            // Handle placeholder types
+            if (isPlaceHolderType(t.getSimpleName())) {
+                originalParam.setType(factory.createReference("changetypehere"));
+            }
+
+            // Handle wildcard extension types like "? extends E"
+            for (CtTypeReference<?> tr : t.getActualTypeArguments()) {
+                if (tr.toString().contains("? extends E")) {
                     List<CtTypeReference<?>> l = new ArrayList<>();
                     l.add(factory.Type().createReference("?"));
-                    method.getParameters().get(i).getType().setActualTypeArguments(l);
+                    originalParam.getType().setActualTypeArguments(l);
                 }
             }
-            params.add(method.getParameters().get(i));
+
+            // Handle nested class full qualification
+            CtTypeReference<?> paramType = originalParam.getType();
+            if (paramType.getDeclaringType() != null) {
+                String qualifiedName = paramType.getQualifiedName();
+                originalParam.setType(factory.Type().createReference(qualifiedName));
+            }
+
+            params.add(originalParam);
         }
         return params;
     }
+
 
     private void injectBenchmarkMethod() {
         // Define the return type (void in this case)

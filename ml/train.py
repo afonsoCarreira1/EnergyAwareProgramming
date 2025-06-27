@@ -74,7 +74,7 @@ def comparison(y,y_pred):
     # Exibir a comparação
     print(comparison_df)
 
-def plot_prediction_vs_feature(model, X, y, column_name):
+def plot_prediction_vs_feature2(model, X, y, column_name):
     """
     Plots predicted energy vs. a selected feature on a log scale, alongside real energy values.
 
@@ -133,6 +133,128 @@ def plot_energy_vs_feature(X, y, column_name):
     plt.legend()
     plt.grid(False)
     plt.show()
+
+def plot_energy_vs_feature4(X, y, column_name, list_type_filter=None):
+    X = X.reset_index(drop=True)
+    y = y.reset_index(drop=True)
+
+    list_columns = {
+        'java.util.ArrayList': 'red',
+        'java.util.Vector': 'blue',
+        'java.util.concurrent.CopyOnWriteArrayList': 'green',
+        'java.util.LinkedList': 'orange'
+    }
+
+    plt.figure(figsize=(8, 6))
+
+    # Use filter if specified, else plot all
+    columns_to_plot = (
+        {list_type_filter: list_columns.get(list_type_filter)}
+        if list_type_filter
+        else list_columns
+    )
+
+    for list_type, color in columns_to_plot.items():
+        if list_type not in X.columns:
+            print(f"Warning: column '{list_type}' not found.")
+            continue
+        mask = X[list_type] == 1
+        print(f"{list_type}: {mask.sum()} rows selected")
+        if mask.sum() == 0:
+            continue
+        plt.scatter(
+            X.loc[mask, column_name],
+            y.loc[mask],
+            label=list_type.split('.')[-1],
+            color=color,
+            alpha=0.6,
+            marker='o'
+        )
+    if column_name == 'input0':column_name = 'list size'
+    plt.xlabel(column_name)
+    plt.ylabel("Energy")
+    title = f"Energy vs {column_name}"
+    if list_type_filter:
+        title += f" (Filtered: {list_type_filter.split('.')[-1]})"
+    else:
+        title += " (Colored by List Type)"
+    plt.title(title)
+    plt.legend()
+    plt.grid(False)
+    plt.show()
+
+
+
+def plot_energy_vs_feature4(X, y, column_name, var_type_filter=None):
+    X = X.reset_index(drop=True)
+    y = y.reset_index(drop=True)
+
+    # Map variable types (or their identifying keywords in column names) to colors
+    var_type_colors = {
+        'Long': 'red',
+        'Double': 'blue',
+        'Int': 'green',
+        'Float': 'orange',
+        'Boolean': 'purple',
+        'String': 'brown'
+        # Add more types/colors here as needed
+    }
+
+    # Find all columns in X that match any of these types (case insensitive)
+    # We consider a column belongs to a type if the type string appears in its name (case-insensitive)
+    filtered_columns = {}
+    for vt, color in var_type_colors.items():
+        matching_cols = [col for col in X.columns if vt.lower() in col.lower()]
+        if matching_cols:
+            # For simplicity, treat all matching columns as that type and pick the first matching column
+            filtered_columns[vt] = {
+                'color': color,
+                'columns': matching_cols
+            }
+
+    if var_type_filter:
+        # Validate filter
+        if var_type_filter not in filtered_columns:
+            print(f"Variable type '{var_type_filter}' not found in columns.")
+            return
+        filtered_columns = {var_type_filter: filtered_columns[var_type_filter]}
+
+    plt.figure(figsize=(8, 6))
+
+    for vt, info in filtered_columns.items():
+        color = info['color']
+        cols = info['columns']
+        # For each type, combine all columns (OR their masks) to select rows where any var of that type is present
+        mask = X[cols].any(axis=1)
+        print(f"{vt}: {mask.sum()} rows selected (from columns {cols})")
+        if mask.sum() == 0:
+            continue
+        plt.scatter(
+            X.loc[mask, column_name],
+            y.loc[mask],
+            label=vt,
+            color=color,
+            alpha=0.6,
+            marker='o'
+        )
+
+    if column_name == 'input0':
+        xlabel = 'list size'
+    else:
+        xlabel = column_name
+
+    plt.xlabel(xlabel)
+    plt.ylabel("Energy")
+    title = f"Energy vs {xlabel}"
+    if var_type_filter:
+        title += f" (Filtered: {var_type_filter})"
+    else:
+        title += " (Colored by Variable Type)"
+    plt.title(title)
+    plt.legend()
+    plt.grid(False)
+    plt.show()
+
 
 def model(df,modelPath,log):
     # Separate features and target
@@ -346,29 +468,6 @@ def plot3D( X, y):
     plt.show()
 
 
-#def divideAllFeaturesInMultipleDfs(df):
-#    files = []
-#    #df['collection_method'] = df['Filename'].str.split('_').str[:2].str.join('_')
-#    df['method'] = df['Filename'].str.split('_').str[1]
-#    grouped = df.groupby('method')
-#    for name, group in grouped:
-#        filename = f"divided_features/{name}.csv"
-#        files.append(name+".csv")
-#        group.to_csv(filename, index=False)
-#    return files
-
-#def readMixedFeatures():
-#    #features/addAll_features/features_4700.csv
-#    filename = 'lists/features_mix_11k.csv'##new_gen_feat/features_1900.csv
-#    df = pd.read_csv(f'features/{filename}')
-#    
-#    #print(df)
-#    #print(df.shape[0]) # print number of rows
-#    print('Size before cleaning',df.shape[0])
-#    df = clean_data(df,False)
-#    print('Size after cleaning',df.shape[0])
-#    df = separate_data(df,'')
-#    return df
     
 def save_log_to_file(log, path):
     filename = path+"/log.txt"
@@ -499,9 +598,9 @@ def plots(files,fname):
         df = clean_data(df,False)
         X = df.iloc[:, :-1]  # All columns except the last one
         y = df.iloc[:, -1]   # Energy column
-        plot3D(X,y)
-        #plot_energy_vs_feature(X,y,'input0')
-
+        #plot3D(X,y)
+        plot_energy_vs_feature(X,y,'input0')
+        #list_type_filter='java.util.concurrent.CopyOnWriteArrayList'
 
 def create_dir_if_not_exists(path):
     if not os.path.exists(path):os.makedirs(path)
@@ -521,8 +620,8 @@ def createFilesForExtension(models_available):
 def main():
     #os.makedirs('out/', exist_ok=True)
     files,models_available = getAllFeatures()
-    #plots(files,"equals_java_lang_Object_")
-    readDividedFeatures(files)
+    plots(files,"equals_java_lang_Object_")
+    #readDividedFeatures(files)
     #check_one_method()
     #createFilesForExtension(models_available)
 

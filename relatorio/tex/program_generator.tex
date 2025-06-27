@@ -156,7 +156,14 @@ Creating the template for each method allows cutting off time of the program gen
 A very important aspect of the program generator is the inputs it generates. Every method works differently, receives different parameters, and even when changing the values of these parameters, the method can behave completely different. So, this generator has an intermediate step, between the creation of the template and creating multiple programs, it finds the maximum size the input parameters should receive. Knowing the maximum size the different parameters can have is very important as it needs to be big enough, so the energy profiles can be abundant, but not to big so that the programs start to get out of memory or taking too much time to complete.
 The input search works by using binary search. It has limits on the inputs (1-100,000) and it starts by trying to run the program with the half of the max input which is 50,000. Then it runs the program for maximum of 10 seconds, which is a threshold based on empirical experimentation, and waits for the exit code of the program, if it is an error code it will lower the input by half again, of it is a normal finish code, it will increase the input by half. This operation is done until the maximum value for the input is found. If the method that is being tested has more than one input, the input tester, first sets all the input values to 1 and then starts the binary search individually for each of the parameters one by one while leaving the other parameters with the value of 1. This avoids having to find multiple combinations of parameters which would increase the time complexity exponentially. Since the process of finding the max inputs is time-consuming, when the maximum value is found, the values of the input type, maximum value and order (if it was the parameter 1 or parameter 2 or parameter 3) are stored in a file, so if the actual programs later generated are not stored, using this files they can be quickly generated. It is worthy to mention that the maximum inputs found depend heavily on the machine where the program generation is taking place, as different hardware will change the maximum values allowed for the inputs.
 
-\begin{tcolorbox}[title=Example: Input Testing Process for \texttt{List.add(index, Element)}, colback=gray!5!white, colframe=gray!75!black, fonttitle=\bfseries, breakable]
+\begin{tcolorbox}[
+    title=Example: Input Testing Process for \texttt{List.add(index, Element)},
+    colback=gray!5!white,
+    colframe=gray!75!black,
+    fonttitle=\bfseries,
+    breakable,
+    label={box:add-method-testing}
+]
 
 Consider analyzing the \texttt{add} method of a list with the following parameters:
 \begin{itemize}
@@ -175,18 +182,17 @@ Consider analyzing the \texttt{add} method of a list with the following paramete
     \item Final Iteration: \texttt{arg0 = 1,700}, \texttt{arg1 = 1}, \texttt{arg2 = 1}
 \end{itemize}
 
-
 \textbf{Step 2 – Varying \texttt{arg1} (index):}
 
 \begin{itemize}
     \item Iteration 1: \texttt{arg0 = 1}, \texttt{arg1 = 25,000}, \texttt{arg2 = 1}
     \item Iteration 2: \texttt{arg0 = 1}, \texttt{arg1 = 12,500}, \texttt{arg2 = 1}
     \item $\vdots$
-    \item Final Iteration: \texttt{arg0 = 1}, \texttt{arg1 = 0}, \texttt{arg2 = 1}
+    \item Final Iteration: \texttt{arg0 = 1}, \texttt{arg1 = 1}, \texttt{arg2 = 1}
 \end{itemize}
 
-{Note: Since the list size (\texttt{arg0}) remains 1, the maximum valid index (\texttt{arg1}) is constrained to 0. This reveals a limitation in the input testing approach.}
-%\vspace{5mm}
+{Note: Since the list size (\texttt{arg0}) remains 1, the maximum valid index (\texttt{arg1}) is constrained to 1. This reveals a limitation in the input testing approach.}
+
 \textbf{Step 3 – Varying \texttt{arg2} (value to be added):}
 
 \begin{itemize}
@@ -204,6 +210,7 @@ Consider analyzing the \texttt{add} method of a list with the following paramete
 \end{itemize}
 
 \end{tcolorbox}
+
 
 The fact that the input has a range of 1 to 100,000 it allows using binary search which makes the search much faster than linear search.
 Nevertheless, the input search does not come without some limitations. First it is constrained to identifying valid input values within the range of 1 to 100,000. Throughout this project we dealt frequently with lists and collections, which require a minimum size of 1 to function correctly. Although this value can be changed in the future, for now it ensures compatibility with most common data structures. The higher bound of 100,000 was chosen due to practical experience, as larger input values would lead to higher execution times and memory crashes. Another limitation is on how the input handles multiple parameter methods. During its search for a valid input, it needs to fix all the other parameters that is not searching, with a default value (typically 1). This approach simplifies the testing process and improves efficiency by avoiding the exponential complexity of testing all possible parameter combinations. However, it will introduce limitations in cases where the parameters are interdependent, which can lead to not estimating the real highest input possible. The process also has a timeout of 10 seconds. This threshold was empirically selected to balance precision and practicality, based on our needs and available hardware.

@@ -21,6 +21,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -45,7 +46,7 @@ public class ASTFeatureExtractor {
         // String inputPath = "java_progs/progs/"+file+".java";
         String inputPath = path + file + ".java";
         if (runningOnWorkspace) inputPath = file + ".java";
-        System.err.println("inputPath -> "+inputPath);
+        //System.err.println("inputPath -> "+inputPath);
         Path currentDir = Paths.get("").toAbsolutePath(); // Get the current directory
         Path resolvedPath = currentDir.resolve(inputPath).normalize(); // Resolve and normalize the path
 
@@ -110,9 +111,42 @@ public class ASTFeatureExtractor {
             methodFeatures.put("MaxLoopDepth", maxLoopDepth);
             methodsFullChecked.put(mapName, methodFeatures);
         }
-        // removeExtraFeaturesCounted(featuresExtractedFromMethod);
-
+        
+        //addMoreKeysToMap(methodsFullChecked);
         return methodsFullChecked;
+    }
+
+    //private static void addMoreKeysToMap(HashMap<String, Map<String, Object>> methodsFullChecked) {
+    //    List<String> originalKeys = new ArrayList<>(methodsFullChecked.keySet());
+    //    for (String key : originalKeys) {
+    //        String newKey = simplifyMethodKey(key);
+    //        if (!methodsFullChecked.containsKey(newKey)) {
+    //            methodsFullChecked.put(newKey, methodsFullChecked.get(key));
+    //        }
+    //    }
+    //}
+
+    public static String simplifyMethodKey(String fullKey) {
+        int start = fullKey.indexOf('(');
+        int end = fullKey.lastIndexOf(')');
+        
+        if (start == -1 || end == -1 || start > end) {
+            // Invalid format
+            return fullKey;
+        }
+
+        String prefix = fullKey.substring(0, start + 1); // includes '('
+        String params = fullKey.substring(start + 1, end);
+        String suffix = fullKey.substring(end); // includes ')'
+
+        String simplifiedParams = Arrays.stream(params.split("\\s*\\|\\s*"))
+                .map(param -> {
+                    int lastDot = param.lastIndexOf('.');
+                    return (lastDot != -1) ? param.substring(lastDot + 1) : param;
+                })
+                .collect(Collectors.joining(" | "));
+
+        return prefix + simplifiedParams + suffix;
     }
 
     private Map<String, Object> extractFeatures(CtMethod<?> method, String path, Set<String> importSet) {
@@ -301,10 +335,34 @@ public class ASTFeatureExtractor {
         }
     }
 
+    //private String getMethodMapName(CtMethod<?> method) {
+    //    return method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
+    //            + getMethodParamsType(method) + ")";
+    //}
+
     private String getMethodMapName(CtMethod<?> method) {
         return method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "("
                 + getMethodParamsType(method) + ")";
-    }
+    }   
+
+
+    /*private String getMethodParamsTypeComplete(CtMethod<?> method) {
+        StringBuilder paramString = new StringBuilder();
+        List<CtParameter<?>> parameters = method.getParameters();
+        for (CtParameter<?> parameter : parameters) {
+            if (paramString.length() > 0) {
+                paramString.append(" | ");
+            }
+            String simple = parameter.getType().getSimpleName();
+            String full = parameter.getType().toString();
+            if (simple.equals(full)) {
+                paramString.append(simple);
+            } else {
+                paramString.append(full);
+            }
+        }
+        return paramString.toString();
+    }*/
 
     private void addRelevantPackages(Launcher launcher) {
         Path currentDir = Paths.get(System.getProperty("user.dir"));
@@ -595,9 +653,9 @@ public class ASTFeatureExtractor {
     private Map<String, Object> mergeFeatures(CtMethod<?> method,
             HashMap<String, Map<String, Object>> allFeatures,
             HashMap<String, CtMethod<?>> methodsBody, HashSet<String> methodsAnalyzed) {
-        String methodParams = getMethodParamsType(method);
-        String mapName = method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "(" + methodParams
-                + ")";
+        //String methodParams = getMethodParamsType(method);
+        //String mapName = method.getDeclaringType().getSimpleName() + "." + method.getSimpleName() + "(" + methodParams+ ")";
+        String mapName = getMethodMapName(method);
         if (methodsAnalyzed.contains(mapName))
             return allFeatures.get(mapName);
         else

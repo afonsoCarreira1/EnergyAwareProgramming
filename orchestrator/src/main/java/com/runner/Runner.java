@@ -72,7 +72,7 @@ public class Runner {
                 //Thread.sleep(100);
                 if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                     String fileName = program.toString().replace(".class", "");
-                    //if (!(args[0].equals("test") && fileName.equals("ArrayList_addAll_int_java_util_Collection_1200"))) continue;//just to test one prog file 
+                    //if (!(args[0].equals("test") && fileName.equals("BinaryTrees_checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_0"))) continue;//just to test one prog file 
                     log.append("---------------------------------------\n");
                     log.append("Program number -> " + (progNum++) + "\n");
                     //System.out.println("Program number -> " + i);
@@ -375,10 +375,14 @@ public class Runner {
         
         String methodName = getFunMapName(file,currentDirBeingTested);
         Map<String, Object> methodfeatures = methods.get(methodName);
+        String newKey = ASTFeatureExtractor.simplifyMethodKey(methodName);
+        if (methodfeatures == null) methodfeatures = methods.get(newKey);
+        
         for (int i = 0; i < inputValues.size(); i++) {
             //System.out.println(inputValues);
             String str = inputValues.get(i);
             String cleaned = str.matches(".*[lLfF]$") ? str.substring(0, str.length() - 1) : str;
+
             methodfeatures.put("input"+i, cleaned); //rmove the f from 5.5f or l from 5l 
             //methodfeatures.put("input"+i, inputValues.get(i));
         }

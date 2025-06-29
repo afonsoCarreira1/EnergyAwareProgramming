@@ -659,7 +659,9 @@ public class SpoonInjector {
         "while (!TemplatesAux.stop && i < iter) {\n      " + //
             Introspector.decapitalize(newClassName)+"("+ args +");\n" + //
         "       i++;\n" + //
-        "}\nreturn iter";
+        "}\n"+
+        "if (i == 0) return 1;\n"+
+        "return i";
 
         CtCodeSnippetStatement snippet = factory.Code().createCodeSnippetStatement(body);
         methodBody.addStatement(snippet);

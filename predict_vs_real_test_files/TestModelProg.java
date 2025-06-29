@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+
 public class TestModelProg {
 
     static String frequency = ".1";
-    static int loopSize = 10_000;
+    static int loopSize = 1;
  /* 
     public static void main(String[] args) throws IOException, InterruptedException {
         int maxListSize = 1000;
@@ -60,17 +61,23 @@ public class TestModelProg {
 */
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        String input = generateRandomWordString(1000);//"Java is simple. Java is powerful.";
+        //String input = generateRandomWordString(1000);//"Java is simple. Java is powerful.";
+        int val = Integer.parseInt(args[0]);
         String pid = ProcessHandle.current().pid()+"";
+        long start = System.currentTimeMillis();
         ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
         Process powerjoularProcess = powerjoularBuilder.start();
-        for (int i = 0; i < loopSize; i++) {
-            compute(input);
-        }
+        BinaryTrees.checkTree(BinaryTrees.createTree(val));
+        //System.out.println("stretch tree of depth " + val +"\t check: " + BinaryTrees.checkTree(BinaryTrees.createTree(val)));
+        //for (int i = 0; i < loopSize; i++) {
+        //    compute(input);
+        //}
         Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularProcess.pid()+""});
         killPowerjoular.waitFor();
+        long end = System.currentTimeMillis();
+        long diff = end - start;
         String energyUsed = readPowerjoularCsv("powerjoular.csv-"+pid+".csv");
-        System.out.println("Energy used was: "+energyUsed + "J");
+        System.out.println("Energy used was: "+energyUsed + "J" + " in "+diff+"ms");
     }
 
     public static void compute(String input) {

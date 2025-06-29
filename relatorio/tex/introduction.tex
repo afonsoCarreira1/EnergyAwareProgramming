@@ -39,19 +39,22 @@ This increased awareness will enable them to understand the overall impact of th
   %This thesis presents a new tool designed to estimate the energy consumption of software applications written in Java. The tool combines static analysis techniques with machine learning to provide fast and accurate predictions, effectively capturing the non-deterministic nature of energy usage in software. It also presents a simple user interface, that allows interactions with sliders to change the predictions of the models.
 
 
-This thesis presents a new tool designed to estimate the energy consumption of Java programs using static code analysis. The key contributions of this work are as follows:
+This thesis presents a framework that automates the generation, execution, energy profiling, and modeling of software programs to enable energy-aware static analysis. The main contributions of this work are:
 
 \begin{itemize}
+    \item \textbf{Program Generation:} A module that automatically generates a large set of Java programs targeting specific methods. It systematically varies method inputs and parameter types to enable broad coverage and controlled diversity.
+
+    \item \textbf{Energy Profiling:} An orchestration module that compiles and executes each generated program while measuring energy consumption at runtime. It captures power usage signals at the method level to build accurate energy profiles.
+
+    \item \textbf{Model Training:} A machine learning pipeline that trains predictive models on the collected energy profiles. These models learn to estimate the energy behavior of program methods based on static and dynamic features.
+    
     \item \textbf{Energy Prediction with Static Analysis and Machine Learning:} The tool combines static program analysis with machine learning techniques to predict the energy usage of Java applications without requiring program execution. This approach allows for fast estimations of energy consumption, and helps with the challenge of the non-deterministic nature of energy behavior in software.
-    
+
     \item \textbf{User-Friendly Interface:} A simple graphical user interface (GUI) was developed to enable user interaction with the models. It includes sliders to change input features and observe how these changes affect the predicted energy usage.
-    
-    \item \textbf{Architecture Pipeline:} The thesis provides a full process for training energy prediction models, from generating programs and measuring their energy usage, to extracting code features and training models. While some steps still require manual input, such as running scripts or editing files, the process is structured and reproducible.
     
     \item \textbf{Method-Based Energy Calculation:} The tool predicts energy at the method level. If one method calls others, its energy is estimated by summing the predictions of those calls. For example, if \texttt{methodA} calls \texttt{addAll} and \texttt{set}, its energy is based on the models trained for those two operations. This approach makes the predictions more modular and easier to reuse across different programs.
 
-
-    \item \textbf{Support for Future Improvements:} The tool is built to be flexible and adaptable, allowing for easy integration of new features, or learning algorithms. This makes it a good foundation for future work in the energy-aware software area.
+    \item \textbf{Support for Future Improvements:} The framework is built to be flexible and adaptable, allowing for easy integration of new features, or learning algorithms. This makes it a good foundation for future work in the energy-aware software area.
 \end{itemize}
 }
 

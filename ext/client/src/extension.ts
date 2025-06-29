@@ -1,16 +1,52 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
+import * as fsp from 'fs/promises';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 let sliderPanel: vscode.WebviewPanel | undefined;
 let client: LanguageClient;
 
+async function installHelperJar(context: vscode.ExtensionContext, jarFileName: string) {
+    const sourceJar = context.asAbsolutePath(path.join('..', 'server', jarFileName));
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
+    if (!workspaceFolder) {
+        console.warn('No workspace folder found.');
+        return;
+    }
+
+    const libDir = path.join(workspaceFolder, 'lib');
+    const destJar = path.join(libDir, jarFileName);
+
+    try {
+        await fsp.mkdir(libDir, { recursive: true });
+        await fsp.copyFile(sourceJar, destJar);
+
+        const config = vscode.workspace.getConfiguration('java.project');
+        const currentLibs: string[] = config.get('referencedLibraries') || [];
+
+        if (!currentLibs.includes('lib/' + jarFileName)) {
+            currentLibs.push('lib/' + jarFileName);
+            await config.update('referencedLibraries', currentLibs, vscode.ConfigurationTarget.Workspace);
+            console.log(`Added ${jarFileName} to java.project.referencedLibraries`);
+        }
+    } catch (error) {
+        console.error(`Failed to install helper JAR: ${error}`);
+    }
+}
+
 export async function activate(context: vscode.ExtensionContext) {
-    const jarPath = context.asAbsolutePath(path.join('..', 'server', 'energy_prediction-1.0-SNAPSHOT-jar-with-dependencies.jar'));
+    const jarDir = context.asAbsolutePath(path.join('..', 'server'));
+    const mainJar = path.join(jarDir, 'energy_prediction-1.0-SNAPSHOT-jar-with-dependencies.jar');
+    const helperJar = path.join(jarDir, 'BinaryTrees.jar');
+
+    const sep = process.platform === 'win32' ? ';' : ':';
+    const classpath = `${mainJar}${sep}${helperJar}`;
 
     const serverOptions: ServerOptions = {
         command: 'java',
-        args: ['-jar', jarPath]
+        args: ['-cp', classpath, 'com.tool.App']
     };
 
     const clientOptions: LanguageClientOptions = {
@@ -19,6 +55,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
     client = new LanguageClient('javaLspServer', 'Java LSP Server', serverOptions, clientOptions);
     await client.start();
+
+    // Install helper JAR into workspace and add to classpath
+    await installHelperJar(context, 'BinaryTrees.jar');
 
     // Handle server notification to update sliders in webview
     client.onNotification('custom/updateSliders', (params) => {
@@ -65,7 +104,6 @@ export async function activate(context: vscode.ExtensionContext) {
             switch (message.type) {
                 case 'sliderChange':
                     console.log(`Slider changed: ${message.id} = ${message.value}`);
-                    // Forward slider change to Java language server
                     client.sendNotification('custom/sliderChanged', {
                         id: message.id,
                         value: message.value
@@ -74,7 +112,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
                 case 'calculateEnergy':
                     console.log('Received calculateEnergy request from webview');
-                    // Send a notification to the Java language server to trigger energy estimation
                     client.sendNotification('custom/calculateEnergy');
                     break;
 

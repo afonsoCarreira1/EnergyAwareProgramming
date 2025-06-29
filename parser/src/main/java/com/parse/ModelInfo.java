@@ -11,20 +11,13 @@ public class ModelInfo {
     private String methodType;
     private String args;
     private HashSet<String> ids;
-    private HashMap<String,String> inputToVarName;
+    private HashMap<String,HashMap<String,Object>> inputToVarName;
     private ArrayList<String> loopIds;
     private boolean isMethodCall;
     private int line;
     private String expression;
     private String realInvocation;
-
-    //public ModelInfo(String realInvocation) {
-    //    this.realInvocation = realInvocation;
-    //    this.ids = new HashSet<>();
-    //    this.inputToVarName = new HashMap<>();
-    //    this.loopIds = new ArrayList<>();
-    //    this.isMethodCall = false;
-    //}
+    
 
     public ModelInfo(String modelName,String realInvocation) {
         this.modelName = modelName;
@@ -53,7 +46,7 @@ public class ModelInfo {
 
     
 
-    public void setInputToVarName(HashMap<String, String> inputToVarName) {
+    public void setInputToVarName(HashMap<String, HashMap<String,Object>> inputToVarName) {
         this.inputToVarName = inputToVarName;
     }
 
@@ -81,8 +74,11 @@ public class ModelInfo {
         this.ids.add(id);
     }
 
-    public void associateInputToVar(String input, String varName) {
-        this.inputToVarName.put(input, varName);
+    public void associateInputToVar(String input, String varName, boolean isLiteral) {
+        HashMap<String,Object> m = new HashMap<>();
+        m.put("input", varName);
+        m.put("isLiteral", isLiteral);
+        this.inputToVarName.put(input, m);
     }
 
     public String getColType() {
@@ -105,7 +101,7 @@ public class ModelInfo {
         return this.modelName;
     }
 
-    public HashMap<String, String> getInputToVarName() {
+    public HashMap<String, HashMap<String,Object>> getInputToVarName() {
         return inputToVarName;
     }
 

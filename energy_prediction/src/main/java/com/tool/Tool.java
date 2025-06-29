@@ -63,6 +63,7 @@ public class Tool implements LanguageServer {
         Path serverDir = Paths.get(Sliders.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
         double totalEnergyUsed = CalculateEnergy.calculateEnergy(serverDir.toString() + "/collected_models/");
         Map<String,Object> message = Map.of("totalEnergyUsed",totalEnergyUsed,"methodsEnergy",CalculateEnergy.getMethodsEnergy());
+        System.err.println("messge -> "+message);
         if (client != null) client.updateEnergy(message); 
         handleMostEnergyExpensiveLines();
     }

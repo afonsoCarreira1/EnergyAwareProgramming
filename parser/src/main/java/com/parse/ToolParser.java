@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
+import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtLoop;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableRead;
@@ -56,8 +57,8 @@ public class ToolParser {
 
                     String declaringType = execRef.getDeclaringType() != null ? execRef.getDeclaringType().getSimpleName() : "UnknownType";
 
-                    String modelName = declaringType+"_"+execRef.getSimpleName() + "_" + (paramKey.length() == 0 ? "_" : paramKey.toString());
-                    
+                    String modelName = declaringType+"_"+execRef.getSimpleName() + "_" + (paramKey.length() == 0 ? "_" : paramKey.toString().replace("$", "_"));
+                    System.err.println("modelName -> "+modelName);
                     boolean isModelMethod = modelsAvailable.contains(modelName);
                     //if (!modelsAvailable.contains(modelName)) continue; // ignore methods that are not trained
                     
@@ -127,10 +128,25 @@ public class ToolParser {
         List<CtExpression<?>> arguments = invocation.getArguments();
         for (int i = 0; i < arguments.size(); i++) {
             CtExpression<?> arg = arguments.get(i);
-            if (arg instanceof CtVariableRead) {
+            if (arg instanceof CtVariableRead) {//test(var)
                 String id = getId(invocation,methodContext, arg.toString());
                 modelInfo.addId(id);
-                modelInfo.associateInputToVar("input" + (i + inputNum), id);
+                modelInfo.associateInputToVar("input" + (i + inputNum), id,false);
+            } else if (arg instanceof CtInvocation) {//test(fun(10))
+                CtInvocation<?> innerInvocation = (CtInvocation<?>) arg;
+                String id = getId(invocation, methodContext, innerInvocation.toString());
+                modelInfo.addId(id);
+                modelInfo.associateInputToVar("input" + (i + inputNum), id,false);
+            } else if (arg instanceof CtLiteral) { //test(10) or test("10")
+                CtLiteral<?> literal = (CtLiteral<?>) arg;
+                Object value = literal.getValue();
+                if (value instanceof Integer) {
+                    Integer val = (Integer) value;
+                    modelInfo.associateInputToVar("input" + (i + inputNum), val+"",true);
+                } else if (value instanceof String) {
+                    String val = (String) value;
+                    modelInfo.associateInputToVar("input" + (i + inputNum), val.length()+"",true);
+                } 
             }
         }
     }
@@ -142,9 +158,10 @@ public class ToolParser {
     // input of the first arg is 1
     private int addInput0AsTargetIfExists(CtInvocation<?> invocation, ModelInfo modelInfo, String methodContext) {
         if (invocation.getTarget() == null) return 0;
+        if (invocation.getExecutable().isStatic()) return 0;
         String id = getId(invocation,methodContext, invocation.getTarget().toString());
         modelInfo.addId(id);
-        modelInfo.associateInputToVar("input0", id);
+        modelInfo.associateInputToVar("input0", id,false);
         return 1;
     }
 

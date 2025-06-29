@@ -37,13 +37,13 @@
 
 
 # Step 1: Merge both files, keeping one model per line
-cat ../../ext/server/ModelsAvailable.txt ModelsAvailable.txt > merged_models.txt
+cat ../ext/server/ModelsAvailable.txt ModelsAvailable.txt > merged_models.txt
 
 # Optional: Remove duplicate lines (if you don't want duplicates)
 sort -u merged_models.txt > merged_models_deduped.txt
 
 # Step 2: Replace the old ModelsAvailable.txt with the new merged one
-mv merged_models_deduped.txt ../../ext/server/ModelsAvailable.txt
+mv merged_models_deduped.txt ../ext/server/ModelsAvailable.txt
 
 # Step 3: Move the entire collected_models/ directory
 mv collected_models/* ../ext/server/collected_models/

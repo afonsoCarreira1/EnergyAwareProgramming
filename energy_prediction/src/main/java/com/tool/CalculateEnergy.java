@@ -33,7 +33,8 @@ public class CalculateEnergy {
         //double totalEnergyUsed = 0;
         HashMap<String,HashSet<String>> methodsLoops = new HashMap<>();
         for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo) {
-            //System.err.println("method: "+methodEnergyInfo.getMethodName());
+            System.err.println("----------------------------------");
+            System.err.println("method: "+methodEnergyInfo.getMethodName());
             double totalMethodEnergy = 0.0;
             ArrayList<ModelInfo> modelInfos = methodEnergyInfo.getModelInfos();
             for (ModelInfo modelInfo : modelInfos) {
@@ -49,26 +50,34 @@ public class CalculateEnergy {
                 lineExpressions.put(modelInfo.toString() + " | "+modelInfo.getLine(), modelInfo.getExpression());
                 double currentEnergy = accountForLoops(modelInfo.getLoopIds(), expressionEvaluated.evaluate());
                 totalMethodEnergy += currentEnergy;// expressionEvaluated.evaluate();
-                //System.err.println("New expression -> " + expression);
-                //System.err.println("Energy for this was -> " + expressionEvaluated.evaluate());
+                System.err.println("New expression -> " + expression);
+                System.err.println("Energy for this was -> " + expressionEvaluated.evaluate());
+                System.err.println("Energy for this after loops -> " + currentEnergy);
                 //System.err.println("------------");
                 insertIfHigher(methodEnergyInfo, currentEnergy,modelInfo.getLine());
             }
+            totalMethodEnergy = capEnergy(totalMethodEnergy);
             methodEnergyInfo.setTotalEnergy(totalMethodEnergy);
             //totalEnergyUsed += totalMethodEnergy;
-            //System.err.println("energia final metodos -> "+methodEnergyInfo.getTotalEnergy());
+            System.err.println("energia final metodos -> "+methodEnergyInfo.getTotalEnergy());
         }
         addMethodLoops(methodsLoops);
         //System.err.println("Final loops -> "+methodsLoops);
         //System.err.println("total energy used was -> " + totalEnergyUsed + "J");
         double e = countMethodsUsedEnergy(methodsLoops);
-        
+        System.err.println("e -> "+e);
         //System.err.println("energia final -> "+e);
-        System.err.println("mostEnergyExpensiveLines -> "+mostEnergyExpensiveLines);
+        //System.err.println("mostEnergyExpensiveLines -> "+mostEnergyExpensiveLines);
+        e = capEnergy(e);
         return e; /* totalEnergyUsed + */ // countMethodsUsedEnergy();
     }
 
-    public static void addMethodLoops(HashMap<String,HashSet<String>> methodsLoops) {
+    //avoid infinity energy
+    private static double capEnergy(double energy) {
+        return energy > 10_000_000 ? 10_000_000 : energy;
+    }
+
+    private static void addMethodLoops(HashMap<String,HashSet<String>> methodsLoops) {
         for (MethodEnergyInfo methodEnergyInfo : methodsEnergyInfo){
               for (ModelInfo modelInfo : methodEnergyInfo.getModelInfos()){
                 if (modelInfo.getLoopIds() == null || modelInfo.getLoopIds().isEmpty()) continue;
@@ -149,8 +158,7 @@ public class CalculateEnergy {
             //double methodEnergy = sumUserMethods(calculateTopologicSort(countedGraph, indegree));
             methodsEnergyForContainer.put(methodName, methodEnergy);
             //System.err.println("ENERGY -> "+methodEnergy);
-            totalEnergy += methodEnergy;
-            
+            totalEnergy += methodEnergy;    
         }
 
         return totalEnergy;
@@ -181,7 +189,7 @@ public class CalculateEnergy {
                 if (mi.getLoopIds() != null && !mi.getLoopIds().isEmpty()) {
                     int loopsMultiplied = 1;
                     for (String loopId : mi.getLoopIds()) {
-                        System.err.println("loop: "+loopId);
+                        //System.err.println("loop: "+loopId);
                         loopsMultiplied *= (Integer) Sliders.sliders.get(loopId).get("val");
                     }
                     totalEnergy += energy.get(methodCalled) * loopsMultiplied;
@@ -195,7 +203,7 @@ public class CalculateEnergy {
             for (String methodUsed : methodCalls.keySet()) {    
                 int dif = methodCalls.get(methodUsed) - numberOfMethodCallsInLoopForMethod.getOrDefault(methodUsed,0);
                 if (dif > 0) totalEnergy += energy.get(methodUsed) * dif;
-                System.err.println(methodName + " uses "+methodUsed+ " -> " +methodUsedLine);
+                //System.err.println(methodName + " uses "+methodUsed+ " -> " +methodUsedLine);
                 if (methodUsedLine.containsKey(methodUsed)) insertIfHigher(mei, totalEnergy, methodUsedLine.get(methodUsed));
                 //System.err.println("dif -> "+dif +" | "+methodCalls.get(methodUsed) +" | "+ numberOfMethodCallsInLoopForMethod.get(methodUsed));
             }
@@ -267,12 +275,21 @@ public class CalculateEnergy {
     // values, and replace them in the expression
     private static Map<String,String> replaceExpressionInputsWithValues(ModelInfo modelInfo, String expression) {
         String expressionForUi = expression;
+        System.err.println("model -> "+modelInfo.getModelName());
         ArrayList<String> inputs = new ArrayList<>(modelInfo.getInputToVarName().keySet());
+        System.err.println("all -> "+modelInfo.getInputToVarName());
         for (String input : inputs) {
-            String varName = modelInfo.getInputToVarName().get(input);
-            Integer inputVal = (Integer) Sliders.sliders.get(varName).get("val");
+            System.err.println("input -> "+input);
+            String varName = (String) modelInfo.getInputToVarName().get(input).get("input");
+            boolean bool = (Boolean) modelInfo.getInputToVarName().get(input).get("isLiteral");
+            Integer inputVal = 0;
+            System.err.println("varname -> "+varName);
+            if (bool) inputVal = Integer.parseInt(varName);
+            else inputVal = (Integer) Sliders.sliders.get(varName).get("val");
             expression = expression.replaceAll(input, inputVal + "");
-            expressionForUi=expressionForUi.replaceAll(input, varName.split(" \\| ")[1]);
+
+            if (!bool) expressionForUi=expressionForUi.replaceAll(input, varName.split(" \\| ")[1]);
+            else expressionForUi=expressionForUi.replaceAll(input, varName);
         }
         return Map.of("expression",expression,"expressionUi",expressionForUi);
     }

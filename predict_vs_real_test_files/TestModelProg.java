@@ -67,7 +67,9 @@ public class TestModelProg {
         long start = System.currentTimeMillis();
         ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
         Process powerjoularProcess = powerjoularBuilder.start();
-        BinaryTrees.checkTree(BinaryTrees.createTree(val));
+        //BinaryTrees.createTree(val);
+        BinaryTrees.trees(val);
+        //BinaryTrees.checkTree(BinaryTrees.createTree(val));
         //System.out.println("stretch tree of depth " + val +"\t check: " + BinaryTrees.checkTree(BinaryTrees.createTree(val)));
         //for (int i = 0; i < loopSize; i++) {
         //    compute(input);

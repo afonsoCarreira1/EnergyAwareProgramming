@@ -72,7 +72,7 @@ public class Runner {
                 //Thread.sleep(100);
                 if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                     String fileName = program.toString().replace(".class", "");
-                    //if (!(args[0].equals("test") && fileName.equals("BinaryTrees_checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_0"))) continue;//just to test one prog file 
+                    //if (!(args[0].equals("test") && fileName.equals("BinaryTrees_trees_int_17"))) continue;//just to test one prog file 
                     log.append("---------------------------------------\n");
                     log.append("Program number -> " + (progNum++) + "\n");
                     //System.out.println("Program number -> " + i);

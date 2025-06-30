@@ -619,11 +619,11 @@ def createFilesForExtension(models_available):
 
 def main():
     #os.makedirs('out/', exist_ok=True)
-    date = "2025_06_29"#2025_05_20
+    date = "2025_06_30"#2025_05_20
     files,models_available = getAllFeatures(date)
-    #plots(files,"equals_java_lang_Object_")
-    readDividedFeatures(files)
+    plots(files,"createTree_int_")#equals_java_lang_Object_
+    #readDividedFeatures(files)
     #check_one_method()
-    createFilesForExtension(models_available)
+    #createFilesForExtension(models_available)
 
 main()

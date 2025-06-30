@@ -84,16 +84,20 @@ def get_method_dirs():
     path = Path("out")
     return [d.name for d in path.iterdir() if d.is_dir()]
 
+def ignore_some_methods(dir_names,ignore):
+    return [dir for dir in dir_names if dir not in ignore]
+
 
 def main():
     dir_names = get_method_dirs()
+    dir_names = ignore_some_methods(dir_names,{'subList_int_int_','loops_int_int_','trees_int_','checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_','createTree_int_'})
     all_dfs = []
     for dir in dir_names:
         df = parse_log_file("out/"+dir+"/log.txt")
         all_dfs.append(df)
         #print(dir)
 
-    panel_charts(all_dfs,"MSE")
+    panel_charts(all_dfs,"R²")#MSE R²
 
     #combined_df = pd.concat(all_dfs, ignore_index=True)
     #sorted_mse = combined_df['MSE'].sort_values(ascending=False)
@@ -108,43 +112,31 @@ def single_chart(df, ax, model_colors,val='R²'):
     
     bars = ax.bar(df_best['Model'], df_best[val], color=bar_colors)
     if (val == "R²"): ax.set_ylim(0, 1.15)  # Give space above bars
-    #else: ax.set_ylim(0, 1e-8)  # Give space above bars
     ax.set_xlabel('')
     ax.set_title(f'Method: {method_name}')
     ax.set_xticks([])
 
-
-    if(val != "R²"): return
     for bar, value in zip(bars, df_best[val]):
         height = bar.get_height()
-        label = f"{value:.2f}"[:4]
-        
-        if height >= 0.92:
-            # Label inside bar
-            ax.text(
-                bar.get_x() + bar.get_width() / 2,
-                height - 0.04,
-                label,
-                ha='center',
-                va='top',
-                fontsize=9,
-                color='white'
-            )
-        else:
-            # Label above bar
-            ax.text(
-                bar.get_x() + bar.get_width() / 2,
-                height + 0.015,
-                label,
-                ha='center',
-                va='bottom',
-                fontsize=9,
-                color='black'
-            )
+        if abs(value) < 0.001:label = f"{value:.0e}"
+        else:label = f"{value:.2f}"
+        y_min, y_max = ax.get_ylim()
+        offset = 0.015 * (y_max - y_min)
+
+        #the .8 is the percentage of the bar the needs to reach for the value to go inside the bar
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            height - offset if height >= 0.8 * y_max else height + offset,
+            label,
+            ha='center',
+            va='top' if height >= 0.8 * y_max else 'bottom',
+            fontsize=9,
+            color='black',
+            )    
 
 
 #panel bar char
-def panel_charts(df_list,val, cols=2):
+def panel_charts(df_list,val, cols=4):
     all_models = sorted(set().union(*[df['Model'].unique() for df in df_list]))
     base_colors = plt.cm.tab10.colors
     model_colors = {model: base_colors[i % len(base_colors)] for i, model in enumerate(all_models)}

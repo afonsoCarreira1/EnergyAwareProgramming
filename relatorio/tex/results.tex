@@ -47,7 +47,7 @@ For this a simple program was developed, Listing~\ref{lst:code_example}, more li
   \centering
   \label{tab:energy_comparison}
   \footnotesize
-  \begin{tabular}{>{\raggedright\arraybackslash}p{5cm}ccc}
+  \begin{tabular}{>{\raggedright\arraybackslash}p{4cm}ccc}
     \toprule
     Method & Actual Energy Range (J) & Predicted Energy (J) & Prediction Error (\%) \\
     \midrule
@@ -56,7 +56,6 @@ For this a simple program was developed, Listing~\ref{lst:code_example}, more li
     \texttt{addAll(Object)} + \texttt{size()} + \texttt{equals(Object)} & 5.0e-4 -- 5.2e-4 & 6.49e-4 & 27 \\
     \midrule
     \texttt{Map.put(Object, Object)} + \texttt{loop(1000)} & 0.0027 -- 0.0030 & 0.033 & $\approx$ 1058 \\
-    \midrule
     \bottomrule
   \end{tabular}
   \vspace{0.5em}
@@ -65,43 +64,86 @@ For this a simple program was developed, Listing~\ref{lst:code_example}, more li
 \end{table}
 
 
+%\begin{table}[htbp]
+%  \centering
+%  \footnotesize
+%  \makebox[\textwidth][c]{%
+%    \begin{tabular}{@{}p{5cm}@{\hspace{2.5em}}c@{\hspace{0.5em}}ccc@{}}
+%      \toprule
+%      Method & Actual Energy Range (J) & Predicted Energy (J) & Input Value (\%) & Prediction Error (\%) \\
+%      \toprule
+%      \texttt{BinaryTrees.createTree(int)} & 3.75e-4 -- 4.60e-4 & -0.083 & 10 & 19980 \\
+%      \midrule
+%      \texttt{BinaryTrees.createTree(int)} & 11.78 -- 12.63 & 10.26 & 23 & 15.9 \\
+%      \midrule
+%      \texttt{BinaryTrees.createTree(int)} & 77.29 -- 80.63 & 79.90 & 26 & 1.2 \\
+%      \midrule
+%      \texttt{BinaryTrees.checkTree(TreeNode)} & 1.64e-4 -- 1.75e-4 & 1.88e-4 & 10 & 10.9 \\
+%      \midrule
+%      \texttt{BinaryTrees.checkTree(TreeNode)} & 1.37 -- 1.56 & 2.19e-3 & 23 & 99.85 \\
+%      \midrule
+%      \texttt{BinaryTrees.checkTree(TreeNode)} & 11.72 -- 13.29 & 3.15e-3 & 26 & 99.97 \\
+%      \midrule
+%      \texttt{BinaryTrees.trees(int)} & 0.041 -- 0.045 & -3.42 & 10 & 127 \\
+%      \midrule
+%      \texttt{BinaryTrees.trees(int)} & 713 -- 800 & 517.89 & 23 & 31.59 \\
+%      \midrule
+%      \texttt{BinaryTrees.trees(int)} & 6260 -- 7111 & 2429 & 26 & 63.66 \\
+%      \midrule
+%      \texttt{BinaryTrees.checkTree(TreeNode) + createTree(int) + trees(int)} & 4.59e-2 -- 4.77e-2 & -3.49 & 10 & 7578 \\
+%      \midrule
+%      \texttt{BinaryTrees.checkTree(TreeNode) + createTree(int) + trees(int)} & 796 -- 806 & 528.15 & 23 & 34.08 \\
+%      \midrule
+%      \texttt{BinaryTrees.checkTree(TreeNode) + createTree(int) + trees(int)} & 7062 -- 7350 & 2509 & 26 & 65.18 \\
+%      \bottomrule
+%    \end{tabular}%
+%  }
+%  \caption{Comparison of actual and predicted energy consumption for BinaryTrees program}
+%  \label{tab:energy_comparison_bin_trees}
+%\end{table}
+
+
 
 \begin{table}[htbp]
   \centering
-  \label{tab:energy_comparison_bin_trees}
   \footnotesize
-  \begin{tabular}{>{\raggedright\arraybackslash}p{5cm}ccc}
-    \toprule
-    Method & Actual Energy Range (J) & Predicted Energy (J) & input value (\%) & Prediction Error (\%) \\
-    \midrule
-    \texttt{BinaryTrees.createTree(int)} & 3.75e-4 -- 4.60e-4 & -0.083 & 10 &  19980 \\
-    \midrule
-    \texttt{BinaryTrees.createTree(int)} & 11.78 -- 12.63 & 10.26 & 23 &  15.9 \\
-    \midrule
-    \texttt{BinaryTrees.createTree(int)} & 77.29 -- 80.63 & 79.90 & 26 &  1.2 \\
-    \midrule
-    \texttt{BinaryTrees.checkTree(TreeNode)} & 1.64e-4 -- 1.75e-4 & 1.88e-4 & 10 &  10.9 \\
-    \midrule
-    \texttt{BinaryTrees.checkTree(TreeNode)} & 1.37 -- 1.56 & 2.19e-3 & 23 &  99.85 \\
-    \midrule
-    \texttt{BinaryTrees.checkTree(TreeNode)} & 11.72 -- 13.29 & 3.15e-3  & 26 &  99.97 \\
-    \midrule
-    \texttt{BinaryTrees.trees(int)} & 0.041 -- 0.045 & -3.42 & 10 &  127 \\
-    \midrule
-    \texttt{BinaryTrees.trees(int)} & 713 -- 800 & 517.89 & 23 &  31.59 \\
-    \midrule
-    \texttt{BinaryTrees.trees(int)} & 6260 -- 7111 & 2429 & 26 &  63.66 \\
-    \midrule
-    \texttt{BinaryTrees.checkTree(TreeNode)} + \texttt{BinaryTrees.createTree(int)} + \texttt{BinaryTrees.trees(int)} & 4.59e-2 -- 4.77e-2 & -3.49 & 10 &  7578 \\
-    \midrule
-    \texttt{BinaryTrees.checkTree(TreeNode)} + \texttt{BinaryTrees.createTree(int)} + \texttt{BinaryTrees.trees(int)} & 796 -- 806 & 528.15 & 23 &  34.08 \\
-    \midrule
-    \texttt{BinaryTrees.checkTree(TreeNode)} + \texttt{BinaryTrees.createTree(int)} + \texttt{BinaryTrees.trees(int)} & 7062 -- 7350 & 2509 & 26 &  65.18 \\
-    \bottomrule
-  \end{tabular}
-  \vspace{0.5em}
+  \setlength{\tabcolsep}{10pt} % increase column separation
+  \makebox[\textwidth][c]{%
+    \begin{tabular}{@{}p{5.3cm}@{\hspace{2.5em}}c@{\hspace{1em}}ccc@{}}
+      \toprule
+      Method & Actual Energy Range (J) & Predicted Energy (J) & Input Value (\%) & Prediction Error (\%) \\
+      \toprule
+
+      \multirow{3}{*}{\texttt{BinaryTrees.createTree(int)}} 
+        & 3.75e-4 -- 4.60e-4 & -0.083 & 10 & 19980 \\
+        & 11.78 -- 12.63 & 10.26 & 23 & 15.9 \\
+        & 77.29 -- 80.63 & 79.90 & 26 & 1.2 \\
+      \midrule
+
+      \multirow{3}{*}{\texttt{BinaryTrees.checkTree(TreeNode)}}
+        & 1.64e-4 -- 1.75e-4 & 1.88e-4 & 10 & 10.9 \\
+        & 1.37 -- 1.56 & 2.19e-3 & 23 & 99.85 \\
+        & 11.72 -- 13.29 & 3.15e-3 & 26 & 99.97 \\
+      \midrule
+
+      \multirow{3}{*}{\texttt{BinaryTrees.trees(int)}}
+        & 0.041 -- 0.045 & -3.42 & 10 & 127 \\
+        & 713 -- 800 & 517.89 & 23 & 31.59 \\
+        & 6260 -- 7111 & 2429 & 26 & 63.66 \\
+      \midrule
+
+      \multirow{3}{*}{\shortstack[l]{\texttt{BinaryTrees.checkTree(TreeNode)} +\\\texttt{createTree(int)} +\\\texttt{trees(int)}}}
+        & 4.59e-2 -- 4.77e-2 & -3.49 & 10 & 7578 \\
+        & 796 -- 806 & 528.15 & 23 & 34.08 \\
+        & 7062 -- 7350 & 2509 & 26 & 65.18 \\
+      \bottomrule
+    \end{tabular}%
+  }
   \caption{Comparison of actual and predicted energy consumption for BinaryTrees program}
+  \label{tab:energy_comparison_bin_trees}
 \end{table}
+
+
 
 
 The actual value measured by PowerJoular is in the range of 4.9e-4 to 5.1e-4J while the prediction is 5.51e-4J. This shows that the prediction was good for this method in particular.
@@ -118,11 +160,52 @@ Another problem is that summing the predictions of individual methods can lead t
 The results demonstrate that while the tool provides useful estimations of energy consumption, especially in terms of relative trends between methods and input sizes, its absolute predictions can vary significantly depending on the type of operations being analyzed. Additionally, while some methods show high prediction accuracy (e.g., addAll(Object)), combining multiple methods or increasing program complexity tends to amplify prediction errors. These limitations highlight the importance of carefully selecting input sizes and operations for meaningful energy analysis, and they suggest that the tool is best suited for relative comparisons rather than precise energy estimation.
 
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width = .8 \textwidth]{figures/createTree_plot.pdf}
+  \caption{Energy for method \texttt{createTree}}
+  \label{fig:createTree_plot}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width = .8 \textwidth]{figures/checkTree_plot.pdf}
+  \caption{Energy for method \texttt{checkTree}}
+  \label{fig:checkTree_plot}
+\end{figure}
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width = .8 \textwidth]{figures/trees_plot.pdf}
+  \caption{Energy for method \texttt{trees}}
+  \label{fig:trees_plot}
+\end{figure}
+
 Another experiment was conducted using a test case considered more realistic than the others. The program was selected from the Computer Language Benchmarks Game, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads~\cite{benchmarksGameJava}.
 
-The program selected was the BinaryTrees (Java naot #3), from how it is implemented on the website it needs some small adjustments in order to work with our framework. First, the program does not have a constructor for the class \texttt{TreeNode} which does not allow the program generator to populate the programs correctly, as the program on the website uses a custom method that create the nodes. Without this change, the methods that required \texttt{TreeNode} as input would be simply receiving an empty Object, as the constructor was also empty, making their generation useless as evry program would be the same.
-With that said, the only adjustments made to the class were, a new private empty constructor, that can only be accessed inside the class, so the generator does not detect it and use it, as the generator always tries to use the smallest one available, so it is important that the empty constructor is private. And it was added a new constructor, this one public, that had the same logic as the method that created the nodes. Now the methods that use \texttt{TreeNode} can be generated as the constructor can call the public constructor that has the similar behavior of the \texttt{createTree(int)} method. These changes do not impact how the program, or method behaves and only helps the program generation.
+The program selected was the \texttt{}{BinaryTrees} (Java naot #3), which are computational intensive task. It contains three core methods, described as follows:
+
+\begin{itemize}
+  \item \textbf{createTree:} Recursively builds a binary tree of the given depth. At each level, creates a node with two children (left and right), until depth equals zero. The result is a complete binary tree with \(2^{\text{depth}} - 1\) nodes.
+ 
+  \item \textbf{checkTree:} Traverses the tree recursively and counts the number of nodes. Returns \texttt{1} for leaf nodes. Returns \texttt{1 + check of left subtree + check of right subtree} for internal nodes.
+  
+  \item \textbf{trees:} Performs the core part of the benchmark by creating and checking many binary trees of varying depths and keeping one long-lived tree in memory to simulate memory pressure.
+\end{itemize}
+
+The Figures~\ref{fig:createTree_plot},~\ref{fig:checkTree_plot}, and~\ref{fig:trees_plot} show the energy of each method, for different input sizes, for every program generated and analyzed by the framework. It is possible to see that the methods have an exponential tendency with the increase of the input, which is expected from binary trees operations. It is also noticeable that the Figure~\ref{fig:checkTree_plot} has a lower curve and input, this was due to the fact that the method required that a tree was created before the method could be run, which would take more time, subsequently, the maximum input for this method was lower. 
+
+
+From how the program is implemented on the website it needs some small adjustments in order to work with our framework. First, the program does not have a constructor for the class \texttt{TreeNode} which does not allow the program generator to populate the programs correctly, as the program on the website uses a custom method that create the nodes. Without this change, the methods that required \texttt{TreeNode} as input would be simply receiving an empty Object, as the constructor was also empty, making their generation useless as every program would be the same.
+With that said, the only adjustments made to the class were, a new private empty constructor, that can only be accessed inside the class, so the generator does not detect it and use it, as the generator always tries to use the smallest one available, so it is important that the empty constructor is private. And it was added a new constructor, this one public, that had the same logic as the method that created the nodes. Now the methods that use \texttt{TreeNode} can be generated as the constructor can call the public constructor that has the similar behavior of the \texttt{createTree(int)} method. These changes do not impact how the program, or methods behave and only helps the program generation.
+
 After that the data was collected and the models for each method used in the program was trained.
+
+
+The results are detailed in the Table~\ref{tab:energy_comparison_bin_trees}. 
+
+
 
 %Another important aspect of the generator is the input creating, the input of the program receives the arguments from the main function and then it converts it to an integer for the program to use. A developer/human can easily observe that by looking at the code, however the generator cannot see the difference and it would start creating random inputs for the \texttt{String[]} type. So, it was also necessary to change the input of the method from 
 

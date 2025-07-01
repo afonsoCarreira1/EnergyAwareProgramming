@@ -24,6 +24,55 @@ The figure contains 100 runs of the Fibonacci recursive program written in Java 
 It is noticeable that the Python orchestrator read energy values lower than the other orchestrators. Further analysis of the orchestrators revealed a notable difference in behavior. When the Python orchestrator was running, both the parent and child processes consumed CPU resources. In contrast, the other orchestrators (Java, C, and Bash) showed CPU usage only in the child process. This disparity may explain why PowerJoular reported lower energy consumption for the Python orchestrator. Since the CPU load was shared between the parent and child processes, PowerJoular, which measures energy only for the child process (the target Fibonacci program), captured less total energy usage.
 Since the experiment runner included an example demonstrating how to use the framework with PowerJoular, the authors were made aware of this potential conflict when launching PowerJoular from Python.
 
+
+\section{Models Metrics} \label{sec:models_metrics}
+
+For the final version of the tool, models were trained on methods from the Java collections framework, specifically focusing on the \texttt{List} and \texttt{Map} interfaces. Data for these methods was generated, collected, and used to train the models. With the models in place, it is now possible to evaluate their performance using metrics such as R² and Mean Squared Error (MSE), based on the features extracted during data collection.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/r2_comparison.pdf}
+  \caption{R² Comparison (Higher is better)}
+  \label{fig:r2_comparison}
+\end{figure}
+
+
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/mse_comparison.pdf}
+  \caption{MSE Comparison (Lower is better)}
+  \label{fig:mse_comparison}
+\end{figure}
+
+The results of the R² can be seen in the Figure~\ref{fig:r2_comparison}.
+Ideally the best score is 1, meaning that the model can get 100\% of the prediction right, however that is not possible in most cases, and this project is not an exception to the rule. It is noticeable that most values are really low (bellow 0.8), which means that the model cannot predict the energy very well for some methods. The best models were for the method \texttt{addAll()} and \texttt{containsAll()} of the List collection, which got an R² of around .8 for most models, meaning that for those 3 methods on average the predictions will be 80\% correct.
+
+For the other methods the scores were lower. The explanation found for this result was the following:
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width = .8 \textwidth]{figures/size_energy.pdf}
+  \caption{Energy for the \texttt{List.size()} method with different list sizes.}
+  \label{fig:size_energy}
+\end{figure}
+
+The 3 methods with the most accuracy were the ones that generated bigger energy outputs, because the methods were computationally more powerful than the others. This made it so that bigger inputs would result in bigger energy outputs, and make the models more easily find a pattern to predict the energy. As for the other models, since a bigger input would not mean a bigger energy output, the model, might had some difficulties predicting the energy. This does not mean that a lower R² will completely make the model unusable for some methods, as their MSE, that can be seen in the Figure~\ref{fig:mse_comparison} is not high, meaning that even when failing to predict the energy of the method, the failed prediction will not be far away as one might expect. For example, if a model has an MSE of $1 \times 10^{-10}$ and predicts the energy usage to be $1~\mathrm{J}$, then even if the prediction is not exact, the true value is likely within $\pm \sqrt{1 \times 10^{-10}} = \pm 1 \times 10^{-5}~\mathrm{J}$ of the prediction, indicating accurate performance despite a potentially low R². 
+
+Another factor that may contribute to low R² scores is the behavior of the energy measurement tool when applied to certain methods. For instance, some methods, such as \texttt{size()}, do not require more computational effort as the collection size increases. Whether the collection has one element or one million, the method executes in roughly the same amount of time. Consequently, the energy consumption remains nearly constant, regardless of the input size. Since these methods complete very quickly and consume very little energy, even minimal measurement noise can significantly affect the recorded values. Figure~\ref{fig:size_energy} illustrates this effect: although an increase in energy with input size is typically expected, the recorded energy values for \texttt{List.size()} remain considerably flat. While this example isolates a single feature, and other features also influence energy consumption, input size is often the most significant. This observation suggests that for low-energy, low-variance methods, measurement noise can impact the signal, making accurate energy prediction particularly challenging.
+
+
+Nonetheless, the lower R² scores should be addressed, and what can be done to improve the results of these models is to have the program generator create higher inputs, so the energy profiles also have outputs with higher energy, making the energy predictions more accurate. Then, since most of the predictions depend on the input, it means the other features do not have such higher impact, so it is also important to pick better features and remove others that might not be interesting. 
+
+
+
+In general, most of the models present similar scores, however the chosen one was PySR. As it can represent the predictions in expressions which can help the users to try to understand why the code is using more energy. It has a nice feature of allowing to balance complexity and accuracy. And can easily be used in another code language as it is represented as a mathematical expression.
+The fact that most models present similar results, ranging from advanced models like Random Forest and Gradient Boosting to simple models like Linear Regression, suggests that features used in the model likely do not capture highly nonlinear or complex relations. This indicates that energy consumption behavior in analyzed approaches can be reliably captured by simple relations. As a result, the set of features cannot offer the richness or variability needed for distinguishing more subtle energy behavior. This does not mean that the learning problem is simple, rather, it indicates that the available features may fail to express potential nonlinear patterns of energy consumption. To improve prediction performance and enable more effective use of expressive models, future work should incorporate features capable of highlight the complexity of predicting energy usage.
+
+
+
 \section{Predicted vs. Measured Energy} \label{sec:predicted_vs_measured_energy}
 
 Since the extension has been built, we can present the results and evaluate how accurately the tool estimates energy consumption compared to real measurements obtained using PowerJoular. Since the energy profiles were generated on a specific hardware setup (see Table~\ref{tab:hardware_specs}), the resulting models are adjusted to that particular system. If the tool were run on a different machine, the absolute energy values would likely differ due to variations in hardware characteristics. However, the relative differences in energy consumption between operations are expected to remain consistent. For instance, if \texttt{TreeMap} consumes more energy than \texttt{HashMap} on one system, the same trend will likely hold on another system, even if the exact energy values vary.
@@ -104,44 +153,6 @@ For this a simple program was developed, Listing~\ref{lst:code_example}, more li
 
 
 
-\begin{table}[htbp]
-  \centering
-  \footnotesize
-  \setlength{\tabcolsep}{10pt} % increase column separation
-  \makebox[\textwidth][c]{%
-    \begin{tabular}{@{}p{5.3cm}@{\hspace{2.5em}}c@{\hspace{1em}}ccc@{}}
-      \toprule
-      Method & Actual Energy Range (J) & Predicted Energy (J) & Input Value (\%) & Prediction Error (\%) \\
-      \toprule
-
-      \multirow{3}{*}{\texttt{BinaryTrees.createTree(int)}} 
-        & 3.75e-4 -- 4.60e-4 & -0.083 & 10 & 19980 \\
-        & 11.78 -- 12.63 & 10.26 & 23 & 15.9 \\
-        & 77.29 -- 80.63 & 79.90 & 26 & 1.2 \\
-      \midrule
-
-      \multirow{3}{*}{\texttt{BinaryTrees.checkTree(TreeNode)}}
-        & 1.64e-4 -- 1.75e-4 & 1.88e-4 & 10 & 10.9 \\
-        & 1.37 -- 1.56 & 2.19e-3 & 23 & 99.85 \\
-        & 11.72 -- 13.29 & 3.15e-3 & 26 & 99.97 \\
-      \midrule
-
-      \multirow{3}{*}{\texttt{BinaryTrees.trees(int)}}
-        & 0.041 -- 0.045 & -3.42 & 10 & 127 \\
-        & 713 -- 800 & 517.89 & 23 & 31.59 \\
-        & 6260 -- 7111 & 2429 & 26 & 63.66 \\
-      \midrule
-
-      \multirow{3}{*}{\shortstack[l]{\texttt{BinaryTrees.checkTree(TreeNode)} +\\\texttt{createTree(int)} +\\\texttt{trees(int)}}}
-        & 4.59e-2 -- 4.77e-2 & -3.49 & 10 & 7578 \\
-        & 796 -- 806 & 528.15 & 23 & 34.08 \\
-        & 7062 -- 7350 & 2509 & 26 & 65.18 \\
-      \bottomrule
-    \end{tabular}%
-  }
-  \caption{Comparison of actual and predicted energy consumption for BinaryTrees program}
-  \label{tab:energy_comparison_bin_trees}
-\end{table}
 
 
 
@@ -189,7 +200,7 @@ The program selected was the \texttt{}{BinaryTrees} (Java naot #3), which are co
 \begin{itemize}
   \item \textbf{createTree:} Recursively builds a binary tree of the given depth. At each level, creates a node with two children (left and right), until depth equals zero. The result is a complete binary tree with \(2^{\text{depth}} - 1\) nodes.
  
-  \item \textbf{checkTree:} Traverses the tree recursively and counts the number of nodes. Returns \texttt{1} for leaf nodes. Returns \texttt{1 + check of left subtree + check of right subtree} for internal nodes.
+  \item \textbf{checkTree:} Recursively traverses the tree and counts the number of nodes. For leaf nodes, it returns \texttt{1}. For internal nodes, it returns the sum of the recursive calls on the left and right subtrees plus one: $1 + \text{check(left)} + \text{check(right)}$.
   
   \item \textbf{trees:} Performs the core part of the benchmark by creating and checking many binary trees of varying depths and keeping one long-lived tree in memory to simulate memory pressure.
 \end{itemize}
@@ -202,9 +213,95 @@ With that said, the only adjustments made to the class were, a new private empty
 
 After that the data was collected and the models for each method used in the program was trained.
 
+\begin{table}[htbp]
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{10pt} % increase column separation
+  \makebox[\textwidth][c]{%
+    \begin{tabular}{@{}p{5.3cm}@{\hspace{2.5em}}c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{1em}}c@{}}
+      \toprule
+      Method & Input Value & Predicted Energy (J) & Actual Energy Range (J) & Prediction Error (\%) \\
+      \toprule
+
+      \multirow{3}{*}{\texttt{BinaryTrees.createTree(int)}} 
+        & 10 & -0.083 & 3.75e-4 -- 4.60e-4 & 19980 \\
+        & 23 & 10.26 & 11.78 -- 12.63 & 15.9 \\
+        & 26 & 79.90 & 77.29 -- 80.63 & 1.2 \\
+      \midrule
+
+      \multirow{3}{*}{\texttt{BinaryTrees.checkTree(TreeNode)}}
+        & 10 & 1.88e-4 & 1.64e-4 -- 1.75e-4 & 10.9 \\
+        & 23 & 2.19e-3 & 1.37 -- 1.56 & 99.85 \\
+        & 26 & 3.15e-3 & 11.72 -- 13.29 & 99.97 \\
+      \midrule
+
+      \multirow{3}{*}{\texttt{BinaryTrees.trees(int)}}
+        & 10 & -3.42 & 0.041 -- 0.045 & 8053 \\
+        & 23 & 517.89 & 713 -- 800 & 31.59 \\
+        & 26 & 2429 & 6260 -- 7111 & 63.66 \\
+      \midrule
+
+      \multirow{3}{*}{\shortstack[l]{\texttt{BinaryTrees.checkTree(TreeNode)} +\\\texttt{createTree(int)} +\\\texttt{trees(int)}}}
+        & 10 & -3.49 & 4.59e-2 -- 4.77e-2 & 7578 \\
+        & 23 & 528.15 & 796 -- 806 & 34.08 \\
+        & 26 & 2509 & 7062 -- 7350 & 65.18 \\
+      \bottomrule
+    \end{tabular}%
+  }
+  \caption{Comparison of actual and predicted energy consumption for BinaryTrees program}
+  \label{tab:energy_comparison_bin_trees}
+\end{table}
+
+
+
+%\begin{table}[htbp]
+%  \centering
+%  \footnotesize
+%  \setlength{\tabcolsep}{10pt}
+%  \makebox[\textwidth][c]{%
+%    \begin{tabular}{@{}p{5.3cm}@{\hspace{2em}}c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{1em}}c@{}}
+%      \toprule
+%      Method & Input Value (\%) & Predicted Energy Simple Model (J) & Predicted Energy Best Model (J) & Actual Energy Range (J) & Prediction Error Simple Model (\%) & Prediction Error Best Model (\%) \\
+%      \toprule
+%
+%      \multirow{3}{=}{\texttt{BinaryTrees.createTree(int)}} 
+%        & 10 & -0.083 & 5.63e-04 & 3.75e-4 -- 4.60e-4 & 19980 & 34.97 \\
+%        & 23 & 10.26 & 9.42 & 11.78 -- 12.63 & 15.9 & 22.83 \\
+%        & 26 & 79.90 & 80.11 & 77.29 -- 80.63 & 1.2 & 1.45 \\
+%      \midrule
+%
+%      \multirow{3}{=}{\texttt{BinaryTrees.checkTree(TreeNode)}}
+%        & 10 & 1.88e-4 & 2.28e-04 & 1.64e-4 -- 1.75e-4 & 10.9 & 34.4 \\
+%        & 23 & 2.19e-3 & 2.43e-03 & 1.37 -- 1.56 & 99.85  & 99.83\\
+%        & 26 & 3.15e-3 & 3.53e-03 & 11.72 -- 13.29 & 99.97 & 99.97\\
+%      \midrule
+%
+%      \multirow{3}{=}{\texttt{BinaryTrees.trees(int)}}
+%        & 10 & -3.42 & 1.69 & 0.041 -- 0.045 & 8053 & 3833 \\
+%        & 23 & 517.89 & 798 & 713 -- 800 & 31.59 & 5.49\\
+%        & 26 & 2429 & 39754 & 6260 -- 7111 & 63.66 & 494.63 \\
+%      \midrule
+%
+%      \multirow{3}{=}{\parbox{5.3cm}{\centering\texttt{BinaryTrees.checkTree(TreeNode) +\\ createTree(int) + trees(int)}}}
+%        & 10 & -3.49 & 4.59e-2 -- 4.77e-2 & 7578 \\
+%        & 23 & 528.15 & 796 -- 806 & 34.08 \\
+%        & 26 & 2509 & 7062 -- 7350 & 65.18 \\
+%      \bottomrule
+%    \end{tabular}%
+%  }
+%  \caption{Comparison of actual and predicted energy consumption for BinaryTrees program}
+%  \label{tab:energy_comparison_bin_trees}
+%\end{table}
+
+
 
 The results are detailed in the Table~\ref{tab:energy_comparison_bin_trees}. 
 
+It is noticeable that the values predicted are not the most accurate, for some inputs it has good accuracy, for example, the method \texttt{createTree} has good accuracy for the input \texttt{26}. For other methods, like \texttt{trees} it does not. Again as the previous experiment, the tool is not very accurate in terms of absolute values, and in this case for methods that change their energy considerably with minimum increase in the input, the models have a harder time to predict. The tool demonstrates good relative energy prediction, as input values increase, the predicted energy consumption also increases, and it decreases correspondingly when the inputs are reduced.
+
+To achieve better results with the \texttt{BinaryTrees} methods it could be possible to improve the feature's selection by incorporating characteristics that better capture the program complexity and increase the maximum input available for each program generated in order to better represent the high-energy regions of execution.
+
+However, this experiment objective's was not focused only on achieving the highest accuracy possible. It was also made to prove that it is possible to use the framework to test more interesting and complex cases. And it was proven that with minimal changes, it was possible to mass generate programs, collect data and train models, for the \texttt{BinaryTrees} program. While it may not work universally for all programs, since creating a framework general enough to handle every case is challenging, this experiment demonstrates that analyzing custom programs is possible.
 
 
 %Another important aspect of the generator is the input creating, the input of the program receives the arguments from the main function and then it converts it to an integer for the program to use. A developer/human can easily observe that by looking at the code, however the generator cannot see the difference and it would start creating random inputs for the \texttt{String[]} type. So, it was also necessary to change the input of the method from 

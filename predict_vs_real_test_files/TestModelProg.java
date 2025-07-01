@@ -11,9 +11,9 @@ import java.util.Random;
 public class TestModelProg {
 
     static String frequency = ".1";
-    static int loopSize = 1;
  /* 
     public static void main(String[] args) throws IOException, InterruptedException {
+        int loopSize = 10_000;
         int maxListSize = 1000;
         int max = 100;
         Random rand = new Random();
@@ -62,13 +62,14 @@ public class TestModelProg {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //String input = generateRandomWordString(1000);//"Java is simple. Java is powerful.";
+        int loopSize = 1;
         int val = Integer.parseInt(args[0]);
         String pid = ProcessHandle.current().pid()+"";
         long start = System.currentTimeMillis();
         ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
         Process powerjoularProcess = powerjoularBuilder.start();
-        //BinaryTrees.createTree(val);
-        BinaryTrees.trees(val);
+        BinaryTrees.createTree(val);
+        //BinaryTrees.trees(val);
         //BinaryTrees.checkTree(BinaryTrees.createTree(val));
         //System.out.println("stretch tree of depth " + val +"\t check: " + BinaryTrees.checkTree(BinaryTrees.createTree(val)));
         //for (int i = 0; i < loopSize; i++) {
@@ -78,7 +79,7 @@ public class TestModelProg {
         killPowerjoular.waitFor();
         long end = System.currentTimeMillis();
         long diff = end - start;
-        String energyUsed = readPowerjoularCsv("powerjoular.csv-"+pid+".csv");
+        String energyUsed = readPowerjoularCsv("powerjoular.csv-"+pid+".csv",loopSize);
         System.out.println("Energy used was: "+energyUsed + "J" + " in "+diff+"ms");
     }
 
@@ -133,7 +134,7 @@ public class TestModelProg {
         Thread.sleep(100);
     }*/
 
-    private static String readPowerjoularCsv(String csvFile) {
+    private static String readPowerjoularCsv(String csvFile, int loopSize) {
         try {Thread.sleep(100);
         } catch (InterruptedException e) {e.printStackTrace();}
         List<String> cpuPowerValues = new ArrayList<>();

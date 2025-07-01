@@ -126,10 +126,10 @@ def plot_energy_vs_feature(X, y, column_name):
     df_avg = df.groupby('x', as_index=False)['y'].mean()
     plt.scatter(X_log, y, label="Energy used", alpha=0.6, color="blue", marker="o")
     #plt.scatter(df_avg['x'], df_avg['y'], label="Averaged Energy", alpha=0.6, color="blue", marker="o")
-    plt.xlabel(f"input")#{column_name}
+    plt.xlabel(f"list size")#{column_name}
     plt.ylabel("Energy")
     #plt.xscale("log")  # Log scale for the X-axis
-    plt.title(f"Energy vs feature")
+    plt.title(f"Energy for List.size()")#Energy vs feature
     plt.legend()
     plt.grid(False)
     plt.show()
@@ -619,9 +619,9 @@ def createFilesForExtension(models_available):
 
 def main():
     #os.makedirs('out/', exist_ok=True)
-    date = "2025_06_30"#2025_05_20
+    date = "2025_05_20"#2025_05_20 2025_06_30
     files,models_available = getAllFeatures(date)
-    plots(files,"createTree_int_")#equals_java_lang_Object_
+    plots(files,"size__")#equals_java_lang_Object_ createTree_int_
     #readDividedFeatures(files)
     #check_one_method()
     #createFilesForExtension(models_available)

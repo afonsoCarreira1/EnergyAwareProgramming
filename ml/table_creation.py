@@ -97,7 +97,7 @@ def main():
         all_dfs.append(df)
         #print(dir)
 
-    panel_charts(all_dfs,"R²")#MSE R²
+    panel_charts(all_dfs,"MSE")#MSE R²
 
     #combined_df = pd.concat(all_dfs, ignore_index=True)
     #sorted_mse = combined_df['MSE'].sort_values(ascending=False)
@@ -136,7 +136,7 @@ def single_chart(df, ax, model_colors,val='R²'):
 
 
 #panel bar char
-def panel_charts(df_list,val, cols=4):
+def panel_charts(df_list,val, cols=3):
     all_models = sorted(set().union(*[df['Model'].unique() for df in df_list]))
     base_colors = plt.cm.tab10.colors
     model_colors = {model: base_colors[i % len(base_colors)] for i, model in enumerate(all_models)}
@@ -160,11 +160,16 @@ def panel_charts(df_list,val, cols=4):
         title='Models',
         loc='lower center',
         ncol=len(model_colors),
-        bbox_to_anchor=(0.5, 0.02)
+        bbox_to_anchor=(0.5, 0.13),
+        fontsize=12,
+        title_fontsize='20'
     )
-    fig.suptitle(f"{val} Score Comparison", fontsize=16, fontweight='bold')
+
+    fig.suptitle(f"{val} Score Comparison", fontsize=25, fontweight='bold')
     plt.tight_layout(rect=[0, 0.05, 1, 0.93])  # leave space for legend and title
     plt.subplots_adjust(hspace=.5, bottom=0.2, top=0.9)
+    
+    plt.savefig("mse_comparison.pdf")
     plt.show()
 
 main()

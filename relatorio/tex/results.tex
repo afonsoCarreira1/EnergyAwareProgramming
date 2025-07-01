@@ -4,12 +4,12 @@
 
 At the beginning of the experiment, some tools were tested to observe their behavior, understand how to use them, and determine which one best suited the needs of the project.
 
-During the initial testing, a Python framework designed to facilitate experiment measurements was used ~\cite{S2_Group_Experiment_Runner}. The framework included an initial test template that used PowerJoular to measure energy of programs. While using the template and testing the framework some bugs and unexpected results were found, some of which were due to misuse of the framework.
+During the initial testing, a Python framework designed to facilitate experiment measurements was used~\cite{S2_Group_Experiment_Runner}. The framework included an initial test template that used PowerJoular to measure energy of programs. While using the template and testing the framework some bugs and unexpected results were found, some of which were due to misuse of the framework.
 Due to these issues, a simpler orchestrator was developed. Although it performed the same core function as the original framework, measuring energy consumption, it was more straightforward, focusing exclusively on energy measurement rather than providing a general-purpose solution. This new orchestrator was implemented in Java.
 
 However, some discrepancies were observed between the energy values measured by the Java and Python frameworks. This was unexpected, as both used the same energy measurement tool (PowerJoular) and measured the same program in the same way. Still, the Python framework consistently reported lower energy values than the Java version.
 To investigate which tool was causing the inconsistency, two more orchestrators were implemented. A simplified custom version of the Python framework was also created. In total, four orchestrators were developed: Java, Python, C, and Bash. All four performed the same process, calling PowerJoular to measure the energy usage of a Java program.
-This setup represents an early iteration of the approach later detailed in Section ~\ref{sec:work_stage2_orchestrator}, which utilized signal-based control to ensure that the measurement tool only ran during the exact computation period being measured.
+This setup represents an early iteration of the approach later detailed in Section~\ref{sec:work_stage2_orchestrator}, which utilized signal-based control to ensure that the measurement tool only ran during the exact computation period being measured.
 
 \begin{figure}[htbp]
   \centering
@@ -18,7 +18,7 @@ This setup represents an early iteration of the approach later detailed in Secti
   \label{fig:4_orchs_comparison}
 \end{figure}
 
-To better understand the inconsistencies, figure \ref{fig:4_orchs_comparison} details the differences.
+To better understand the inconsistencies, Figure~\ref{fig:4_orchs_comparison} details the differences.
 The figure contains 100 runs of the Fibonacci recursive program written in Java and order by the less energy to the highest energy. And it shows the energy reads for the four different orchestrators used. The labels contain the average energy values and its standard deviation.
 
 It is noticeable that the Python orchestrator read energy values lower than the other orchestrators. Further analysis of the orchestrators revealed a notable difference in behavior. When the Python orchestrator was running, both the parent and child processes consumed CPU resources. In contrast, the other orchestrators (Java, C, and Bash) showed CPU usage only in the child process. This disparity may explain why PowerJoular reported lower energy consumption for the Python orchestrator. Since the CPU load was shared between the parent and child processes, PowerJoular, which measures energy only for the child process (the target Fibonacci program), captured less total energy usage.
@@ -41,14 +41,38 @@ Since the extension has been built, we can present the results and evaluate how 
 \end{listing}
 
 To test if the extension tool is accurate, the energy measurement needs to be run in the same machine were the data was collected.
-For this a simple program was developed~\ref{lst:code_example}, more like simple Java instructions, of just creating two lists (both with size 1000) and using the method \texttt{addAll(Object)} and checking if the prediction matches the actual measurement.
+For this a simple program was developed, Listing~\ref{lst:code_example}, more like simple Java instructions, of just creating two lists (both with size 1000) and using the method \texttt{addAll(Object)} and checking if the prediction matches the actual measurement.
+
+\begin{table}[htbp]
+  \centering
+  
+  \label{tab:energy_comparison}
+  \footnotesize
+  \begin{tabular}{>{\raggedright\arraybackslash}p{5cm}ccc}
+    \toprule
+    Method & Actual Energy Range (J) & Predicted Energy (J) & Prediction Error (\%) \\
+    \midrule
+    \texttt{addAll(Object)} & 4.9e-4 -- 5.1e-4 & 5.51e-4 & 10.2 \\
+    \midrule
+    \texttt{addAll(Object)} + \texttt{size()} + \texttt{equals(Object)} & 5.0e-4 -- 5.2e-4 & 6.49e-4 & 27 \\
+    \midrule
+    \texttt{Map.put(Object, Object)} + \texttt{loop(1000)} & 0.0027 -- 0.0030 & 0.033 & $\approx$ 1058 \\
+    \bottomrule
+  \end{tabular}
+  \vspace{0.5em}
+  \caption{Comparison of actual and predicted energy consumption for different methods}
+  %\footnotesize{The actual energy ranges were obtained by running the program 10 times.}
+\end{table}
+
+
+
 
 The actual value measured by PowerJoular is in the range of 4.9e-4 to 5.1e-4J while the prediction is 5.51e-4J. This shows that the prediction was good for this method in particular.
 When trying to add two more operations (\texttt{size()} and \texttt{equals(Object)}) the measurement is in the range of 5.0e-4 to 5.2e-4J and the prediction is 6.49e-4J, so now the values are getting off. The method \texttt{addAll(Object)} is one of the methods that has the best accuracy of around 80\%, and the other two do not. This makes it so that when adding the other two methods the real energy value starts drifting away from the real one.
 
 This can get worse when the number of methods used and variables involved start increasing, leading to greater divergence between the prediction output and actual values. 
 
-Using the example of the word counting program ~\ref{lst:Java_program_to_count_word_frequencies_in_a_string}, which involves Maps and loops, the bigger gap between reality and prediction can be seen, as the Map methods predictions are not very accurate. The loop has a size of 1000 (extension default) and the Map contains 3 unique entries, since the input string includes just three distinct words.
+Using the example of the word counting program, Listing~\ref{lst:Java_program_to_count_word_frequencies_in_a_string}, which involves Maps and loops, the bigger gap between reality and prediction can be seen, as the Map methods predictions are not very accurate. The loop has a size of 1000 (extension default) and the Map contains 3 unique entries, since the input string includes just three distinct words.
 
 The energy measured is in the range of 0.0027J to 0.0030J and the prediction is 0.033J. This deviates by a factor of 10 which is considerable and makes the prediction absolute values not viable. However, the relative predictions remain consistent, as input sizes increase, the predicted energy consumption also increases.
 

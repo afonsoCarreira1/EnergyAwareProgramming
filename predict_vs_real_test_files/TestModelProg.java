@@ -8,9 +8,12 @@ import java.util.Map;
 import java.util.Random;
 
 
+
+
 public class TestModelProg {
 
     static String frequency = ".1";
+    public static boolean stop = false;
  /* 
     public static void main(String[] args) throws IOException, InterruptedException {
         int loopSize = 10_000;
@@ -62,19 +65,21 @@ public class TestModelProg {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //String input = generateRandomWordString(1000);//"Java is simple. Java is powerful.";
-        int loopSize = 1;
+        int loopSize = 0;
         int val = Integer.parseInt(args[0]);
         String pid = ProcessHandle.current().pid()+"";
         long start = System.currentTimeMillis();
         ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
         Process powerjoularProcess = powerjoularBuilder.start();
-        BinaryTrees.createTree(val);
+        //BinaryTrees.checkTree(tn);
         //BinaryTrees.trees(val);
         //BinaryTrees.checkTree(BinaryTrees.createTree(val));
         //System.out.println("stretch tree of depth " + val +"\t check: " + BinaryTrees.checkTree(BinaryTrees.createTree(val)));
-        //for (int i = 0; i < loopSize; i++) {
-        //    compute(input);
-        //}
+        launchTimerThread(1100);
+        while (!stop) {
+            BinaryTrees.checkTree(tn);
+            loopSize++;
+        }
         Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularProcess.pid()+""});
         killPowerjoular.waitFor();
         long end = System.currentTimeMillis();
@@ -86,6 +91,18 @@ public class TestModelProg {
     public static void compute(String input) {
         HashMap<String, Integer> result = countWordFrequency(input);
         System.out.println(result);
+    }
+
+    public static void launchTimerThread(int timeSeconds) {
+        Thread timerThread = new Thread(() -> {
+            try {
+                Thread.sleep(timeSeconds);
+                stop = true;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        timerThread.start();
     }
 
     public static List<Integer> generateRandomNumberList(int size) {

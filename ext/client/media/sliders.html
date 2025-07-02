@@ -13,11 +13,13 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      position: relative;
     }
 
     h2 {
       text-align: center;
       margin-top: 20px;
+      color: white;
     }
 
     #slider-container {
@@ -115,10 +117,169 @@
         transform: translateY(0);
       }
     }
+
+    #info-container {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 100;
+    }
+
+    #info-btn {
+      font-size: 18px;
+      padding: 6px 10px;
+      border-radius: 5px;
+      background-color: #007acc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #info-btn:hover {
+      background-color: #005fa3;
+    }
+
+    #info-box {
+      margin-top: 10px;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: white;
+      color: #333;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: none;
+      width: 400px;
+      position: absolute;
+      right: 0;
+      top: 40px;
+    }
+
+    #info-box h3 {
+      margin-top: 0;
+    }
+
+    #info-box th, #info-box td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+#info-box th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+#info-box td {
+  background-color: #fafafa;
+}
+
+#info-box {
+  max-height: 400px; /* Optional: limit height if content is long */
+  overflow-y: auto;
+}
   </style>
 </head>
 
 <body>
+
+  <div id="info-container">
+    <button id="info-btn">ℹ️</button>
+    <div id="info-box">
+  <h3>Energy Contextual Examples</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Energy Range</th>
+        <th>Description & Examples</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>&lt; 1 J</td>
+        <td>
+          Very small energy, typical in fine mechanical or electronic systems.<br>
+          <strong>Electricity:</strong> Powering a microcontroller for a few milliseconds.<br>
+          <strong>Impact:</strong> A feather falling from 1 meter.<br>
+          <strong>Heat:</strong> Touching a surface briefly without feeling warmth.
+        </td>
+      </tr>
+      <tr>
+        <td>1 J</td>
+        <td>
+          Enough to move a small object.<br>
+          <strong>Impact:</strong> Lifting a 100g object 1 meter.<br>
+          <strong>Electricity:</strong> A 1W LED running for 1 second.<br>
+          <strong>Heat:</strong> Click of a retractable pen.
+        </td>
+      </tr>
+      <tr>
+        <td>1–10 J</td>
+        <td>
+          Energy in small mechanical movements.<br>
+          <strong>Impact:</strong> Snapping a rubber band.<br>
+          <strong>Electricity:</strong> Powering a smartwatch for a few seconds.<br>
+          <strong>Heat:</strong> Heating 1g of water by ≈2°C..
+        </td>
+      </tr>
+      <tr>
+        <td>10–100 J</td>
+        <td>
+          Noticeable force or electrical use.<br>
+          <strong>Impact:</strong> A strong punch (≈100 J).<br>
+          <strong>Electricity:</strong> A 10W LED for 10 seconds.<br>
+          <strong>Mechanical:</strong> Dropping a 1 kg object from 1 meter height (10 J).
+        </td>
+      </tr>
+      <tr>
+        <td>100 J – 1 kJ</td>
+        <td>
+          Significant energy in daily actions.<br>
+          <strong>Impact:</strong> Dropping a 10 kg object from 1 meter.<br>
+          <strong>Electricity:</strong> A 100W bulb for 10 seconds.<br>
+          <strong>Safety:</strong>  EN ISO 20345-rated toe caps can absorb 100–200 J.
+        </td>
+      </tr>
+      <tr>
+        <td>1–10 kJ</td>
+        <td>
+          Energy in daily activities.<br>
+          <strong>Impact:</strong> Kinetic energy of a moving bicycle.<br>
+          <strong>Electricity:</strong> Boiling 100 ml of water (≈8.4 kJ).<br>
+          <strong>Food:</strong> A small snack (≈1 kcal = 4.2 kJ).
+        </td>
+      </tr>
+      <tr>
+        <td>10–100 kJ</td>
+        <td>
+          Large tools or explosives.<br>
+          <strong>Impact:</strong> Hammering or industrial stamping machines.<br>
+          <strong>Electricity:</strong> Microwave use for ≈30 seconds.<br>
+          <strong>Explosives:</strong> 1g of TNT releases ≈4.2 kJ.
+        </td>
+      </tr>
+      <tr>
+        <td>100 kJ – 1 MJ</td>
+        <td>
+          Household appliances and vehicle motion.<br>
+          <strong>Heating:</strong> Boiling 1 liter of water (≈ 420 kJ).
+          <strong>Electricity:</strong> Running a microwave for 1–2 minutes.<br>
+          <strong>Mechanical:</strong> Starting an electric car motor.
+        </td>
+      </tr>
+      <tr>
+        <td>1–10 MJ</td>
+        <td>
+          Everyday Energy Use.<br>
+          <strong>Electricity:</strong> A 12W bulb running for ≈9.6 days (1 MJ).<br>
+          <strong>Electricity:</strong> Running a 1kW heater for over an hour.<br>
+          <strong>Daily:</strong> Human brain activity per day (≈5-6 MJ).
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+  </div>
 
   <h2>Adjust Parameters</h2>
   <div id="slider-container"></div>
@@ -135,13 +296,14 @@
     const vscode = acquireVsCodeApi();
     let currentSliderValues = {};
 
-    
+    document.getElementById('info-btn').addEventListener('click', () => {
+      const infoBox = document.getElementById('info-box');
+      const isVisible = infoBox.style.display === 'block';
+      infoBox.style.display = isVisible ? 'none' : 'block';
+    });
 
     window.addEventListener('message', event => {
       const message = event.data;
-
-
-      
 
       if (message.type === 'updateSliders') {
         const sliders = message.sliders || [];
@@ -173,10 +335,10 @@
           const header = document.createElement('div');
           header.className = 'method-header';
           header.innerHTML = `
-    <span class="method-name">${method}</span>
-    <span class="method-energy">(${formatEnergy(energy)})</span>
-    <span>⯈</span>
-  `;
+            <span class="method-name">${method}</span>
+            <span class="method-energy">(${formatEnergy(energy)})</span>
+            <span>⯈</span>
+          `;
 
           const content = document.createElement('div');
           content.className = 'method-content';
@@ -188,7 +350,6 @@
             if (arrowSpan) {
               arrowSpan.textContent = isVisible ? '⯈' : '⯆';
             }
-
           });
 
           const configs = sliderMap[method] || [];
@@ -197,7 +358,6 @@
             const fullId2 = config.id || 'slider';
             const idParts = fullId2.split('|').map(s => s.trim());
 
-            // Extract display ID for label
             let displayId = '';
             const varPart = idParts.find(part => part.startsWith('Variable:'));
             if (varPart) {
@@ -209,7 +369,6 @@
               displayId = filteredParts.join(' | ');
             }
 
-            // Fallback if displayId is still empty
             if (!displayId) {
               displayId = fullId2;
             }
@@ -243,7 +402,7 @@
               currentSliderValues[displayId] = input.value;
               vscode.postMessage({
                 type: 'sliderChange',
-                id: `${fullId2}`,//Method: ${method} | 
+                id: `${fullId2}`,
                 value: input.value
               });
             });
@@ -256,15 +415,11 @@
             content.appendChild(sliderBlock);
           }
 
-
           box.appendChild(header);
           box.appendChild(content);
           container.appendChild(box);
         }
-
-
       }
-
 
       if (message.type === 'updateEnergy') {
         const energyValue = formatEnergy(message.energy) ?? '--';
@@ -287,7 +442,6 @@
           }
         });
       }
-
     });
 
     document.getElementById('estimate-btn').addEventListener('click', () => {

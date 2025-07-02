@@ -6,7 +6,8 @@ import java.io.IOException;
 
 public class TemplatesAux {
 
-    public static boolean stop = false;
+    //public static boolean stop = false;
+    public static volatile boolean stop = false;
 
     public static void sendStopSignalToOrchestrator(String pid, int iter) throws IOException {
         WritePid.writeTargetProgInfo(Long.toString(ProcessHandle.current().pid()), iter);

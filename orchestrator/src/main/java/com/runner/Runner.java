@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.ProcessBuilder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -54,6 +55,7 @@ public class Runner {
     public static void main(String[] args) throws IOException, InterruptedException  {
         new File("tmp").mkdirs();
         createLogDirAndFile();
+        createDirIfNotExists("src/main/java/com/aux_runtime/error_files");
         dependencies = new String(Files.readAllBytes(Paths.get("cp.txt"))).trim();
         File parentDir = new File(".").getCanonicalFile().getParentFile();
         File codegenDir = new File(parentDir, "codegen");
@@ -72,7 +74,7 @@ public class Runner {
                 //Thread.sleep(100);
                 if (args != null && args.length == 3 && Integer.parseInt(args[2]) > 0) {
                     String fileName = program.toString().replace(".class", "");
-                    //if (!(args[0].equals("test") && fileName.equals("BinaryTrees_trees_int_17"))) continue;//just to test one prog file 
+                    if (!(args[0].equals("test") && fileName.equals("BinaryTrees_trees_int_0"))) continue;//just to test one prog file 
                     log.append("---------------------------------------\n");
                     log.append("Program number -> " + (progNum++) + "\n");
                     //System.out.println("Program number -> " + i);
@@ -107,7 +109,7 @@ public class Runner {
         //createFeaturesCSV();
     }
 
-    private static void runProgramCommand(String filename,String currentDirBeingTested) throws IOException{
+    /*private static void runProgramCommand(String filename,String currentDirBeingTested) throws IOException{
         String[] command = {
             "java", 
 
@@ -117,6 +119,37 @@ public class Runner {
             Long.toString(ProcessHandle.current().pid())
         };
         Runtime.getRuntime().exec(command);
+    }*/
+
+    private static void runProgramCommand(String filename, String currentDirBeingTested) throws IOException {
+        String[] command = {
+            "java",
+            "-cp",
+            classpath,
+            "com.generated_progs." + currentDirBeingTested.substring(currentDirBeingTested.lastIndexOf("/") + 1) + "." + filename,
+            Long.toString(ProcessHandle.current().pid())
+        };
+
+        Process process = Runtime.getRuntime().exec(command);
+
+        // For now discard stdout
+        new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                while (reader.readLine() != null) {
+                    // discard
+                }
+            } catch (IOException ignored) {}
+        }).start();
+
+        // For now discard stdout
+        new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                while (reader.readLine() != null) {
+                    // discard
+                }
+            } catch (IOException ignored) {}
+        }).start();
+
     }
 
     public static void run(String filename, Boolean readCFile, String currentDirBeingTested,String tempDir) throws IOException, InterruptedException {
@@ -569,6 +602,11 @@ public class Runner {
 
     private static File[] getAllFilesInDir(String dir) {
         return new File(dir).listFiles();
+    }
+
+    public static void createDirIfNotExists(String path) {
+        File dir = new File(path);
+        if (!dir.exists()) dir.mkdirs();  
     }
 
     private static void createLogDirAndFile() {

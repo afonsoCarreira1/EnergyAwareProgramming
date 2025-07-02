@@ -1,5 +1,8 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +14,7 @@ public class BinaryTrees_trees_int_17 {
         
             BenchmarkArgs[] arr = new BenchmarkArgs[75000];
             populateArray(arr);
+            
             String pid = ProcessHandle.current().pid()+"";
             ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
             Process powerjoularProcess = powerjoularBuilder.start();
@@ -21,13 +25,28 @@ public class BinaryTrees_trees_int_17 {
             String energyUsed = readPowerjoularCsv(iter,"powerjoular.csv-"+pid+".csv");
             System.out.println("iter -> "+iter);
             System.out.println("Energy used was: "+energyUsed + "J");
+            writeErrorInFile("oi","test");
+    }
+
+    public static void writeErrorInFile(String filename, String errorMessage) {
+        String path = "src/main/java/com/aux_runtime/error_files/";
+        //System.out.println("this happened -> "+errorMessage);
+        try {
+            File myObj = new File(path +filename+".txt");
+            myObj.createNewFile();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        try (FileWriter writer = new FileWriter(path + filename+".txt")) {
+            writer.write(errorMessage);
+        } catch (IOException e) {System.out.println(e.getMessage());}
     }
 
     static class BenchmarkArgs {
         public int var0;
 
         BenchmarkArgs() {
-            this.var0 = 20;
+            this.var0 = 4;
         }
     }
 

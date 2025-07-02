@@ -104,7 +104,7 @@ For this a simple program was developed, Listing~\ref{lst:code_example}, more li
     \midrule
     \texttt{addAll(Object)} + \texttt{size()} + \texttt{equals(Object)} & 5.0e-4 -- 5.2e-4 & 6.49e-4 & 27 \\
     \midrule
-    \texttt{Map.put(Object, Object)} + \texttt{loop(1000)} & 0.0027 -- 0.0030 & 0.033 & $\approx$ 1058 \\
+    \texttt{Map.put(Object, Object)} + \texttt{loop(1000)} & 0.0027 -- 0.0030 & 0.033 &  1058 \\
     \bottomrule
   \end{tabular}
   \vspace{0.5em}
@@ -173,29 +173,31 @@ The results demonstrate that while the tool provides useful estimations of energ
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width = .8 \textwidth]{figures/createTree_plot.pdf}
+  \includegraphics[width = .7 \textwidth]{figures/createTree_plot.pdf}
   \caption{Energy for method \texttt{createTree}}
   \label{fig:createTree_plot}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width = .8 \textwidth]{figures/checkTree_plot.pdf}
+  \includegraphics[width = .7 \textwidth]{figures/checkTree_plot.pdf}
   \caption{Energy for method \texttt{checkTree}}
   \label{fig:checkTree_plot}
 \end{figure}
 
-
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width = .8 \textwidth]{figures/trees_plot.pdf}
+  \includegraphics[width = .7 \textwidth]{figures/trees_plot.pdf}
   \caption{Energy for method \texttt{trees}}
   \label{fig:trees_plot}
 \end{figure}
 
-Another experiment was conducted using a test case considered more realistic than the others. The program was selected from the Computer Language Benchmarks Game, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads~\cite{benchmarksGameJava}.
+
+{\color{blue}
+  Another experiment was conducted using a test case considered more realistic than the others. The program was selected from the Computer Language Benchmarks Game, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads~\cite{benchmarksGameJava}.
 
 The program selected was the \texttt{}{BinaryTrees} (Java naot #3), which are computational intensive task. It contains three core methods, described as follows:
+
 
 \begin{itemize}
   \item \textbf{createTree:} Recursively builds a binary tree of the given depth. At each level, creates a node with two children (left and right), until depth equals zero. The result is a complete binary tree with \(2^{\text{depth}} - 1\) nodes.
@@ -204,14 +206,17 @@ The program selected was the \texttt{}{BinaryTrees} (Java naot #3), which are co
   
   \item \textbf{trees:} Performs the core part of the benchmark by creating and checking many binary trees of varying depths and keeping one long-lived tree in memory to simulate memory pressure.
 \end{itemize}
+}
 
-The Figures~\ref{fig:createTree_plot},~\ref{fig:checkTree_plot}, and~\ref{fig:trees_plot} show the energy of each method, for different input sizes, for every program generated and analyzed by the framework. It is possible to see that the methods have an exponential tendency with the increase of the input, which is expected from binary trees operations. It is also noticeable that the Figure~\ref{fig:checkTree_plot} has a lower curve and input, this was due to the fact that the method required that a tree was created before the method could be run, which would take more time, subsequently, the maximum input for this method was lower. 
+{\color{blue}
+  The Figures~\ref{fig:createTree_plot},~\ref{fig:checkTree_plot}, and~\ref{fig:trees_plot} show the energy of each method, for different input sizes, for every program generated and analyzed by the framework. It is possible to see that the methods have an exponential tendency with the increase of the input, which is expected from binary trees operations. It is also noticeable that the Figure~\ref{fig:checkTree_plot} has a lower curve and input, this was due to the fact that the method required that a tree was created before the method could be run, which would take more time, subsequently, the maximum input for this method was lower. 
 
 
 From how the program is implemented on the website it needs some small adjustments in order to work with our framework. First, the program does not have a constructor for the class \texttt{TreeNode} which does not allow the program generator to populate the programs correctly, as the program on the website uses a custom method that create the nodes. Without this change, the methods that required \texttt{TreeNode} as input would be simply receiving an empty Object, as the constructor was also empty, making their generation useless as every program would be the same.
 With that said, the only adjustments made to the class were, a new private empty constructor, that can only be accessed inside the class, so the generator does not detect it and use it, as the generator always tries to use the smallest one available, so it is important that the empty constructor is private. And it was added a new constructor, this one public, that had the same logic as the method that created the nodes. Now the methods that use \texttt{TreeNode} can be generated as the constructor can call the public constructor that has the similar behavior of the \texttt{createTree(int)} method. These changes do not impact how the program, or methods behave and only helps the program generation.
 
 After that the data was collected and the models for each method used in the program was trained.
+}
 
 \begin{table}[htbp]
   \centering
@@ -295,6 +300,7 @@ After that the data was collected and the models for each method used in the pro
 
 
 
+{\color{blue}
 The results are detailed in the Table~\ref{tab:energy_comparison_bin_trees}. 
 
 It is noticeable that the values predicted are not the most accurate, for some inputs it has good accuracy, for example, the method \texttt{createTree} has good accuracy for the input \texttt{26}. For other methods, like \texttt{trees} it does not. Again as the previous experiment, the tool is not very accurate in terms of absolute values, and in this case for methods that change their energy considerably with minimum increase in the input, the models have a harder time to predict. The tool demonstrates good relative energy prediction, as input values increase, the predicted energy consumption also increases, and it decreases correspondingly when the inputs are reduced.
@@ -302,9 +308,9 @@ It is noticeable that the values predicted are not the most accurate, for some i
 To achieve better results with the \texttt{BinaryTrees} methods it could be possible to improve the feature's selection by incorporating characteristics that better capture the program complexity and increase the maximum input available for each program generated in order to better represent the high-energy regions of execution.
 
 However, this experiment objective's was not focused only on achieving the highest accuracy possible. It was also made to prove that it is possible to use the framework to test more interesting and complex cases. And it was proven that with minimal changes, it was possible to mass generate programs, collect data and train models, for the \texttt{BinaryTrees} program. While it may not work universally for all programs, since creating a framework general enough to handle every case is challenging, this experiment demonstrates that analyzing custom programs is possible.
+}
 
 
-%Another important aspect of the generator is the input creating, the input of the program receives the arguments from the main function and then it converts it to an integer for the program to use. A developer/human can easily observe that by looking at the code, however the generator cannot see the difference and it would start creating random inputs for the \texttt{String[]} type. So, it was also necessary to change the input of the method from 
 
 
 \section{Limitations and Challenges} \label{sec:limitations_and_challenges}
@@ -316,6 +322,9 @@ This highlights a challenge in energy profiling: some collections, especially th
 
 Another important factor is that the tool is not able to predict energy when threads are involved, as the programs generated only used a single thread, subsequently the models will not have that factor into account. This limitation exists because measuring and modeling the energy usage of multithreaded programs is particularly challenging due to factors like concurrent execution, thread scheduling, and synchronization overhead. However, threading can deeply impact the energy usage of a program, as a program execution stop being strictly linear, and can have multiple simultaneous computations, potentially increasing the code energy consumption.
 
+{\color{blue}
+  A limitation detected during the experimentation of analyzing an external program, was how the inputs on some programs are defined. For example, a program can have a method that receives a String, however, when inside the method it decides to convert the String to int and use it as an Integer, making it so a method that actually uses Integers and not Strings. Although it is easily noticeable by human eye, the program generator cannot understand this kind of context changes as easy, and it would start generating inputs for Strings instead of Integers, which would fail in the program generation. A good example of this usage is when the main function is called and receives the arguments in the \texttt{String[]} and then it uses its values in different variables.
+}
 
 
 

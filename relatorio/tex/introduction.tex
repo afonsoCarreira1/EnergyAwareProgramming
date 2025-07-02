@@ -19,7 +19,9 @@ Some key reasons to prioritize energy efficiency in software, whether for mobile
 
 When developing a program, most of the time developers optimize for the time the program takes to complete, or the memory it uses, and not so often take into account the energy it uses~\cite{10.1145/1666420.1666438}. 
 In the cases where developers actually want to improve the energy efficiency of the code, they normally have difficulties and seek help, relying on blogs, websites and YouTube videos, which in most cases lack empirical evidence, leading to perceptions of improvement rather than measured benefits~\cite{10.1145/3154384}.
+{\color{blue}
 Recently, developers have also started consulting Large Language Models, such as GitHub Copilot or ChatGPT, to get suggestions for writing energy-efficient code. These models can offer advice on optimized algorithms, data structures, and design patterns, which could lead to more sustainable software development~\cite{vartziotis2024carbon,rani2025can}.
+However, their guidance is not yet fully reliable when it comes to energy efficiency~\cite{islam2025evaluating}, as the models still, on average, output code that is less energy efficient than human written solutions.}
 
 This is due to a lack of knowledge and guidelines, because understanding the energy usage of a program and how to make it more efficient is not trivial, as running the same program multiple times will output different values each time and even if the execution time of the program is reduced, is not guaranteed to also reduce energy consumption. Because of its difficulty, there is still a need for tools that can help with this task~\cite{10.1145/2597073.2597110}. 
 
@@ -27,8 +29,10 @@ Also, most current tools can measure the energy of programs and applications as 
 
 \section{Objectives}
 
+{\color{blue}
 This thesis proposes a framework with the objective of increasing energy awareness of developers. The framework follows a structured pipeline that begins by generating multiple programs using various collection types or developer-defined classes. These programs are then energy-profiled to train predictive models for each method within the target class.
 The resulting models are integrated into an IDE extension capable of identifying the energy consumption of methods in programs and presenting this information quickly to programmers, enabling them to make informed decisions in software design. The goal is to create a framework with an approach that can be reproducible for obtaining models capable of performing energy prediction statically. The framework is divided into modular components that can be improved independently to optimize model performance.
+}
 
 To create this framework, it was essential to understand the current state of the art, including the techniques previously used and the tools currently in use. The tool employs static analysis techniques to identify which instructions are utilized, and through models from previously collected data, indicate the estimated energy levels of the program's execution. The models will be trained using energy data collected from low-level library functions. More complex functions are built on the basis of function composition, which means that, based on the estimated consumption of low-level functions, we can generalize our estimates to more complex functions and ultimately to the program as a whole. 
 

@@ -76,4 +76,13 @@ If, for instance, instead of using \texttt{HashMap}, \texttt{TreeMap} is used, t
 
 There is also a feature that can help the user understand how the energy changes. When the mouse hovers through some methods, it is possible to see the mathematical expression utilized for the calculations. The Figure~\ref{fig:extension_expression_example} shows how the expression is displayed in the extension UI. It has the numbers that the model think are the best to predict the energy, and it has the features/variables that it affects the prediction the most. In this case the two variables are the size of the map collection and if there are any \texttt{TreeMap} collection being used. This can help understand what are the variables that actually impact the energy of the code. 
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width = .8 \textwidth]{figures/most_expensive_line.png}
+  \caption{Most expensive line highlighted}
+  \label{fig:most_expensive_line}
+\end{figure}
+
+Another useful feature is the line that spends more energy in each method. Being the line a user defined function or a model trained method, the line will appear highlighted, helping the developer in case of needing help on where to start when needing to refactor the code for energy efficiency. The example can be seen in the Figure~\ref{fig:most_expensive_line}.
+
 The extension can be open in a Java project and gather the total energy used by the user made methods, allowing for a better understanding of the code energy impact. Naturally, the extension is limited by the set of pre-trained models it relies on. If a program uses methods that aren't covered by these models, the extension will report an energy usage of zero, which is inaccurate, as those methods still consume energy.

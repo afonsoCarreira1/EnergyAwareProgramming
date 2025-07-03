@@ -185,7 +185,7 @@ def plot_energy_vs_feature4(X, y, column_name, list_type_filter=None):
 
 
 
-def plot_energy_vs_feature4(X, y, column_name, var_type_filter=None):
+def plot_energy_vs_feature3(X, y, column_name, var_type_filter=None):
     X = X.reset_index(drop=True)
     y = y.reset_index(drop=True)
 
@@ -599,7 +599,8 @@ def plots(files,fname):
         X = df.iloc[:, :-1]  # All columns except the last one
         y = df.iloc[:, -1]   # Energy column
         #plot3D(X,y)
-        plot_energy_vs_feature(X,y,'input0')
+        plot_energy_vs_feature4(X,y,'input0','java.util.concurrent.CopyOnWriteArrayList')
+        #plot_energy_vs_feature3(X,y,'input0')
         #list_type_filter='java.util.concurrent.CopyOnWriteArrayList'
 
 def create_dir_if_not_exists(path):
@@ -619,10 +620,10 @@ def createFilesForExtension(models_available):
 
 def main():
     #os.makedirs('out/', exist_ok=True)
-    date = "2025_06_30"#2025_05_20 2025_06_30
+    date = "2025_05_20"#2025_05_20 2025_06_30
     files,models_available = getAllFeatures(date)
-    #plots(files,"trees_int_")#equals_java_lang_Object_ createTree_int_
-    readDividedFeatures(files)
+    plots(files,"size__")#equals_java_lang_Object_ createTree_int_
+    #readDividedFeatures(files)
     #check_one_method()
     #createFilesForExtension(models_available)
 

@@ -9,16 +9,16 @@ import matplotlib.patches as mpatches
 import matplotlib as mpl
 
 mpl.rcParams.update({
-    "font.family": "serif",             # optional: to match LaTeX style
-    #"font.serif": ["Times New Roman"],  # or "Computer Modern", "Times", etc.
+    "font.family": "serif",
+    #"font.serif": ["Times New Roman"],
 
     # Font sizes
-    "axes.titlesize": 9,      # Subplot titles like 'Method: X'
-    "axes.labelsize": 5,      # Axis labels (e.g., y-axis)
-    "xtick.labelsize": 5,     # X tick labels
-    "ytick.labelsize": 5,     # Y tick labels
-    "legend.fontsize": 5,     # Legend text
-    "figure.titlesize": 5    # Overall suptitle (if used)
+    "axes.titlesize": 9,
+    "axes.labelsize": 5,   
+    "xtick.labelsize": 5,    
+    "ytick.labelsize": 5,   
+    "legend.fontsize": 5,   
+    "figure.titlesize": 5  
 })
 
 
@@ -116,23 +116,47 @@ def main():
         all_dfs.append(df)
         #print(dir)
     all_dfs = change_pos(all_dfs,3,4)
-    panel_charts(all_dfs,"R²")#MSE R²
+    panel_charts(all_dfs,"MSE")#MSE R²
 
     #combined_df = pd.concat(all_dfs, ignore_index=True)
     #sorted_mse = combined_df['MSE'].sort_values(ascending=False)
     #print(sorted_mse)
 
-    
+def clean_method_name(method_name):
+    if method_name == "retainAll_java_util_Collection": return "retainAll(Collection)"
+    if method_name == "remove_java_lang_Object": return "remove(Object)"
+    if method_name == "values": return "values()"
+    if method_name == "containsKey_java_lang_Object": return "containsKey(Object)"
+    if method_name == "get_int": return "get(Int)"
+    if method_name == "put_java_lang_Object_java_lang_Object": return "put(Object, Object)"
+    if method_name == "isEmpty": return "isEmpty()"
+    if method_name == "addAll_int_java_util_Collection": return "addAll(int, Collection)"
+    if method_name == "clear": return "clear()"
+    if method_name == "iterator": return "iterator()"
+    if method_name == "get_java_lang_Object": return "get(Object)"
+    if method_name == "contains_java_lang_Object": return "contains(Object)"
+    if method_name == "set_int_java_lang_Object": return "set(int, Object)"
+    if method_name == "size": return "size()"
+    if method_name == "containsAll_java_util_Collection": return "containsAll(Collection)"
+    if method_name == "add_java_lang_Object": return "add(Object)"
+    if method_name == "addAll_java_util_Collection": return "addAll(Collection)"
+    if method_name == "equals_java_lang_Object": return "equals(Object)"
+    if method_name == "containsValue_java_lang_Object": return "containsValue(Object)"
+    if method_name == "entrySet": return "entrySet()"
+    if method_name == "add_int_java_lang_Object": return "add(int, Object)"
+    if method_name == "values": return "values()"
 
 def single_chart(df, ax, model_colors,val='R²'):
     method_name = df.iloc[0]['Method'].rstrip("_") 
+    method_name = clean_method_name(method_name)
     df_best = df.groupby('Model', as_index=False)[val].max()
     bar_colors = [model_colors[model] for model in df_best['Model']]
     
     bars = ax.bar(df_best['Model'], df_best[val], color=bar_colors)
     if (val == "R²"): ax.set_ylim(0, 1.15)  # Give space above bars
     ax.set_xlabel('')
-    ax.set_title(f'Method: {method_name}')
+    #ax.set_title(f'Method: {method_name}')
+    ax.set_title(f'{method_name}')
     ax.set_xticks([])
 
     for bar, value in zip(bars, df_best[val]):
@@ -189,7 +213,7 @@ def panel_charts(df_list,val, cols=3):
         model_colors.keys(),
         title='Models',
         loc='lower center',
-        ncol=min(len(model_colors), cols * 2),
+        ncol=min(len(model_colors), cols),
         bbox_to_anchor=(0.5, 0.07),
         fontsize=9,
         title_fontsize=10
@@ -199,8 +223,8 @@ def panel_charts(df_list,val, cols=3):
     #plt.tight_layout(rect=[0, 0.05, 1, 0.93])  # leave space for legend and title
     #plt.subplots_adjust(hspace=.5, bottom=0.2, top=0.9)
     plt.tight_layout(rect=[0, 0.05, 1, 0.95])
-    plt.subplots_adjust(hspace=0.6, bottom=0.15, top=0.88, wspace= .4)
-    plt.savefig("../relatorio/figures/r2_comparison.pdf", bbox_inches='tight', dpi=300)
+    plt.subplots_adjust(hspace=0.6, bottom=0.15, top=0.88, wspace= .3)
+    plt.savefig("../relatorio/figures/mse_comparison.pdf", bbox_inches='tight', dpi=300)
     #plt.savefig("mse_comparison.pdf")
     plt.show()
 

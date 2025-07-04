@@ -6,6 +6,20 @@ import re
 import pandas as pd
 import math
 import matplotlib.patches as mpatches
+import matplotlib as mpl
+
+mpl.rcParams.update({
+    "font.family": "serif",             # optional: to match LaTeX style
+    #"font.serif": ["Times New Roman"],  # or "Computer Modern", "Times", etc.
+
+    # Font sizes
+    "axes.titlesize": 9,      # Subplot titles like 'Method: X'
+    "axes.labelsize": 5,      # Axis labels (e.g., y-axis)
+    "xtick.labelsize": 5,     # X tick labels
+    "ytick.labelsize": 5,     # Y tick labels
+    "legend.fontsize": 5,     # Legend text
+    "figure.titlesize": 5    # Overall suptitle (if used)
+})
 
 
 def parse_log_file(filepath):
@@ -87,6 +101,11 @@ def get_method_dirs():
 def ignore_some_methods(dir_names,ignore):
     return [dir for dir in dir_names if dir not in ignore]
 
+def change_pos(df,pos1,pos2):
+    temp = df[pos1]
+    df[pos1] = df[pos2] 
+    df[pos2] = temp
+    return df
 
 def main():
     dir_names = get_method_dirs()
@@ -96,8 +115,8 @@ def main():
         df = parse_log_file("out/"+dir+"/log.txt")
         all_dfs.append(df)
         #print(dir)
-
-    panel_charts(all_dfs,"MSE")#MSE R²
+    all_dfs = change_pos(all_dfs,3,4)
+    panel_charts(all_dfs,"R²")#MSE R²
 
     #combined_df = pd.concat(all_dfs, ignore_index=True)
     #sorted_mse = combined_df['MSE'].sort_values(ascending=False)
@@ -130,7 +149,7 @@ def single_chart(df, ax, model_colors,val='R²'):
             label,
             ha='center',
             va='top' if height >= 0.8 * y_max else 'bottom',
-            fontsize=9,
+            fontsize=6,
             color='black',
             )    
 
@@ -144,14 +163,25 @@ def panel_charts(df_list,val, cols=3):
     n = len(df_list)
     rows = math.ceil(n / cols)
 
-    fig_height = rows * 5 + 1.5 
-    fig, axes = plt.subplots(rows, cols, figsize=(cols * 6, fig_height))
+    #fig_height = rows * 5 + 1.5 
+    #fig, axes = plt.subplots(rows, cols, figsize=(cols * 6, fig_height))
+    fig_width_inch = 7  # matches \textwidth in LaTeX
+    cell_width = fig_width_inch / cols
+    cell_height = 1.5  # reasonable row height
+
+    fig_height_inch = rows * cell_height
+    fig, axes = plt.subplots(rows, cols, figsize=(fig_width_inch, fig_height_inch))
+
+
     axes = axes.flatten()
 
     for i, df in enumerate(df_list):
+        #print(f'names -> {df['Method']}')
         single_chart(df, axes[i], model_colors,val)
     for j in range(i + 1, len(axes)):
         fig.delaxes(axes[j])
+
+    handles = [mpatches.Patch(color=color, label=model) for model, color in model_colors.items()]
 
     handles = [mpatches.Patch(color=color, label=model) for model, color in model_colors.items()]
     fig.legend(
@@ -159,17 +189,19 @@ def panel_charts(df_list,val, cols=3):
         model_colors.keys(),
         title='Models',
         loc='lower center',
-        ncol=len(model_colors),
-        bbox_to_anchor=(0.5, 0.13),
-        fontsize=12,
-        title_fontsize='20'
+        ncol=min(len(model_colors), cols * 2),
+        bbox_to_anchor=(0.5, 0.07),
+        fontsize=9,
+        title_fontsize=10
     )
 
     fig.suptitle(f"{val} Score Comparison", fontsize=25, fontweight='bold')
-    plt.tight_layout(rect=[0, 0.05, 1, 0.93])  # leave space for legend and title
-    plt.subplots_adjust(hspace=.5, bottom=0.2, top=0.9)
-    
-    plt.savefig("mse_comparison.pdf")
+    #plt.tight_layout(rect=[0, 0.05, 1, 0.93])  # leave space for legend and title
+    #plt.subplots_adjust(hspace=.5, bottom=0.2, top=0.9)
+    plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+    plt.subplots_adjust(hspace=0.6, bottom=0.15, top=0.88, wspace= .4)
+    plt.savefig("../relatorio/figures/r2_comparison.pdf", bbox_inches='tight', dpi=300)
+    #plt.savefig("mse_comparison.pdf")
     plt.show()
 
 main()

@@ -5,16 +5,34 @@ This section presents the future work that can be done to improve the framework 
 The framework presented showed different modules that when combined result in a static analysis tool that estimates energy consumption of Java programs. Each of the modules can have individual improvements that can boost the overall performance of the final extension tool.
 
 
-\section{Program Generator} \label{sec:future_work_program_generator}
+\section{Enhancing Program Generation} \label{sec:future_work_enhancing_program_generation}
 
 Some improvements can be performed to the Program Generator. The first one is the max input finder. As it is now, the maximum input finder is a simple approach, as it was already explained in Section~\ref{sec:work_stage1_input_tester}. This approach makes it, so it does not find the best combination of inputs available for each method, which can lead to the collected data to avoid edge cases. It is possible to implement a more robust solution that avoids increasing the time complexity by too much, and improves the searching capabilities of the input finder.
+%Another improvement that can be done is to implement an array size finder so the program generator can be more dynamic and work for more collections and programs.
+
+\section{Improving Model Accuracy} \label{sec:future_work_improving_model_accuracy}
+
+In Section~\ref{chapter:results}, some experiments were conducted and the R² and MSE metrics of the models were presented. It is observable that the overall accuracy of the models is not the greatest and that they can definitely benefit from a richer feature set. Estimating energy consumption is a complex process and requires multiple variables to actually get an accurate prediction, and the features uses at the moment might not be the ones the can better help the models achieve the best performance. During the experiment it was noticeable that the most important feature is the input size and the other features are not used as much. The models could benefit from more runtime features like time of execution, processor cycles, caches accesses and other low-level performance metrics.
 
 
-%Mambo geral
+\section{Centralized Energy Estimation Model} \label{sec:future_work_centralized_energy_estimation_model}
 
 The final approach uses individually trained models for each method, with each model tailored to its own features and prediction style. But when the dataset grows large enough, there is an opportunity to train a single, more powerful model that can directly estimate methods energy consumption, without needing to run the entire framework every time.
 By bringing together the features, predictions, and real energy usage data from all the existing models, this unified model gains access to a richer dataset. That added depth allows it to make accurate energy predictions on its own. Each time the framework processes a method, the resulting model is not just pushed to the extension tool, it also helps improve the centralized model, by making it smarter and more accurate with every update.
 While the framework will still handle program generation, energy measurement, and model training for the tool, over time we can consolidate these models towards one powerful model, eliminating the need to run the full pipeline for every new prediction, requiring only parsing the data of the target program and combining with the existing data.
+This model could update the extension tool with new data very quickly with little effort, however to achieve this kind of large dataset it is required a lot of time.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 %Building on the progress made so far, additional energy profiles must be created to develop a robust energy inference function. This task involves collecting profiles from different machines and gathering enough data to effectively train the machine learning model. The static analysis tool will be implemented and used to provide important code, specifically, certain features that will feed into the model.

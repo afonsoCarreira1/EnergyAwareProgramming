@@ -29,9 +29,19 @@ Since the experiment runner included an example demonstrating how to use the fra
 
 For the final version of the tool, models were trained on methods from the Java collections framework, specifically focusing on the \texttt{List} and \texttt{Map} interfaces. Data for these methods was generated, collected, and used to train the models. With the models in place, it is now possible to evaluate their performance using metrics such as R² and Mean Squared Error (MSE), based on the features extracted during data collection.
 
+%\begin{figure}[htbp]
+%  \centering
+%  \includegraphics[width=0.85\textwidth]{figures/r2_comparison.pdf}
+%  \caption{R² Comparison (\textit{Higher is better})}
+%  \label{fig:r2_comparison}
+%\end{figure}
+
+
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.85\textwidth]{figures/r2_comparison.pdf}
+  \makebox[\textwidth][c]{%
+    \hspace{5mm}\includegraphics{figures/r2_comparison.pdf}
+  }
   \caption{R² Comparison (\textit{Higher is better})}
   \label{fig:r2_comparison}
 \end{figure}
@@ -41,7 +51,9 @@ For the final version of the tool, models were trained on methods from the Java 
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics{figures/mse_comparison.pdf}
+  \makebox[\textwidth][c]{%
+    \hspace{5mm}\includegraphics{figures/mse_comparison.pdf}
+  }
   \caption{MSE Comparison (\textit{Lower is better})}
   \label{fig:mse_comparison}
 \end{figure}

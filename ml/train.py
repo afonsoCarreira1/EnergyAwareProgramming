@@ -1,5 +1,6 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
+import math
 import pandas as pd 
 import seaborn as sns
 import os, subprocess
@@ -106,33 +107,39 @@ def plot_prediction_vs_feature2(model, X, y, column_name):
 
 def plot_energy_vs_feature(X, y, column_name):
     """
-    Plots predicted energy vs. a selected feature on a log scale, alongside real energy values.
-
-    Parameters:
-    - regressor: Trained DecisionTreeRegressor model
-    - X: Feature dataset (DataFrame)
-    - y: True energy values (Series)
-    - column_name: The feature column to plot against predictions
+    Plots actual energy vs. a selected feature for all inputs,
+    and predicted energy for unique inputs.
     """
     if column_name not in X.columns:
         print(f"Column '{column_name}' not found in dataset!")
         return
-    
-    #feature_values_input1 = set(X[column_name])
-    #print(f"input1 (Size of each List) - Unique Values: {feature_values_input1}")
+
+    X_unique = X.drop_duplicates()
+    energy_predicts = get_energy_predictions(X_unique)
+
     plt.figure(figsize=(8, 6))
-    X_log = X[column_name]#np.log1p(X[column_name])
-    df = pd.DataFrame({'x': X_log, 'y': y})
-    df_avg = df.groupby('x', as_index=False)['y'].mean()
-    plt.scatter(X_log, y, label="Energy used", alpha=0.6, color="blue", marker="o")
-    #plt.scatter(df_avg['x'], df_avg['y'], label="Averaged Energy", alpha=0.6, color="blue", marker="o")
-    plt.xlabel(f"input size")#{column_name}
+
+    plt.scatter(X[column_name], y, label="Actual Energy", alpha=0.6, color="blue", marker="o")
+
+    plt.scatter(X_unique[column_name], energy_predicts, label="Predicted Energy", alpha=0.8,s=75, linewidths=2, color="red", marker="x")
+
+    plt.xlabel(column_name)
     plt.ylabel("Energy")
-    #plt.xscale("log")  # Log scale for the X-axis
-    plt.title(f"Energy for BinaryTrees.trees()")#Energy vs feature
+    plt.title("Actual vs. Predicted Energy")
     plt.legend()
     plt.grid(False)
     plt.show()
+
+def get_energy_predictions(df):
+    energy_predict_for_input = []
+    unique_vals = {col: df[col].unique() for col in df.columns}
+    unique_inputs = unique_vals['input0']
+    for input in unique_inputs:
+        energy_predict_for_input.append(get_model_expression(input))
+    return energy_predict_for_input
+
+def get_model_expression(input0):
+    return (math.exp(input0 * 0.33956113) * 7.016629e-6) + -1.0424203e-5
 
 def plot_energy_vs_feature4(X, y, column_name, list_type_filter=None):
     X = X.reset_index(drop=True)
@@ -599,8 +606,8 @@ def plots(files,fname):
         X = df.iloc[:, :-1]  # All columns except the last one
         y = df.iloc[:, -1]   # Energy column
         #plot3D(X,y)
-        plot_energy_vs_feature4(X,y,'input0','java.util.concurrent.CopyOnWriteArrayList')
-        #plot_energy_vs_feature3(X,y,'input0')
+        #plot_energy_vs_feature4(X,y,'input0','java.util.concurrent.CopyOnWriteArrayList')
+        plot_energy_vs_feature(X,y,'input0')
         #list_type_filter='java.util.concurrent.CopyOnWriteArrayList'
 
 def create_dir_if_not_exists(path):
@@ -620,11 +627,13 @@ def createFilesForExtension(models_available):
 
 def main():
     #os.makedirs('out/', exist_ok=True)
-    date = "2025_05_20"#2025_05_20 2025_06_30
+    date = "2025_06_30"#2025_05_20 2025_06_30
     files,models_available = getAllFeatures(date)
-    plots(files,"size__")#equals_java_lang_Object_ createTree_int_
+    plots(files,"checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_")#equals_java_lang_Object_ createTree_int_
     #readDividedFeatures(files)
     #check_one_method()
     #createFilesForExtension(models_available)
 
 main()
+
+#checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_

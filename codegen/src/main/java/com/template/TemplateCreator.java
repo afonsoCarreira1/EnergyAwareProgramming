@@ -57,6 +57,7 @@ public class TemplateCreator {
             programToRun = args[0];
             Launcher launcher = initSpoon(new ArrayList<>(Arrays.asList("src/main/java/com/template/")));
             methods = getPublicMethodsInClass(launcher,programToRun);
+            //System.out.println("methods -> "+methods);
             collections = Arrays.asList(ref.getTypeDeclaration());
             getCustomImports = true;
         }
@@ -124,9 +125,9 @@ public class TemplateCreator {
                     
                     for (int size : sizes) {
                         String finalProg = replaceValues(programChangedFunCall/* ,size*/,maxInputs);
-                        String methodNameForClass = Introspector.decapitalize(className);
+                        //String methodNameForClass = Introspector.decapitalize(className);
                         finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+className+"",className+id);
-                        finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+methodNameForClass+"",methodNameForClass+id);
+                        //finalProg = finalProg.replaceAll("(?<!generated_progs\\.)"+methodNameForClass+"",methodNameForClass+id);
                         //finalProg = finalProg.replace(className,className+id);
                         createFile(dirName+"/"+className+id+".java",finalProg,false);
                         id++;

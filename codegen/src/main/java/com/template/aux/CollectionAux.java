@@ -1,10 +1,14 @@
 package com.template.aux;
 
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 public class CollectionAux {
@@ -156,17 +160,60 @@ public class CollectionAux {
         return map;
     }
 
-    //public static <T> void populateArrayObject(T[] arr, Supplier<T> sup) {
-    //    for (int i = 0; i < arr.length; i++) {
-    //        arr[i] = sup.get();
-    //    }
-    //}
-
     public static <T> void populateArrayPrimitive(T[] arr, Supplier<T> valueSupplier) {
         for (int i = 0; i < arr.length; i++) {
             arr[i] = valueSupplier.get();
         }
     }
+
+        public static void populateArrayPrimitive(double[] arr, DoubleSupplier valueSupplier) {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = valueSupplier.getAsDouble();
+        }
+    }
+
+    public static void populateArrayPrimitive(int[] arr, IntSupplier valueSupplier) {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = valueSupplier.getAsInt();
+        }
+    }
+
+    public static void populateArrayPrimitive(long[] arr, LongSupplier valueSupplier) {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = valueSupplier.getAsLong();
+        }
+    }
+
+    public static void populateArrayPrimitive(boolean[] arr, BooleanSupplier valueSupplier) {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = valueSupplier.getAsBoolean();
+        }
+    }
+
+    public static void populateArrayPrimitive(char[] arr, Supplier<Character> valueSupplier) {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = valueSupplier.get();
+        }
+    }
+
+    public static void populateArrayPrimitive(float[] arr, Supplier<Float> valueSupplier) {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = valueSupplier.get();
+        }
+    }
+
+    public static void populateArrayPrimitive(byte[] arr, Supplier<Byte> valueSupplier) {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = valueSupplier.get();
+        }
+    }
+
+    public static void populateArrayPrimitive(short[] arr, Supplier<Short> valueSupplier) {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = valueSupplier.get();
+        }
+    }
+
 
     public static int getRandomIndex(int listSize) {
         return rand.nextInt(listSize);

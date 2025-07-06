@@ -7,10 +7,14 @@
 
 #test args
 ARGS=(
-    "BinaryTrees checkTree",
-    "BinaryTrees createTree",
-    "BinaryTrees trees",
-    "BinaryTrees loops"
+    "spectralnorm Approximate",
+    "spectralnorm A",
+    "spectralnorm MultiplyAv",
+    "spectralnorm MultiplyAtv",
+    "spectralnorm MultiplyAtAv",
+    "fannkuchredux fannkuch",
+    "NBodySystem advance",
+    "NBodySystem energy"
 ) 
 
 ARG_PAIR="${ARGS[$SLURM_ARRAY_TASK_ID]}"
@@ -43,3 +47,11 @@ java -jar target/codegen-1.0-SNAPSHOT-jar-with-dependencies.jar $targetProgram $
 #"lib_java.lang.Math hypot",
 #"lib_java.lang.Math ulp",
 #"lib_java.lang.Math copySign"
+
+
+#ARGS=(
+#    "BinaryTrees checkTree",
+#    "BinaryTrees createTree",
+#    "BinaryTrees trees",
+#    "BinaryTrees loops"
+#) 

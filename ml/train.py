@@ -121,7 +121,7 @@ def plot_energy_vs_feature(X, y, column_name):
 
     plt.scatter(X[column_name], y, label="Actual Energy", alpha=0.6, color="blue", marker="o")
 
-    plt.scatter(X_unique[column_name], energy_predicts, label="Predicted Energy", alpha=0.8,s=75, linewidths=2, color="red", marker="x")
+    plt.scatter(X_unique[column_name], energy_predicts, label="Predicted Energy", color="red", marker="x")# alpha=0.8,s=75, linewidths=2,
 
     plt.xlabel(column_name)
     plt.ylabel("Energy")
@@ -139,7 +139,7 @@ def get_energy_predictions(df):
     return energy_predict_for_input
 
 def get_model_expression(input0):
-    return (math.exp(input0 * 0.33956113) * 7.016629e-6) + -1.0424203e-5
+    return math.exp((input0 + -9.133306) * 2.4944384) + 0.003643311
 
 def plot_energy_vs_feature4(X, y, column_name, list_type_filter=None):
     X = X.reset_index(drop=True)
@@ -627,9 +627,9 @@ def createFilesForExtension(models_available):
 
 def main():
     #os.makedirs('out/', exist_ok=True)
-    date = "2025_06_30"#2025_05_20 2025_06_30
+    date = "2025_07_06"#2025_05_20 2025_06_30
     files,models_available = getAllFeatures(date)
-    plots(files,"checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_")#equals_java_lang_Object_ createTree_int_
+    plots(files,"fannkuch_int_")#equals_java_lang_Object_ createTree_int_
     #readDividedFeatures(files)
     #check_one_method()
     #createFilesForExtension(models_available)

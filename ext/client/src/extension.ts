@@ -7,8 +7,11 @@ import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-lan
 let sliderPanel: vscode.WebviewPanel | undefined;
 let client: LanguageClient;
 
-async function installHelperJar(context: vscode.ExtensionContext, jarFileName: string) {
-    const sourceJar = context.asAbsolutePath(path.join('..', 'server', jarFileName));
+/**
+ * Copies all files from server/custom_progs/lib to workspace/lib
+ */
+async function installCustomLibs(context: vscode.ExtensionContext) {
+    const sourceLibDir = context.asAbsolutePath(path.join('..', 'server', 'custom_progs'));
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
     if (!workspaceFolder) {
@@ -16,33 +19,38 @@ async function installHelperJar(context: vscode.ExtensionContext, jarFileName: s
         return;
     }
 
-    const libDir = path.join(workspaceFolder, 'lib');
-    const destJar = path.join(libDir, jarFileName);
+    const destLibDir = path.join(workspaceFolder, 'lib');
 
     try {
-        await fsp.mkdir(libDir, { recursive: true });
-        await fsp.copyFile(sourceJar, destJar);
+        await fsp.mkdir(destLibDir, { recursive: true });
 
-        const config = vscode.workspace.getConfiguration('java.project');
-        const currentLibs: string[] = config.get('referencedLibraries') || [];
+        const files = await fsp.readdir(sourceLibDir);
 
-        if (!currentLibs.includes('lib/' + jarFileName)) {
-            currentLibs.push('lib/' + jarFileName);
-            await config.update('referencedLibraries', currentLibs, vscode.ConfigurationTarget.Workspace);
-            console.log(`Added ${jarFileName} to java.project.referencedLibraries`);
+        for (const file of files) {
+            const sourcePath = path.join(sourceLibDir, file);
+            const destPath = path.join(destLibDir, file);
+
+            const stat = await fsp.stat(sourcePath);
+            if (stat.isFile()) {
+                console.log(`Copying file: ${file}`);
+                await fsp.copyFile(sourcePath, destPath);
+            } else {
+                console.log(`Skipping non-file: ${file}`);
+            }
         }
+
     } catch (error) {
-        console.error(`Failed to install helper JAR: ${error}`);
+        console.error(`Failed to copy files to workspace/lib: ${error}`);
     }
 }
 
 export async function activate(context: vscode.ExtensionContext) {
     const jarDir = context.asAbsolutePath(path.join('..', 'server'));
     const mainJar = path.join(jarDir, 'energy_prediction-1.0-SNAPSHOT-jar-with-dependencies.jar');
-    const helperJar = path.join(jarDir, 'BinaryTrees.jar');
+    //const helperJar = path.join(jarDir, 'BinaryTrees.jar');
 
-    const sep = process.platform === 'win32' ? ';' : ':';
-    const classpath = `${mainJar}${sep}${helperJar}`;
+    //const sep = process.platform === 'win32' ? ';' : ':';
+    const classpath = `${mainJar}`;//${sep}${helperJar}
 
     const serverOptions: ServerOptions = {
         command: 'java',
@@ -56,10 +64,10 @@ export async function activate(context: vscode.ExtensionContext) {
     client = new LanguageClient('javaLspServer', 'Java LSP Server', serverOptions, clientOptions);
     await client.start();
 
-    // Install helper JAR into workspace and add to classpath
-    await installHelperJar(context, 'BinaryTrees.jar');
+    // Install ALL files into workspace/lib from server/custom_progs/lib
+    await installCustomLibs(context);
 
-    // Handle server notification to update sliders in webview
+    // Server → Webview: update sliders
     client.onNotification('custom/updateSliders', (params) => {
         console.log('Received custom/updateSliders notification:', params);
         if (sliderPanel) {
@@ -73,7 +81,7 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // Handle server notification to update energy in webview
+    // Server → Webview: update energy values
     client.onNotification('custom/updateEnergy', (params) => {
         console.log('Received custom/updateEnergy notification:', params);
         if (sliderPanel) {
@@ -99,7 +107,7 @@ export async function activate(context: vscode.ExtensionContext) {
         const buffer = await vscode.workspace.fs.readFile(htmlPath);
         sliderPanel.webview.html = buffer.toString();
 
-        // Listen for messages from the webview (sliders and button)
+        // Webview → Server
         sliderPanel.webview.onDidReceiveMessage(message => {
             switch (message.type) {
                 case 'sliderChange':

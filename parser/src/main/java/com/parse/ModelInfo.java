@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import spoon.reflect.code.CtInvocation;
+
 public class ModelInfo {
 
     private String modelName;
@@ -16,10 +18,10 @@ public class ModelInfo {
     private boolean isMethodCall;
     private int line;
     private String expression;
-    private String realInvocation;
+    private CtInvocation<?> realInvocation;
     
 
-    public ModelInfo(String modelName,String realInvocation) {
+    public ModelInfo(String modelName,CtInvocation<?> realInvocation) {
         this.modelName = modelName;
         this.realInvocation = realInvocation;
         this.ids = new HashSet<>();
@@ -29,7 +31,8 @@ public class ModelInfo {
     
     @Override
     public String toString() {
-        return realInvocation;
+        realInvocation.setComments(new ArrayList<>());
+        return realInvocation.toString();
     }
 
     public void setExpression(String expression) {
@@ -125,7 +128,7 @@ public class ModelInfo {
         return line;
     }
 
-    public String getRealInvocation() {
+    public CtInvocation<?> getRealInvocation() {
         return realInvocation;
     }
 

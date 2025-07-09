@@ -1,6 +1,6 @@
 package com.parse;
 
-import java.nio.file.Path;
+
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import spoon.reflect.CtModel;
+import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
@@ -19,6 +20,7 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.visitor.PrettyPrinter;
 import spoon.reflect.visitor.filter.TypeFilter;
 
 public class ToolParser {
@@ -63,12 +65,12 @@ public class ToolParser {
                     //if (!modelsAvailable.contains(modelName)) continue; // ignore methods that are not trained
                     
                     int loops = 0;
-
+                    
                     //se for um metodo do user quero o guardar ate agora e dar skip ao resto
                     if (invocation.getExecutable().getDeclaration() != null) {
                         System.err.println("from "+ methodName+ " called "+invocation.getExecutable().getSimpleName());
                         methodsEnergyInfo.add(methodEnergyInfo);
-                        ModelInfo modelInfo = new ModelInfo(getMethodNameFromInvocation(invocation),invocation.toString());
+                        ModelInfo modelInfo = new ModelInfo(getMethodNameFromInvocation(invocation),invocation);
                         modelInfo.setMethodCall(true);
                         modelInfo.setLine(invocation.getPosition().getLine());
                         loops = countEnclosingLoops(invocation,modelInfo,methodName);
@@ -78,7 +80,7 @@ public class ToolParser {
                     }
                     if (!isModelMethod) continue; // ignore methods that are not trained
                     
-                    ModelInfo modelInfo = new ModelInfo(modelName,invocation.toString());
+                    ModelInfo modelInfo = new ModelInfo(modelName,invocation);
                     loops = countEnclosingLoops(invocation,modelInfo,methodName);
                     System.err.println("Loops around " + modelName + " -> "+loops);
                     getFeaturesForTool(modelInfo, invocation);

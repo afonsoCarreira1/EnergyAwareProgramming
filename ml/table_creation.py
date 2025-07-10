@@ -109,7 +109,7 @@ def change_pos(df,pos1,pos2):
 
 def main():
     dir_names = get_method_dirs()
-    dir_names = ignore_some_methods(dir_names,{'subList_int_int_','loops_int_int_','trees_int_','checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_','createTree_int_'})
+    dir_names = ignore_some_methods(dir_names,{'subList_int_int_','MultiplyAv_int_double___double___','MultiplyAtv_int_double___double___','MultiplyAtAv_int_double___double___','fannkuch_int_','energy__','Approximate_int_','advance_double_','A_int_int_','loops_int_int_','trees_int_','checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_','createTree_int_'})
     all_dfs = []
     for dir in dir_names:
         df = parse_log_file("out/"+dir+"/log.txt")
@@ -219,7 +219,7 @@ def panel_charts(df_list,val, cols=3):
         title_fontsize=10
     )
 
-    fig.suptitle(f"{val} Score Comparison", fontsize=25, fontweight='bold')
+    #fig.suptitle(f"{val} Score Comparison", fontsize=25, fontweight='bold')
     #plt.tight_layout(rect=[0, 0.05, 1, 0.93])  # leave space for legend and title
     #plt.subplots_adjust(hspace=.5, bottom=0.2, top=0.9)
     plt.tight_layout(rect=[0, 0.05, 1, 0.95])

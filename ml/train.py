@@ -105,7 +105,7 @@ def plot_prediction_vs_feature2(model, X, y, column_name):
     plt.grid(False)
     plt.show()
 
-def plot_energy_vs_feature(X, y, column_name):
+def plot_energy_vs_feature(X, y, column_name,log = False):
     """
     Plots actual energy vs. a selected feature for all inputs,
     and predicted energy for unique inputs.
@@ -113,7 +113,6 @@ def plot_energy_vs_feature(X, y, column_name):
     if column_name not in X.columns:
         print(f"Column '{column_name}' not found in dataset!")
         return
-
     X_unique = X.drop_duplicates()
     energy_predicts = get_energy_predictions(X_unique)
 
@@ -123,8 +122,12 @@ def plot_energy_vs_feature(X, y, column_name):
 
     plt.scatter(X_unique[column_name], energy_predicts, label="Predicted Energy", color="red", marker="x")# alpha=0.8,s=75, linewidths=2,
 
-    plt.xlabel(column_name)
+    if column_name != 'input0': plt.xlabel(column_name) 
+    else: plt.xlabel("input")
     plt.ylabel("Energy")
+    if log:
+        plt.yscale('log')
+        plt.ylim()
     plt.title("Actual vs. Predicted Energy")
     plt.legend()
     plt.grid(False)
@@ -138,8 +141,7 @@ def get_energy_predictions(df):
         energy_predict_for_input.append(get_model_expression(input))
     return energy_predict_for_input
 
-def get_model_expression(input0):
-    return math.exp((input0 + -9.133306) * 2.4944384) + 0.003643311
+
 
 def plot_energy_vs_feature4(X, y, column_name, list_type_filter=None):
     X = X.reset_index(drop=True)
@@ -598,16 +600,16 @@ def check_one_method(method = "size__"):#addAll_java_util_Collection_
     #for x in log:
     #    print(x)
 
-def plots(files,fname):
+def plots(files,fname,log_scale):
     for filename in files:
         if fname not in filename:continue 
         df = pd.read_csv(filename)
-        df = clean_data(df,True)
+        df = clean_data(df,False)
         X = df.iloc[:, :-1]  # All columns except the last one
         y = df.iloc[:, -1]   # Energy column
         #plot3D(X,y)
         #plot_energy_vs_feature4(X,y,'input0','java.util.concurrent.CopyOnWriteArrayList')
-        plot_energy_vs_feature(X,y,'input0')
+        plot_energy_vs_feature(X,y,'input0',log_scale)
         #list_type_filter='java.util.concurrent.CopyOnWriteArrayList'
 
 def create_dir_if_not_exists(path):
@@ -625,15 +627,24 @@ def createFilesForExtension(models_available):
         shutil.copyfile(pysr_model_path, dst_path)
     subprocess.run(f"./move_models_to_extension.sh", shell=True, capture_output=True, text=True)
 
+def get_model_expression(input0):
+    return (input0 * 1.7818553e-7) * ((input0 * input0) + 5.4003377)
+
 def main():
     #os.makedirs('out/', exist_ok=True)
-    date = "2025_07_06"#2025_05_20 2025_06_30
+    date = "2025_07_05"#2025_05_20 2025_06_30
     files,models_available = getAllFeatures(date)
-    plots(files,"fannkuch_int_")#equals_java_lang_Object_ createTree_int_
+    plots(files,"checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_",log_scale=False)#equals_java_lang_Object_ createTree_int_
     #readDividedFeatures(files)
     #check_one_method()
     #createFilesForExtension(models_available)
 
 main()
 
-#checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_
+#checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_ (input0 * 1.7818553e-7) * ((input0 * input0) + 5.4003377)
+#trees_int_ math.exp((input0 + -11.710805) * 0.563765)
+#createTree_int_ math.exp((input0 + -19.571716) * 0.6815255) + -0.08256852
+
+#advance_double_ (-7.739528e-6 * math.sin(input0 * -0.81902814)) + 4.2258347e-5
+#Approximate_int_ math.sin((input0 * 2.0593527e-6) + 0.0006085703) * input0
+#fannkuch_int_ math.exp((input0 + -9.133306) * 2.4944384) + 0.003643311

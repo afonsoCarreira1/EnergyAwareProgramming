@@ -23,6 +23,11 @@ While the framework will still handle program generation, energy measurement, an
 This model could update the extension tool with new data very quickly with little effort, however to achieve this kind of large dataset it is required a lot of time.
 
 
+\section{System-Specific Model Adaptation} \label{sec:future_system_specific_model_adaptation}
+
+There is an important aspect with the resulting models from the framework, they are all bounded to the machine in which they were trained. A model, for a given input, will always give the same output, despite the machine it is running. However, the process of collecting the model is repeated for different machines, the obtained models might differ as well. One useful feature that would make the models obtained more reliable would be to add the hardware information during the collection process. When there is enough data about hardware, the models can adjust the energy usage of the specific machine without having to collect the data all over again. This would be the most pratical for developers that would only want to use the VSCode extension tool with the existing models, without having the extra effort or time-consuming task.
+
+
 
 
 

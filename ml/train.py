@@ -17,6 +17,7 @@ from joblib import dump, load
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
 import shutil
+import re
 from pysr import PySRRegressor
 from m3gp.M3GP import M3GP
 
@@ -600,16 +601,18 @@ def check_one_method(method = "size__"):#addAll_java_util_Collection_
     #for x in log:
     #    print(x)
 
-def plots(files,fname,log_scale):
+def plots(files,fname,date,log_scale):
     for filename in files:
-        if fname not in filename:continue 
+        if fname not in filename:continue
         df = pd.read_csv(filename)
+        associate_df_with_array_size(df,'NBodySystem',fname,date)
         df = clean_data(df,False)
         X = df.iloc[:, :-1]  # All columns except the last one
         y = df.iloc[:, -1]   # Energy column
         #plot3D(X,y)
         #plot_energy_vs_feature4(X,y,'input0','java.util.concurrent.CopyOnWriteArrayList')
-        plot_energy_vs_feature(X,y,'input0',log_scale)
+        plot_by_arr_size(df)
+        #plot_energy_vs_feature(X,y,'input0',log_scale)
         #list_type_filter='java.util.concurrent.CopyOnWriteArrayList'
 
 def create_dir_if_not_exists(path):
@@ -627,14 +630,61 @@ def createFilesForExtension(models_available):
         shutil.copyfile(pysr_model_path, dst_path)
     subprocess.run(f"./move_models_to_extension.sh", shell=True, capture_output=True, text=True)
 
+def associate_df_with_array_size(df,collec,fname,date,save=False):
+    original_dir = os.getcwd()
+    os.chdir("..")# go up one folder
+    os.chdir(f"orchestrator/logs/log_{date}/prog_files/{collec}_{fname}")
+    all_entries = os.listdir()
+    files = [f for f in all_entries if os.path.isfile(f)]
+    pattern = r'BenchmarkArgs\[\] arr = new BenchmarkArgs\[(\d+)\]'
+
+    file_array_size = {}
+    for filename in files:
+        with open(filename, 'r', encoding='utf-8') as file:
+            for line_number, line in enumerate(file, start=1):
+                match = re.search(pattern, line)
+                if match:
+                    file_array_size[filename.replace('.java','')] = int(match.group(1))
+    df.insert(0, 'arraySize', df['Filename'].map(file_array_size))
+    os.chdir(original_dir)
+    if save: save_df_to_csv(df,"csv_with_arrSize.csv")
+
+def plot_by_arr_size(df):
+    # Define color mapping for arraySize
+    color_map = {
+        75000: 'green',
+        100000: 'blue',
+        150000: 'red'
+    }
+
+    # Sort dataframe by input0
+    df_sorted = df.sort_values(by='input0')
+
+    # Create plot
+    plt.figure(figsize=(10, 6))
+
+    # Plot each arraySize group with its own color
+    for size, color in color_map.items():
+        subset = df_sorted[df_sorted['arraySize'] == size]
+        plt.scatter(subset['input0'], subset['EnergyUsed'], label=f'{size}', color=color)
+
+    plt.xlabel('input0')
+    plt.ylabel('Energy')
+    plt.title('Energy vs input0 colored by arraySize')
+    plt.legend(title='Array Size')
+    plt.tight_layout()
+    plt.show()
+
+
 def get_model_expression(input0):
-    return (input0 * 1.7818553e-7) * ((input0 * input0) + 5.4003377)
+    return (-7.739528e-6 * math.sin(input0 * -0.81902814)) + 4.2258347e-5
+
 
 def main():
     #os.makedirs('out/', exist_ok=True)
-    date = "2025_07_05"#2025_05_20 2025_06_30
+    date = "2025_07_06"#2025_05_20 2025_06_30
     files,models_available = getAllFeatures(date)
-    plots(files,"checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_",log_scale=False)#equals_java_lang_Object_ createTree_int_
+    plots(files,"advance_double_",date,log_scale=False)#equals_java_lang_Object_ createTree_int_
     #readDividedFeatures(files)
     #check_one_method()
     #createFilesForExtension(models_available)

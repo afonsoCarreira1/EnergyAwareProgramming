@@ -6,9 +6,10 @@ import java.util.List;
 public class NBodySystem_advance_double_198 {
     public static boolean stop = false;
     static String frequency = ".1";
+    public static int arrSize = 150_000;
     public static void main(String[] args) throws Exception {
         int iter = 0;
-        BenchmarkArgs[] arr = new BenchmarkArgs[75000];
+        BenchmarkArgs[] arr = new BenchmarkArgs[arrSize];
         populateArray(arr);
         String pid = ProcessHandle.current().pid()+"";
         ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
@@ -48,7 +49,7 @@ public class NBodySystem_advance_double_198 {
     }
 
     private static void populateArray(BenchmarkArgs[] arr) {
-        for (int i = 0;i < 75000;i++) {
+        for (int i = 0;i < arrSize;i++) {
           arr[i] = new BenchmarkArgs();
         };
     }

@@ -208,7 +208,7 @@ The results demonstrate that while the tool provides useful estimations of energ
 {\color{blue}
   Another experiment was conducted using a test case considered more realistic than the others. The program was selected from the Computer Language Benchmarks Game, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads~\cite{benchmarksGameJava}.
 
-The program selected was the \texttt{}{BinaryTrees} (Java naot #3), which are computational intensive task. It contains three core methods, described as follows:
+The program selected was the \texttt{}{BinaryTrees} (Java naot \#3), which are computational intensive task. It contains three core methods, described as follows:
 
 
 \begin{itemize}
@@ -369,7 +369,7 @@ It is noticeable that the values predicted are not the most accurate, for some i
 
 To achieve better results with the \texttt{BinaryTrees} methods it could be possible to improve the feature's selection by incorporating characteristics that better capture the program complexity and increase the maximum input available for each program generated in order to better represent the high-energy regions of execution.
 
-To further evaluate the framework’s ability to analyze and collect energy models for various custom programs, three additional benchmarks from the same source were selected. The chosen programs were fannkuch-redux (Java), n-body (Java naot #4), and spectral-norm (Java). These benchmarks were specifically selected because they are purely CPU and memory bound, with minimal variability and no reliance on disk I/O or multithreading. This makes them more predictable and reliable for energy consumption measurements.
+To further evaluate the framework’s ability to analyze and collect energy models for various custom programs, three additional benchmarks from the same source were selected. The chosen programs were fannkuch-redux (Java), n-body (Java naot \#4), and spectral-norm (Java). These benchmarks were specifically selected because they are purely CPU and memory bound, with minimal variability and no reliance on disk I/O or multithreading. This makes them more predictable and reliable for energy consumption measurements.
 
 The predictions for the fannkuch-redux and spectral-norm programs are shown in Tables~\ref{tab:energy_comparison_fannkuch_redux} and~\ref{tab:energy_comparison_spectral_norm}, respectively. Overall, the results are quite reasonable, with the model achieving low prediction errors in most cases. However, for the n-body program, the model performed poorly, as seen in Table~\ref{tab:energy_comparison_nBody}, where the predicted values deviated by an order of magnitude. 
 

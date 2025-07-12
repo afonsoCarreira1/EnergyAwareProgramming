@@ -49,10 +49,13 @@
 \usepackage{booktabs}
 \usepackage{colortbl}
 
+\setlength{\headheight}{14pt}
+
 % Isto é só para gerar o texto dummy do exemplo. Remover da tese.
 %\usepackage{blindtext}
 
 \usepackage{graphicx}
+\usepackage{soul}
 
 % Indice remissivo
 \usepackage{makeidx}
@@ -68,6 +71,10 @@
 % Package para cabecalhos
 \usepackage{fancyhdr}
 \usepackage{lastpage}
+
+
+\newcommand{\wo}[1]{\textcolor{cyan}{WO: #1}}
+
 
 \fancyhf{} %
 \lhead{\nouppercase {\leftmark}} %
@@ -136,7 +143,7 @@
 %}
 %\fi
 
-\usepackage[dvips]{geometry}
+\usepackage{geometry}
 \geometry{a4paper=true,portrait=true,left=3cm,right=3cm,top=2.5cm,bottom=3.5cm}
 
 %\title{\PEITITULO}
@@ -242,12 +249,12 @@
 \nocite{*}
 \bibliographystyle{unsrt}
 \bibliography{bibliography}
-\addcontentsline {toc} {chapter} {\bibname}
+\addcontentsline{toc} {chapter} {\bibname}
 
 % Indice remissivo
 %\LIMPA
 \printindex
-\addcontentsline {toc} {chapter} {\indexname}
+\addcontentsline{toc} {chapter} {\indexname}
 
 % Inicio apendices
 \appendix

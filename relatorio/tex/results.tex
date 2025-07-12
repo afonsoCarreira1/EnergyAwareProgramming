@@ -184,7 +184,7 @@ The results demonstrate that while the tool provides useful estimations of energ
 
 \section{Evaluating Java Benchmark Programs} \label{sec:evaluating_java_benchmark_programs}
 
-Another experiment was conducted using test cases considered more realistic than the ones present in the Section~\ref{sec:predicted_vs_measured_energy}, to further evaluate the framework’s ability to analyze and collect energy models for various custom programs. The programs were selected from the Computer Language Benchmarks Game, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads~\cite{benchmarksGameJava}. The chosen programs were \texttt{BinaryTrees} (Java naot #3) \texttt{fannkuch-redux} (Java), \texttt{n-body} (Java naot #4), and \texttt{spectral-norm} (Java). These benchmarks were specifically selected because they are purely CPU and memory bound, with minimal variability, no reliance on disk I/O or multithreading, and no usage of external libraries. This makes them more predictable and reliable for energy consumption measurements.
+Another experiment was conducted using test cases considered more realistic than the ones present in the Section~\ref{sec:predicted_vs_measured_energy}, to further evaluate the framework’s ability to analyze and collect energy models for various custom programs. The programs were selected from the Computer Language Benchmarks Game, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads~\cite{benchmarksGameJava}. The chosen programs were \texttt{BinaryTrees} (Java naot \#3) \texttt{fannkuch-redux} (Java), \texttt{n-body} (Java naot \#4), and \texttt{spectral-norm} (Java). These benchmarks were specifically selected because they are purely CPU and memory bound, with minimal variability, no reliance on disk I/O or multithreading, and no usage of external libraries. This makes them more predictable and reliable for energy consumption measurements.
 
 
 Starting with the program \texttt{BinaryTrees}, which is composed of three methods, being some of them computational intensive tasks, described as follows:
@@ -221,34 +221,6 @@ The Figures~\ref{fig:createTree_plot},~\ref{fig:checkTree_plot}, and~\ref{fig:tr
 \end{figure}
 
 
-<<<<<<< HEAD
-{\color{blue}
-  Another experiment was conducted using a test case considered more realistic than the others. The program was selected from the Computer Language Benchmarks Game, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads~\cite{benchmarksGameJava}.
-
-The program selected was the \texttt{}{BinaryTrees} (Java naot \#3), which are computational intensive task. It contains three core methods, described as follows:
-
-
-\begin{itemize}
-  \item \textbf{createTree:} Recursively builds a binary tree of the given depth. At each level, creates a node with two children (left and right), until depth equals zero. The result is a complete binary tree with \(2^{\text{depth}} - 1\) nodes.
- 
-  \item \textbf{checkTree:} Recursively traverses the tree and counts the number of nodes. For leaf nodes, it returns \texttt{1}. For internal nodes, it returns the sum of the recursive calls on the left and right subtrees plus one: $1 + \text{check(left)} + \text{check(right)}$.
-  
-  \item \textbf{trees:} Performs the core part of the benchmark by creating and checking many binary trees of varying depths and keeping one long-lived tree in memory to simulate memory pressure.
-\end{itemize}
-}
-
-{\color{blue}
-  The Figures~\ref{fig:createTree_plot},~\ref{fig:checkTree_plot}, and~\ref{fig:trees_plot} show the energy of each method, for different input sizes, for every program generated and analyzed by the framework. It is possible to see that the methods have an exponential tendency with the increase of the input, which is expected from binary trees operations. It is also noticeable that the Figure~\ref{fig:checkTree_plot} has a lower curve and input, this was due to the fact that the method required that a tree was created before the method could be run, which would take more time, subsequently, the maximum input for this method was lower. 
-
-
-From how the program is implemented on the website it needs some small adjustments in order to work with our framework. First, the program does not have a constructor for the class \texttt{TreeNode} which does not allow the program generator to populate the programs correctly, as the program on the website uses a custom method that create the nodes. Without this change, the methods that required \texttt{TreeNode} as input would be simply receiving an empty Object, as the constructor was also empty, making their generation useless as every program would be the same.
-With that said, the only adjustments made to the class were, a new private empty constructor, that can only be accessed inside the class, so the generator does not detect it and use it, as the generator always tries to use the smallest one available, so it is important that the empty constructor is private. And it was added a new constructor, this one public, that had the same logic as the method that created the nodes. Now the methods that use \texttt{TreeNode} can be generated as the constructor can call the public constructor that has the similar behavior of the \texttt{createTree(int)} method. These changes do not impact how the program, or methods behave and only helps the program generation.
-
-After that the data was collected and the models for each method used in the program was trained.
-}
-
-=======
->>>>>>> fcc314182ed47dc348ecdb2ddb2fb7370b09c7dc
 \begin{comment}
   \begin{table}[htbp]
   \centering
@@ -387,11 +359,7 @@ The results are detailed in the Table~\ref{tab:energy_comparison_bin_trees}.
 It is noticeable that the values predicted are not the most accurate, for some inputs it has good accuracy, for example, the method \texttt{createTree} has good accuracy for the input \texttt{26}. For other methods, like \texttt{trees} it does not. Again as the previous experiment, the tool is not very accurate in terms of absolute values, and in this case for methods that change their energy considerably with minimum increase in the input, the models have a harder time to predict. The tool demonstrates good relative energy prediction, as input values increase, the predicted energy consumption also increases, and it decreases correspondingly when the inputs are reduced.
 
 
-<<<<<<< HEAD
-To further evaluate the framework’s ability to analyze and collect energy models for various custom programs, three additional benchmarks from the same source were selected. The chosen programs were fannkuch-redux (Java), n-body (Java naot \#4), and spectral-norm (Java). These benchmarks were specifically selected because they are purely CPU and memory bound, with minimal variability and no reliance on disk I/O or multithreading. This makes them more predictable and reliable for energy consumption measurements.
-=======
 The \texttt{fannkuch-redux} program also presents a computationally intensive task. It generates all permutations of the sequence \([0, 1, \ldots, n-1]\) and, for each permutation, performs a "flip" operation until the first element is zero. A flip consists of reversing the order of the first \(k + 1\) elements, where \(k\) is the first element of the permutation. For each permutation, it tracks the number of flips needed (called the flip count) and maintains the maximum flip count across all permutations. Additionally, it calculates a checksum by adding or subtracting the flip count based on the parity of the permutation index. The function returns the maximum number of flips needed for any permutation.
->>>>>>> fcc314182ed47dc348ecdb2ddb2fb7370b09c7dc
 
 The Figure~\ref{fig:fannkuch_plot}, shows the measured energy with the predictions, and it is observable that the energy grows quickly as the input also increases. Both the Table~\ref{tab:energy_comparison_fannkuch_redux} and the Figure~\ref{fig:fannkuch_plot}, confirm that for inputs lower than ten, the model has difficulties predicting.
 

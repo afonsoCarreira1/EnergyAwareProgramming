@@ -2,7 +2,7 @@
 *.idx
 *.ist
 *.minted
-*.synctex
+*.synctex(busy)
 *.aux
 *.log
 *.out

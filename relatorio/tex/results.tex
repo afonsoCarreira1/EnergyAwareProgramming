@@ -87,7 +87,7 @@ The fact that most models present similar results, ranging from advanced models 
 
 \section{Predicted vs. Measured Energy} \label{sec:predicted_vs_measured_energy}
 
-Since the extension has been built, we can present the results and evaluate how accurately the tool estimates energy consumption compared to real measurements obtained using PowerJoular. Since the energy profiles were generated on a specific hardware setup (see Table~\ref{tab:hardware_specs}), the resulting models are adjusted to that particular system. If the tool were run on a different machine, the absolute energy values would likely differ due to variations in hardware characteristics. However, the relative differences in energy consumption between operations are expected to remain consistent. For instance, if \texttt{TreeMap} consumes more energy than \texttt{HashMap} on one system, the same trend will likely hold on another system, even if the exact energy values vary.
+Since the models have been collected and the extension is built, we can present the results and evaluate how accurately the tool estimates energy consumption compared to real measurements obtained using PowerJoular. Since the energy profiles were generated on a specific hardware setup (see Table~\ref{tab:hardware_specs}), the resulting models are adjusted to that particular system. If the tool were run on a different machine, the absolute energy values would likely differ due to variations in hardware characteristics. However, the relative differences in energy consumption between operations are expected to remain consistent. For instance, if \texttt{TreeMap} consumes more energy than \texttt{HashMap} on one system, the same trend will likely hold on another system, even if the exact energy values vary.
 
 \begin{listing}[H]
 \noindent\rule{\linewidth}{0.4pt}
@@ -164,11 +164,6 @@ For this a simple program was developed, Listing~\ref{lst:code_example}, more li
 %\end{table}
 
 
-
-
-
-
-
 The actual value measured by PowerJoular is in the range of 4.9e-4 to 5.1e-4J while the prediction is 5.51e-4J. This shows that the prediction was good for this method in particular.
 When trying to add two more operations (\texttt{size()} and \texttt{equals(Object)}) the measurement is in the range of 5.0e-4 to 5.2e-4J and the prediction is 6.49e-4J, so now the values are getting off. The method \texttt{addAll(Object)} is one of the methods that has the best accuracy of around 80\%, and the other two do not. This makes it so that when adding the other two methods the real energy value starts drifting away from the real one.
 
@@ -182,6 +177,27 @@ Another problem is that summing the predictions of individual methods can lead t
 
 The results demonstrate that while the tool provides useful estimations of energy consumption, especially in terms of relative trends between methods and input sizes, its absolute predictions can vary significantly depending on the type of operations being analyzed. Additionally, while some methods show high prediction accuracy (e.g., addAll(Object)), combining multiple methods or increasing program complexity tends to amplify prediction errors. These limitations highlight the importance of carefully selecting input sizes and operations for meaningful energy analysis, and they suggest that the tool is best suited for relative comparisons rather than precise energy estimation.
 
+
+
+
+
+
+\section{Evaluating Java Benchmark Programs} \label{sec:evaluating_java_benchmark_programs}
+
+Another experiment was conducted using test cases considered more realistic than the ones present in the Section~\ref{sec:predicted_vs_measured_energy}, to further evaluate the framework’s ability to analyze and collect energy models for various custom programs. The programs were selected from the Computer Language Benchmarks Game, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads~\cite{benchmarksGameJava}. The chosen programs were \texttt{BinaryTrees} (Java naot #3) \texttt{fannkuch-redux} (Java), \texttt{n-body} (Java naot #4), and \texttt{spectral-norm} (Java). These benchmarks were specifically selected because they are purely CPU and memory bound, with minimal variability, no reliance on disk I/O or multithreading, and no usage of external libraries. This makes them more predictable and reliable for energy consumption measurements.
+
+
+Starting with the program \texttt{BinaryTrees}, which is composed of three methods, being some of them computational intensive tasks, described as follows:
+
+\begin{itemize}
+  \item \textbf{createTree:} Recursively builds a binary tree of the given depth. At each level, creates a node with two children (left and right), until depth equals zero. The result is a complete binary tree with \(2^{\text{depth}} - 1\) nodes.
+ 
+  \item \textbf{checkTree:} Recursively traverses the tree and counts the number of nodes. For leaf nodes, it returns \texttt{1}. For internal nodes, it returns the sum of the recursive calls on the left and right subtrees plus one: $1 + \text{check(left)} + \text{check(right)}$.
+  
+  \item \textbf{trees:} Performs the core part of the benchmark by creating and checking many binary trees of varying depths and keeping one long-lived tree in memory to simulate memory pressure.
+\end{itemize}
+
+The Figures~\ref{fig:createTree_plot},~\ref{fig:checkTree_plot}, and~\ref{fig:trees_plot} show the energy of each method, for different input sizes, for every program generated and analyzed by the framework. It is possible to see that the methods have an exponential tendency with the increase of the input, which is expected from binary trees operations. It is also noticeable that the Figure~\ref{fig:checkTree_plot} has a lower curve and maximum input, this was due to the fact that the method required that a tree was created before the method could be run, which would take more time, subsequently, the maximum input for this method was lower. 
 
 \begin{figure}[htbp]
   \centering
@@ -205,6 +221,7 @@ The results demonstrate that while the tool provides useful estimations of energ
 \end{figure}
 
 
+<<<<<<< HEAD
 {\color{blue}
   Another experiment was conducted using a test case considered more realistic than the others. The program was selected from the Computer Language Benchmarks Game, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads~\cite{benchmarksGameJava}.
 
@@ -230,6 +247,8 @@ With that said, the only adjustments made to the class were, a new private empty
 After that the data was collected and the models for each method used in the program was trained.
 }
 
+=======
+>>>>>>> fcc314182ed47dc348ecdb2ddb2fb7370b09c7dc
 \begin{comment}
   \begin{table}[htbp]
   \centering
@@ -275,49 +294,6 @@ After that the data was collected and the models for each method used in the pro
 \end{table}
 \end{comment}
 
-\begin{table}[htbp]
-  \centering
-  \footnotesize
-  \setlength{\tabcolsep}{10pt} % increase column separation
-  \makebox[\textwidth][c]{%
-    \begin{tabular}{@{}p{5.3cm}@{\hspace{2.5em}}c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{1em}}c@{}}
-      \toprule
-      Method & Input Value & Predicted Energy (J) & Actual Energy Range (J) & Prediction Error (\%) \\
-      \toprule
-
-      \multirow{3}{*}{\texttt{BinaryTrees.createTree(int)}}
-        & 5 & -0.082 & [1.27e-5, 1.49e-5] & 598070 \\
-        & 10 & -0.083 & [3.75e-4, 4.60e-4] & 19980 \\
-        & 23 & 10.26 & [11.78, 12.63] & 15.9 \\
-        & 26 & 79.90 & [77.29, 80.63] & 1.2 \\
-      \midrule
-
-      \multirow{3}{*}{\texttt{BinaryTrees.checkTree(TreeNode)}}
-        & 5 & 2.71e-05 & [2.63e-6, 2.70e-6] & 916 \\
-        & 10 & 1.88e-4 & [1.64e-4, 1.75e-4] & 10.9 \\
-        & 23 & 2.19e-3 & [1.37, 1.56] & 99.85 \\
-        & 26 & 3.15e-3 & [11.72, 13.29] & 99.97 \\
-      \midrule
-
-      \multirow{3}{*}{\texttt{BinaryTrees.trees(int)}}
-        & 5 & -9.94 & [2.68e-4, 3.55e-4] & 1265924 \\
-        & 10 & -3.42 & [0.041, 0.045] & 8053 \\
-        & 23 & 517.89 & [713, 800] & 31.59 \\
-        & 26 & 2429 & [6260, 7111] & 63.66 \\
-      \midrule
-
-      \multirow{3}{*}{\shortstack[l]{\texttt{BinaryTrees.checkTree(TreeNode)} +\\\texttt{createTree(int)} +\\\texttt{trees(int)}}}
-        & 5 & -4.03 & [2.77e-4, 3.44e-4] & 1296569 \\
-        & 10 & -3.49 & [4.59e-2, 4.77e-2] & 7578 \\
-        & 23 & 528.15 & [796, 806] & 34.08 \\
-        & 26 & 2509 & [7062, 7350] & 65.18 \\
-      \bottomrule
-    \end{tabular}%
-  }
-  \caption{Comparison of actual and predicted energy consumption for BinaryTrees program}
-  \label{tab:energy_comparison_bin_trees}
-\end{table}
-
 
 
 
@@ -362,18 +338,72 @@ After that the data was collected and the models for each method used in the pro
 
 
 
-{\color{blue}
+
 The results are detailed in the Table~\ref{tab:energy_comparison_bin_trees}. 
+
+\begin{table}[htbp]
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{10pt} % increase column separation
+  \makebox[\textwidth][c]{%
+    \begin{tabular}{@{}p{5.3cm}@{\hspace{2.5em}}c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{1em}}c@{}}
+      \toprule
+      Method & Input Value & Predicted Energy (J) & Actual Energy Range (J) & Prediction Error (\%) \\
+      \toprule
+
+      \multirow{3}{*}{\texttt{BinaryTrees.createTree(int)}}
+        & 5 & -0.082 & [1.27e-5, 1.49e-5] & 598070 \\
+        & 10 & -0.083 & [3.75e-4, 4.60e-4] & 19980 \\
+        & 23 & 10.26 & [11.78, 12.63] & 15.9 \\
+        & 26 & 79.84 & [77.29, 80.63] & 1.12 \\
+      \midrule
+
+      \multirow{3}{*}{\texttt{BinaryTrees.checkTree(TreeNode)}}
+        & 5 & 2.71e-05 & [2.63e-6, 2.70e-6] & 916 \\
+        & 10 & 1.88e-4 & [1.64e-4, 1.75e-4] & 10.9 \\
+        & 23 & 2.19e-3 & [1.37, 1.56] & 99.85 \\
+        & 26 & 3.15e-3 & [11.72, 13.29] & 99.97 \\
+      \midrule
+
+      \multirow{3}{*}{\texttt{BinaryTrees.trees(int)}}
+        & 5 & 0.02 & [2.68e-4, 3.55e-4] & 7202 \\
+        & 10 & 0.38 & [0.041, 0.045] & 786 \\
+        & 23 & 581 & [713, 800] & 23.23 \\
+        & 26 & 3152 & [6260, 7111] & 52.86 \\
+      \midrule
+
+      \multirow{3}{*}{\shortstack[l]{\texttt{BinaryTrees.checkTree(TreeNode)} +\\\texttt{createTree(int)} +\\\texttt{trees(int)}}}
+        & 5 & -0.06 & [2.77e-4, 3.44e-4] & 19341 \\
+        & 10 & 0.30 & [4.59e-2, 4.77e-2] & 541 \\
+        & 23 & 591 & [796, 806] & 26.20 \\
+        & 26 & 3232 & [7062, 7350] & 55 \\
+      \bottomrule
+    \end{tabular}%
+  }
+  \caption{Comparison of actual and predicted energy consumption for BinaryTrees program}
+  \label{tab:energy_comparison_bin_trees}
+\end{table}
 
 It is noticeable that the values predicted are not the most accurate, for some inputs it has good accuracy, for example, the method \texttt{createTree} has good accuracy for the input \texttt{26}. For other methods, like \texttt{trees} it does not. Again as the previous experiment, the tool is not very accurate in terms of absolute values, and in this case for methods that change their energy considerably with minimum increase in the input, the models have a harder time to predict. The tool demonstrates good relative energy prediction, as input values increase, the predicted energy consumption also increases, and it decreases correspondingly when the inputs are reduced.
 
-To achieve better results with the \texttt{BinaryTrees} methods it could be possible to improve the feature's selection by incorporating characteristics that better capture the program complexity and increase the maximum input available for each program generated in order to better represent the high-energy regions of execution.
 
+<<<<<<< HEAD
 To further evaluate the framework’s ability to analyze and collect energy models for various custom programs, three additional benchmarks from the same source were selected. The chosen programs were fannkuch-redux (Java), n-body (Java naot \#4), and spectral-norm (Java). These benchmarks were specifically selected because they are purely CPU and memory bound, with minimal variability and no reliance on disk I/O or multithreading. This makes them more predictable and reliable for energy consumption measurements.
+=======
+The \texttt{fannkuch-redux} program also presents a computationally intensive task. It generates all permutations of the sequence \([0, 1, \ldots, n-1]\) and, for each permutation, performs a "flip" operation until the first element is zero. A flip consists of reversing the order of the first \(k + 1\) elements, where \(k\) is the first element of the permutation. For each permutation, it tracks the number of flips needed (called the flip count) and maintains the maximum flip count across all permutations. Additionally, it calculates a checksum by adding or subtracting the flip count based on the parity of the permutation index. The function returns the maximum number of flips needed for any permutation.
+>>>>>>> fcc314182ed47dc348ecdb2ddb2fb7370b09c7dc
 
-The predictions for the fannkuch-redux and spectral-norm programs are shown in Tables~\ref{tab:energy_comparison_fannkuch_redux} and~\ref{tab:energy_comparison_spectral_norm}, respectively. Overall, the results are quite reasonable, with the model achieving low prediction errors in most cases. However, for the n-body program, the model performed poorly, as seen in Table~\ref{tab:energy_comparison_nBody}, where the predicted values deviated by an order of magnitude. 
+The Figure~\ref{fig:fannkuch_plot}, shows the measured energy with the predictions, and it is observable that the energy grows quickly as the input also increases. Both the Table~\ref{tab:energy_comparison_fannkuch_redux} and the Figure~\ref{fig:fannkuch_plot}, confirm that for inputs lower than ten, the model has difficulties predicting.
 
-The Figures~\ref{fig:advance_plot},~\ref{fig:approximate_plot}, and~\ref{fig:fannkuch_plot}, show the energy readings of the methods of the different programs, and their predictions.
+The \texttt{spectralnorm} program computes an approximation of the spectral norm (largest singular value) of a specific, implicitly defined matrix. It uses the power method, an algorithm that repeatedly multiplies a vector by the matrix to estimate how strongly the matrix can amplify a vector. The matrix \(A\) is not stored explicitly, instead, each element is computed on demand using the formula \(A_{i,j} = \frac{1}{\frac{(i + j)(i + j + 1)}{2} + i + 1}\). The program initializes a unit vector and performs 20 steps of power iteration by repeatedly multiplying with \(A\) and its transpose \(A^T\). The spectral norm is then approximated as \(\sqrt{\frac{v^T (A^T A) v}{v^T v}}\), where \(v\) is the resulting vector after the iterations.
+
+The model obtained for this case prove quite effective discovering the pattern of the energy usage of the method, being the input the main feature that help achieve it, as Figure~\ref{fig:approximate_plot} shows, the prediction and measured values are almost similiar, and the prediction follows the curve of the mesaured energy. The concrete values can be seen in the Table~\ref{tab:energy_comparison_spectral_norm}, and it illustrates that the higher inputs tend to have higher accuracy as well.
+
+The final program is the \texttt{nbody} program, which simulates the motion of celestial bodies under the influence of gravity, modeling a simplified version of the solar system. It tracks five bodies: the Sun, Jupiter, Saturn, Uranus, and Neptune. The simulation starts by calculating the total momentum of the system and adjusting the Sun’s velocity to keep the center of mass stationary. Then, for a given number of time steps, it repeatedly updates the velocities and positions of the bodies using Newton’s law of universal gravitation. Each iteration involves computing pairwise gravitational interactions between all bodies, updating their velocities based on the forces, and then advancing their positions. The program prints the total system energy before and after the simulation to verify that it remains nearly constant, which serves as a correctness check.
+
+
+This time the resulting model had difficulties predicting the energy for the given method, as shown in the Table~\ref{tab:energy_comparison_nBody}. The Figure~\ref{fig:advance_plot} also shows an interesting behavior of the measured energy, which might explain why the model accuracy is so low.
+
 
 \begin{table}[htbp]
   \centering
@@ -462,8 +492,19 @@ The Figures~\ref{fig:advance_plot},~\ref{fig:approximate_plot}, and~\ref{fig:fan
   \label{fig:fannkuch_plot}
 \end{figure}
 
-This experiment objective's was not focused only on achieving the highest accuracy possible. It was also made to prove that it is possible to use the framework to test more interesting and complex cases. And it was proven that with minimal changes, it was possible to mass generate programs, collect data and train models, for the \texttt{BinaryTrees} program. While it may not work universally for all programs, since creating a framework general enough to handle every case is challenging, this experiment demonstrates that analyzing custom programs is possible.
-}
+
+
+To achieve better results it could be possible to improve the feature's selection by incorporating characteristics that better capture the program complexity and increase the maximum input available for each program generated in order to better represent the high-energy regions of execution.
+
+
+This experiment also tests how pratical it is to actually measure a custom program. 
+The \texttt{BinaryTrees} program, from how it is implemented on the website it needs some small adjustments in order to work with our framework. First, the program does not have a constructor for the class \texttt{TreeNode} which does not allow the program generator to populate the programs correctly, as the program on the website uses a custom method that create the nodes. Without this change, the methods that required \texttt{TreeNode} as input would be simply receiving an empty Object, as the constructor was also empty, making their generation useless as every program would be the same.
+With that said, the only adjustments made to the class were, a new private empty constructor, that can only be accessed inside the class, so the generator does not detect it and use it, as the generator always tries to use the smallest one available, so it is important that the empty constructor is private. And it was added a new constructor, this one public, that had the same logic as the method that created the nodes. Now the methods that use \texttt{TreeNode} can be generated as the constructor can call the public constructor that has the similar behavior of the \texttt{createTree(int)} method. These changes do not impact how the program, or methods behave and only helps the program generation.
+Aside from the \texttt{BinaryTrees} program, the others were even less troubled, as the \texttt{fannkuch-redux} and \texttt{spectral-norm} required no changes, apart from the package declaration, and the \texttt{n-body} program only required to divide the internal classes into more Java classes resulting in three files — \texttt{n-body.java}, \texttt{NBodySystem.java}, and \texttt{Body.java}.
+
+
+This experiment objective's was not focused only on achieving the highest accuracy possible. It was also made to prove that it is possible to use the framework to test more interesting and complex cases. And it was proven that with minimal changes, it was possible to mass generate programs, collect data and train models, for four different programs. While it may not work universally for all programs, since creating a framework general enough to handle every case is challenging, this experiment demonstrates that analyzing custom programs is possible.
+
 
 
 

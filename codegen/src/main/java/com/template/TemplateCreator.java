@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +37,7 @@ public class TemplateCreator {
     static CtTypeReference<?> ref;
     static boolean isGeneric = true;
 
+    
     private static HashSet<String> getTargetMethodSet(String[] args) {
         return args.length > 1 ? new HashSet<>(Arrays.asList(args[1].split(","))) : new HashSet<>();
     }
@@ -60,6 +65,8 @@ public class TemplateCreator {
             //System.out.println("methods -> "+methods);
             collections = Arrays.asList(ref.getTypeDeclaration());
             getCustomImports = true;
+            ProcessBuilder pb = new ProcessBuilder("./create_jar.sh", programToRun);
+            pb.start();
         }
         outputDir += "/"+args[0];
         if (args.length>1) outputDir+="_"+args[1].replace(",", "_");
@@ -385,5 +392,6 @@ public class TemplateCreator {
         }
         return collectionTypes;
     }
+
 
 }

@@ -47,6 +47,7 @@ public class CalculateEnergy {
                 expression = replaceExpressionWithFeatures(modelInfo, expression);
                 Expression expressionEvaluated = new ExpressionBuilder(expression).build();
                 modelInfo.setExpression(expressions.get("expressionUi"));
+                System.err.println("mis -> "+modelInfo.toString());
                 lineExpressions.put(modelInfo.toString() + " | "+modelInfo.getLine(), modelInfo.getExpression());
                 double currentEnergy = accountForLoops(modelInfo.getLoopIds(), expressionEvaluated.evaluate());
                 totalMethodEnergy += currentEnergy;// expressionEvaluated.evaluate();
@@ -377,15 +378,19 @@ public class CalculateEnergy {
             }
 
             // Read each row
+            String firstExpression = "";
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
-                if (values.length > complexityIndex && values[complexityIndex].trim().equals(targetComplexity+"")
-                        || values.length > complexityIndex && values[complexityIndex].trim().equals(backupComplexity+"")) {
-                    expression = values[expressionIndex].replaceAll("\"", "");
-                    break;
-                }
+                if (values.length > complexityIndex && values[complexityIndex].trim().equals(1+"")) firstExpression = values[expressionIndex].replaceAll("\"", "");
+                if (values.length > complexityIndex && values[complexityIndex].trim().equals(targetComplexity+"") ||
+                    values.length > complexityIndex && values[complexityIndex].trim().equals(backupComplexity+"")) 
+                    {
+                        expression = values[expressionIndex].replaceAll("\"", "");
+                        break;
+                    }
 
             }
+            if (expression.isEmpty()) expression = firstExpression;
         } catch (IOException e) {
             e.printStackTrace();
         }

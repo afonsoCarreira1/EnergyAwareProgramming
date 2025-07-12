@@ -192,8 +192,14 @@ public class Tool implements LanguageServer {
             String line = lines[pos.getLine()];
 
             String key = line.trim().replace(";", "") + " | " +(pos.getLine()+1);
-            String expression = CalculateEnergy.lineExpressions.getOrDefault(key, "No expression available");
+            //String expression = CalculateEnergy.lineExpressions.getOrDefault(key, "No expression available");
+            String expression = CalculateEnergy.lineExpressions.getOrDefault(
+            key,
+            CalculateEnergy.lineExpressions.getOrDefault("com.template.programsToBenchmark."+key, "No expression available")
+            );
 
+            //System.err.println("key -> "+key);
+            //System.err.println("expressions -> "+CalculateEnergy.lineExpressions);
             if (expression == null) return CompletableFuture.completedFuture(null);
 
             MarkupContent content = new MarkupContent();

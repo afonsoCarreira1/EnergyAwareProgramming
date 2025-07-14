@@ -1,18 +1,25 @@
 \chapter{Approach and Implementation}\label{chapter:approach}
 
 
-As described in the previous sections, the aim of this work is to make developers aware of the energy consumption of their programs. 
+\wo{The main goal of this work is to help developers understand the energy consumption of their programs, enabling them to make informed decisions about energy efficiency during development.}
+\st{As described in the previous sections, the aim of this work is to make developers aware of the energy consumption of their programs.} 
 
-{\color{blue}In order to achieve this goal, a framework was built with the objective of simplifying and automating the process of program generation, energy measurement, and model training. The framework is built with a modular approach, by making it easier to change in face of new needs. It is composed of four distinct modules, three implemented in Java as Maven projects and one as a standalone Python script, ensuring ease of installation and integration. Depending on the specific use case, these modules can function either as a unit or independently. Being the final output a simple and practical tool, they can quickly and accurately estimate developers programs energy consumption.} This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development. 
-It is important to note that the tool serves as a guide, providing energy consumption estimates to raise awareness rather than dictate action. Ultimately, it is up to developers to decide whether to prioritize performance, energy efficiency or any other factor. For example, if a program only needs to run within a certain timeframe and can afford a slight reduction in performance, developers may choose to trade some performance for improved energy efficiency, making more informed decisions thanks to the insights provided by the tool.
+
+\wo{Eu tentei dar um feedback mais focado aqui mas acho que tem muita coisa que precisa ser reescrita. Me parece que o objetivo é uma ferramenta mas na verdade, o plugin é somente um pequeno pedaço do que é o framework. O framework é o que faz a geração de programas, coleta de dados, treinamento de modelo e construção do plugin. O plugin é uma parte do framework, mas não é o objetivo final e nem a única coisa que foi construída. Também não gosto muito do uso de 'tool' por toda parte. Não sei se o 'tool' é o framework, se o 'tool' é só o plugin. Está bem confuso.}
+
+{\color{blue}In order to achieve this goal, a framework was built with the objective of simplifying and automating the process of program generation, energy measurement, and model training. The framework is built with a modular approach, by making it easier to change in face of new needs. It is composed of four distinct modules, three implemented in Java \st{as Maven projects} and one as a standalone Python script, ensuring ease of installation and integration. Depending on the specific use case, these modules can function either as a unit or independently. \wo{The objective its that the framework can be instantiated into} \st{Being the final output} a simple and practical tool, they can quickly and accurately estimate developers programs energy consumption. This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development.} 
+It is important to note that the tool will serve as a guide, providing energy consumption estimates to raise awareness rather than dictate action. Ultimately, it is up to developers to decide whether to prioritize performance, energy efficiency or any other factor. For example, if a program only needs to run within a certain timeframe and can afford a slight reduction in performance, developers may choose to trade some performance for improved energy efficiency, making more informed decisions thanks to the insights provided by the tool.
+
 
 To provide this insight to developers it is necessary to build a tool that can provide all of that. The tool needs to be practical, which means that integrating it in an IDE is recommended. With this the developer only needs to download an extension for an IDE and will access to the insights provided by the tool.
 
-The tool will be a VSCode extension built using the LSP as explained in~\ref{sec:background_lsp}. While VSCode may not be the most commonly used IDE for Java projects compared to Eclipse or IntelliJ IDEA, it provides a much simpler and more accessible environment for developing and testing extensions. This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an AST, from there it is capable of analyzing the code and using an inference function it will output the estimated cost.
+The tool will be a VSCode extension \wo{só o plugin?} built using the LSP as explained in~\ref{sec:background_lsp}. While VSCode may not be the most commonly used IDE for Java projects compared to Eclipse or IntelliJ IDEA, it provides a much simpler and more accessible environment for developing and testing extensions. This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an AST, from there it is capable of analyzing the code and using an inference function it will output the estimated cost.
+
+
 
 
 Many devices rely on Java and the JVM, so it is important that the code they run is energy efficient. Several factors can affect the power consumption of Java applications, including the behavior of the garbage collector and the efficiency of the memory management system ~\cite{10.5555/1267847.1267870} making it difficult to predict the power consumption of Java programs. This unpredictability highlights the need for a specialized tool to accurately measure and analyze power consumption so that developers can optimize their applications for energy efficiency.
-Java is an excellent choice for developing this tool because of its high interoperability with various operating systems and its widespread usage across the globe, making it a reliable and option. It has a wide range of useful libraries (JRAPL, JoularJx, Jalen) that help to measure energy accurately, and Java's typing and object-oriented features make the code easier to maintain and extend, so the tool can evolve with new energy metering standards and technologies. 
+Java is an excellent choice for developing this tool~\wo{o plugin está em Java? está muito confuso} because of its high interoperability with various operating systems and its widespread usage across the globe, making it a reliable and option. It has a wide range of useful libraries (JRAPL, JoularJx, Jalen) that help to measure energy accurately, and Java's typing and object-oriented features make the code easier to maintain and extend, so the tool can evolve with new energy metering standards and technologies. 
 
 There are several Java parsing tools available, such as WALA~\cite{wala_main}, SootUp~\cite{sootup_main}, Spoon~\cite{spoon_main} and JavaParser~\cite{javaParser}. WALA and SootUp are primarily designed for analyzing Java Bytecode and are generally more complex to use. For this project, Spoon was chosen because it is a user-friendly tool that facilitates easy retrieval and manipulation of the AST from Java source code. Both JavaParser and Spoon support AST manipulation and code generation. However, Spoon provides a deeper, type-aware metamodel and built-in templating features. These features make Spoon more suitable for generating code that conforms to Java’s syntactic and semantic rules, especially in complex transformation scenarios.
 
@@ -28,52 +35,11 @@ There are several Java parsing tools available, such as WALA~\cite{wala_main}, S
 
 
 In order to build the extension, it was necessary to build a system architecture capable of providing as final output the functioning tool. The architecture follows different stages, that were deeply analyzed before moving to the next one.
-The architecture is divided in four main modules, Program Generator, Orchestrator, Parser, and Tool, as illustrated in Figure~\ref{fig:main_modules}.
+The architecture is divided in four main modules: \textbf{Program Generator}, \textbf{Orchestrator}, \textbf{Parser}, and \textbf{Tool \wo{Plugin? Extension?}}, as illustrated in Figure~\ref{fig:main_modules} \wo{, will be explained in the following sections:}
+
+\wo{movi as máquinas para a secção de resultados;}
 
 
-
-
-To perform this experiment two computers were used:
-
-\begin{table}[htbp]
-\centering
-\caption{System Hardware Specifications}
-\begin{tabular}{|l|p{10cm}|}
-\hline
-\textbf{Component} & \textbf{Specification} \\
-\hline
-\multicolumn{2}{|l|}{\textbf{System 1 — Data Generation and Collection (High-Performance Workstation)}} \\
-\hline
-Operating System & Ubuntu 24.04.2 LTS (x86\_64) \\
-\hline
-CPU & AMD Ryzen Threadripper 3960X \\
-     & 24 cores / 48 threads \\
-     & Base frequency: 2.2 GHz, Boost up to ~5.05 GHz \\
-\hline
-Memory (RAM) & 94 GiB \\
-\hline
-GPU & NVIDIA GeForce RTX 3090 Ti (GA102) \\
-    & VRAM: 24 GiB (standard) \\
-\hline
-
-\multicolumn{2}{|l|}{\textbf{System 2 — Machine for Testing (Lower-Spec)}} \\
-\hline
-Operating System & Ubuntu 24.04.2 LTS (x86\_64) \\
-\hline
-CPU & AMD Ryzen 5 3600 \\
-     & 6 cores / 12 threads \\
-     & Base frequency: 3.6 GHz, Boost up to ~4.2 GHz \\
-\hline
-Memory (RAM) & 16 GiB \\
-\hline
-GPU & NVIDIA GeForce RTX 3060 Ti \\
-    & VRAM: 8 GiB (standard) \\
-\hline
-\end{tabular}
-\label{tab:hardware_specs}
-\end{table}
-
-The more powerful system, System 1, as described in Table~\ref{tab:hardware_specs}, was used for program generation and data collection, as it was configured to work with SLURM (Simple Linux Utility for Resource Management). SLURM is a highly scalable, open-source job scheduler used to efficiently manage compute resources on shared systems. It allows tasks to be queued and scheduled based on resource availability and job priority, helping to organize workloads across users without manual intervention. The model training did not use SLURM, as it did not require significant computation time.
 
 
 \input{./tex/program_generator}

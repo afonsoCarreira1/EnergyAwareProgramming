@@ -1,16 +1,27 @@
 \section{Stage 1: Program Generator} \label{sec:work_stage1_program_generator}
 
-\begin{figure}[htbp]%[H]
-  \centering
-  \includegraphics[width = 1 \textwidth]{figures/program_generator.pdf}
-  \caption{Program Generator}
-  \label{fig:program_generator}
-\end{figure}
 
-In order to be able to predict energy using ML models it is of course needed a lot of data, so the models can train, and the results can be analyzed. To obtain a considerable amount of data, a program generator was built, as illustrated in Figure~\ref{fig:program_generator}.
+
+
+\wo{To use machine learning models to predict energy consumption, it is necessary to have a large amount of data. This data can be obtained by generating programs that are then executed to collect energy profiles. The program generator is responsible for creating these programs, which are then used to train the machine learning models. The generator is designed to be flexible and adaptable, allowing it to generate a wide variety of programs based on different templates and input parameters. The architecture of the Program Generator can be seen in Figure~\ref{fig:program_generator}.}
+
+\st{In order to be able to predict energy using ML models it is of course needed a lot of data, so the models can train, and the results can be analyzed. To obtain a considerable amount of data, a program generator was built, as illustrated in Figure}~\ref{fig:program_generator}.
 
 The program generator works alongside with Java Spoon to make it the more general as possible allowing custom programs to be mass generated.
-The generator works for custom, developer-created, Java classes, for most collections interface (Lists, Sets, Maps) implementations, for utility classes like Math, Base64, Duration, and it can be called to analyze all the public methods of the class or just specific ones.
+
+\wo{isso é uma definição da tua abordagem. Não precisa ser muito restritivo.}
+
+\wo{The generator is capable of generating programs for custom, developer-created, Java classes, as well as for the most common APIs, such as collections interface implementations (Lists, Sets, Maps), and utility classes like Math, Base64, Duration. It can also be configured to analyze all public methods of a class or just specific ones.}
+
+\st{The generator works for custom, developer-created, Java classes, for most collections interface (Lists, Sets, Maps) implementations, for utility classes like Math, Base64, Duration, and it can be called to analyze all the public methods of the class or just specific ones.}
+
+\begin{figure}[htbp]%[H]
+    \centering
+    \includegraphics[width = 1 \textwidth]{figures/program_generator.pdf}
+    \caption{Program Generator}
+    \label{fig:program_generator}
+\end{figure}
+
 
 \subsection{Template Creation} \label{sec:work_stage1_template_creation}
 
@@ -80,24 +91,26 @@ The generator works for custom, developer-created, Java classes, for most collec
 
 The first step to generate multiple programs is to first create an intermediate template capable of holding the necessary code that will later be used for energy profiling.
 
-The program generator starts by reading a custom Java file (or just access the Lists, Sets, Maps classes), and using Spoon it finds every public method available in the provided class. If it is needed to analyze a specific method, the generator will search in the class for every method with the name requested. Then it has access to all the public methods in the class and what parameters they receive.
-Since it has access to the whole custom class, it can see how its constructors are called, and use them if any of the methods parameters requires. It recursively calls constructors if needed, making it very versatile to use. 
+\wo{O parágrafo abaixo está um bocado confuso. acho melhor reescrever.}
 
-After identifying the methods that will be targeted, it starts by creating templates for each of them. 
+The program generator starts by reading a \st{custom} Java file (or just access the Lists, Sets, Maps classes \wo{o que isso significa?}), and using Spoon \st{it finds} \wo{to find} every public method available in the provided class. If it is needed to analyze a specific method, the generator will search in the class for every method with the name requested \wo{who has requested a name?}. Then it has access to all the public methods in the class and what parameters they receive \wo{it already had access to the public methods before, right?}.
+Since it has access to the whole \st{custom} class, it can see how its constructors are called, and use them if any of the methods parameters requires. It recursively calls constructors if needed, making it very versatile to use. 
 
-Template important features:
+After identifying the methods that will be targeted, it starts by creating templates for each of them. \wo{The templates are Java classes that contain the necessary code to run the method, and placeholders for the inputs and types. The templates are structured so that they can be easily modified later, allowing the generator to create multiple programs based on the same template. The templates are designed following the structure below:}
+
+%Template important features:
 
 \begin{itemize}
 
-  \item Input placeholders: Placeholders that will be later changed with real values for inputs, in this case inputs are variable values. 
+\item Input placeholders: Placeholders that will be later changed with real values for inputs, in this case inputs are variable values. 
 
-  \item Type placeholder: Placeholders that will later be replaced with Java wrapper classes.
+\item Type placeholder: Placeholders that will later be replaced with Java wrapper classes.
   
-  \item Array Size placeholder: Placeholder that will later be replaced with the value of an array size. (This array will be explained in~\ref{sec:work_stage2_orchestrator}). 
+\item Array Size placeholder: Placeholder that will later be replaced with the value of an array size. (\st{This array will be explained} \wo{more details} in~\ref{sec:work_stage2_orchestrator}). 
 
 \end{itemize}
 
-Also, the template is structured so that the programs will work in harmony with the Orchestrator, that will extract the energy profile for each program (see Section~\ref{sec:work_stage2_orchestrator}), so when the placeholders are replaced with actual values, the orchestrator can run the program, and communicate with them.
+Also, the template is structured so that the programs will work in harmony with the \textbf{Orchestrator}, that will extract the energy profile for each program (see Section~\ref{sec:work_stage2_orchestrator}), so when the placeholders are replaced with actual values, the orchestrator can run the program, and communicate with them.
 
 
 \begin{listing}[H]
@@ -120,8 +133,51 @@ static class BenchmarkArgs {
 \label{lst:var_placeholders}
 \end{listing}
 
-The template creates a class that holds the necessary variables the method needs to run, Listing~\ref{lst:var_placeholders} shows an example of the variables that need to be created to run the method \texttt{List.add(Object)}. First it creates the list with the smallest constructor possible, then if the variable is a collection (List, Set, Map) it calls a custom-made method that populates collections with random values of a given type, and then it starts creating variables of parameters that the method \texttt{List.add(Object)} uses. The placeholder \texttt{ChangeValueHere1} will change to a random number, it contains a number \texttt{1} because it represents the input number of the method that will later help the model training understand how inputs can affect energy consumption. The placeholder \texttt{changetypehere} later changes to a type. The template after the transformation can be seen in the Listing~\ref{lst:var_placeholders_replaced}
+\wo{Templates will have the definitions of a class that holds the necessary variables that the method under evaluation needs to run}. Listing~\ref{lst:var_placeholders} shows an example \st{of the variables that need to be created to run the method} \wo{of template to evaluate the method} \texttt{List.add(Object)}. \wo{It follows the algorithm described in Algorithm \ref{alg:test_generation}}. First it creates the list with the smallest constructor possible, then if the variable is a collection (List, Set, Map) it calls a custom-made method that populates collections with random values of a given type, and then it starts creating variables of parameters that the method \texttt{List.add(Object)} uses. The placeholder \texttt{ChangeValueHere1} will change to a random number, it contains a number \texttt{1} because it represents the input number of the method that will later help the model training understand how inputs can affect energy consumption. The placeholder \texttt{changetypehere} later changes to a type. The template after the transformation can be seen in the Listing~\ref{lst:var_placeholders_replaced}
 
+
+\wo{verifica se isso faz sentido e atualiza.}
+
+\begin{algorithm}[H]
+\caption{Template Fullfillment Algorithm}
+\label{alg:test_generation}
+\begin{algorithmic}[1]
+    \Statex \textbf{Given:}
+    \Statex \hspace{\algorithmicindent} $S_C \coloneqq \{\text{List, Set, Map}, \dots\}$, the set of collection types.
+    \Statex \hspace{\algorithmicindent} $\tau$, a target type.
+    \Statex \hspace{\algorithmicindent} $P_T$ and $P_V$, sets of placeholders for values and types, respectively.
+    \Statex \hspace{\algorithmicindent} $G_V$ and $G_T$, sets of generated values and types, respectively.
+    \Statex \hspace{\algorithmicindent} $\text{elem}(c)$, a function returning the element type of $c$.
+
+\Procedure{FullfillTemplate}{$\tau$}
+    \State $\textit{instance} \gets \text{new } \tau()$ \Comment{Create an instance, using the smallest constructor.}
+    
+    
+    \If{$\tau \in S_C$}
+        \State \Call{PopulateCollection}{$\textit{instance}$, \texttt{elementType}} \Comment{Como se sabe o elementType?}
+    \EndIf
+
+    \ForAll{$p_t \in P_T$}
+        \State $G_T \gets G_T \cup \{\text{ResolvePlaceholder}(\text{elem}(p_t))\}$
+    \EndFor
+
+    \ForAll{$p_v \in P_V$}
+        \State $G_V \gets G_V \cup \{\text{GenerateRandomValue}(\text{elem}(p_v))\}$
+    \EndFor
+
+    \State RewriteTemplate({$\textit{instance}$,$G_V$, $G_T$, $\tau$})
+\EndProcedure
+
+\vspace{1em} 
+
+\Procedure{PopulateCollection}{$collection, elementType$}
+    \State $\textit{N} \gets \text{RandomInteger}(1, 100)$ \Comment{Qual o máximo?}
+    \For{$i = 1 \to N$}
+        \State $\textit{collection}$.add(\text{GenerateRandomValue}(\textit{elementType}))
+    \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 \begin{listing}[H]
 \noindent\rule{\linewidth}{0.4pt}
@@ -142,6 +198,7 @@ static class BenchmarkArgs {
 \caption{Example of variable placeholders replaced}            
 \label{lst:var_placeholders_replaced}
 \end{listing}
+
 
 
 It is worth mentioning that the types used by the generator are the Java wrapper classes, which are object representations of the primitive types. Using these types it is possible to achieve a more general generator, as every program can use them and if other custom types were used it would make the generator more complex and not general.

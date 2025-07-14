@@ -2,6 +2,55 @@
 
 %\section{The issue with inconsistent energy readings} \label{sec:results_the_issue_with_inconsistent_energy_readings}
 
+
+
+To perform this experiment two computers were used:
+
+\begin{table}[htbp]
+\centering
+\caption{System Hardware Specifications}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Component} & \textbf{Specification} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{System 1 — Data Generation and Collection (High-Performance Workstation)}} \\
+\hline
+Operating System & Ubuntu 24.04.2 LTS (x86\_64) \\
+\hline
+CPU & AMD Ryzen Threadripper 3960X \\
+     & 24 cores / 48 threads \\
+     & Base frequency: 2.2 GHz, Boost up to ~5.05 GHz \\
+\hline
+Memory (RAM) & 94 GiB \\
+\hline
+GPU & NVIDIA GeForce RTX 3090 Ti (GA102) \\
+    & VRAM: 24 GiB (standard) \\
+\hline
+
+\multicolumn{2}{|l|}{\textbf{System 2 — Machine for Testing (Lower-Spec)}} \\
+\hline
+Operating System & Ubuntu 24.04.2 LTS (x86\_64) \\
+\hline
+CPU & AMD Ryzen 5 3600 \\
+     & 6 cores / 12 threads \\
+     & Base frequency: 3.6 GHz, Boost up to ~4.2 GHz \\
+\hline
+Memory (RAM) & 16 GiB \\
+\hline
+GPU & NVIDIA GeForce RTX 3060 Ti \\
+    & VRAM: 8 GiB (standard) \\
+\hline
+\end{tabular}
+\label{tab:hardware_specs}
+\end{table}
+
+
+
+The more powerful system, System 1, as described in Table~\ref{tab:hardware_specs}, was used for program generation and data collection, as it was configured to work with SLURM (Simple Linux Utility for Resource Management). SLURM is a highly scalable, open-source job scheduler used to efficiently manage compute resources on shared systems. It allows tasks to be queued and scheduled based on resource availability and job priority, helping to organize workloads across users without manual intervention. The model training did not use SLURM, as it did not require significant computation time.
+
+
+
+
 At the beginning of the experiment, some tools were tested to observe their behavior, understand how to use them, and determine which one best suited the needs of the project.
 
 During the initial testing, a Python framework designed to facilitate experiment measurements was used~\cite{S2_Group_Experiment_Runner}. The framework included an initial test template that used PowerJoular to measure energy of programs. While using the template and testing the framework some bugs and unexpected results were found, some of which were due to misuse of the framework.

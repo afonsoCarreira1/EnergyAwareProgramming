@@ -14,12 +14,17 @@ public class NBodySystem_advance_double_198 {
         String pid = ProcessHandle.current().pid()+"";
         ProcessBuilder powerjoularBuilder = new ProcessBuilder("powerjoular", "-l", "-p", pid, "-D",frequency, "-f", "powerjoular.csv");
         Process powerjoularProcess = powerjoularBuilder.start();
+        long start = System.currentTimeMillis();
         launchTimerThread(1100);
         iter = computation(arr, arr.length);
         Process killPowerjoular = Runtime.getRuntime().exec(new String[]{"sudo", "kill", powerjoularProcess.pid()+""});
         killPowerjoular.waitFor();
+        long end = System.currentTimeMillis();
         String energyUsed = readPowerjoularCsv(iter,"powerjoular.csv-"+pid+".csv");
         System.out.println("iter -> "+iter);
+        
+        long diff = end - start;
+        System.out.println("Time: "+diff +"ms");
         System.out.println("Energy used was: "+energyUsed + "J");
     }
 

@@ -1,16 +1,72 @@
 \section{Stage 3: Model Training} \label{sec:work_stage3_model_training}
 
-This section of the framework focuses on training models using the data collected in the previous stage. It is possible to analyze the data, understand its behavior, and evaluate how the models respond to it.
+\st{This section of the framework focuses on training models using the data collected in the previous stage. It is possible to analyze the data, understand its behavior, and evaluate how the models respond to it.}
 
-When all the energy profiles are collected it is possible to finally start training the models. As explained in Section~\ref{sec:background_machine_learning} there are a lot of possible ways of using machine learning, however in this case the approach that best fit our need is supervised machine learning. So, some models were trained to see how good they performed using the data collected.
 
-First there is a merge of features. While each method is initially trained individually, it is not useful to treat \texttt{LinkedList.add(Object)} and \texttt{ArrayList.add(Object)} as entirely separate cases. Both represent the same \texttt{List.add(Object)} method, differing only in their characteristics specific to their implementation. Therefore, once all energy profiles have been collected, a merging step is performed to consolidate these related methods.
 
-All these features are stored in a new CSV and for the python program in a Data frame, to be processed.
+\wo{First step to start training the machine learning models its to to extract features from the energy profiles. Features are the characteristics of the code that will be used to train the models and are based on the code structure and behavior. The features extracted can be seen in Table~\ref{tab:features_extracted}.}
 
-This part was developed in python using some libraries specialized on machine learning, like scikit-learn (sklearn)~\cite{scikit-learn} which contains some models and functions to evaluate the models, and PySR~\cite{cranmer2023interpretablemachinelearningscience} which was already explained in Section~\ref{sec:background_machine_learning} an is also already implemented.
+\begin{table}[htbp]
+\centering
+\caption{Features Extracted}
+\label{tab:features_extracted}
+%\makebox[\textwidth][c]{% uncomment if needed and comment line bellow
+\resizebox{0.95\textwidth}{!}{
+\begin{tabular}{l|c}
+\hline
+\textbf{Feature Name} & \textbf{Description} \\
+\hline\hline
+VariableDeclarations & Number of variable declarations in the code. \\
+\hline
+Assignments & Number of assignment operations (=) in the code. \\
+\hline
+BinaryOperators & Number of binary operators used (e.g., +, -, *, /, \&\&). \\
+\hline
+MethodInvocations & Number of method calls in the code. \\
+\hline
+CustomMethodsUsed & Number of user-defined (custom) methods used in the code. \\
+\hline
+CustomObjectsUsed & Number of user-defined (custom) objects used in the code. \\
+\hline
+BranchCount & Number of branching statements ( if, else if, else ) in the code. \\
+\hline
+LoopCount & Number of loops ( for, while, do-while ) in the code. \\
+\hline
+LoopMaxDepth & Maximum nesting depth of loops in the code. \\
+\hline
+CyclomaticComplexity & The cyclomatic complexity of the code (number of independent execution paths). \\
+\hline
+LiteralCount & Number of literals (numbers, strings, boolean values) in the code. \\
+\hline
+VariableCount & Total number of variables in the code. \\
+\hline
+Reassignments & Number of times variables are reassigned a new value. \\
+\hline
+VariableTypes & Types of variables used (e.g., int, String, List$<$String$>$). \\
+\hline
+ImportsUsed & List of imported Java packages/libraries in the code. \\
+\hline
+java.langMethodUsed & If the method is from java.lang, the specific function name (e.g., ArrayList.get). \\
+\hline
+Inputs & The parameters received by the method. \\
+\hline\hline
+\end{tabular}}
+\end{table}
 
-In this phase the models tested were: Decision Tree Regressor, Random Forest, Gradient Boosting, Linear Regression, and PySR. Firstly the values of the MSE and R² are evaluated by the default values of sklearn, then in a second pass, GridSearch was used, which is a function of sklearn that tries to find the best parameters for a model. After that the scores and models are saved. The GridSearch does not work with PySR as they are from different libraries so, the parameters for PySR were manually set. When the models are trained, they are moved to the extension folders ready to be used.
+
+
+\st{When all the energy profiles are collected it is possible to finally start training the models.} 
+%As explained in Section~\ref{sec:background_machine_learning} 
+There are a lot of possible ways of using machine learning, however in this case the approach that best fit our need is supervised machine learning. So, some models were trained to see how good they performed using the data collected.
+
+ 
+
+\st{First there is a merge of features.} \wo{On the context of this project, the first step it is to merge the features to start training the models}. While each method is initially trained individually, it is not useful to treat \texttt{LinkedList.add(Object)} and \texttt{ArrayList.add(Object)} as entirely separate cases. Both represent the same \texttt{List.add(Object)} method, differing only in their characteristics specific to their implementation. Therefore, once all energy profiles have been collected, a merging step is performed to consolidate these related methods. All these \wo{merged} features are stored in a new CSV and for the python program in a Data frame, to be processed.
+
+\st{This part was developed in python using some} \wo{To implement this functionality, Python scripts were used, combining} libraries specialized on machine learning, like scikit-learn (sklearn)~\cite{scikit-learn} which contains \st{some} models and functions to evaluate the models, and PySR~\cite{cranmer2023interpretablemachinelearningscience}\wo{(detailed in Section~\ref{sec:background_machine_learning})}.
+%which was already explained in Section~\ref{sec:background_machine_learning} an is also already implemented.
+
+\wo{Among the available models, we selected a subset of them to train:} \st{In this phase the models tested were:} Decision Tree Regressor, Random Forest, Gradient Boosting, Linear Regression, and PySR. Firstly the values of the MSE and R² are evaluated by the default values of sklearn. \st{then in a second pass,} GridSearch was used \st{, which is a function of sklearn that tries} to find the best parameters for a model. After that the scores and models are saved \wo{← essa frase está solta}. The GridSearch does not work with PySR as they are from different libraries so, the parameters for PySR were manually set. When the models are trained, they are moved to the extension folders ready to be used.
 
 
 \begin{comment}
@@ -20,9 +76,6 @@ In this phase the models tested were: Decision Tree Regressor, Random Forest, Gr
   \caption{R² Comparison (Higher is better)}
   \label{fig:r2_comparison}
 \end{figure}
-
-
-
 
 \begin{figure}[htbp]
   \centering

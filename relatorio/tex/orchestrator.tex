@@ -10,28 +10,41 @@
 \end{figure}
 
 
-Having all the programs generated, it is possible to move to the next stage. Gathering the energy profiles for each of the generated programs. This step is necessary, of course, because to give energy consumption estimates, first it is necessary to obtain energy profiles~\cite{10.1145/2884781.2884869,8816747}, so the machine learning models can obtain the most accurate results possible. To make this task as easily as possible, a process was implemented, illustrated in Figure~\ref{fig:orchestrators_workflow}. This process automates the task while taking into account what was mentioned in Section~\ref{sec:background_benchmarking}.
+Having all the programs generated, it is possible to move to the next stage. Gathering the energy profiles for each of the generated programs. \st{This step is necessary, of course, because to give energy consumption estimates, first it is necessary to obtain energy profiles so the machine learning models can obtain the most accurate results possible.}
+\wo{Energy profiles~\cite{10.1145/2884781.2884869,8816747} are a established way to organize energy consumption data. They will be the main data source of the machine learning models to obtain accurate results}. To \st{make this task as easily as possible} \wo{reduce the complexity of this task}, a process was implemented, illustrated in Figure~\ref{fig:orchestrators_workflow}. This process automates the task while taking into account what was mentioned in Section~\ref{sec:background_benchmarking}.
 
 As described in the Section~\ref{sec:background_energy} there are several tools capable of performing dynamic energy measurements.
-At the start some tools were tested in order to see the one that best suited the needs of the project.
+At the start some tools were tested in order to see the one that best suited the needs of the project:
+\wo{faz uma tabela com todas essas ferramentas, com as suas vantagens e desvantagens e mostra por qual motivo escolhemos o PowerJoular. Agora, isso não deveria estar aqui. Deveria estar no background.}
 
-Perf is a Linux tool primarily designed for analyzing application performance characteristics rather than precise energy measurement. While it can provide some energy-related metrics, its measurements tend to be imprecise. In this context, Perf was used mainly to get a rough idea of energy consumption and to serve as an alternative when more accurate tools were unavailable.
+\textbf{Perf} is a Linux tool primarily designed for analyzing application performance characteristics rather than precise energy measurement. While it can provide some energy-related metrics, its measurements tend to be imprecise. In this context, Perf was used mainly to get a rough idea of energy consumption and to serve as an alternative when more accurate tools were unavailable.
 
-Powertop was also tested, but it could only perform energy measurements on laptops, as it relies on battery drain data to calculate energy consumption. Since this approach does not align with our specific requirements, we considered Powertop as a last-resort option.
+\textbf{Powertop} was also tested, but it could only perform energy measurements on laptops, as it relies on battery drain data to calculate energy consumption. Since this approach does not align with our specific requirements, we considered Powertop as a last-resort option.
 
-JoularJx is an energy measurement tool capable of measuring the consumption of Java programs and its methods. However, it is not as precise as other tools as it requires to measure the entire start of the JVM and whole functions instead of small code blocks.
+\textbf{JoularJx} is an energy measurement tool capable of measuring the consumption of Java programs and its methods. However, it is not as precise as other tools as it requires to measure the entire start of the JVM and whole functions instead of small code blocks.
 
-In our case we choose PowerJoular, it has good features that caught our attention, for example being a command line tool that could be easily integrated in almost every programming language, it stores the energy used in a CSV file (easy to work with), capable of only reading energy of running processes and so on, as explained before in Section~\ref{sec:background_energy}.
+\wo{Podes fazer a comparação no background e manter só o parágrafo abaixo aqui.}
+
+\st{In our case we choose} \textbf{PowerJoular} \st{, it} has good features that caught our attention, for example being a command line tool that could be easily integrated in almost every programming language, it stores the energy used in a CSV file \st{(easy to work with)}, capable of only reading energy of running processes and so on, as explained before in Section~\ref{sec:background_energy}.
 
 Since PowerJoular is a command line tool, it is launched as a process, and then it can be killed whenever needed because it is a process as well. This allows to measure not only programs/processes energies but have a more precise measurement, as it is possible to call PowerJoular to measure a specific computation and then kill it when the computation is finished.
 
 With all of this in mind a process was built. The process uses an orchestrator that is responsible for invoking the target program and the measurement tool (PowerJoular) to accurately measure the energy consumption of the program or the specific computation being analyzed within it.
 
 
-One challenge in measuring energy consumption is that computation often completes too quickly to capture accurately. It is really difficult to measure a single operation of, for example, a \texttt{List.add(Object)} with most tools, as it simply to fast for the tool to capture, and if the tool was able to capture it, the energy measured would have too much noise to be considered. So, it surges the need to loop through the method until the tool (PowerJoular) is capable of getting its energy and then dividing the total energy by the number of times it looped. This can work, but it brings other errors that will need to be considered.
+One challenge in measuring energy consumption is that computation often completes too quickly to capture accurately. It is \st{really difficult} \wo{hard} to measure a single operation of, for example, a \texttt{List.add(Object)} with most tools, as it simply to fast for the tool to capture, and if the tool was able to capture it, the energy measured \st{would} \wo{could} have too much noise to be considered. \st{So, it surges the need} \wo{Our solution was} to loop through the method until the tool \st{(PowerJoular)} is capable of getting its energy and then dividing the total energy by the number of times it looped. \st{This can work, but it brings other errors that will need to be considered.}
+\wo{This solution, although effective, introduces potential errors that need to be addressed.}
 
-If we approach the measurements with the loop technique, first we need to create the variables needed for the method target to analysis, like shown in the Listing~\ref{lst:var_placeholders}. But there is a problem, the methods are treated like a black box, it is not possible to know what the methods are going to do with the parameters or with its variables, for example, the method \texttt{List.size()} it receives nothing, and return the size of the list which is fine. However, this raises problems with other methods, such as \texttt{List.add(Object)}, maybe not in the first iterations. But what if the loop iterates too many times? It will make the list much bigger than the initial list, which again will cause differences in the energy measurements and later in the energy predictions. 
-Now, suppose we have a custom method called sort that takes a randomly ordered list and sorts it. This introduces a problem when measuring its energy consumption. On the first run, the method will sort the unsorted list, which may take significant time depending on the randomness of the data and the sorting algorithm used. However, on subsequent runs with the same list, the input is already sorted, meaning the sort method will likely complete much faster or with minimal effort. This difference can result in misleading or inconsistent measurements.
+\st{If we approach the measurements} \wo{By approach the measurements} with the loop technique, first we need to create the variables needed for the method target to analysis, like shown in the Listing~\ref{lst:var_placeholders} \wo{dê exemplos}. \st{But there is a problem} \wo{However, because}, the methods are treated like a black box, it is not possible to know what the methods are going to do with the parameters or with its variables. For example, the method \texttt{List.size()} \st{it receives nothing} \wo{has no parameteres}, and return the size of the list \st{which is fine}. 
+
+\wo{reescrever →}
+However, this raises problems with other methods, such as \texttt{List.add(Object)}, maybe not in the first iterations. But what if the loop iterates too many times? It will make the list much bigger than the initial list, which again will cause differences in the energy measurements and later in the energy predictions. 
+\wo{← reescrever}
+
+Now, suppose we have a method called \texttt{sort} that takes a randomly ordered list and sorts it. This introduces a problem when measuring its energy consumption. On the first run, the method will sort the unsorted list, which may take significant time depending on the randomness of the data and the sorting algorithm used. However, on subsequent runs with the same list, the input is already sorted, meaning the sort method will likely complete much faster or with minimal effort. This difference can result in misleading or inconsistent measurements.
+
+To prevent this side effect from happening \st{the approach used was to create} \wo{we designed a solution that consists of creating} an array that holds the parameters, that can be seen in the Figure~\ref{fig:array}. \st{Basically, }The \wo{necessary} parameters \wo{to execute the method} are created \wo{and stored} into \st{an} \wo{the} array. \st{all with the same values, but with different references} \wo{They are exatcly copies with different refereces.} Now, if one of the elements is changed during its execution on the method, it will not affect the other's execution. \st{Of course, since now there are multiple references of the same values, the memory usage is much higher, so that is why there is an array size, also empirically chosen, to avoid memory errors and avoid having the array so small the PowerJoular would not have time to perform the measurements.} \wo{While this approach increases memory usage due to multiple copies, we empirically selected array sizes (75,000, 100,000, and 150,000) to balance between avoiding out-of-memory errors and ensuring the computation runs long enough for PowerJoular to record energy measurements.} \st{There are, for now, 3 different array sizes (75,000, 100,000, 150,000).} PowerJoular by default needs to run for 1 second to create the CSV file that has the energy used for the target process, so these sizes aim so that looping the array takes at least a second. In some cases, the CSV file may not be generated because the loop executes too quickly. In such instances, the energy reading will be assumed to be 0 J, as the execution was too fast to record a value. \st{Using an array in this case is preferable to a list, as it introduces less overhead and has a smaller impact on energy measurements.}
+
 
 \begin{figure}[htbp]
   \centering
@@ -40,10 +53,9 @@ Now, suppose we have a custom method called sort that takes a randomly ordered l
   \label{fig:array}
 \end{figure}
 
-To prevent this side effect from happening the approach used was to create an array that holds the parameters, that can be seen in the Figure~\ref{fig:array}. Basically, the parameters are created into an array, all with the same values, but with different references. Now, if one of the elements is changed during its execution on the method, it will not affect the other's execution. Of course, since now there are multiple references of the same values, the memory usage is much higher, so that is why there is an array size, also empirically chosen, to avoid memory errors and avoid having the array so small the PowerJoular would not have time to perform the measurements. There are, for now, 3 different array sizes (75,000, 100,000, 150,000). PowerJoular by default needs to run for 1 second to create the CSV file that has the energy used for the target process, so these sizes aim so that looping the array takes at least a second. In some cases, the CSV file may not be generated because the loop executes too quickly. In such instances, the energy reading will be assumed to be 0 J, as the execution was too fast to record a value. Using an array in this case is preferable to a list, as it introduces less overhead and has a smaller impact on energy measurements.
+\wo{To be able to collect some of the faster executison} \st{Additionally}, the original PowerJoular was modified to allow customizable measurement durations, enabling readings at intervals shorter than the default 1 second, such as 100ms, which provides greater flexibility and finer granularity in energy profiling.
 
-Additionally, the original PowerJoular was modified to allow customizable measurement durations, enabling readings at intervals shorter than the default 1 second, such as 100ms, which provides greater flexibility and finer granularity in energy profiling.
-
+The computation method shown in Listing~\ref{lst:Computation_method} illustrates how each profiling method operates independently of the specific method being evaluated. It attempts to execute the target function repeatedly for approximately one second. In this particular case, the target function performs the operation \texttt{var.add(arg0);} and returns the number of iterations completed, which is then used for further calculations.
 
 \begin{listing}[H]
 \noindent\rule{\linewidth}{0.4pt}
@@ -62,12 +74,13 @@ private static int computation(BenchmarkArgs[] args, int iter) {
 \label{lst:Computation_method}
 \end{listing}
 
-The computation method shown in Listing~\ref{lst:Computation_method} illustrates how each profiling method operates independently of the specific method being evaluated. It attempts to execute the target function repeatedly for approximately one second. In this particular case, the target function performs the operation \texttt{var.add(arg0);} and returns the number of iterations completed, which is then used for further calculations.
-
 
 With the process structure now defined, we can proceed to explain how it functions.
 
 The workflow of this step can be described as follows:
+
+
+\wo{Descreve isso usando um, algoritmo, como fiz antes. Podes deixar a descrição em texto aqui também.}
 
 \begin{itemize}
   \item The orchestrator launches a command to start the target Java Program and waits a signal.
@@ -78,52 +91,3 @@ The workflow of this step can be described as follows:
 \end{itemize}
 
 All these steps are performed for each generated program. At the end of the process, a log file is created containing key information, including all the programs used, the PowerJoular files generated, temporary files, error logs, and features.
-
-The features extracted from the parser can be seen in the Table~\ref{tab:features_extracted}
-
-\begin{table}[htbp]
-\centering
-\caption{Features Extracted}
-\label{tab:features_extracted}
-%\makebox[\textwidth][c]{% uncomment if needed and comment line bellow
-\resizebox{0.95\textwidth}{!}{
-\begin{tabular}{||l|c||}
-\hline\hline
-\textbf{Feature Name} & \textbf{Description} \\
-\hline\hline
-VariableDeclarations & Number of variable declarations in the code. \\
-\hline
-Assignments & Number of assignment operations (=) in the code. \\
-\hline
-BinaryOperators & Number of binary operators used (e.g., +, -, *, /, \&\&). \\
-\hline
-MethodInvocations & Number of method calls in the code. \\
-\hline
-CustomMethodsUsed & Number of user-defined (custom) methods used in the code. \\
-\hline
-CustomObjectsUsed & Number of user-defined (custom) objects used in the code. \\
-\hline
-BranchCount & Number of branching statements ( if, else if, else ) in the code. \\
-\hline
-LoopCount & Number of loops ( for, while, do-while ) in the code. \\
-\hline
-LoopMaxDepth & Maximum nesting depth of loops in the code. \\
-\hline
-CyclomaticComplexity & The cyclomatic complexity of the code (number of independent execution paths). \\
-\hline
-LiteralCount & Number of literals (numbers, strings, boolean values) in the code. \\
-\hline
-VariableCount & Total number of variables in the code. \\
-\hline
-Reassignments & Number of times variables are reassigned a new value. \\
-\hline
-VariableTypes & Types of variables used (e.g., int, String, List$<$String$>$). \\
-\hline
-ImportsUsed & List of imported Java packages/libraries in the code. \\
-\hline
-java.langMethodUsed & If the method is from java.lang, the specific function name (e.g., ArrayList.get). \\
-\hline
-Inputs & The parameters received by the method. \\
-\hline\hline
-\end{tabular}}
-\end{table}

@@ -3,17 +3,12 @@
 
 
 
-\wo{To use machine learning models to predict energy consumption, it is necessary to have a large amount of data. This data can be obtained by generating programs that are then executed to collect energy profiles. The program generator is responsible for creating these programs, which are then used to train the machine learning models. The generator is designed to be flexible and adaptable, allowing it to generate a wide variety of programs based on different templates and input parameters. The architecture of the Program Generator can be seen in Figure~\ref{fig:program_generator}.}
+To use machine learning models to predict energy consumption, it is necessary to have a large amount of data. This data can be obtained by generating programs that are then executed to collect energy profiles. The program generator is responsible for creating these programs, which are then used to train the machine learning models. The generator is designed to be flexible and adaptable, allowing it to generate a wide variety of programs based on different templates and input parameters. The architecture of the Program Generator can be seen in Figure~\ref{fig:program_generator}.
 
-\st{In order to be able to predict energy using ML models it is of course needed a lot of data, so the models can train, and the results can be analyzed. To obtain a considerable amount of data, a program generator was built, as illustrated in Figure}~\ref{fig:program_generator}.
 
 The program generator works alongside with Java Spoon to make it the more general as possible allowing custom programs to be mass generated.
 
-\wo{isso é uma definição da tua abordagem. Não precisa ser muito restritivo.}
-
-\wo{The generator is capable of generating programs for custom, developer-created, Java classes, as well as for the most common APIs, such as collections interface implementations (Lists, Sets, Maps), and utility classes like Math, Base64, Duration. It can also be configured to analyze all public methods of a class or just specific ones.}
-
-\st{The generator works for custom, developer-created, Java classes, for most collections interface (Lists, Sets, Maps) implementations, for utility classes like Math, Base64, Duration, and it can be called to analyze all the public methods of the class or just specific ones.}
+The generator is capable of generating programs for custom, developer-created, Java classes, as well as for the most common APIs, such as collections interface implementations (Lists, Sets, Maps), and utility classes like Math, Base64, Duration. It can also be configured to analyze all public methods of a class or just specific ones.
 
 \begin{figure}[htbp]%[H]
     \centering
@@ -93,12 +88,8 @@ The first step to generate multiple programs is to first create an intermediate 
 
 \wo{O parágrafo abaixo está um bocado confuso. acho melhor reescrever.}
 
-The program generator starts by reading a \st{custom} Java file (or just access the Lists, Sets, Maps classes \wo{o que isso significa?}), and using Spoon \st{it finds} \wo{to find} every public method available in the provided class. If it is needed to analyze a specific method, the generator will search in the class for every method with the name requested \wo{who has requested a name?}. Then it has access to all the public methods in the class and what parameters they receive \wo{it already had access to the public methods before, right?}.
-Since it has access to the whole \st{custom} class, it can see how its constructors are called, and use them if any of the methods parameters requires. It recursively calls constructors if needed, making it very versatile to use. 
-
-After identifying the methods that will be targeted, it starts by creating templates for each of them. \wo{The templates are Java classes that contain the necessary code to run the method, and placeholders for the inputs and types. The templates are structured so that they can be easily modified later, allowing the generator to create multiple programs based on the same template. The templates are designed following the structure below:}
-
-%Template important features:
+To generate programs for a specific class, the user has to input the name of the collection or the name of the custom program it wants to generate. For the collections of Lists, Sets and Maps, the generator is prepared to create more than one implementation of those collections, for example, if the objective is to generate programs to the List collection, the program generator will use the \texttt{ArrayList}, \texttt{LinkedList}, \texttt{Vector} and \texttt{CopyOnWriteArrayList}. The user can also input the name of the method to be analyzed, or simply gather all the available methods in the class, which are then found using Spoon.
+After the search for the methods, the generator has access to all the methods it will analyze and their input parameters. Since it has access to the whole class, it can see how its constructors are called, and use them if any of the methods parameters requires. It recursively calls constructors if needed, making it very versatile to use. After identifying the methods that will be targeted, it starts by creating templates for each of them. The templates are Java classes that contain the necessary code to run the method, and placeholders for the inputs and types. The templates are structured so that they can be easily modified later, allowing the generator to create multiple programs based on the same template. The templates are designed following the structure below:
 
 \begin{itemize}
 
@@ -106,7 +97,7 @@ After identifying the methods that will be targeted, it starts by creating templ
 
 \item Type placeholder: Placeholders that will later be replaced with Java wrapper classes.
   
-\item Array Size placeholder: Placeholder that will later be replaced with the value of an array size. (\st{This array will be explained} \wo{more details} in~\ref{sec:work_stage2_orchestrator}). 
+\item Array Size placeholder: Placeholder that will later be replaced with the value of an array size. (more details in~\ref{sec:work_stage2_orchestrator}). 
 
 \end{itemize}
 
@@ -133,49 +124,47 @@ static class BenchmarkArgs {
 \label{lst:var_placeholders}
 \end{listing}
 
-\wo{Templates will have the definitions of a class that holds the necessary variables that the method under evaluation needs to run}. Listing~\ref{lst:var_placeholders} shows an example \st{of the variables that need to be created to run the method} \wo{of template to evaluate the method} \texttt{List.add(Object)}. \wo{It follows the algorithm described in Algorithm \ref{alg:test_generation}}. First it creates the list with the smallest constructor possible, then if the variable is a collection (List, Set, Map) it calls a custom-made method that populates collections with random values of a given type, and then it starts creating variables of parameters that the method \texttt{List.add(Object)} uses. The placeholder \texttt{ChangeValueHere1} will change to a random number, it contains a number \texttt{1} because it represents the input number of the method that will later help the model training understand how inputs can affect energy consumption. The placeholder \texttt{changetypehere} later changes to a type. The template after the transformation can be seen in the Listing~\ref{lst:var_placeholders_replaced}
+Templates will have the definitions of a class that holds the necessary variables that the method under evaluation needs to run. Listing~\ref{lst:var_placeholders} shows an example of template to evaluate the method \texttt{List.add(Object)}. It follows the algorithm described in Algorithm \ref{alg:test_generation}. First it creates the list with the smallest constructor possible, then if the variable is a collection (List, Set, Map), or an array, it calls a custom-made method that populates collections with random values of a given type, and then it starts creating variables of parameters that the method \texttt{List.add(Object)} uses. The placeholder \texttt{ChangeValueHere1} will change to a random number, it contains a number \texttt{1} because it represents the input number of the method that will later help the model training understand how inputs can affect energy consumption. The placeholder \texttt{changetypehere} later changes to a type. The template after the transformation can be seen in the Listing~\ref{lst:var_placeholders_replaced}
 
 
-\wo{verifica se isso faz sentido e atualiza.}
 
 \begin{algorithm}[H]
 \caption{Template Fullfillment Algorithm}
 \label{alg:test_generation}
 \begin{algorithmic}[1]
     \Statex \textbf{Given:}
-    \Statex \hspace{\algorithmicindent} $S_C \coloneqq \{\text{List, Set, Map}, \dots\}$, the set of collection types.
-    \Statex \hspace{\algorithmicindent} $\tau$, a target type.
-    \Statex \hspace{\algorithmicindent} $P_T$ and $P_V$, sets of placeholders for values and types, respectively.
-    \Statex \hspace{\algorithmicindent} $G_V$ and $G_T$, sets of generated values and types, respectively.
-    \Statex \hspace{\algorithmicindent} $\text{elem}(c)$, a function returning the element type of $c$.
+    \Statex \hspace{\algorithmicindent} $collection \coloneqq \{\text{List}\}$, collection selected.
+    \Statex \hspace{\algorithmicindent} $ds \coloneqq \{\text{List, Map, Set, arrays}\}$, existent data structures.
+    \Statex \hspace{\algorithmicindent} $methods \coloneqq \{\text{add, size, get}, \dots\}$, the set of methods of the classes.
 
-\Procedure{FullfillTemplate}{$\tau$}
-    \State $\textit{instance} \gets \text{new } \tau()$ \Comment{Create an instance, using the smallest constructor.}
-    
-    
-    \If{$\tau \in S_C$}
-        \State \Call{PopulateCollection}{$\textit{instance}$, \texttt{elementType}} \Comment{Como se sabe o elementType?}
-    \EndIf
-
-    \ForAll{$p_t \in P_T$}
-        \State $G_T \gets G_T \cup \{\text{ResolvePlaceholder}(\text{elem}(p_t))\}$
+\Procedure{FullfillTemplate}{}
+    \ForAll{method \textbf{in} methods}
+        \ForAll{parameter \textbf{in} \texttt{method.parameters}}
+            \State textit{var} $\gets$ \Call{ParameterCreation(\texttt{parameter.type})}
+            \If{$parameter.type \in ds$}
+                \State \Call{FillWithRandomValues}{var, maxSizePlaceHolder, typePlaceHolder}
+            \EndIf
+        \EndFor
     \EndFor
-
-    \ForAll{$p_v \in P_V$}
-        \State $G_V \gets G_V \cup \{\text{GenerateRandomValue}(\text{elem}(p_v))\}$
-    \EndFor
-
-    \State RewriteTemplate({$\textit{instance}$,$G_V$, $G_T$, $\tau$})
 \EndProcedure
 
 \vspace{1em} 
 
-\Procedure{PopulateCollection}{$collection, elementType$}
-    \State $\textit{N} \gets \text{RandomInteger}(1, 100)$ \Comment{Qual o máximo?}
-    \For{$i = 1 \to N$}
-        \State $\textit{collection}$.add(\text{GenerateRandomValue}(\textit{elementType}))
-    \EndFor
+\Procedure{ParameterCreation}{\textit{type}}
+    \If{\Call{IsPrimitive}{type}}
+        \State \Return type
+    \Else
+        \State dependencies $\gets$ \Call{GetConstructorArguments}{type}
+        \State args $\gets$ empty list
+        \ForAll{dep \textbf{in} dependencies}
+            \State arg $\gets$ \Call{ParameterCreation}{dep}
+            \State Append arg to args
+        \EndFor
+        \State instance $\gets$ \Call{Instantiate}{type, args} \Comment{Create an instance, using the smallest constructor.}
+        \State \Return instance
+    \EndIf
 \EndProcedure
+
 \end{algorithmic}
 \end{algorithm}
 
@@ -210,13 +199,12 @@ Creating the template for each method allows cutting off time of the program gen
 
 \subsection{Input Tester} \label{sec:work_stage1_input_tester}
 
-An \st{very} important aspect of the program generator are the inputs it generates. \st{Every method works differently, receives different parameters, and even when changing the values of these parameters, the method can behave completely different.} \wo{Every method has its on funcionality that may be dependent on the input values.} \st{So, this generator has an intermediate step, between the creation of the template and creating multiple programs, it finds the maximum size the input parameters should receive.} \wo{To be able to better generalize, its important to find the method input values upper limit.} Knowing the maximum size \st{the} \wo{that} different parameters can have is \st{very important} \wo{fundamental} as it needs to be \st{big enough} \wo{representative}, so the energy profiles can \st{be abundant} \wo{cover more cases}, but not \st{to big} \wo{to large} so that the programs start to get out of memory or taking too much time to complete.
-The \st{input search} \wo{limit definition} works by using binary search. It has \st{limits} \wo{an inital threshold} on the inputs (e.g., 1-100,000 to numerical values) and it starts by trying to run the program with the half of the max \st{input} \wo{upper limit threshold} \st{which is 50,000} \wo{(e.g., 50,000)}. 
+An important aspect of the program generator are the inputs it generates. Every method has its on funcionality that may be dependent on the input values.  To be able to better generalize, it is important to find the method input values upper limit. Knowing the maximum size that different parameters can have is fundamental as it needs to be representative, so the energy profiles can cover more cases, but not to large so that the programs start to get out of memory or taking too much time to complete.
+The limit definition works by using binary search. It has an inital threshold on the inputs (e.g., 1-100,000 to numerical values) and it starts by trying to run the program with the half of the maximum upper limit threshold (e.g., 50,000). 
 
-\st{Then it runs the program for maximum of 10 seconds, which is a threshold based on empirical experimentation and waits for the exit code of the program, if it is an error code it will lower the input by half again, of it is a normal finish code, it will increase the input by half. This operation is done until the maximum value for the input is found.},
-\wo{It can be important, for pratical reasons, to impose a threashold on the execution time (in this project, we established the threshold as 10 seconds based on empirical experimentation). If the program runs successfully, it will increase the input by half, and if it fails, it will decrease the input by half. This process continues until the maximum value for the input is found.}
+It can be important, for pratical reasons, to impose a threashold on the execution time (in this project, we established the threshold as 10 seconds based on empirical experimentation). If the program runs successfully, it will increase the input by half, and if it fails, it will decrease the input by half. This process continues until the maximum value for the input is found.
 
-If the method that is being tested has more than one input \wo{, the input tester is responsible to find the upper limit for each parameter individually.}. First it sets all the input values to 1 and then starts the binary search individually for each of the parameters one by one while leaving the other parameters with the value of 1. \wo{Although this is a simplification, this method} avoids having to find multiple combinations of parameters which would increase the time complexity exponentially. \wo{More robust solutions (such as using a combinatory search) could be implemented in the future.} \wo{Nevertheless, even using the simplified solution, the}\st{Since} the process of finding the max inputs is time-consuming. \wo{To improve its performance,} when the maximum value is found, the values of the input type, maximum value and order (\wo{e.g., first, second or third parameter.} \st{if it was the parameter 1 or parameter 2 or parameter 3}) are stored in a file. \st{so if the actual programs later generated are not stored}, \wo{This makes subsequent executions much faster} \st{using this files they can be quickly generated}. It is worthy to mention that the maximum inputs found depend heavily on the machine where the program generation is taking place, as different hardware will change the maximum values allowed for the inputs. \wo{Example 1 illustrates how the input tester works for the method \texttt{List.add(index, Element)}.}
+If the method that is being tested has more than one input, the input tester is responsible to find the upper limit for each parameter individually. First it sets all the input values to 1 and then starts the binary search individually for each of the parameters one by one while leaving the other parameters with the value of 1. Although this is a simplification, this method avoids having to find multiple combinations of parameters which would increase the time complexity exponentially. More robust solutions (such as using a combinatory search) could be implemented in the future. Nevertheless, even using the simplified solution, the process of finding the max inputs is time-consuming. To improve its performance, when the maximum value is found, the values of the input type, maximum value and order (e.g., first, second or third parameter), are stored in a file. This makes subsequent executions much faster. It is worthy to mention that the maximum inputs found depend heavily on the machine where the program generation is taking place, as different hardware will change the maximum values allowed for the inputs. Example 1 illustrates how the input tester works for the method \texttt{List.add(index, Element)}.
 
 \begin{tcolorbox}[
     title=Example 1: Input Testing Process for \texttt{List.add(index, Element)},
@@ -274,9 +262,8 @@ Consider analyzing the \texttt{add} method of a list with the following paramete
 \end{tcolorbox}
 
 
-The fact that the input has a \wo{pre-determined} range \st{of 1 to 100,000} it allows using binary search which makes the search much faster than linear search.
-Nevertheless, the input search does not come without some limitations. First it is constrained to identifying valid input values within the range \st{of 1 to 100,000}. \wo{As an example,} throughout this project we dealt frequently with lists and collections, which require a minimum size of 1 to function correctly. Although this value can be changed in the future, for now it ensures compatibility with most common data structures. The higher bound \st{of 100,000}
- was chosen due to \st{practical experience} \wo{empirical evidences}, as larger input values would lead to st{higher} \wo{limitating} execution times and memory crashes. Another constraint is on how the input handles multiple parameter methods. During its search for a valid input, it needs to fix all the other parameters that is not searching, with a default value (typically \st{1} \wo{the lower bound}). This approach simplifies the testing process and improves efficiency by avoiding the exponential complexity of testing all possible parameter combinations. However, it will introduce limitations in cases where the parameters are interdependent, which can lead to not estimating the real highest input possible. \st{The process also has a timeout of 10 seconds. This threshold was empirically selected to balance precision and practicality, based on our needs and available hardware.}
+The fact that the input has a pre-determined range it allows using binary search which makes the search much faster than linear search.
+Nevertheless, the input search does not come without some limitations. First it is constrained to identifying valid input values within the range. As an example, throughout this project we dealt frequently with lists and collections, which require a minimum size of 1 to function correctly. Although this value can be changed in the future, for now it ensures compatibility with most common data structures. The higher bound was chosen due to empirical evidences, as larger input values would lead to limitating execution times and memory crashes. Another constraint is on how the input handles multiple parameter methods. During its search for a valid input, it needs to fix all the other parameters that is not searching, with a default value (typically the lower bound). This approach simplifies the testing process and improves efficiency by avoiding the exponential complexity of testing all possible parameter combinations. However, it will introduce limitations in cases where the parameters are interdependent, which can lead to not estimating the real highest input possible. 
 Despite these limitations, the input search plays a crucial role in ensuring that the program generator produces viable test cases. By identifying input ranges that are both valid and computationally achievable, it reduces the unusable generated programs (e.g., due to timeouts or crashes), and maximizing the number of generated programs, that can be used for energy profiling.
 
 

@@ -4,7 +4,7 @@
 
 
 
-\wo{First step to start training the machine learning models its to to extract features from the energy profiles. Features are the characteristics of the code that will be used to train the models and are based on the code structure and behavior. The features extracted can be seen in Table~\ref{tab:features_extracted}.}
+\wo{First step to start training the machine learning models it is to extract features from the energy profiles. Features are the characteristics of the code that will be used to train the models and are based on the code structure and behavior. The features extracted can be seen in Table~\ref{tab:features_extracted}.}
 
 \begin{table}[htbp]
 \centering
@@ -55,18 +55,16 @@ Inputs & The parameters received by the method. \\
 
 
 
-\st{When all the energy profiles are collected it is possible to finally start training the models.} 
-%As explained in Section~\ref{sec:background_machine_learning} 
 There are a lot of possible ways of using machine learning, however in this case the approach that best fit our need is supervised machine learning. So, some models were trained to see how good they performed using the data collected.
 
  
 
-\st{First there is a merge of features.} \wo{On the context of this project, the first step it is to merge the features to start training the models}. While each method is initially trained individually, it is not useful to treat \texttt{LinkedList.add(Object)} and \texttt{ArrayList.add(Object)} as entirely separate cases. Both represent the same \texttt{List.add(Object)} method, differing only in their characteristics specific to their implementation. Therefore, once all energy profiles have been collected, a merging step is performed to consolidate these related methods. All these \wo{merged} features are stored in a new CSV and for the python program in a Data frame, to be processed.
+On the context of this project, the first step it is to merge the features to start training the models. While each method is initially trained individually, it is not useful to treat \texttt{LinkedList.add(Object)} and \texttt{ArrayList.add(Object)} as entirely separate cases. Both represent the same \texttt{List.add(Object)} method, differing only in their characteristics specific to their implementation. Therefore, once all energy profiles have been collected, a merging step is performed to consolidate these related methods. All these merged features are stored in a new CSV and for the python program in a Data frame, to be processed.
 
-\st{This part was developed in python using some} \wo{To implement this functionality, Python scripts were used, combining} libraries specialized on machine learning, like scikit-learn (sklearn)~\cite{scikit-learn} which contains \st{some} models and functions to evaluate the models, and PySR~\cite{cranmer2023interpretablemachinelearningscience}\wo{(detailed in Section~\ref{sec:background_machine_learning})}.
+To implement this functionality, Python scripts were used, combining libraries specialized on machine learning, like scikit-learn (sklearn)~\cite{scikit-learn} which contains models and functions to evaluate the models, and PySR~\cite{cranmer2023interpretablemachinelearningscience} (detailed in Section~\ref{sec:background_machine_learning}).
 %which was already explained in Section~\ref{sec:background_machine_learning} an is also already implemented.
 
-\wo{Among the available models, we selected a subset of them to train:} \st{In this phase the models tested were:} Decision Tree Regressor, Random Forest, Gradient Boosting, Linear Regression, and PySR. Firstly the values of the MSE and R² are evaluated by the default values of sklearn. \st{then in a second pass,} GridSearch was used \st{, which is a function of sklearn that tries} to find the best parameters for a model. After that the scores and models are saved \wo{← essa frase está solta}. The GridSearch does not work with PySR as they are from different libraries so, the parameters for PySR were manually set. When the models are trained, they are moved to the extension folders ready to be used.
+Among the available models, we selected a subset of them to train: Decision Tree Regressor, Random Forest, Gradient Boosting, Linear Regression, and PySR. Firstly the values of the MSE and R² are evaluated by the default values of sklearn. GridSearch was used to find the best parameters for a model. The GridSearch does not work with PySR as they are from different libraries so, the parameters for PySR were manually set. When the models are trained, they are moved to the extension folders ready to be used, and all the metrics for each model are logged to a file for subsequent analysis.
 
 
 \begin{comment}

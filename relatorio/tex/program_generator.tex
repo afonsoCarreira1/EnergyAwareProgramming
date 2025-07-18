@@ -86,8 +86,6 @@ The generator is capable of generating programs for custom, developer-created, J
 
 The first step to generate multiple programs is to first create an intermediate template capable of holding the necessary code that will later be used for energy profiling.
 
-\wo{O parágrafo abaixo está um bocado confuso. acho melhor reescrever.}
-
 To generate programs for a specific class, the user has to input the name of the collection or the name of the custom program it wants to generate. For the collections of Lists, Sets and Maps, the generator is prepared to create more than one implementation of those collections, for example, if the objective is to generate programs to the List collection, the program generator will use the \texttt{ArrayList}, \texttt{LinkedList}, \texttt{Vector} and \texttt{CopyOnWriteArrayList}. The user can also input the name of the method to be analyzed, or simply gather all the available methods in the class, which are then found using Spoon.
 After the search for the methods, the generator has access to all the methods it will analyze and their input parameters. Since it has access to the whole class, it can see how its constructors are called, and use them if any of the methods parameters requires. It recursively calls constructors if needed, making it very versatile to use. After identifying the methods that will be targeted, it starts by creating templates for each of them. The templates are Java classes that contain the necessary code to run the method, and placeholders for the inputs and types. The templates are structured so that they can be easily modified later, allowing the generator to create multiple programs based on the same template. The templates are designed following the structure below:
 
@@ -104,7 +102,7 @@ After the search for the methods, the generator has access to all the methods it
 Also, the template is structured so that the programs will work in harmony with the \textbf{Orchestrator}, that will extract the energy profile for each program (see Section~\ref{sec:work_stage2_orchestrator}), so when the placeholders are replaced with actual values, the orchestrator can run the program, and communicate with them.
 
 
-\begin{listing}[H]
+\begin{listing}[htbp]
 \noindent\rule{\linewidth}{0.4pt}
 \begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
 static class BenchmarkArgs {
@@ -124,51 +122,59 @@ static class BenchmarkArgs {
 \label{lst:var_placeholders}
 \end{listing}
 
-Templates will have the definitions of a class that holds the necessary variables that the method under evaluation needs to run. Listing~\ref{lst:var_placeholders} shows an example of template to evaluate the method \texttt{List.add(Object)}. It follows the algorithm described in Algorithm \ref{alg:test_generation}. First it creates the list with the smallest constructor possible, then if the variable is a collection (List, Set, Map), or an array, it calls a custom-made method that populates collections with random values of a given type, and then it starts creating variables of parameters that the method \texttt{List.add(Object)} uses. The placeholder \texttt{ChangeValueHere1} will change to a random number, it contains a number \texttt{1} because it represents the input number of the method that will later help the model training understand how inputs can affect energy consumption. The placeholder \texttt{changetypehere} later changes to a type. The template after the transformation can be seen in the Listing~\ref{lst:var_placeholders_replaced}
+Templates will have the definitions of a class that holds the necessary variables that the method under evaluation needs to run. Listing~\ref{lst:var_placeholders} shows an example of template to evaluate the method \texttt{List.add(Object)}. It follows the algorithm described in Algorithm~\ref{alg:template_creation_algorithm}. First it creates the list with the smallest constructor possible, then if the variable is a collection (List, Set, Map), or an array, it calls a custom-made method that populates collections with random values of a given type, and then it starts creating variables of parameters that the method \texttt{List.add(Object)} uses. The placeholder \texttt{ChangeValueHere1} will change to a random number, it contains a number \texttt{1} because it represents the input number of the method that will later help the model training understand how inputs can affect energy consumption. The placeholder \texttt{changetypehere} later changes to a type. The template after the transformation can be seen in the Listing~\ref{lst:var_placeholders_replaced}
 
 
 
-\begin{algorithm}[H]
-\caption{Template Fullfillment Algorithm}
-\label{alg:test_generation}
+\begin{algorithm}[htbp]
+\caption{Template Creation Algorithm}
+\label{alg:template_creation_algorithm}
 \begin{algorithmic}[1]
     \Statex \textbf{Given:}
     \Statex \hspace{\algorithmicindent} $collection \coloneqq \{\text{List}\}$, collection selected.
     \Statex \hspace{\algorithmicindent} $ds \coloneqq \{\text{List, Map, Set, arrays}\}$, existent data structures.
     \Statex \hspace{\algorithmicindent} $methods \coloneqq \{\text{add, size, get}, \dots\}$, the set of methods of the classes.
 
-\Procedure{FullfillTemplate}{}
-    \ForAll{method \textbf{in} methods}
-        \ForAll{parameter \textbf{in} \texttt{method.parameters}}
-            \State textit{var} $\gets$ \Call{ParameterCreation(\texttt{parameter.type})}
-            \If{$parameter.type \in ds$}
-                \State \Call{FillWithRandomValues}{var, maxSizePlaceHolder, typePlaceHolder}
-            \EndIf
+    \Procedure{CreateTemplate}{}
+        \State \textit{methods} $\gets$ \Call{getMethods}{\texttt{collection}}
+        \ForAll{method \textbf{in} methods}
+            \State vars $\gets$ empty list
+            \ForAll{parameter \textbf{in} \texttt{method.parameters}}
+                \State \textit{var} $\gets$ \Call{ParameterCreation}{\texttt{parameter.type}}
+                \If{$parameter.type \in ds$}
+                    \State \Call{FillWithRandomValues}{var, maxSizePlaceHolder, typePlaceHolder}
+                \EndIf
+                \State Append var to vars
+            \EndFor
+            \State \Call{CreateBenchmarkArrayMethod}{method, vars}
+            \State \Call{CreateBenchmarkMethod}{method, vars}
+            \State \Call{CreateOrchestratorStartSetup}{}
+            \State \Call{CreateComputationMethod}{method, vars}
+            \State \Call{CreateOrchestratorEndSetup}{}
+            \State \Call{SaveTemplate}{}
         \EndFor
-    \EndFor
-\EndProcedure
+    \EndProcedure
 
-\vspace{1em} 
-
-\Procedure{ParameterCreation}{\textit{type}}
-    \If{\Call{IsPrimitive}{type}}
-        \State \Return type
-    \Else
-        \State dependencies $\gets$ \Call{GetConstructorArguments}{type}
-        \State args $\gets$ empty list
-        \ForAll{dep \textbf{in} dependencies}
-            \State arg $\gets$ \Call{ParameterCreation}{dep}
-            \State Append arg to args
-        \EndFor
-        \State instance $\gets$ \Call{Instantiate}{type, args} \Comment{Create an instance, using the smallest constructor.}
-        \State \Return instance
-    \EndIf
-\EndProcedure
-
+    \Procedure{ParameterCreation}{\textit{type}}
+        \If{\Call{IsPrimitive}{type}}
+            \State \Return type
+        \Else
+            \State dependencies $\gets$ \Call{GetConstructorArguments}{type}
+            \State args $\gets$ empty list
+            \ForAll{dep \textbf{in} dependencies}
+                \State arg $\gets$ \Call{ParameterCreation}{dep}
+                \State Append arg to args
+            \EndFor
+            \State instance $\gets$ \Call{Instantiate}{type, args} \Comment{Create an instance, using the smallest constructor.}
+            \State \Return instance
+        \EndIf
+    \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-\begin{listing}[H]
+
+
+\begin{listing}[htbp]
 \noindent\rule{\linewidth}{0.4pt}
 \begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
 static class BenchmarkArgs {
@@ -270,8 +276,56 @@ Despite these limitations, the input search plays a crucial role in ensuring tha
 
 \subsection{Program Generation} \label{sec:work_stage1_program_generation}
 
-Finally, when the templates are created, and the maximum inputs are found the program generation can finally begin. This part consists on picking every template created and replacing the placeholder values with actual values created by a random number generator.
+Finally, when the templates are created, and the maximum inputs are found the program generation can finally begin. This part consists on picking every template created and replacing the placeholder values with actual values created by a random number generator. It follows the algorithm described in Algorithm~\ref{alg:template_fullfillment_algorithm}
 
-It starts by looping through the types and changing them to the Java wrapper classes, then it loops through the array size. Lastly, it loops through the input sizes determined by the input tester and can repeat this process a configurable number of times. By increasing the number of iterations, results in more programs being generated with random inputs, constrained by the previously identified input bounds. \wo{desenha um algoritmo como eu fiz anteriormente para mostrar como isso funciona.}
+It starts by looping through the types and changing them to the Java wrapper classes, then it loops through the array size. Lastly, it loops through the input sizes determined by the input tester and can repeat this process a configurable number of times. By increasing the number of iterations, results in more programs being generated with random inputs, constrained by the previously identified input bounds. 
+
+
+
+
+\begin{algorithm}[htbp]
+\caption{Template Fullfillment Algorithm}
+\label{alg:template_fullfillment_algorithm}
+\begin{algorithmic}[1]
+    \Statex \textbf{Given:}
+    \Statex \hspace{\algorithmicindent} $templates$, list of templates previously generated.
+    \Statex \hspace{\algorithmicindent} $types \coloneqq \{\text{Integer, Double, Long, Float, Short, Character }\}$, types to be replaced.
+    \Statex \hspace{\algorithmicindent} $arraySize \coloneqq \{\text{75\,000, 100\,000, 150\,000}\}$, array sizes to be used.
+    \Statex \hspace{\algorithmicindent} $template.maxInputs $, each template has a maximum input file associated to it.
+    \Statex \hspace{\algorithmicindent} $iterations $, number of iterations for the input loop.
+
+\Procedure{FullfillTemplate}{}
+    \ForAll{template \textbf{in} templates}
+        \ForAll{type \textbf{in} \texttt{types}}
+            \State program $\gets$ \Call{Replace}{template, "typePlaceHolder", type}
+                \ForAll{arraySize \textbf{in} \texttt{arraySizes}}
+                    \State program2 $\gets$ \Call{Replace}{program, "arraySizePlaceHolder", arraySize}
+                        \For{$i \gets 0$ \textbf{to} \texttt{iterations}}
+                            \State program3 $\gets$ \Call{replaceValues}{program2, template.maxInputs}
+                            \State \Call{SaveToFile}{program3}
+                        \EndFor
+                \EndFor
+        \EndFor
+    \EndFor
+    
+\EndProcedure
+
+\vspace{1em} 
+
+\Procedure{ReplaceValues}{program, maxInputs}
+    \State valuesToReplace $\gets$ \Call{FindStringsToReplace}{program, placeholderPattern}
+    \For{$i \gets 0$ \textbf{to} \Call{Size}{valuesToReplace} - 1}
+        \State value $\gets$ valuesToReplace[i]
+        \State type $\gets$ \Call{ExtractType}{value}
+        \State max $\gets$ maxInputs[i]
+        \State min $\gets$ \Call{Min}{1, max}
+        \State newValue $\gets$ \Call{GetRandomValue}{type, min, max}
+        \State program $\gets$ \Call{Replace}{program, value, newValue}
+    \EndFor
+    \State \Return program
+\EndProcedure
+
+\end{algorithmic}
+\end{algorithm}
 
 This process easily generate thousands of programs which are crucial to train machine learn models that are able to predict energy consumption. When generating programs, a number is chosen to balance the requirements for effective model training while minimizing the time spent on input testing and collecting energy profiles. Afterwards, that the programs are ready to be compiled and used.

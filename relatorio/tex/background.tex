@@ -88,13 +88,76 @@ An alternative with minimal overhead is to use software-based tools. These tools
 
 Understanding and optimizing energy consumption in software requires specialized tools capable of measuring and analyzing power usage. These tools provide valuable insights into how programs consume energy during execution, enabling developers to identify inefficiencies and optimize performance.
 
+At the start some tools were tested in order to see the one that best suited the needs of the project:
+
 Intel RAPL (Running Average Power Limit)~\cite{intel_rapl} is a tool for monitoring power consumption. It utilizes Model-Specific Registers (MSRs), which are used for program execution tracing, performance monitoring, and toggling CPU features. These registers can store the total energy usage of the CPU and memory, allowing it to be read and analyzed. Most software based tools rely on RAPL to measure energy consumption, since it is pretty accurate and is widely available in most CPUs.
+
+
+Perf~\cite{perfwiki_main} is a Linux tool primarily designed for analyzing application performance characteristics rather than precise energy measurement. While it can provide some energy-related metrics, its measurements tend to be imprecise. In this context, Perf was used mainly to get a rough idea of energy consumption and to serve as an alternative when more accurate tools were unavailable.
+
+Powertop~\cite{archlinux_powertop} was also tested, but it could only perform energy measurements on laptops, as it relies on battery drain data to calculate energy consumption. Since this approach does not align with our specific requirements, we considered Powertop as a last-resort option.
+
+JoularJx~\cite{noureddine-ie-2022} is an energy measurement tool capable of measuring the consumption of Java programs and its methods. However, it is not as precise as other tools as it requires to measure the entire start of the JVM and whole functions instead of small code blocks.
+
 
 PowerJoular~\cite{noureddine-ie-2022} is an open source tool, capable of measuring energy, from the CPU and GPU, using the Intel RAPL power data through the Linux powercap interface it can read the energy from the CPU and for the GPU it uses NVIDIA SMI to directly read the power consumption.
 To read the power consumption of specific processes, PowerJoular monitors the CPU cycles and utilization of each process. By knowing the total power consumption of the CPU through the RAPL interface, it can calculate the power usage of individual processes based on their CPU utilization.
 It is build in ADA, that is considered one of most energy efficient programming languages~\cite{PEREIRA2021102609}, and it can monitor applications by name or PID. In this work, it will be necessary to measure the energy consumption of programs, methods, and specific code snippets. To achieve this, PowerJoular will be employed as the primary tool for energy profiling.
 
 Experiment-Runner~\cite{S2_Group_Experiment_Runner} is a framework built in python made to facilitate experiments, it is easily customizable and can be used with energy measurement tools, such as PowerJoular, to monitor the power consumption of another process. While it offers robust support for energy-related experiments, some issues were identified during its use, which will be discussed in detail in Section~\ref{chapter:results}.
+
+\begin{table}[H]%[htbp]
+\centering
+\caption{Comparison of energy measurement tools}
+\begin{tabular}{|l|p{5.5cm}|p{5.5cm}|}
+\hline
+\textbf{Tool} & \textbf{Pros} & \textbf{Cons} \\
+\hline
+\textbf{Intel RAPL}~\cite{intel_rapl} & 
+- Hardware-level accuracy \newline
+- Widely supported in modern CPUs \newline
+- Low overhead and high precision & 
+- Not easily accessible \newline
+- Cannot measure per-process energy directly \\
+\hline
+\textbf{Perf}~\cite{perfwiki_main} & 
+- Standard Linux tool \newline
+- Useful for performance + rough energy metrics & 
+- Not designed for energy profiling \newline
+- Low precision in energy consumption \\
+\hline
+\textbf{Powertop}~\cite{archlinux_powertop} & 
+- Easy to use \newline
+- Good for overall system power stats on laptops & 
+- Relies on battery drain \newline
+- Ineffective on desktops or servers \\
+\hline
+\textbf{JoularJx}~\cite{noureddine-ie-2022} & 
+- Measures Java program energy \newline
+- Method-level granularity possible & 
+- Less precise \newline
+- Only works with Java \newline
+- Can only measure large code blocks \\
+\hline
+\textbf{PowerJoular}~\cite{noureddine-ie-2022} & 
+- Support for CPU and GPU \newline
+- Supports per-process measurement \newline
+- Built in energy-efficient ADA \newline
+- Monitors by name or PID & 
+- Multi-thread measurement is limited \newline
+- Slightly more complex setup \\
+\hline
+\textbf{Experiment-Runner}~\cite{S2_Group_Experiment_Runner} & 
+- Highly customizable \newline
+- Integrates well with PowerJoular \newline
+- Ideal for repeatable experiments & 
+- Limited control over measurement internals, since it relies on a prebuilt framework instead of a custom solution \newline
+- Some bugs and issues in practical use \\
+\hline
+\end{tabular}
+\label{tab:tool_comparison}
+\end{table}
+
 
 
 \section{Code static and dynamic analysis} \label{sec:background_static_dynamic_analysis}

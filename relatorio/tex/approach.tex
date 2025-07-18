@@ -1,16 +1,10 @@
 \chapter{Approach and Implementation}\label{chapter:approach}
 
-\wo{Eu tentei dar um feedback mais focado aqui mas acho que tem muita coisa que precisa ser reescrita. Me parece que o objetivo é uma ferramenta mas na verdade, o plugin é somente um pequeno pedaço do que é o framework. O framework é o que faz a geração de programas, coleta de dados, treinamento de modelo e construção do plugin. O plugin é uma parte do framework, mas não é o objetivo final e nem a única coisa que foi construída. Também não gosto muito do uso de 'tool' por toda parte. Não sei se o 'tool' é o framework, se o 'tool' é só o plugin. Está bem confuso.}
+
 
 The main goal of this work is to help developers understand the energy consumption of their programs, enabling them to make informed decisions about energy efficiency during development.
 
 In order to achieve this goal, a framework was built with the objective of simplifying and automating the process of program generation, energy measurement, and model training. The framework is built with a modular approach, by making it easier to change in face of new needs. It is composed of four distinct modules, three implemented in Java and one as a standalone Python script, ensuring ease of installation and integration. Depending on the specific use case, these modules can function either as a unit or independently. Being the final component a simple and practical extension tool for VSCode, it can quickly and accurately estimate developers programs energy consumption. This allows them to get immediate feedback on energy consumption with every code change, facilitating energy-efficient development.
-
-
-It is important to note that the extension tool will serve as a guide, providing energy consumption estimates to raise awareness rather than dictate action. Ultimately, it is up to developers to decide whether to prioritize performance, energy efficiency or any other factor. For example, if a program only needs to run within a certain timeframe and can afford a slight reduction in performance, developers may choose to trade some performance for improved energy efficiency, making more informed decisions thanks to the insights provided by the tool.
-To provide this insight to developers it is necessary to build a tool that can provide all of that. The tool needs to be practical, which means that integrating it in an IDE is recommended. With this the developer only needs to download an extension for an IDE and will access to the insights provided by the tool.
-The tool will be a VSCode extension \wo{só o plugin?} built using the LSP as explained in~\ref{sec:background_lsp}. While VSCode may not be the most commonly used IDE for Java projects compared to Eclipse or IntelliJ IDEA, it provides a much simpler and more accessible environment for developing and testing extensions. This will make it accessible to most developers wanting feedback on the energy consumption. To make it fast, it will use static analysis to parse the code into an AST, from there it is capable of analyzing the code and using an inference function it will output the estimated cost.
-
 
 
 
@@ -30,7 +24,7 @@ There are several Java parsing tools available, such as WALA~\cite{wala_main}, S
 
 
 
-In order to build the extension, it was necessary to build a system architecture capable of providing as final output the functioning estimation tool. The architecture follows different stages, that were deeply analyzed before moving to the next one.
+{\color{blue}To build the framework, it was necessary to design a system architecture capable of supporting the entire pipeline, from program generation and benchmark data collection to model training and prediction. The architecture is divided into distinct stages, each carefully analyzed and refined before progressing to the next.}
 The architecture is divided in four main modules: \textbf{Program Generator}, \textbf{Orchestrator}, \textbf{Parser}, and \textbf{Extension Tool}, as illustrated in Figure~\ref{fig:main_modules}, will be explained in the following sections:
 
 
@@ -42,13 +36,3 @@ The architecture is divided in four main modules: \textbf{Program Generator}, \t
 \input{./tex/model_training}
 
 \input{./tex/extension_build}
-
-
-
-%\section{Step 3: Implementation and testing} \label{sec:work_step3_implementation_and_testing}
-%
-%Once the main components of the tool are built, they need to be assembled into the extension. When using it, the developers should be able to see the total energy estimate of their code in the IDE, and it should also show the estimates for each function and its most energy consuming lines.
-%The estimate alone may be enough to understand if the code is high or low in energy consumption, for example, if the developer has two implementations of the same function and they both give different values, it may be easy to understand which one consumes the most. However, this may not always be the case, so the tool will also provide some information to help the developer know how good or bad the energy efficiency of the code is.
-%
-%Another important step is to test and ensure that the tool performs as expected on most machines, delivers the most accurate estimations possible, and undergoes a final comparison with other tools to evaluate its effectiveness.
-%

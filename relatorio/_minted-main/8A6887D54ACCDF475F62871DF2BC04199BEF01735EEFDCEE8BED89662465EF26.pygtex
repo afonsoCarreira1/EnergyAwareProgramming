@@ -1,0 +1,19 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{class} \PYG{n+nc}{WordFrequency}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{HashMap}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Integer}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{countWordFrequency}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{text}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{String}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{words}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{text}\PYG{p}{.}\PYG{n+na}{toLowerCase}\PYG{p}{().}\PYG{n+na}{split}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}\PYGZbs{}\PYGZbs{}W+\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{HashMap}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Integer}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{frequencyMap}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{HashMap}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}
+\PYG{+w}{        }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{word}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{words}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{word}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}\PYG{+w}{ }\PYG{k}{continue}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{temp}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{frequencyMap}\PYG{p}{.}\PYG{n+na}{getOrDefault}\PYG{p}{(}\PYG{n}{word}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{frequencyMap}\PYG{p}{.}\PYG{n+na}{put}\PYG{p}{(}\PYG{n}{word}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{temp}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{frequencyMap}\PYG{p}{;}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{main}\PYG{p}{(}\PYG{n}{String}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{args}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{input}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Java is simple. Java is powerful.\PYGZdq{}}\PYG{p}{;}
+\PYG{+w}{        }\PYG{n}{HashMap}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Integer}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{result}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{countWordFrequency}\PYG{p}{(}\PYG{n}{input}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{System}\PYG{p}{.}\PYG{n+na}{out}\PYG{p}{.}\PYG{n+na}{println}\PYG{p}{(}\PYG{n}{result}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

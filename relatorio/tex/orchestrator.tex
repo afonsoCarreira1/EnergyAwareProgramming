@@ -2,37 +2,22 @@
 
 \section{Stage 2: Orchestrator} \label{sec:work_stage2_orchestrator}
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[scale = 0.7]{figures/orchestrators_process.pdf}
-  \caption{Orchestrator Workflow}
-  \label{fig:orchestrators_workflow}
-\end{figure}
+
 
 
 Having all the programs generated, it is possible to move to the next stage. Gathering the energy profiles for each of the generated programs. 
 Energy profiles~\cite{10.1145/2884781.2884869,8816747} are an established way to organize energy consumption data. They will be the main data source of the machine learning models to obtain accurate results. To reduce the complexity of this task, a process was implemented, illustrated in Figure~\ref{fig:orchestrators_workflow}. This process automates the task while taking into account what was mentioned in Section~\ref{sec:background_benchmarking}.
 
 As described in the Section~\ref{sec:background_energy} there are several tools capable of performing dynamic energy measurements.
-At the start some tools were tested in order to see the one that best suited the needs of the project:
-\wo{faz uma tabela com todas essas ferramentas, com as suas vantagens e desvantagens e mostra por qual motivo escolhemos o PowerJoular. Agora, isso não deveria estar aqui. Deveria estar no background.}
 
-\textbf{Perf} is a Linux tool primarily designed for analyzing application performance characteristics rather than precise energy measurement. While it can provide some energy-related metrics, its measurements tend to be imprecise. In this context, Perf was used mainly to get a rough idea of energy consumption and to serve as an alternative when more accurate tools were unavailable.
-
-\textbf{Powertop} was also tested, but it could only perform energy measurements on laptops, as it relies on battery drain data to calculate energy consumption. Since this approach does not align with our specific requirements, we considered Powertop as a last-resort option.
-
-\textbf{JoularJx} is an energy measurement tool capable of measuring the consumption of Java programs and its methods. However, it is not as precise as other tools as it requires to measure the entire start of the JVM and whole functions instead of small code blocks.
-
-\wo{Podes fazer a comparação no background e manter só o parágrafo abaixo aqui.}
-
-\textbf{PowerJoular} has good features that caught our attention, for example being a command line tool that could be easily integrated in almost every programming language, it stores the energy used in a CSV file, capable of only reading energy of running processes and so on, as explained before in Section~\ref{sec:background_energy}.
+PowerJoular has good features that caught our attention, for example being a command line tool that could be easily integrated in almost every programming language, it stores the energy used in a CSV file, capable of only reading energy of running processes and so on, as explained before in Section~\ref{sec:background_energy}.
 
 Since PowerJoular is a command line tool, it is launched as a process, and then it can be killed whenever needed because it is a process as well. This allows to measure not only programs/processes energies but have a more precise measurement, as it is possible to call PowerJoular to measure a specific computation and then kill it when the computation is finished.
 
 With all of this in mind a process was built. The process uses an orchestrator that is responsible for invoking the target program and the measurement tool (PowerJoular) to accurately measure the energy consumption of the program or the specific computation being analyzed within it.
 
 
-One challenge in measuring energy consumption is that computation often completes too quickly to capture accurately. It is hard to measure a single operation of, for example, a \texttt{List.add(Object)} with most tools, as it simply to fast for the tool to capture, and if the tool was able to capture it, the energy measured could have too much noise to be considered. Our solution was to loop through the method until the tool is capable of getting its energy and then dividing the total energy by the number of times it looped. 
+One challenge in measuring energy consumption is that computation often completes too quickly to capture accurately. It is hard to measure a single operation of, for example, a \texttt{List.\allowbreak add(Object)} with most tools, as it simply to fast for the tool to capture, and if the tool was able to capture it, the energy measured could have too much noise to be considered. Our solution was to loop through the method until the tool is capable of getting its energy and then dividing the total energy by the number of times it looped. 
 This solution, although effective, introduces potential errors that need to be addressed.
 
 By approaching the measurements with the loop technique, first we need to create the variables needed for the method target to analysis, like shown in the Listing~\ref{lst:var_placeholders} \wo{dê exemplos}. However, because, the methods are treated like a black box, it is not possible to know what the methods are going to do with the parameters or with its variables. {\color{blue} For example, the method \texttt{List.size()} has no parameteres, and return the size of the list. In this case the functioning of the method is known, and it is noticeable that the attributes of the object will not change, as the method simply reads and returns a value.
@@ -51,11 +36,11 @@ To prevent this side effect from happening we designed a solution that consists 
   \label{fig:array}
 \end{figure}
 
-To be able to collect some of the faster executions, the original PowerJoular was modified to allow customizable measurement durations, enabling readings at intervals shorter than the default 1 second, such as 100ms, which provides greater flexibility and finer granularity in energy profiling.
+To be able to collect some faster executions, the original PowerJoular was modified to allow customizable measurement durations, enabling readings at intervals shorter than the default 1 second, such as 100ms, which provides greater flexibility and finer granularity in energy profiling.
 
 The computation method shown in Listing~\ref{lst:Computation_method} illustrates how each profiling method operates independently of the specific method being evaluated. It attempts to execute the target function repeatedly for approximately one second. In this particular case, the target function performs the operation \texttt{var.add(arg0);} and returns the number of iterations completed, which is then used for further calculations.
 
-\begin{listing}[H]
+\begin{listing}[htbp]%[H]
 \noindent\rule{\linewidth}{0.4pt}
 \begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
 private static int computation(BenchmarkArgs[] args, int iter) {
@@ -78,7 +63,12 @@ With the process structure now defined, we can proceed to explain how it functio
 The workflow of this step can be described as follows:
 
 
-\wo{Descreve isso usando um, algoritmo, como fiz antes. Podes deixar a descrição em texto aqui também.}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale = 0.7]{figures/orchestrators_process.pdf}
+  \caption{Orchestrator Workflow}
+  \label{fig:orchestrators_workflow}
+\end{figure}
 
 \begin{itemize}
   \item The orchestrator launches a command to start the target Java Program and waits a signal.

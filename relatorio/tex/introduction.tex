@@ -55,7 +55,7 @@ This thesis presents a framework that automates the generation, execution, energ
 
     \item \textbf{User-Friendly Interface:} A simple graphical user interface (GUI) was developed to enable user interaction with the models. It includes sliders to change input features and observe how these changes affect the predicted energy usage.
     
-    \item \textbf{Method-Based Energy Calculation:} The tool predicts energy at the method level. If one method calls others, its energy is estimated by summing the predictions of those calls. {\color{blue}For example, if \texttt{baz()} calls \texttt{foo()} and \texttt{bar()}, its energy is based on the models trained for those two operations. This approach makes the predictions more modular and easier to reuse across different programs.}
+    \item \textbf{Method-Based Energy Calculation:} The tool predicts energy at the method level. If one method calls others, its energy is estimated by summing the predictions of those calls. {\color{blue}For example, if \texttt{foo()} calls \texttt{bar()} and \texttt{baz()}, its energy is based on the models trained for those two operations. This approach makes the predictions more modular and easier to reuse across different programs.}
 
     \item \textbf{Support for Future Improvements:} The framework is built to be flexible and adaptable, allowing for easy integration of new features, or learning algorithms. This makes it a good foundation for future work in the energy-aware software area.
 \end{itemize}

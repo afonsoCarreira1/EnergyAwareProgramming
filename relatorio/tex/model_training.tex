@@ -2,53 +2,45 @@
 
 
 
-First step to start training the machine learning models it is to extract features from the energy profiles. Features are the characteristics of the code that will be used to train the models and are based on the code structure and behavior. The features extracted can be seen in Table~\ref{tab:features_extracted}.
+First step to start training the machine learning models it is to extract features from the energy profiles. Features are the characteristics of the code that will be used to train the models and are based on the code structure and behavior. The features extracted can be seen in Table~\ref{tab:features_extracted_grouped}.
 
-\begin{table}[htbp]
-\centering
-\caption{Features Extracted}
-\label{tab:features_extracted}
-%\makebox[\textwidth][c]{% uncomment if needed and comment line bellow
-\resizebox{0.95\textwidth}{!}{
-\begin{tabular}{l|c}
-\hline
-\textbf{Feature Name} & \textbf{Description} \\
-\hline\hline
-VariableDeclarations & Number of variable declarations in the code. \\
-\hline
-Assignments & Number of assignment operations (=) in the code. \\
-\hline
-BinaryOperators & Number of binary operators used (e.g., +, -, *, /, \&\&). \\
-\hline
-MethodInvocations & Number of method calls in the code. \\
-\hline
-CustomMethodsUsed & Number of user-defined (custom) methods used in the code. \\
-\hline
-CustomObjectsUsed & Number of user-defined (custom) objects used in the code. \\
-\hline
-BranchCount & Number of branching statements ( if, else if, else ) in the code. \\
-\hline
-LoopCount & Number of loops ( for, while, do-while ) in the code. \\
-\hline
-LoopMaxDepth & Maximum nesting depth of loops in the code. \\
-\hline
-CyclomaticComplexity & The cyclomatic complexity of the code (number of independent execution paths). \\
-\hline
-LiteralCount & Number of literals (numbers, strings, boolean values) in the code. \\
-\hline
-VariableCount & Total number of variables in the code. \\
-\hline
-Reassignments & Number of times variables are reassigned a new value. \\
-\hline
-VariableTypes & Types of variables used (e.g., int, String, List$<$String$>$). \\
-\hline
-ImportsUsed & List of imported Java packages/libraries in the code. \\
-\hline
-java.langMethodUsed & If the method is from java.lang, the specific function name (e.g., ArrayList.get). \\
-\hline
-Inputs & The parameters received by the method. \\
-\hline\hline
-\end{tabular}}
+\begin{table}[htbp]  
+  \footnotesize
+  \centering
+  \caption{Features extracted for Model Training, grouped by category}
+  \label{tab:features_extracted_grouped}
+  \begin{tabularx}{\textwidth}{l X}
+
+    \toprule
+    \textbf{Feature Name} & \textbf{Description} \\
+    \midrule
+    \multicolumn{2}{l}{\textit{Syntactic and Operator Counts}} \\
+    \addlinespace
+    \texttt{VariableDeclarations} & Number of variable declarations. \\
+    \texttt{Assignments}          & Number of assignment operations (\texttt{=}). \\
+    \texttt{BinaryOperators}      & Number of binary operators (e.g., \texttt{+}, \texttt{-}, \texttt{*}, \texttt{/}, \texttt{\&\&}). \\
+    \texttt{MethodInvocations}    & Number of method calls. \\
+    \texttt{LiteralCount}         & Number of literals (e.g., numbers, strings, boolean values). \\
+    \addlinespace
+    \multicolumn{2}{l}{\textit{Control Flow and Complexity}} \\
+    \addlinespace
+    \texttt{BranchCount}          & Number of branching statements (\texttt{if}, \texttt{else if}, \texttt{else}). \\
+    \texttt{LoopCount}            & Number of loops (\texttt{for}, \texttt{while}, \texttt{do-while}). \\
+    \texttt{LoopMaxDepth}         & Maximum nesting depth of loops. \\
+    \texttt{CyclomaticComplexity} & The cyclomatic complexity of the code (number of independent execution paths). \\
+    \addlinespace
+    \multicolumn{2}{l}{\textit{Variable and Type Information}} \\
+    \addlinespace
+    \texttt{VariableCount}        & Total number of variables. \\
+    \texttt{Reassignments}        & Number of times variables are reassigned a new value. \\
+    \texttt{VariableTypes}        & Types of variables used (e.g., \texttt{int}, \texttt{String}, \texttt{List<String>}). \\
+    \texttt{CustomMethodsUsed}    & Number of user-defined (custom) methods used. \\
+    \texttt{CustomObjectsUsed}    & Number of user-defined (custom) objects used. \\
+    \texttt{ImportsUsed}          & List of imported Java packages or libraries. \\
+    \texttt{java.langMethodUsed}  & If the method is from \texttt{java.lang}, the specific function name (e.g., \texttt{ArrayList.get}). \\
+    \texttt{Inputs}               & The parameters received by the method. \\
+    \bottomrule
+  \end{tabularx}
 \end{table}
 
 

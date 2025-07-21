@@ -2,63 +2,50 @@
 
 %\section{The issue with inconsistent energy readings} \label{sec:results_the_issue_with_inconsistent_energy_readings}
 
+\wo{In this section we will report the results of the experiments conducted to evaluate the framework and its components. The results will be presented in a structured manner, focusing on the performance of the program generator, the orchestrator, the model training, and the extension tool. Each section will provide insights into the effectiveness of the framework in measuring and predicting energy consumption in Java programs.}
 
-
-To perform this experiment two computers were used:
+\wo{Our hardware infrastructure is composed of two systems, one high-performance workstation used for data generation and collection, and a lower-spec machine used for testing the extension tool. The high-performance workstation is equipped with an AMD Ryzen Threadripper 3960X CPU, 94 GiB of RAM, and an NVIDIA GeForce RTX 3090 Ti GPU, while the lower-spec machine has an AMD Ryzen 5 3600 CPU, 16 GiB of RAM, and an NVIDIA GeForce RTX 3060 Ti GPU. The details of the hardware specifications can be found in Table~\ref{tab:hardware_specs}.}
 
 \begin{table}[htbp]
-\centering
-\caption{System Hardware Specifications}
-\begin{tabular}{|l|p{10cm}|}
-\hline
-\textbf{Component} & \textbf{Specification} \\
-\hline
-\multicolumn{2}{|l|}{\textbf{System 1 — Data Generation and Collection (High-Performance Workstation)}} \\
-\hline
-Operating System & Ubuntu 24.04.2 LTS (x86\_64) \\
-\hline
-CPU & AMD Ryzen Threadripper 3960X \\
-     & 24 cores / 48 threads \\
-     & Base frequency: 2.2 GHz, Boost up to ~5.05 GHz \\
-\hline
-Memory (RAM) & 94 GiB \\
-\hline
-GPU & NVIDIA GeForce RTX 3090 Ti (GA102) \\
-    & VRAM: 24 GiB (standard) \\
-\hline
-
-\multicolumn{2}{|l|}{\textbf{System 2 — Machine for Testing (Lower-Spec)}} \\
-\hline
-Operating System & Ubuntu 24.04.2 LTS (x86\_64) \\
-\hline
-CPU & AMD Ryzen 5 3600 \\
-     & 6 cores / 12 threads \\
-     & Base frequency: 3.6 GHz, Boost up to ~4.2 GHz \\
-\hline
-Memory (RAM) & 16 GiB \\
-\hline
-GPU & NVIDIA GeForce RTX 3060 Ti \\
-    & VRAM: 8 GiB (standard) \\
-\hline
-\end{tabular}
-\label{tab:hardware_specs}
+  \small
+  \centering
+  \caption{Hardware Infrastructure Specifications}
+  \label{tab:hardware_specs}
+  \begin{tabularx}{\textwidth}{l X}
+    \toprule
+    \textbf{Component} & \textbf{Specification} \\
+    \midrule
+    \multicolumn{2}{l}{\textbf{System 1 — Data Generation and Collection (High-Performance Workstation)}} \\
+    \cmidrule(r){1-2}
+    OS & Ubuntu 24.04.2 LTS (x86\_64) \\
+    CPU                 & AMD Ryzen Threadripper 3960X (24 cores / 48 threads). 2.2 GHz, up to 5.05 GHz \\
+    RAM                 & 94 GiB \\
+    GPU                 & NVIDIA GeForce RTX 3090 Ti (GA102) with 24 GiB VRAM \\
+    \midrule
+    \multicolumn{2}{l}{\textbf{System 2 — Machine for Testing (Lower-Spec)}} \\
+    \cmidrule(r){1-2}
+    OS                  & Ubuntu 24.04.2 LTS (x86\_64) \\
+    CPU                 & AMD Ryzen 5 3600 (6 cores / 12 threads). 3.6 GHz, up to 4.2 GHz \\
+    RAM                 & 16 GiB \\
+    GPU                 & NVIDIA GeForce RTX 3060 Ti with 8 GiB VRAM \\
+    \bottomrule
+  \end{tabularx}
 \end{table}
 
 
+The more powerful system, System 1, as described in Table~\ref{tab:hardware_specs}, was used for program generation and data collection, as it was configured to work with SLURM (Simple Linux Utility for Resource Management). SLURM is a highly scalable, open-source job scheduler used to efficiently manage compute resources on shared systems. It allows tasks to be queued and scheduled based on resource availability and job priority, helping to organize workloads across users without manual intervention. The model training did not use SLURM, as it did not require significant computation \st{time} \wo{capabilities}.
 
-The more powerful system, System 1, as described in Table~\ref{tab:hardware_specs}, was used for program generation and data collection, as it was configured to work with SLURM (Simple Linux Utility for Resource Management). SLURM is a highly scalable, open-source job scheduler used to efficiently manage compute resources on shared systems. It allows tasks to be queued and scheduled based on resource availability and job priority, helping to organize workloads across users without manual intervention. The model training did not use SLURM, as it did not require significant computation time.
+At the beginning of the experiment, some tools \wo{(described in Section \ref{sec:background_energy})} were tested to observe their behavior, understand how to use them, and determine which one best suited the needs of the project.
 
-
-
-
-At the beginning of the experiment, some tools were tested to observe their behavior, understand how to use them, and determine which one best suited the needs of the project.
-
-During the initial testing, a Python framework designed to facilitate experiment measurements was used~\cite{S2_Group_Experiment_Runner}. The framework included an initial test template that used PowerJoular to measure energy of programs. While using the template and testing the framework some bugs and unexpected results were found, some of which were due to misuse of the framework.
-Due to these issues, a simpler orchestrator was developed. Although it performed the same core function as the original framework, measuring energy consumption, it was more straightforward, focusing exclusively on energy measurement rather than providing a general-purpose solution. This new orchestrator was implemented in Java.
+During the initial testing, Experiment Runner~\cite{S2_Group_Experiment_Runner}, a Python framework designed to facilitate experiment measurements was \st{used} \wo{our initial choice}. The framework included an initial test template that used PowerJoular to measure energy of programs. While using the template and testing the framework some bugs and unexpected results were found, some of which were due to misuse of the framework.
+Due to these issues, a \st{simpler} \wo{tailor-suited Java} orchestrator was developed. Although it performed the same core function as \st{the original framework} \wo{Experiment Runner} (measuring energy consumption), it was more straightforward, focusing exclusively on energy measurement rather than providing a general-purpose solution. \st{This new orchestrator was implemented in Java.}
 
 However, some discrepancies were observed between the energy values measured by the Java and Python frameworks. This was unexpected, as both used the same energy measurement tool (PowerJoular) and measured the same program in the same way. Still, the Python framework consistently reported lower energy values than the Java version.
-To investigate which tool was causing the inconsistency, two more orchestrators were implemented. A simplified custom version of the Python framework was also created. In total, four orchestrators were developed: Java, Python, C, and Bash. All four performed the same process, calling PowerJoular to measure the energy usage of a Java program.
+To investigate which tool was causing the inconsistency, \st{two} \wo{three} more orchestrators were implemented, \wo{including} \st{and} a simplified \st{custom} \wo{in Python} version \st{of the Python framework was also created}. In total, four orchestrators were developed: Java, Python, C, and Bash. All four performed the same process, calling PowerJoular to measure the energy usage of a Java program.
 This setup represents an early iteration of the approach later detailed in Section~\ref{sec:work_stage2_orchestrator}, which utilized signal-based control to ensure that the measurement tool only ran during the exact computation period being measured.
+
+\st{To better understand the inconsistencies, }Figure~\ref{fig:4_orchs_comparison} \wo{presents the used CPU power observed by the four orchestrators} \st{details the differences.} \wo{while running }
+\st{The figure contains} 100 \st{runs of the} \wo{times a} Fibonacci recursive program written in Java. \wo{They are ordered} \st{and order} by the less energy to the highest energy. \st{And it shows the energy reads for the four different orchestrators used.} The labels contain the average energy values and its standard deviation.
 
 \begin{figure}[htbp]
   \centering
@@ -67,16 +54,13 @@ This setup represents an early iteration of the approach later detailed in Secti
   \label{fig:4_orchs_comparison}
 \end{figure}
 
-To better understand the inconsistencies, Figure~\ref{fig:4_orchs_comparison} details the differences.
-The figure contains 100 runs of the Fibonacci recursive program written in Java and order by the less energy to the highest energy. And it shows the energy reads for the four different orchestrators used. The labels contain the average energy values and its standard deviation.
-
-It is noticeable that the Python orchestrator read energy values lower than the other orchestrators. Further analysis of the orchestrators revealed a notable difference in behavior. When the Python orchestrator was running, both the parent and child processes consumed CPU resources. In contrast, the other orchestrators (Java, C, and Bash) showed CPU usage only in the child process. This disparity may explain why PowerJoular reported lower energy consumption for the Python orchestrator. Since the CPU load was shared between the parent and child processes, PowerJoular, which measures energy only for the child process (the target Fibonacci program), captured less total energy usage.
-Since the experiment runner included an example demonstrating how to use the framework with PowerJoular, the authors were made aware of this potential conflict when launching PowerJoular from Python.
+It is noticeable that the Python orchestrator read energy values lower than the other orchestrators. Further analysis of the orchestrators revealed a notable difference in behavior. When the Python orchestrator was running, both the parent and child processes consumed CPU resources. In contrast, the other orchestrators (Java, C, and Bash) showed CPU usage only in the child process. This disparity may explain why PowerJoular reported lower energy consumption for the Python orchestrator. Since the CPU load was shared between the parent and child processes, PowerJoular, which measures energy only for the child process (\wo{in this example, }the target Fibonacci program), captured less total energy usage.
+Since the experiment runner included an example demonstrating how to use the framework with PowerJoular, the authors were made aware of this potential conflict when launching PowerJoular from Python \wo{consegues colocar aqui um link de como foram avisado? foi um pull request ou uma issue? se foi só um e-mail, é bom deixar claro.}.
 
 
 \section{Models Metrics} \label{sec:models_metrics}
 
-For the final version of the tool, models were trained on methods from the Java collections framework, specifically focusing on the \texttt{List} and \texttt{Map} interfaces. Data for these methods was generated, collected, and used to train the models. With the models in place, it is now possible to evaluate their performance using metrics such as R² and Mean Squared Error (MSE), based on the features extracted during data collection.
+\st{For the final version of the tool} \wo{To instantiate the tool}, models were trained on methods from the Java collections framework, specifically focusing on the \texttt{List} and \texttt{Map} interfaces. Data for these methods was generated, collected, and used to train the models. With the models in place, it is now possible to evaluate their performance using metrics such as R² and Mean Squared Error (MSE), based on the features extracted during data collection.
 
 %\begin{figure}[htbp]
 %  \centering
@@ -85,6 +69,7 @@ For the final version of the tool, models were trained on methods from the Java 
 %  \label{fig:r2_comparison}
 %\end{figure}
 
+\st{The results of the R² can be seen in the} Figure~\ref{fig:r2_comparison} \wo{presents the R² of all the methods that were analyzed from the \texttt{List} and \texttt{Map} interfaces}. \st{Ideally the best score is 1,} \wo{A score of 1 would mean} \st{meaning} that the model can get 100\% of the prediction right\wo{. Howerver, most of the time, its not feasible to achieve a score of 1} \st{, however that is not possible in most cases, and this project is not an exception to the rule.} \wo{In fact, }\st{It is noticeable that} most values are really low (bellow 0.8), which means that the model cannot predict the energy very well for some methods. The best models were for the method \texttt{addAll()} and \texttt{containsAll()} of the \texttt{List} collection, which got an R² of around .8 for most models \st{, meaning that for those 3 methods on average the predictions will be 80\% correct.}
 
 \begin{figure}[htbp]
   \centering
@@ -95,8 +80,7 @@ For the final version of the tool, models were trained on methods from the Java 
   \label{fig:r2_comparison}
 \end{figure}
 
-
-
+These three methods with the \st{most} \wo{highest} accuracy were the ones that generated bigger energy outputs, because the methods were computationally more \st{powerful} \wo{intenstive} than the others. This made it so that bigger inputs would result in bigger energy outputs, and make the models more easily find a pattern to predict the energy. As for the other models, since a bigger input would not mean a bigger energy output, the model, might had some difficulties predicting the energy. This does not mean that a lower R² will completely make the model unusable for some methods, as their MSE, that can be seen in the Figure~\ref{fig:mse_comparison} is not high, meaning that even when failing to predict the energy of the method, the failed prediction will not be far away as one might expect. For example, if a model has an MSE of $1 \times 10^{-10}$ and predicts the energy usage to be $1~\mathrm{J}$, then even if the prediction is not exact, the true value is likely within $\pm \sqrt{1 \times 10^{-10}} = \pm 1 \times 10^{-5}~\mathrm{J}$ of the prediction, indicating accurate performance despite a potentially low R². 
 
 \begin{figure}[htbp]
   \centering
@@ -107,11 +91,7 @@ For the final version of the tool, models were trained on methods from the Java 
   \label{fig:mse_comparison}
 \end{figure}
 
-The results of the R² can be seen in the Figure~\ref{fig:r2_comparison}.
-Ideally the best score is 1, meaning that the model can get 100\% of the prediction right, however that is not possible in most cases, and this project is not an exception to the rule. It is noticeable that most values are really low (bellow 0.8), which means that the model cannot predict the energy very well for some methods. The best models were for the method \texttt{addAll()} and \texttt{containsAll()} of the List collection, which got an R² of around .8 for most models, meaning that for those 3 methods on average the predictions will be 80\% correct.
-
-For the other methods the scores were lower. The explanation found for this result was the following:
-
+Another factor that may contribute to low R² scores is the behavior of the energy measurement tool when applied to certain methods. For instance, some methods, such as \texttt{size()}, do not require more computational effort as the collection size increases. Whether the collection has one element or one million, the method executes in roughly the same amount of time. Consequently, the energy consumption remains nearly constant, regardless of the input size. Since these methods complete \st{very} quickly and consume \st{very} little energy, even minimal measurement noise can significantly affect the recorded values. Figure~\ref{fig:size_energy} illustrates this effect: although an increase in energy with input size is typically expected, the recorded energy values for \texttt{List.size()} remain considerably flat. While this example isolates a single feature, and other features also influence energy consumption, input size is often the most significant. This observation suggests that for low-energy, low-variance methods, measurement noise can impact the signal, making accurate energy prediction particularly challenging.
 
 \begin{figure}[htbp]
   \centering
@@ -120,23 +100,18 @@ For the other methods the scores were lower. The explanation found for this resu
   \label{fig:size_energy}
 \end{figure}
 
-The 3 methods with the most accuracy were the ones that generated bigger energy outputs, because the methods were computationally more powerful than the others. This made it so that bigger inputs would result in bigger energy outputs, and make the models more easily find a pattern to predict the energy. As for the other models, since a bigger input would not mean a bigger energy output, the model, might had some difficulties predicting the energy. This does not mean that a lower R² will completely make the model unusable for some methods, as their MSE, that can be seen in the Figure~\ref{fig:mse_comparison} is not high, meaning that even when failing to predict the energy of the method, the failed prediction will not be far away as one might expect. For example, if a model has an MSE of $1 \times 10^{-10}$ and predicts the energy usage to be $1~\mathrm{J}$, then even if the prediction is not exact, the true value is likely within $\pm \sqrt{1 \times 10^{-10}} = \pm 1 \times 10^{-5}~\mathrm{J}$ of the prediction, indicating accurate performance despite a potentially low R². 
 
-Another factor that may contribute to low R² scores is the behavior of the energy measurement tool when applied to certain methods. For instance, some methods, such as \texttt{size()}, do not require more computational effort as the collection size increases. Whether the collection has one element or one million, the method executes in roughly the same amount of time. Consequently, the energy consumption remains nearly constant, regardless of the input size. Since these methods complete very quickly and consume very little energy, even minimal measurement noise can significantly affect the recorded values. Figure~\ref{fig:size_energy} illustrates this effect: although an increase in energy with input size is typically expected, the recorded energy values for \texttt{List.size()} remain considerably flat. While this example isolates a single feature, and other features also influence energy consumption, input size is often the most significant. This observation suggests that for low-energy, low-variance methods, measurement noise can impact the signal, making accurate energy prediction particularly challenging.
-
-
-Nonetheless, the lower R² scores should be addressed, and what can be done to improve the results of these models is to have the program generator create higher inputs, so the energy profiles also have outputs with higher energy, making the energy predictions more accurate. Then, since most of the predictions depend on the input, it means the other features do not have such higher impact, so it is also important to pick better features and remove others that might not be interesting. 
+Nonetheless, the lower R² scores should be addressed, and what can be done to improve the results of these models is to have the program generator create higher inputs, so the energy profiles also have outputs with higher energy, making the energy predictions more accurate. Then, since most of the predictions depend on the input, it means the other features do not have such higher impact, so it is also important to pick better features and remove others that might not be interesting. \wo{podes também argumentar aqui que ainda que o R² seja baixo para algumas funções, ela natualmente são muito simples e provavelmente vão ser usadas em composição com funções mais complexas. E neste caso, as funções mais complexas já vão ter um R² mais alto, e portanto, a composição de funções simples com funções complexas deveria resultar numa função composta com um R² mais estável, não tão bom quanto a função inicial que conseguimos prever bem mas não tão ruim quanto as que não somos capazes de prever nada.}
 
 
-
-In general, most of the models present similar scores, however the chosen one was PySR. As it can represent the predictions in expressions which can help the users to try to understand why the code is using more energy. It has a nice feature of allowing to balance complexity and accuracy. And can easily be used in another code language as it is represented as a mathematical expression.
-The fact that most models present similar results, ranging from advanced models like Random Forest and Gradient Boosting to simple models like Linear Regression, suggests that features used in the model likely do not capture highly nonlinear or complex relations. This indicates that energy consumption behavior in analyzed approaches can be reliably captured by simple relations. As a result, the set of features cannot offer the richness or variability needed for distinguishing more subtle energy behavior. This does not mean that the learning problem is simple, rather, it indicates that the available features may fail to express potential nonlinear patterns of energy consumption. To improve prediction performance and enable more effective use of expressive models, future work should incorporate features capable of highlight the complexity of predicting energy usage.
+In general, most of the models present similar scores, however \st{the chosen one was} \wo{we used} PySR \wo{in the instantation}. \wo{The biggest advantage over the other models is that} \st{As} it can represent the predictions in expressions which can help the users to try to understand why the code is using more energy. It has a nice feature of allowing to balance complexity and accuracy. And can easily be used in another code language as it is represented as a mathematical expression.
+The fact that most models present similar results, ranging from advanced models like Random Forest and Gradient Boosting to simple models like Linear Regression, suggests that features used in the model likely do not capture highly nonlinear or complex relations. This indicates that energy consumption behavior in analyzed approaches can be reliably captured by simple relations. As a result, the set of features cannot offer the richness or variability needed for distinguishing more subtle energy behavior. This does not mean that the learning problem is simple, rather, it indicates that the available features may fail to express potential nonlinear patterns of energy consumption. \wo{Although the strategy should be enough for most cases, to} \st{To} improve prediction performance and enable more effective use of expressive models, future work should incorporate features capable of highlight the complexity of predicting energy usage.
 
 
 
 \section{Predicted vs. Measured Energy} \label{sec:predicted_vs_measured_energy}
 
-Since the models have been collected and the extension is built, we can present the results and evaluate how accurately the tool estimates energy consumption compared to real measurements obtained using PowerJoular. Since the energy profiles were generated on a specific hardware setup (see Table~\ref{tab:hardware_specs}), the resulting models are adjusted to that particular system. If the tool were run on a different machine, the absolute energy values would likely differ due to variations in hardware characteristics. However, the relative differences in energy consumption between operations are expected to remain consistent. For instance, if \texttt{TreeMap} consumes more energy than \texttt{HashMap} on one system, the same trend will likely hold on another system, even if the exact energy values vary.
+\st{Since the models have been collected and the extension is built} \wo{Leveraging the developed models and the extenstion}, we can present the results and evaluate how accurately the tool estimates energy consumption compared to real measurements obtained using PowerJoular. Since the energy profiles were generated on a specific hardware setup (see Table~\ref{tab:hardware_specs}), the resulting models are adjusted to that particular system. If the tool were run on a different machine, the absolute energy values would likely differ due to variations in hardware characteristics. However, the relative differences in energy consumption between operations are expected to remain consistent. For instance, if \texttt{TreeMap} consumes more energy than \texttt{HashMap} on one system, the same trend will likely hold on another system, even if the exact energy values vary.
 
 \begin{listing}[H]
 \noindent\rule{\linewidth}{0.4pt}
@@ -150,7 +125,7 @@ Since the models have been collected and the extension is built, we can present 
 \label{lst:code_example}
 \end{listing}
 
-To test if the extension tool is accurate, the energy measurement needs to be run in the same machine were the data was collected. It is also important to take into account that the measured energies from these experiments were not processed exactly like the orchestrator, as the orchestrator processer has a more general approach that can introduce overhead in some cases. So the measurements performed, when possible, were only measuring the exact method.
+To test \st{if} the extension tool \st{is accurate} \wo{accuracy}, the energy measurement needs to be run in the same machine were the data was collected. It is also important to take into account that the measured energies from these experiments were not processed exactly like the orchestrator, as the orchestrator processer has a more general approach that can introduce overhead in some cases. So the \st{measurements} \wo{experiments} performed, when possible, were only measuring the exact method \wo{which method? confusing}.
 For this a simple program was developed, Listing~\ref{lst:code_example}, more like simple Java instructions, of just creating two lists (both with size 1000) and using the method \texttt{addAll(Object)} and checking if the prediction matches the actual measurement.
 
 \begin{table}[htbp]
@@ -213,40 +188,47 @@ For this a simple program was developed, Listing~\ref{lst:code_example}, more li
 %\end{table}
 
 
-The actual value measured by PowerJoular is in the range of 4.9e-4 to 5.1e-4J while the prediction is 5.51e-4J. This shows that the prediction was good for this method in particular.
-When trying to add two more operations (\texttt{size()} and \texttt{equals(Object)}) the measurement is in the range of 5.0e-4 to 5.2e-4J and the prediction is 6.49e-4J, so now the values are getting off. The method \texttt{addAll(Object)} is one of the methods that has the best accuracy of around 80\%, and the other two do not. This makes it so that when adding the other two methods the real energy value starts drifting away from the real one.
+The actual value measured by PowerJoular is in the range of 4.9e-4 to 5.1e-4J while the prediction is 5.51e-4J. This shows that the prediction \wo{(about 10.2\% prediction error)} was good for this method in particular.
+When trying to add two more operations (\texttt{size()} and \texttt{equals(Object)}) the measurement is in the range of 5.0e-4 to 5.2e-4J and the prediction is 6.49e-4J \wo{, about (about 27\% prediction error)} \st{, so now the values are getting off}. \wo{Usually, t}he method \texttt{addAll(Object)} is one of the methods that has the best accuracy of around 80\%.\st{, and the other two do not. This makes it so that when adding the other two methods the real energy value starts drifting away from the real one.} \wo{Composing \texttt{addAll(Object)} with the other methods (\texttt{size()} and \texttt{equals(Object)}) that presented a low R² creates a more complex behavior and, as expected, increases the prediction error. Although the prediction is not as accurate as the previous one, it still provides a reasonable estimate of the energy consumption.}
 
-This can get worse when the number of methods used and variables involved start increasing, leading to greater divergence between the prediction output and actual values. 
+\wo{However, if we use the program presented in Listing~\ref{lst:Java_program_to_count_word_frequencies_in_a_string}, which involves a Map and a loop, the prediction accuracy drops significantly. The actual energy measured is in the range of 0.0027J to 0.0030J, while the prediction is 0.033J, resulting in a prediction error of about 1058\%. This discrepancy highlights the limitations of the model when applied to more complex operations involving Maps and loops.}
 
-Using the example of the word counting program, Listing~\ref{lst:Java_program_to_count_word_frequencies_in_a_string}, which involves Maps and loops, the bigger gap between reality and prediction can be seen, as the Map methods predictions are not very accurate. The loop has a size of 1000 (extension default) and the Map contains 3 unique entries, since the input string includes just three distinct words.
+\wo{The models trained have a low accuracy for Map methods. The prediction error is very high, which means that the model is not able to predict the energy consumption of these methods accurately. This is likely due to the fact that the models were trained on a limited set of data and do not generalize well to more complex operations.}
 
-The energy measured is in the range of 0.0027J to 0.0030J and the prediction is 0.033J. This deviates by a factor of 10 which is considerable and makes the prediction absolute values not viable. However, the relative predictions remain consistent, as input sizes increase, the predicted energy consumption also increases.
+\st{This can get worse when the number of methods used and variables involved start increasing, leading to greater divergence between the prediction output and actual values. 
 
-Another problem is that summing the predictions of individual methods can lead to error accumulation, which increases discrepancies between predicted and actual energy values as more methods are used, even if the individual models are accurate. To mitigate this, one potential solution is to introduce a correction factor or calibration step based on empirical error measurements, adjusting the final predicted value to better reflect observed trends.
+Using the example of the word counting program, listing%~\ref{lst:Java_program_to_count_word_frequencies_in_a_string},
+which involves Maps and loops, the bigger gap between reality and prediction can be seen, as the Map methods predictions are not very accurate. The loop has a size of 1000 (extension default) and the Map contains 3 unique entries, since the input string includes just three distinct words.
 
-The results demonstrate that while the tool provides useful estimations of energy consumption, especially in terms of relative trends between methods and input sizes, its absolute predictions can vary significantly depending on the type of operations being analyzed. Additionally, while some methods show high prediction accuracy (e.g., addAll(Object)), combining multiple methods or increasing program complexity tends to amplify prediction errors. These limitations highlight the importance of carefully selecting input sizes and operations for meaningful energy analysis, and they suggest that the tool is best suited for relative comparisons rather than precise energy estimation.
+The energy measured is in the range of 0.0027J to 0.0030J and the prediction is 0.033J. This deviates by a factor of 10 which is considerable and makes the prediction absolute values not viable. However, the relative predictions remain consistent, as input sizes increase, the predicted energy consumption also increases.}
 
+\wo{This issue also highlights a limitation of our instantation: by composing with methods that have low R² scores, the prediction accuracy is significantly affected. The models trained on methods with low R² scores struggle to accurately predict energy consumption for more complex operations, leading to high prediction errors, which leads to a error accumlation problem. Potential solutions could involve introducing a correction factor or calibration step based on empirical error measurements, adjusting the final predicted value to better reflect observed trends.}
 
+\st{Another problem is that summing the predictions of individual methods can lead to error accumulation, which increases discrepancies between predicted and actual energy values as more methods are used, even if the individual models are accurate. To mitigate this, one potential solution is to introduce a correction factor or calibration step based on empirical error measurements, adjusting the final predicted value to better reflect observed trends.}
 
-
+The results demonstrate that while the tool provides useful estimations of energy consumption, especially in terms of relative trends between methods and input sizes, its absolute predictions can vary significantly depending on the type of operations being analyzed. Additionally, while some methods show high prediction accuracy (e.g., addAll(Object)), combining multiple methods or increasing program complexity tends to amplify prediction errors. These limitations highlight the importance of carefully selecting input sizes and operations for meaningful energy analysis, and they suggest that the tool is best suited for relative comparisons rather than precise energy estimation. \wo{eu não gosto muito do tom aqui, parece que estás a dizer que o tool tem mais problemas do que solução. Acho que precisamos falar das limitações, claro, mas precisamos dar ênfase ao que fazemos bem. Seria bom reescrever isto para que o tom seja mais positivo, e que se foque mais no que conseguimos fazer bem, e menos no que não conseguimos fazer. Eu percebi que em todos os casos que tu mostrou os erros foram que superestimamos o consumo energético. Consegues apontar algo nessa direção? Por qual motivos os modelos que treinamos acham que o código vai usar muito mais energia do que realmente usa? E o que podemos fazer para melhorar isso?}
 
 
 \section{Evaluating Java Benchmark Programs} \label{sec:evaluating_java_benchmark_programs}
 
-Another experiment was conducted using test cases considered more realistic than the ones present in the Section~\ref{sec:predicted_vs_measured_energy}, to further evaluate the framework’s ability to analyze and collect energy models for various custom programs. The programs were selected from the Computer Language Benchmarks Game, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads~\cite{benchmarksGameJava}. The chosen programs were \texttt{BinaryTrees} (Java naot \#3) \texttt{fannkuch-redux} (Java), \texttt{n-body} (Java naot \#4), and \texttt{spectral-norm} (Java). These benchmarks were specifically selected because they are purely CPU and memory bound, with minimal variability, no reliance on disk I/O or multithreading, and no usage of external libraries. This makes them more predictable and reliable for energy consumption measurements.
+\st{Another experiment was conducted} \wo{Our previous experiments were designed to evaluate simple methods but we also} used test cases considered more realistic \st{than the ones present in the Section}%~\ref{sec:predicted_vs_measured_energy}
+, to further evaluate the framework’s ability to analyze and collect energy models for various custom programs. The programs were selected from the Computer Language Benchmarks Game~\cite{benchmarksGameJava}, which provides algorithmic benchmarks designed to test language performance on tasks that are representative of certain real-world computational workloads. The chosen programs were \texttt{BinaryTrees} (Java naot \#3) \texttt{fannkuch-redux} (Java), \texttt{n-body} (Java naot \#4), and \texttt{spectral-norm} (Java). These benchmarks were specifically selected because they are purely CPU and memory bound, with minimal variability, no reliance on disk I/O or multithreading, and no usage of external libraries. This makes them more predictable and reliable for energy consumption measurements.
+
+\wo{adiciona aqui uma parágrafo explicando cada um dos benchmarks. O que eles fazem, como são implementados, etc. Assim já não precisas explicar abaixo quando falares dos resultados. fica mais fácil de ler.}
 
 
-Starting with the program \texttt{BinaryTrees}, which is composed of three methods, being some of them computational intensive tasks, described as follows:
+
+Starting with the program \texttt{BinaryTrees}, \wo{adiciona aqui uma pequena descrição do binary trees} which is composed of three methods, being some of them computational intensive tasks, described as follows:
 
 \begin{itemize}
-  \item \textbf{createTree:} Recursively builds a binary tree of the given depth. At each level, creates a node with two children (left and right), until depth equals zero. The result is a complete binary tree with \(2^{\text{depth}} - 1\) nodes.
+  \item \texttt{createTree:} Recursively builds a binary tree of the given depth. At each level, creates a node with two children (left and right), until depth equals zero. The result is a complete binary tree with \(2^{\text{depth}} - 1\) nodes.
  
-  \item \textbf{checkTree:} Recursively traverses the tree and counts the number of nodes. For leaf nodes, it returns \texttt{1}. For internal nodes, it returns the sum of the recursive calls on the left and right subtrees plus one: $1 + \text{check(left)} + \text{check(right)}$.
+  \item \texttt{checkTree:} Recursively traverses the tree and counts the number of nodes. For leaf nodes, it returns \texttt{1}. For internal nodes, it returns the sum of the recursive calls on the left and right subtrees plus one: $1 + \text{check(left)} + \text{check(right)}$.
   
-  \item \textbf{trees:} Performs the core part of the benchmark by creating and checking many binary trees of varying depths and keeping one long-lived tree in memory to simulate memory pressure.
+  \item \texttt{trees:} Performs the core part of the benchmark by creating and checking many binary trees of varying depths and keeping one long-lived tree in memory to simulate memory pressure.
 \end{itemize}
 
-The Figures~\ref{fig:createTree_plot},~\ref{fig:checkTree_plot}, and~\ref{fig:trees_plot} show the energy of each method, for different input sizes, for every program generated and analyzed by the framework. It is possible to see that the methods have an exponential tendency with the increase of the input, which is expected from binary trees operations. It is also noticeable that the Figure~\ref{fig:checkTree_plot} has a lower curve and maximum input, this was due to the fact that the method required that a tree was created before the method could be run, which would take more time, subsequently, the maximum input for this method was lower. 
+The Figures~\ref{fig:createTree_plot},~\ref{fig:checkTree_plot}, and~\ref{fig:trees_plot} \wo{Não gosto muito disso como três figuras separadas. Podem ser três plots na mesma figura ou as figuras lado a lado pelo menos. Parecido com o que tu fez antes com o MSE e R2} show the energy of each method, for different input sizes, for every program generated and analyzed by the framework. It is possible to see that the methods have an exponential tendency with the increase of the input, which is expected from binary trees operations. It is also noticeable that the Figure~\ref{fig:checkTree_plot} has a lower curve and maximum input, this was due to the fact that the method required that a tree was created before the method could be run, which would take more time, subsequently, the maximum input for this method was lower. 
 
 \begin{figure}[htbp]
   \centering
@@ -357,10 +339,8 @@ The Figures~\ref{fig:createTree_plot},~\ref{fig:checkTree_plot}, and~\ref{fig:tr
 %  \label{tab:energy_comparison_bin_trees}
 %\end{table}
 
+\st{The results are detailed in the}Table~\ref{tab:energy_comparison_bin_trees} \wo{presents the detailed information about the energy consumption of the BinaryTrees program}\wo{de novo os resultados parecem super estimados. Tens uma intuição sobre isso?}. It is noticeable that the values predicted are not the most accurate, for some inputs it has good accuracy, for example, the method \texttt{createTree} has good accuracy for the input \texttt{26}. For other methods, like \texttt{trees} it does not. Again as the previous experiment, the tool is not very accurate in terms of absolute values, and in this case for methods that change their energy considerably with minimum increase in the input, the models have a harder time to predict. The tool demonstrates good relative energy prediction, as input values increase, the predicted energy consumption also increases, and it decreases correspondingly when the inputs are reduced.
 
-
-
-The results are detailed in the Table~\ref{tab:energy_comparison_bin_trees}. 
 
 \begin{table}[htbp]
   \centering
@@ -405,8 +385,7 @@ The results are detailed in the Table~\ref{tab:energy_comparison_bin_trees}.
   \label{tab:energy_comparison_bin_trees}
 \end{table}
 
-It is noticeable that the values predicted are not the most accurate, for some inputs it has good accuracy, for example, the method \texttt{createTree} has good accuracy for the input \texttt{26}. For other methods, like \texttt{trees} it does not. Again as the previous experiment, the tool is not very accurate in terms of absolute values, and in this case for methods that change their energy considerably with minimum increase in the input, the models have a harder time to predict. The tool demonstrates good relative energy prediction, as input values increase, the predicted energy consumption also increases, and it decreases correspondingly when the inputs are reduced.
-
+\wo{acho que podes juntar as tabelas 5.4, 5.5 e 5.6 em uma só. Pq só falas dos métodos de BinaryTrees, e não dos outros? As figuras falam nomes de métodos sem dizer de onde vem. Os benchmarks não tem metodos? Eu não gosto muito de todas essas tabelas e plots separados. Vê se consegues juntar mais.}
 
 The \texttt{fannkuch-redux} program also presents a computationally intensive task. It generates all permutations of the sequence \([0, 1, \ldots, n-1]\) and, for each permutation, performs a "flip" operation until the first element is zero. A flip consists of reversing the order of the first \(k + 1\) elements, where \(k\) is the first element of the permutation. For each permutation, it tracks the number of flips needed (called the flip count) and maintains the maximum flip count across all permutations. Additionally, it calculates a checksum by adding or subtracting the flip count based on the parity of the permutation index. The function returns the maximum number of flips needed for any permutation.
 
@@ -523,21 +502,25 @@ Aside from the \texttt{BinaryTrees} program, the others were even less troubled,
 This experiment objective's was not focused only on achieving the highest accuracy possible. It was also made to prove that it is possible to use the framework to test more interesting and complex cases. And it was proven that with minimal changes, it was possible to mass generate programs, collect data and train models, for four different programs. While it may not work universally for all programs, since creating a framework general enough to handle every case is challenging, this experiment demonstrates that analyzing custom programs is possible.
 
 
+\section{Analysis} \label{sec:analysis}
+
+\wo{Escreve aqui uma secção de análise, onde tu analisas os resultados que obtiveste. O que é que tu achas que correu bem? O que é que correu mal? Pq o resultados do Nbody são tão ruins? pq o fannkuch é incrivelmente bom? Pq a maioria deles consegue prever melhor quando temos um input maior? Essa é parte que vai mostrar que tu percebeu o que se passou no teu trabalho.}
+
+
 
 
 
 
 \section{Limitations and Challenges} \label{sec:limitations_and_challenges}
 
-During program generation, most of the tested collections focused on List, Set, and Map. However, programs were also generated for another collection category, the Math collection. This introduced an issue. The computations in these programs were extremely fast, completing too quickly for PowerJoular to measure any meaningful energy consumption. As a result, all energy readings for the Math collection programs were reported as 0J.
-The problem was the array sizes used to hold the method parameters. While the three predefined array sizes worked well for List, Set, and Map collections, they were too small for the Math collection. The smaller input sizes caused the Math computations to execute very fast, not giving PowerJoular enough time to capture energy usage.
-This highlights a challenge in energy profiling: some collections, especially those involving lightweight or highly optimized operations like Math functions, may be difficult to measure accurately. One possible solution would be to determine array sizes during program generation, large enough to ensure that each program runs for at least one second, giving PowerJoular sufficient time to measure energy consumption. However, implementing this would significantly increase the time required for program generation, as it would involve exploring many more combinations of input sizes to find suitable configurations.
-
+During program generation, most of the tested collections focused on \texttt{List}, \texttt{Set}, and \texttt{Map}. However, programs were also generated for another collection category, the \texttt{Math} library. This introduced an issue. The computations in these programs were extremely fast, completing too quickly for PowerJoular to measure any meaningful energy consumption. As a result, all energy readings for the \texttt{Math} programs were reported as 0J.
+\st{The problem} \wo{We were able to identify that the source of the problem} was the array sizes used to hold the method parameters. While the three predefined array sizes worked well for \texttt{List}, \texttt{Set}, and \texttt{Map}, they were too small for the \texttt{Math} library. The smaller input sizes caused the Math computations to execute very fast, not giving PowerJoular enough time to capture energy usage.
+This highlights a challenge in energy profiling: some collections, especially those involving lightweight or highly optimized operations like Math functions, may be difficult to measure accurately. One possible solution would be to determine array sizes during program generation, large enough to ensure that each program runs for at least one second, giving PowerJoular sufficient time to measure energy consumption. However, implementing this would significantly increase the time required for program generation, as it would involve exploring many more combinations of input sizes to find suitable configurations. \wo{A gente já não faz isso?}
 
 Another important factor is that the tool is not able to predict energy when threads are involved, as the programs generated only used a single thread, subsequently the models will not have that factor into account. This limitation exists because measuring and modeling the energy usage of multithreaded programs is particularly challenging due to factors like concurrent execution, thread scheduling, and synchronization overhead. However, threading can deeply impact the energy usage of a program, as a program execution stop being strictly linear, and can have multiple simultaneous computations, potentially increasing the code energy consumption.
 
 {\color{blue}
-  A limitation detected during the experimentation of analyzing an external program, was how the inputs on some programs are defined. For example, a program can have a method that receives a String, however, when inside the method it decides to convert the String to int and use it as an Integer, making it so a method that actually uses Integers and not Strings. Although it is easily noticeable by human eye, the program generator cannot understand this kind of context changes as easy, and it would start generating inputs for Strings instead of Integers, which would fail in the program generation. A good example of this usage is when the main function is called and receives the arguments in the \texttt{String[]} and then it uses its values in different variables.
+  A limitation detected during the experimentation of analyzing an external program, was how the inputs on some programs are defined. For example, a program can have a method that receives a \texttt{String}, however, when inside the method it decides to convert the \texttt{String} to \texttt{int} and use it as an \texttt{Integer}, making it so a method that actually uses \texttt{Integers} and not \texttt{Strings}. Although it is easily noticeable by human eye, the program generator cannot understand this kind of context changes as easy, and it would start generating inputs for \texttt{Strings} instead of \texttt{Integers}, which would fail in the program generation. A good example of this usage is when the main function is called and receives the arguments in the \texttt{String[]} and then it uses its values in different variables.
 }
 
 

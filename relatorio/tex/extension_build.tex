@@ -20,7 +20,7 @@ If a method calls another user-defined method that already has an assigned energ
 When a model-trained method or a user-defined method are called inside a loop, a new slider appears to represent the loop size. The method’s energy cost is multiplied by this loop size. In the case of nested loops, the energy cost is multiplied by the product of all nested loop sizes. Note that only methods and variables that affect the energy appear on the panel.
 
 This extension can help understand how much energy the code is using.
-For example, \st{this small code} the snippet in Listing~\ref{lst:Java_program_to_count_word_frequencies_in_a_string} \st{that} counts how many times each word appears in a given text string, can be estimated for how much energy it uses.
+For example, the snippet in listing~\ref{lst:Java_program_to_count_word_frequencies_in_a_string} counts how many times each word appears in a given text string, can be estimated for how much energy it uses.
 
 \begin{listing}[htbp]
 \noindent\rule{\linewidth}{0.4pt}
@@ -48,7 +48,7 @@ For example, \st{this small code} the snippet in Listing~\ref{lst:Java_program_t
 \label{lst:Java_program_to_count_word_frequencies_in_a_string}
 \end{listing}
 
-Figure~\ref{fig:extension_example1} illustrates how the extension displays the energy consumption of the code in Listing~\ref{lst:Java_program_to_count_word_frequencies_in_a_string}. In the figure two methods \texttt{countWordFrequency(String)} and \texttt{main(String[]) can be seen, next to their energy consumption estimations}. Its also shown under the box with the method's name, the important variables that can affect energy consumption. For instance, in the method \texttt{countWordFrequency(String)} it can be seen that the size of the variables \texttt{word} and \texttt{frequencyMap} can change the energy usage. Also, the loop size is taken into account, and the number operations performed will impact the energy significantly.
+Figure~\ref{fig:extension_example1} illustrates how the extension displays the energy consumption of the code in Listing~\ref{lst:Java_program_to_count_word_frequencies_in_a_string}. In the figure two methods \texttt{countWordFrequency(String)} and \texttt{main(String[])} can be seen, next to their energy consumption estimations. Its also shown under the box with the method's name, the important variables that can affect energy consumption. For instance, in the method \texttt{countWordFrequency(String)} it can be seen that the size of the variables \texttt{word} and \texttt{frequencyMap} can change the energy usage. Also, the loop size is taken into account, and the number operations performed will impact the energy significantly.
 
 {\color{blue}When calling the method \texttt{Map.put(Object, Object)}, the extension tool shows more options available in the slider menu. The Figure~\ref{fig:extension_example1}, illustrates the variables that appear when the method is used. It is noticeable that four sliders are available to change, and they contain the three variables used in the method \texttt{frequencyMap.put(word, temp)}. The first one is the collection input, \texttt{frequencyMap}, the second input is the String variable \texttt{word}, and the last input is the String variable \texttt{temp}. All these three variables were detected by the extension tool and marked as important. The last slider that is displayed in the image is the loop, which can also affect the energy output, so it is also marked as important by the extension tool.}
 
@@ -56,7 +56,7 @@ Figure~\ref{fig:extension_example1} illustrates how the extension displays the e
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width = .8 \textwidth]{figures/extension_example1.png}
+  \includegraphics[width = .7 \textwidth]{figures/extension_example1.png}
   \caption{Extension example HashMap}
   \label{fig:extension_example1}
 \end{figure}
@@ -70,7 +70,7 @@ Another example can be see in the Figure~\ref{fig:extension_example2}, where the
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width = .8 \textwidth]{figures/extension_example2.png}
+  \includegraphics[width = .7 \textwidth]{figures/extension_example2.png}
   \caption{Extension example TreeMap}
   \label{fig:extension_example2}
 \end{figure}

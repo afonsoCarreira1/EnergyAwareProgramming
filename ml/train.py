@@ -611,9 +611,11 @@ def plots(files,fname,date,log_scale):
         y = df.iloc[:, -1]   # Energy column
         #plot3D(X,y)
         #plot_energy_vs_feature4(X,y,'input0','java.util.concurrent.CopyOnWriteArrayList')
-        plot_by_arr_size(df)
-        #plot_energy_vs_feature(X,y,'input0',log_scale)
+        #plot_by_arr_size(df)
+        plot_energy_vs_feature(X,y,'input0',log_scale)
         #list_type_filter='java.util.concurrent.CopyOnWriteArrayList'
+
+
 
 def create_dir_if_not_exists(path):
     if not os.path.exists(path):os.makedirs(path)

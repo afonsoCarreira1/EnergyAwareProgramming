@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np 
 import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
@@ -145,6 +146,12 @@ def clean_method_name(method_name):
     if method_name == "entrySet": return "entrySet()"
     if method_name == "add_int_java_lang_Object": return "add(int, Object)"
     if method_name == "values": return "values()"
+    if method_name == "checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_": return "checkTree(TreeNode)"
+    if method_name == "trees_int_": return "trees(int)"
+    if method_name == "createTree_int_": return "createTree(int)"
+    if method_name == "advance_double_" : return "advance(double)"
+    if method_name == "Approximate_int_" : return "Approximate(int)"
+    if method_name == "fannkuch_int_" : return "fannkuch(int)"
 
 def single_chart(df, ax, model_colors,val='R²'):
     method_name = df.iloc[0]['Method'].rstrip("_") 
@@ -178,6 +185,7 @@ def single_chart(df, ax, model_colors,val='R²'):
             )    
 
 
+
 #panel bar char
 def panel_charts(df_list,val, cols=3):
     all_models = sorted(set().union(*[df['Model'].unique() for df in df_list]))
@@ -200,7 +208,6 @@ def panel_charts(df_list,val, cols=3):
     axes = axes.flatten()
 
     for i, df in enumerate(df_list):
-        #print(f'names -> {df['Method']}')
         single_chart(df, axes[i], model_colors,val)
     for j in range(i + 1, len(axes)):
         fig.delaxes(axes[j])
@@ -228,4 +235,134 @@ def panel_charts(df_list,val, cols=3):
     #plt.savefig("mse_comparison.pdf")
     plt.show()
 
-main()
+
+def plot_energy_vs_feature_ax(ax, methodName, X, y, column_name, log=False):
+    if column_name not in X.columns:
+        print(f"Column '{column_name}' not found in dataset!")
+        return
+
+    X_unique = X.drop_duplicates()
+    
+    energy_predicts = get_energy_predictions(methodName, X_unique)
+    ax.scatter(X[column_name], y, label="Actual Energy", alpha=0.6, color="blue", marker="o",s=15)
+    ax.scatter(X_unique[column_name], energy_predicts, label="Predicted Energy", color="red", marker="x",s=15)
+
+    ax.set_xlabel("Input" if column_name == 'input0' else column_name, fontsize=9)
+    ax.set_ylabel("Energy", fontsize=9)
+    ax.set_title(f"{clean_method_name(methodName)}", fontsize=9)
+    ax.tick_params(axis='both', which='major', labelsize=8)
+    if log:
+        ax.set_yscale('log')
+
+    ax.grid(False)
+
+
+def get_energy_predictions(methodName, df):
+    energy_predict_for_input = []
+    unique_vals = {col: df[col].unique() for col in df.columns}
+    unique_inputs = unique_vals['input0']
+    for input in unique_inputs:
+        energy_predict_for_input.append(get_model_expression(methodName,input))
+    return energy_predict_for_input
+
+def get_model_expression(name, input0):
+    methods_exp = {
+        'checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_':
+            lambda x: (x * 1.7818553e-7) * ((x * x) + 5.4003377),
+        'trees_int_':lambda x: math.exp((x + -11.710805) * 0.563765),
+        'createTree_int_':lambda x: math.exp((x + -19.571716) * 0.6815255) + -0.08256852,
+        'advance_double_':lambda x: (-7.739528e-6 * math.sin(x * -0.81902814)) + 4.2258347e-5,
+        'Approximate_int_':lambda x: math.sin((x * 2.0593527e-6) + 0.0006085703) * x,
+        'fannkuch_int_': lambda x: math.exp((x + -9.133306) * 2.4944384) + 0.003643311,
+    }
+    return methods_exp[name](input0)
+
+
+def create_table_predict_vs_real():
+    #methods = ['checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_','trees_int_','createTree_int_']
+    #logs = {'checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_':False,'trees_int_':True,'createTree_int_':True}
+    methods = ['advance_double_','Approximate_int_','fannkuch_int_']
+    logs = {'advance_double_':False,'Approximate_int_':True,'fannkuch_int_':True}
+    panel_plot_energy_vs_feature(
+        methods=methods,
+        logs=logs,
+        cols=2,
+        column_name='input0',
+        output_file='benchmark_energy_panel_plot.pdf'
+    )
+
+def clean_data(df,clean_zeros = True):
+    df = drop_column(df,'Filename')
+    col_name = 'EnergyUsed'
+    df = df.replace([np.inf, -np.inf], np.nan)  # Replace infinity with NaN
+    if clean_zeros: df[col_name] = df[col_name].replace(0.0, np.nan)
+    df = df.dropna(subset=[col_name])
+    return df
+
+def drop_column(df,column_name):
+    if column_name in df.columns:df = df.drop(columns=[column_name])
+    else: print(f"Column '{column_name}' not found in DataFrame.")
+    return df  
+
+def panel_plot_energy_vs_feature(methods, logs=None, cols=3, column_name='input0', output_file='energy_vs_feature_panel.pdf'):
+    if logs is None:
+        logs = {method: False for method in methods}
+
+    n = len(methods)
+    rows = math.ceil(n / cols)
+
+    fig_width_inch = 7  # To match LaTeX \textwidth
+    cell_width = fig_width_inch / cols
+    cell_height = 2.5  # Reasonable height per plot
+    fig_height_inch = rows * cell_height
+
+    fig, axes = plt.subplots(rows, cols, figsize=(fig_width_inch, fig_height_inch))
+    axes = axes.flatten()
+
+    for i, method in enumerate(methods):
+        try:
+            df = pd.read_csv(f'out/{method}/{method}.csv')
+            df = clean_data(df, False)
+            X = df.iloc[:, :-1]
+            y = df.iloc[:, -1]
+
+            plot_energy_vs_feature_ax(
+                axes[i],
+                methodName=method,
+                X=X,
+                y=y,
+                column_name=column_name,
+                log=logs.get(method, False)
+            )
+        except Exception as e:
+            print(f"Error processing {method}: {e}")
+            axes[i].set_title(f"{method}\n[Error loading data]")
+            axes[i].axis('off')
+
+    # Remove unused axes
+    for j in range(i + 1, len(axes)):
+        fig.delaxes(axes[j])
+
+    # Add shared legend
+    handles = [
+        mpatches.Patch(color="blue", label="Actual Energy"),
+        mpatches.Patch(color="red", label="Predicted Energy")
+    ]
+    fig.legend(
+        handles,
+        ["Actual Energy", "Predicted Energy"],
+        loc='lower center',
+        ncol=2,
+        bbox_to_anchor=(0.5, 0.001),
+        fontsize=8,
+        title_fontsize=10
+    )
+
+    plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+    plt.subplots_adjust(hspace=0.6, bottom=0.15, top=0.88, wspace=0.3)
+    plt.savefig(f"../relatorio/figures/{output_file}", bbox_inches='tight', dpi=300)
+    plt.show()
+
+
+#main()
+create_table_predict_vs_real()

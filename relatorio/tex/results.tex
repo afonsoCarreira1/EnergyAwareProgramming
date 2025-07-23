@@ -541,7 +541,20 @@ This experiment objective's was not focused only on achieving the highest accura
 
 \section{Analysis} \label{sec:analysis}
 
-\wo{Escreve aqui uma secção de análise, onde tu analisas os resultados que obtiveste. O que é que tu achas que correu bem? O que é que correu mal? Pq o resultados do Nbody são tão ruins? pq o fannkuch é incrivelmente bom? Pq a maioria deles consegue prever melhor quando temos um input maior? Essa é parte que vai mostrar que tu percebeu o que se passou no teu trabalho.}
+In this chapter the results obtain for the custom programs will be analyzed.
+
+In most of the experiments, it was observed that the energy consumption curve followed the input values, meaning the model's predicted energy usage was largely dependent on the input. Since the tested programs involved computationally intensive tasks, increasing the input also led to longer execution times, which in turn caused higher energy consumption, indicating a strong correlation between execution time and energy usage. 
+For the methods where a lower input was enough to generate a benchmark that would run for an acceptable amount of time, the models could predict better, as a small increase in the input would affect the energy consumption by a significant amount. However, to prioritize accurate predictions for higher input values, many models tended to fail in predicting energy usage for the lower input range.
+
+As it is now, the most important feature collected from the benchmarks is the input, and it showed to be effective in helping the models outputting a reliable prediction model. However, it is possible to see that it is the only variable that can help the models predict in this case. They could benefit from a more diverse set of features that could include dynamic features, for instance, time of execution, processor cycles or other low-level metrics. Using more features could help the overall accuracy of the models.
+
+From the experiments conducted, the one that displayed the most unusual result, was the \texttt{advance} method from the \texttt{nbody} program. The concrete reason to why the predictions and the measured values are not as accurate as the those of other methods, is not known for sure, however, there is a hypothesis. The methods \texttt{advance} required higher inputs. Since the input generator is limited to a maximum threshold, the benchmarks generated were also capped to that value. This would make that an input of 1 or 100,000 would spend in general the same amount of energy, making the input a bad decision factor for the model. Increasing the input could lead to a better model for this particular method, but could also increase the search time of the maximum inputs in the generator.
+
+Overall, the results indicate that while the models are capable of producing reliable energy consumption predictions under certain conditions, their accuracy and adaptability could be significantly improved with a richer and more diverse feature set.
+
+
+
+%\wo{Escreve aqui uma secção de análise, onde tu analisas os resultados que obtiveste. O que é que tu achas que correu bem? O que é que correu mal? Pq o resultados do Nbody são tão ruins? pq o fannkuch é incrivelmente bom? Pq a maioria deles consegue prever melhor quando temos um input maior? Essa é parte que vai mostrar que tu percebeu o que se passou no teu trabalho.}
 
 
 

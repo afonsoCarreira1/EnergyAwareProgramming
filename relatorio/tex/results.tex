@@ -541,7 +541,7 @@ This experiment objective's was not focused only on achieving the highest accura
 
 \section{Analysis} \label{sec:analysis}
 
-In this chapter the results obtain for the custom programs will be analyzed.
+{\color{blue}In this chapter the results obtain for the custom programs will be analyzed.
 
 In most of the experiments, it was observed that the energy consumption curve followed the input values, meaning the model's predicted energy usage was largely dependent on the input. Since the tested programs involved computationally intensive tasks, increasing the input also led to longer execution times, which in turn caused higher energy consumption, indicating a strong correlation between execution time and energy usage. 
 For the methods where a lower input was enough to generate a benchmark that would run for an acceptable amount of time, the models could predict better, as a small increase in the input would affect the energy consumption by a significant amount. However, to prioritize accurate predictions for higher input values, many models tended to fail in predicting energy usage for the lower input range.
@@ -550,7 +550,7 @@ As it is now, the most important feature collected from the benchmarks is the in
 
 From the experiments conducted, the one that displayed the most unusual result, was the \texttt{advance} method from the \texttt{nbody} program. The concrete reason to why the predictions and the measured values are not as accurate as the those of other methods, is not known for sure, however, there is a hypothesis. The methods \texttt{advance} required higher inputs. Since the input generator is limited to a maximum threshold, the benchmarks generated were also capped to that value. This would make that an input of 1 or 100,000 would spend in general the same amount of energy, making the input a bad decision factor for the model. Increasing the input could lead to a better model for this particular method, but could also increase the search time of the maximum inputs in the generator.
 
-Overall, the results indicate that while the models are capable of producing reliable energy consumption predictions under certain conditions, their accuracy and adaptability could be significantly improved with a richer and more diverse feature set.
+Overall, the results indicate that while the models are capable of producing reliable energy consumption predictions under certain conditions, their accuracy and adaptability could be significantly improved with a richer and more diverse feature set.}
 
 
 

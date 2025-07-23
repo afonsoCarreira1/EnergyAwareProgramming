@@ -1,20 +1,20 @@
 #!/bin/bash
 #SBATCH --job-name=codegen
 #SBATCH --output=log_codegen_%A_%a.log
-#SBATCH --array=0-7
+#SBATCH --array=0-1
 #SBATCH --ntasks=1
 #SBATCH --mem=1G
 
 #test args
 ARGS=(
-    "spectralnorm Approximate",
-    "spectralnorm A",
-    "spectralnorm MultiplyAv",
-    "spectralnorm MultiplyAtv",
-    "spectralnorm MultiplyAtAv",
-    "fannkuchredux fannkuch",
+    #"spectralnorm Approximate",
+    #"spectralnorm A",
+    #"spectralnorm MultiplyAv",
+    #"spectralnorm MultiplyAtv",
+    #"spectralnorm MultiplyAtAv",
+    #"fannkuchredux fannkuch",
     "NBodySystem advance",
-    "NBodySystem energy"
+    #"NBodySystem energy"
 ) 
 
 ARG_PAIR="${ARGS[$SLURM_ARRAY_TASK_ID]}"

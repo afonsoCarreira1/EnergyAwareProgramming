@@ -8,7 +8,7 @@ actual_max = float(range.split(', ')[1])
 
 predict_checkTree = (input * 1.7818553e-7) * ((input * input) + 5.4003377)
 predict_createTree = exp((input + -19.571716) * 0.6815255) + -0.08256852
-predict_trees = math.exp((input + -11.710805) * 0.563765)                #exp((input + -10.852579) * 0.51566976) + -3.9919426
+predict_trees = exp((input + -11.710805) * 0.563765)                #exp((input + -10.852579) * 0.51566976) + -3.9919426
 
 
 predict_energy = 4.2848456e-5

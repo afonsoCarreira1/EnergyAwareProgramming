@@ -30,7 +30,7 @@ Also, most current tools can measure the energy of programs and applications as 
 \section{Objectives}
 
 
-This thesis proposes a framework with the objective of increasing energy awareness of developers. The framework follows a structured pipeline that begins by generating multiple programs using various collection types or developer-defined classes. These programs are then energy-profiled to train predictive models for each method within the target class.
+This thesis proposes a framework with the objective of increasing energy awareness of developers. The framework follows a structured pipeline that begins by generating multiple benchmarks using various collection types or developer-defined classes. These benchmarks are then energy-profiled to train predictive models for each method within the target class.
 The resulting models are integrated into an IDE extension capable of identifying the energy consumption of methods in programs and presenting this information quickly to programmers, enabling them to make informed decisions in software design. The goal is to create a framework with an approach that can be reproducible for obtaining models capable of performing energy prediction statically. The framework is divided into modular components that can be improved independently to optimize model performance.
 
 
@@ -45,9 +45,9 @@ This increased awareness will enable them to understand the overall impact of th
 This thesis presents a framework that automates the generation, execution, energy profiling, and modeling of software programs to enable energy-aware static analysis. The main contributions of this work are:
 
 \begin{itemize}
-    \item \textbf{Program Generation:} A module that automatically generates a large set of Java programs targeting specific methods. It systematically varies method inputs and parameter types to enable broad coverage and controlled diversity.
+    \item \textbf{Benchmark Generation:} A module that automatically generates a large set of Java benchmarks targeting specific methods. It systematically varies method inputs and parameter types to enable broad coverage and controlled diversity.
 
-    \item \textbf{Energy Profiling:} An orchestration module that compiles and executes each generated program while measuring energy consumption at runtime. It captures power usage signals at the method level to build accurate energy profiles.
+    \item \textbf{Energy Profiling:} An orchestration module that compiles and executes each generated benchmark while measuring energy consumption at runtime. It captures power usage signals at the method level to build accurate energy profiles.
 
     \item \textbf{Model Training:} A machine learning pipeline that trains predictive models on the collected energy profiles. These models learn to estimate the energy behavior of program methods based on static and dynamic features.
     

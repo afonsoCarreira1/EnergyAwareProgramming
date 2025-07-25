@@ -1,95 +1,31 @@
-\section{Stage 1: Program Generator} \label{sec:work_stage1_program_generator}
+\section{Stage 1: Benchmark Generator} \label{sec:work_stage1_program_generator}
 
 
 
 
-To use machine learning models to predict energy consumption, it is necessary to have a large amount of data. This data can be obtained by generating programs that are then executed to collect energy profiles. The program generator is responsible for creating these programs, which are then used to train the machine learning models. The generator is designed to be flexible and adaptable, allowing it to generate a wide variety of programs based on different templates and input parameters. The architecture of the Program Generator can be seen in Figure~\ref{fig:program_generator}.
+To use machine learning models to predict energy consumption, it is necessary to have a large amount of data. This data can be obtained by generating benchmarks that are then executed to collect energy profiles. The benchmark generator is responsible for creating these benchmarks, which are then used to train the machine learning models. The generator is designed to be flexible and adaptable, allowing it to generate a wide variety of benchmarks based on different templates and input parameters. The architecture of the benchmark generator can be seen in Figure~\ref{fig:program_generator}.
 
 
-The program generator works alongside with Java Spoon to make it the more general as possible allowing custom programs to be mass generated.
+The benchmark generator works alongside with Java Spoon to make it the more general as possible allowing custom programs to be mass generated.
 
-The generator is capable of generating programs for custom, developer-created, Java classes, as well as for the most common APIs, such as collections interface implementations (Lists, Sets, Maps), and utility classes like Math, Base64, Duration. It can also be configured to analyze all public methods of a class or just specific ones.
+The generator is capable of generating benchmarks for custom, developer-created, Java classes, as well as for the most common APIs, such as collections interface implementations (Lists, Sets, Maps), and utility classes like Math, Base64, Duration. It can also be configured to analyze all public methods of a class or just specific ones.
 
 \begin{figure}[htbp]%[H]
     \centering
     \includegraphics[width = 1 \textwidth]{figures/program_generator.pdf}
-    \caption{Program Generator}
+    \caption{benchmark generator}
     \label{fig:program_generator}
 \end{figure}
 
 
 \subsection{Template Creation} \label{sec:work_stage1_template_creation}
 
-%\FloatBarrier
+The first step to generate multiple benchmarks is to first create an intermediate template capable of holding the necessary code that will later be used for energy profiling.
 
-%\begin{listing}[htbp]
-%\begin{minted}[linenos, fontsize=\small, frame=none, bgcolor=white,breaklines=true,breakanywhere=true]{java}
-%
-%public class ArrayList_add_java_lang_Object_ {
-%    public static void main(String[] args) throws Exception {
-%        int iter = 0;
-%        try {
-%            BenchmarkArgs[] arr = new BenchmarkArgs["numberOfFunCalls"];
-%            populateArray(arr);
-%            TemplatesAux.sendStartSignalToOrchestrator(args[0]);
-%            TemplatesAux.launchTimerThread(1100);
-%            iter = computation(arr, arr.length);
-%        } catch (OutOfMemoryError e) {
-%            TemplatesAux.writeErrorInFile("ArrayList_add_java_lang_Object_", "Out of memory error caught by the program:\n" + e.getMessage());
-%        } catch (Exception e) {
-%            TemplatesAux.writeErrorInFile("ArrayList_add_java_lang_Object_", "Error caught by the program:\n" + e.getMessage());
-%        } finally {
-%            TemplatesAux.sendStopSignalToOrchestrator(args[0], iter);
-%        }
-%    }
-%
-%    static class BenchmarkArgs {
-%        public ArrayList<changetypehere> var0;
-%
-%        public changetypehere var1;
-%
-%        BenchmarkArgs() {
-%            this.var0 = new ArrayList();
-%            CollectionAux.insertRandomNumbers(var0, "ChangeValueHere1_changetypehere", "changetypehere");
-%            this.var1 = "ChangeValueHere2_changetypehere";
-%        }
-%    }
-%
-%    private static void arrayList_add_java_lang_Object_(ArrayList var, changetypehere arg0) {
-%        var.add(arg0);
-%    }
-%
-%    private static int computation(BenchmarkArgs[] args, int iter) {
-%        int i = 0;
-%        while (!TemplatesAux.stop && i < iter) {
-%              arrayList_add_java_lang_Object_(args[i].var0, args[i].var1);
-%               i++;
-%        }
-%        return iter;
-%    }
-%
-%    private static void populateArray(BenchmarkArgs[] arr) {
-%        for (int i = 0;i < "numberOfFunCalls";i++) {
-%          arr[i] = new BenchmarkArgs();
-%        };
-%    }
-%
-%    private String input1 = "ChangeValueHere1";
-%    private String input2 = "ChangeValueHere2";
-%}
-%
-%
-%\end{minted}
-%\caption{Example of template for List.add(Object)}            
-%\label{lst:template_example}
-%\end{listing}
-
-The first step to generate multiple programs is to first create an intermediate template capable of holding the necessary code that will later be used for energy profiling.
-
-{\color{blue}To generate programs for a specific class, the user has to input the name of the collection or the name of the custom program it wants to generate. For the collections of Lists, Sets and Maps, the generator is prepared to create more than one implementation of those collections, for example, if the objective is to generate programs to the List collection, the program generator will use the \texttt{ArrayList}, \texttt{LinkedList}, \texttt{Vector} and \texttt{CopyOnWriteArrayList}. The user can also input the name of the method to be analyzed, or simply gather all the available methods in the class, which are then found using Spoon.
+{\color{blue}To generate benchmarks for a specific class, the user has to input the name of the collection or the name of the custom program it wants to generate. For the collections of Lists, Sets and Maps, the generator is prepared to create more than one implementation of those collections, for example, if the objective is to generate benchmarks to the List collection, the benchmark generator will use the \texttt{ArrayList}, \texttt{LinkedList}, \texttt{Vector} and \texttt{CopyOnWriteArrayList}. The user can also input the name of the method to be analyzed, or simply gather all the available methods in the class, which are then found using Spoon.
 After the search for the methods, the generator has access to all the methods it will analyze and their input parameters. }
 Since it has access to the whole class, it can see how its constructors are called, and use them if any of the methods parameters requires. 
-It recursively calls constructors if needed, making it very versatile to use. After identifying the methods that will be targeted, it starts by creating templates for each of them. The templates are Java classes that contain the necessary code to run the method, and placeholders for the inputs and types. The templates are structured so that they can be easily modified later, allowing the generator to create multiple programs based on the same template. The templates are designed following the structure below:
+It recursively calls constructors if needed, making it very versatile to use. After identifying the methods that will be targeted, it starts by creating templates for each of them. The templates are Java classes that contain the necessary code to run the method, and placeholders for the inputs and types. The inputs we consider include the parameters received directly by the method, as well as the values required to construct any objects that are passed as parameters. The templates are structured so that they can be easily modified later, allowing the generator to create multiple benchmarks based on the same template. The templates are designed following the structure below:
 
 \begin{itemize}
 
@@ -101,7 +37,7 @@ It recursively calls constructors if needed, making it very versatile to use. Af
 
 \end{itemize}
 
-Also, the template is structured so that the programs will work in harmony with the \textbf{Orchestrator}, that will extract the energy profile for each program (see Section~\ref{sec:work_stage2_orchestrator}), so when the placeholders are replaced with actual values, the orchestrator can run the program, and communicate with them.
+Also, the template is structured so that the benchmarks will work in harmony with the \textbf{Orchestrator}, that will extract the energy profile for each benchmark (see Section~\ref{sec:work_stage2_orchestrator}), so when the placeholders are replaced with actual values, the orchestrator can run the program, and communicate with them.
 
 
 \begin{listing}[htbp]
@@ -203,16 +139,16 @@ It is worth mentioning that the types used by the generator are the Java wrapper
 What mostly differs from template to template is the number of variables used, because different methods have different parameters, so the template can have more or less input placeholders, also the type placeholder changes according to the methods types and parameters.
 
 
-Creating the template for each method allows cutting off time of the program generation by only having to replace values of the placeholders instead of needing to create the whole program all over again, since the programs for the same method only differ in inputs, types and array size, maintaining all the structure.
+Creating the template for each method allows cutting off time of the benchmark generation by only having to replace values of the placeholders instead of needing to create the whole benchmark all over again, since the benchmarks for the same method only differ in inputs, types and array size, maintaining all the structure.
 
 \subsection{Input Tester} \label{sec:work_stage1_input_tester}
 
-An important aspect of the program generator are the inputs it generates. Every method has its on funcionality that may be dependent on the input values.  To be able to better generalize, it is important to find the method input values upper limit. Knowing the maximum size that different parameters can have is fundamental as it needs to be representative, so the energy profiles can cover more cases, but not to large so that the programs start to get out of memory or taking too much time to complete.
-The limit definition works by using binary search. It has an inital threshold on the inputs (e.g., 1-100,000 to numerical values) and it starts by trying to run the program with the half of the maximum upper limit threshold (e.g., 50,000). 
+An important aspect of the benchmark generator are the inputs it generates. Every method has its on funcionality that may be dependent on the input values. To be able to better generalize, it is important to find the method input values upper limit. Knowing the maximum size that different parameters can have is fundamental as it needs to be representative, so the energy profiles can cover more cases, but not to large so that the benchmarks start to run out of memory or taking too much time to complete.
+The limit definition works by using binary search. It has an inital threshold on the inputs (e.g., 1-100,000 to numerical values) and it starts by trying to run the benchmark with the half of the maximum upper limit threshold (e.g., 50,000). 
 
-It can be important, for pratical reasons, to impose a threashold on the execution time (in this project, we established the threshold as 10 seconds based on empirical experimentation). If the program runs successfully, it will increase the input by half, and if it fails, it will decrease the input by half. This process continues until the maximum value for the input is found.
+It can be important, for pratical reasons, to impose a threashold on the execution time (in this project, we established the threshold as 10 seconds based on empirical experimentation). If the benchmark runs successfully, it will increase the input by half, and if it fails, it will decrease the input by half. This process continues until the maximum value for the input is found.
 
-If the method that is being tested has more than one input, the input tester is responsible to find the upper limit for each parameter individually. First it sets all the input values to 1 and then starts the binary search individually for each of the parameters one by one while leaving the other parameters with the value of 1. Although this is a simplification, this method avoids having to find multiple combinations of parameters which would increase the time complexity exponentially. More robust solutions (such as using a combinatory search) could be implemented in the future. Nevertheless, even using the simplified solution, the process of finding the max inputs is time-consuming. To improve its performance, when the maximum value is found, the values of the input type, maximum value and order (e.g., first, second or third parameter), are stored in a file. This makes subsequent executions much faster. It is worthy to mention that the maximum inputs found depend heavily on the machine where the program generation is taking place, as different hardware will change the maximum values allowed for the inputs. Example 1 illustrates how the input tester works for the method \texttt{List.add(index, Element)}.
+If the method that is being tested has more than one input, the input tester is responsible to find the upper limit for each parameter individually. First it sets all the input values to 1 and then starts the binary search individually for each of the parameters one by one while leaving the other parameters with the value of 1. Although this is a simplification, this method avoids having to find multiple combinations of parameters which would increase the time complexity exponentially. More robust solutions (such as using a combinatory search) could be implemented in the future. Nevertheless, even using the simplified solution, the process of finding the max inputs is time-consuming. To improve its performance, when the maximum value is found, the values of the input type, maximum value and order (e.g., first, second or third parameter), are stored in a file. This makes subsequent executions much faster. It is worthy to mention that the maximum inputs found depend heavily on the machine where the benchmark generation is taking place, as different hardware will change the maximum values allowed for the inputs. Example 1 illustrates how the input tester works for the method \texttt{List.add(index, Element)}.
 
 \begin{tcolorbox}[
     title=Example 1: Input Testing Process for \texttt{List.add(index, Element)},
@@ -272,15 +208,15 @@ Consider analyzing the \texttt{add} method of a list with the following paramete
 
 The fact that the input has a pre-determined range it allows using binary search which makes the search much faster than linear search.
 Nevertheless, the input search does not come without some limitations. First it is constrained to identifying valid input values within the range. As an example, throughout this project we dealt frequently with lists and collections, which require a minimum size of 1 to function correctly. Although this value can be changed in the future, for now it ensures compatibility with most common data structures. The higher bound was chosen due to empirical evidences, as larger input values would lead to limitating execution times and memory crashes. Another constraint is on how the input handles multiple parameter methods. During its search for a valid input, it needs to fix all the other parameters that is not searching, with a default value (typically the lower bound). This approach simplifies the testing process and improves efficiency by avoiding the exponential complexity of testing all possible parameter combinations. However, it will introduce limitations in cases where the parameters are interdependent, which can lead to not estimating the real highest input possible. 
-Despite these limitations, the input search plays a crucial role in ensuring that the program generator produces viable test cases. By identifying input ranges that are both valid and computationally achievable, it reduces the unusable generated programs (e.g., due to timeouts or crashes), and maximizing the number of generated programs, that can be used for energy profiling.
+Despite these limitations, the input search plays a crucial role in ensuring that the benchmark generator produces viable test cases. By identifying input ranges that are both valid and computationally achievable, it reduces the unusable generated benchmarks (e.g., due to timeouts or crashes), and maximizing the number of generated benchmarks, that can be used for energy profiling.
 
 
 
-\subsection{Program Generation} \label{sec:work_stage1_program_generation}
+\subsection{Benchmark Generation} \label{sec:work_stage1_program_generation}
 
-Finally, when the templates are created, and the maximum inputs are found the program generation can finally begin. This part consists on picking every template created and replacing the placeholder values with actual values created by a random number generator. It follows the algorithm described in Algorithm~\ref{alg:template_fullfillment_algorithm}
+Finally, when the templates are created, and the maximum inputs are found the benchmark generation can finally begin. This part consists on picking every template created and replacing the placeholder values with actual values created by a random number generator. It follows the algorithm described in Algorithm~\ref{alg:template_fullfillment_algorithm}
 
-It starts by looping through the types and changing them to the Java wrapper classes, then it loops through the array size. Lastly, it loops through the input sizes determined by the input tester and can repeat this process a configurable number of times. By increasing the number of iterations, results in more programs being generated with random inputs, constrained by the previously identified input bounds. 
+It starts by looping through the types and changing them to the Java wrapper classes, then it loops through the array size. Lastly, it loops through the input sizes determined by the input tester and can repeat this process a configurable number of times. By increasing the number of iterations, results in more benchmarks being generated with random inputs, constrained by the previously identified input bounds. 
 
 
 
@@ -330,4 +266,4 @@ It starts by looping through the types and changing them to the Java wrapper cla
 \end{algorithmic}
 \end{algorithm}
 
-This process easily generate thousands of programs which are crucial to train machine learn models that are able to predict energy consumption. When generating programs, a number is chosen to balance the requirements for effective model training while minimizing the time spent on input testing and collecting energy profiles. Afterwards, that the programs are ready to be compiled and used.
+This process easily generate thousands of benchmarks which are crucial to train machine learn models that are able to predict energy consumption. When generating benchmarks, a number is chosen to balance the requirements for effective model training while minimizing the time spent on input testing and collecting energy profiles. Afterwards, that the benchmarks are ready to be compiled and used.

@@ -5,7 +5,7 @@
 
 
 
-Having all the programs generated, it is possible to move to the next stage. Gathering the energy profiles for each of the generated programs. 
+Having all the benchmarks generated, it is possible to move to the next stage. Gathering the energy profiles for each of the generated benchmarks. 
 Energy profiles~\cite{10.1145/2884781.2884869,8816747} are an established way to organize energy consumption data. They will be the main data source of the machine learning models to obtain accurate results. To reduce the complexity of this task, a process was implemented, illustrated in Figure~\ref{fig:orchestrators_workflow}. This process automates the task while taking into account what was mentioned in Section~\ref{sec:background_benchmarking}.
 
 As described in the Section~\ref{sec:background_energy} there are several tools capable of performing dynamic energy measurements.
@@ -14,7 +14,7 @@ PowerJoular has good features that caught our attention, for example being a com
 
 Since PowerJoular is a command line tool, it is launched as a process, and then it can be killed whenever needed because it is a process as well. This allows to measure not only programs/processes energies but have a more precise measurement, as it is possible to call PowerJoular to measure a specific computation and then kill it when the computation is finished.
 
-With all of this in mind a process was built. The process uses an orchestrator that is responsible for invoking the target program and the measurement tool (PowerJoular) to accurately measure the energy consumption of the program or the specific computation being analyzed within it.
+With all of this in mind a process was built. The process uses an orchestrator that is responsible for invoking the target benchmark and the measurement tool (PowerJoular) to accurately measure the energy consumption of the benchmark or the specific computation being analyzed within it.
 
 
 One challenge in measuring energy consumption is that computation often completes too quickly to capture accurately. It is hard to measure a single operation of, for example, a \texttt{List.\allowbreak add(Object)} with most tools, as it simply to fast for the tool to capture, and if the tool was able to capture it, the energy measured could have too much noise to be considered. Our solution was to loop through the method until the tool is capable of getting its energy and then dividing the total energy by the number of times it looped. 
@@ -71,11 +71,11 @@ The workflow of this step can be described as follows:
 \end{figure}
 
 \begin{itemize}
-  \item The orchestrator launches a command to start the target Java Program and waits a signal.
-  \item The Java program starts and setup the necessary elements to run (creating all the variables, reading/writing files, populating the array, etc.) and then before starting the computation it wants to measure, it sends a start signal to the orchestrator to start monitoring, and waits for 100 milliseconds.
-  \item The orchestrator receives the start signal and reads the PID, which is stored in a file during the target program setup. Finally, it starts PowerJoular using that PID. Then it waits for the stop signal.
-  \item The Java program will run until it finishes the computation. The computation runs for a maximum of one second. Then the number of iterations are stored in a file and the stop signal is sent back to the orchestrator.
-  \item The orchestrator on receiving the stop signal, first stops PowerJoular and then stops the target program, if needed. Then it parses the target program to extract its features, combines them with the energy information stored in the files created by PowerJoular, stores it in a CSV file.
+  \item The orchestrator launches a command to start the target Java benchmark and waits a signal.
+  \item The Java benchmark starts and setup the necessary elements to run (creating all the variables, reading/writing files, populating the array, etc.) and then before starting the computation it wants to measure, it sends a start signal to the orchestrator to start monitoring, and waits for 100 milliseconds.
+  \item The orchestrator receives the start signal and reads the PID, which is stored in a file during the target benchmark setup. Finally, it starts PowerJoular using that PID. Then it waits for the stop signal.
+  \item The Java benchmark will run until it finishes the computation. The computation runs for a maximum of one second. Then the number of iterations are stored in a file and the stop signal is sent back to the orchestrator.
+  \item The orchestrator on receiving the stop signal, first stops PowerJoular and then stops the target benchmark, if needed. Then it parses the target benchmark to extract its features, combines them with the energy information stored in the files created by PowerJoular, stores it in a CSV file.
 \end{itemize}
 
-All these steps are performed for each generated program. At the end of the process, a log file is created containing key information, including all the programs used, the PowerJoular files generated, temporary files, error logs, and features.
+All these steps are performed for each generated benchmark. At the end of the process, a log file is created containing key information, including all the benchmarks used, the PowerJoular files generated, temporary files, error logs, and features.

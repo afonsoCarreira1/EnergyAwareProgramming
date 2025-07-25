@@ -611,8 +611,8 @@ def plots(files,fname,date,log_scale):
         y = df.iloc[:, -1]   # Energy column
         #plot3D(X,y)
         #plot_energy_vs_feature4(X,y,'input0','java.util.concurrent.CopyOnWriteArrayList')
-        #plot_by_arr_size(df)
-        plot_energy_vs_feature(X,y,'input0',log_scale)
+        plot_by_arr_size(df)
+        #plot_energy_vs_feature(X,y,'input0',log_scale)
         #list_type_filter='java.util.concurrent.CopyOnWriteArrayList'
 
 
@@ -670,9 +670,9 @@ def plot_by_arr_size(df):
         subset = df_sorted[df_sorted['arraySize'] == size]
         plt.scatter(subset['input0'], subset['EnergyUsed'], label=f'{size}', color=color)
 
-    plt.xlabel('input0')
+    plt.xlabel('Input')
     plt.ylabel('Energy')
-    plt.title('Energy vs input0 colored by arraySize')
+    plt.title('Energy Measured vs Input')
     plt.legend(title='Array Size')
     plt.tight_layout()
     plt.show()

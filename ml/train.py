@@ -16,6 +16,7 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from joblib import dump, load
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
+from scipy.stats import pearsonr, spearmanr
 import shutil
 import re
 from pysr import PySRRegressor
@@ -605,13 +606,14 @@ def plots(files,fname,date,log_scale):
     for filename in files:
         if fname not in filename:continue
         df = pd.read_csv(filename)
-        associate_df_with_array_size(df,'NBodySystem',fname,date)
+        #associate_df_with_array_size(df,'NBodySystem',fname,date)
         df = clean_data(df,False)
         X = df.iloc[:, :-1]  # All columns except the last one
         y = df.iloc[:, -1]   # Energy column
+        print(f'fname -> {filename} | correlations : {correlation(df)}')
         #plot3D(X,y)
         #plot_energy_vs_feature4(X,y,'input0','java.util.concurrent.CopyOnWriteArrayList')
-        plot_by_arr_size(df)
+        #plot_by_arr_size(df)
         #plot_energy_vs_feature(X,y,'input0',log_scale)
         #list_type_filter='java.util.concurrent.CopyOnWriteArrayList'
 
@@ -677,6 +679,11 @@ def plot_by_arr_size(df):
     plt.tight_layout()
     plt.show()
 
+def correlation(df,x = 'input0', y='EnergyUsed'):
+    r_pearson, p_value_pearson = pearsonr(df[x], df[y])
+    r_spearman, p_value_spearman = spearmanr(df['input0'], df['EnergyUsed'])
+    return {'correlation_pearson': r_pearson, 'p_value_pearson': p_value_pearson, 'correlation_spearman': r_spearman, 'p_value_spearman': p_value_spearman}
+
 
 def get_model_expression(input0):
     return (-7.739528e-6 * math.sin(input0 * -0.81902814)) + 4.2258347e-5
@@ -684,9 +691,9 @@ def get_model_expression(input0):
 
 def main():
     #os.makedirs('out/', exist_ok=True)
-    date = "2025_07_14_p1"#2025_05_20 2025_06_30
+    date = "2025_06_30"#2025_05_20 2025_06_30
     files,models_available = getAllFeatures(date)
-    plots(files,"advance_double_",date,log_scale=False)#equals_java_lang_Object_ createTree_int_
+    plots(files,"checkTree_com_template_programsToBenchmark_BinaryTrees_TreeNode_",date,log_scale=False)#equals_java_lang_Object_ createTree_int_
     #readDividedFeatures(files)
     #check_one_method()
     #createFilesForExtension(models_available)

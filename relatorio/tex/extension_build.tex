@@ -1,13 +1,13 @@
 \section{Stage 4: IDE Extension} \label{sec:work_stage4_extension_build}
 
-{\color{blue}The last component is the extension for an IDE, capable of predicting energy consumption. 
+The last component is the extension for an IDE, capable of predicting energy consumption. 
 To provide this insight to developers it is necessary to build a tool that can provide all of that. Integrating the tool into an IDE makes it easier to understand and use, which are some of our main goals. With this the developer only needs to download an extension for an IDE and will access to the insights provided by the tool.
 
 In this project, we choose the VSCode due to its lightweight architecture, extensive community support, and ease of extension development using familiar web technologies such as JavaScript and TypeScript. This extension allows the user to have a better understanding of how much energy the code is consuming, and what are the methods, and variables that most affect it.
 
 It is important to note that the extension tool will serve as a guide, providing energy consumption estimates to raise awareness rather than dictate action. Ultimately, it is up to developers to decide whether to prioritize performance, energy efficiency or any other factor. For example, if a program only needs to run within a certain timeframe and can afford a slight reduction in performance, developers may choose to trade some performance for improved energy efficiency, making more informed decisions thanks to the insights provided by the tool.
 
-To ensure efficiency, the tool uses static analysis to parse the code into an AST. From the AST, it analyzes the code and, using previously collected models, estimates the energy cost of the operations.}
+To ensure efficiency, the tool uses static analysis to parse the code into an AST. From the AST, it analyzes the code and, using previously collected models, estimates the energy cost of the operations.
 
 
 When opening the extension side page, it contains sliders that can change the input values, and it has the estimate button, to predict the energy.
@@ -50,7 +50,7 @@ For example, the snippet in listing~\ref{lst:Java_program_to_count_word_frequenc
 
 Figure~\ref{fig:extension_example1} illustrates how the extension displays the energy consumption of the code in Listing~\ref{lst:Java_program_to_count_word_frequencies_in_a_string}. In the figure two methods \texttt{countWordFrequency(String)} and \texttt{main(String[])} can be seen, next to their energy consumption estimations. Its also shown under the box with the method's name, the important variables that can affect energy consumption. For instance, in the method \texttt{countWordFrequency(String)} it can be seen that the size of the variables \texttt{word} and \texttt{frequencyMap} can change the energy usage. Also, the loop size is taken into account, and the number operations performed will impact the energy significantly.
 
-{\color{blue}When calling the method \texttt{Map.put(Object, Object)}, the extension tool shows more options available in the slider menu. The Figure~\ref{fig:extension_example1}, illustrates the variables that appear when the method is used. It is noticeable that four sliders are available to change, and they contain the three variables used in the method \texttt{frequencyMap.put(word, temp)}. The first one is the collection input, \texttt{frequencyMap}, the second input is the String variable \texttt{word}, and the last input is the String variable \texttt{temp}. All these three variables were detected by the extension tool and marked as important. The last slider that is displayed in the image is the loop, which can also affect the energy output, so it is also marked as important by the extension tool.}
+When calling the method \texttt{Map.put(Object, Object)}, the extension tool shows more options available in the slider menu. The Figure~\ref{fig:extension_example1}, illustrates the variables that appear when the method is used. It is noticeable that four sliders are available to change, and they contain the three variables used in the method \texttt{frequencyMap.put(word, temp)}. The first one is the collection input, \texttt{frequencyMap}, the second input is the String variable \texttt{word}, and the last input is the String variable \texttt{temp}. All these three variables were detected by the extension tool and marked as important. The last slider that is displayed in the image is the loop, which can also affect the energy output, so it is also marked as important by the extension tool.
 
 
 

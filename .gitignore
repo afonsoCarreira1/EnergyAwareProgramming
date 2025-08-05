@@ -32,6 +32,7 @@ ml/venv/
 generated_progs/
 generated_templates/
 **/cp.txt
+orchestrator/cp.txt
 old_files/
 ./vscode
 ml/models/

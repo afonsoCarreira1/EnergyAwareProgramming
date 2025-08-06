@@ -32,6 +32,8 @@ bash build-install.sh
 echo "Installation complete."
 sudo chmod +x /usr/bin/powerjoular # Make powerjoular executable if needed
 cd ../../../..
+sudo rm -rf powerjoular_edited
+
 
 # Compile codegen
 echo "Compiling codegen..."
